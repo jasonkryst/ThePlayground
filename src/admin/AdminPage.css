@@ -42,6 +42,7 @@
   border: 2px solid var(--color-aqua);
   transition: background 0.15s;
   min-height: 64px;
+  min-width: 64px;
 }
 
 .admin__radio-label.selected {
@@ -49,7 +50,13 @@
   color: white;
 }
 
-.admin__radio-label input { display: none; }
+.admin__radio-label input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  pointer-events: none;
+}
 
 .admin__toggle {
   display: flex;
