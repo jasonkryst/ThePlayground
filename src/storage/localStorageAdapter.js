@@ -13,7 +13,7 @@ const localStorageAdapter = {
   },
 
   async addScore(score) {
-    const scores = await this.getScores()
+    const scores = await localStorageAdapter.getScores()
     scores.push(score)
     localStorage.setItem(SCORES_KEY, JSON.stringify(scores))
   },
