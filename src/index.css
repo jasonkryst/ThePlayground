@@ -1,0 +1,52 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
+
+:root {
+  --color-aqua:     #80DEEA;
+  --color-teal:     #80CBC4;
+  --color-lavender: #B39DDB;
+  --color-lilac:    #CE93D8;
+  --color-bg:       #F0FDFF;
+  --color-surface:  #FFFFFF;
+  --color-text:     #37474F;
+  --radius-card:    20px;
+  --radius-button:  16px;
+  --font-main:      'Nunito', sans-serif;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--font-main);
+  background: var(--color-bg);
+  color: var(--color-text);
+  min-height: 100vh;
+  font-size: 18px;
+}
+
+button {
+  cursor: pointer;
+  font-family: var(--font-main);
+  font-size: 18px;
+  border: none;
+  border-radius: var(--radius-button);
+  min-width: 64px;
+  min-height: 64px;
+}
+
+@keyframes pulse-green {
+  0%   { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7); }
+  70%  { box-shadow: 0 0 0 16px rgba(76, 175, 80, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0); }
+}
+
+@keyframes shake-red {
+  0%, 100% { transform: translateX(0); background: inherit; }
+  20%       { transform: translateX(-8px); background: #ef9a9a; }
+  40%       { transform: translateX(8px);  background: #ef9a9a; }
+  60%       { transform: translateX(-8px); background: #ef9a9a; }
+  80%       { transform: translateX(8px);  background: #ef9a9a; }
+}
+
+.correct { animation: pulse-green 0.6s ease forwards; background: #a5d6a7 !important; }
+.wrong   { animation: shake-red   0.6s ease forwards; }
+.highlight-correct { background: #a5d6a7 !important; }
