@@ -1,0 +1,16 @@
+.score-history { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+
+.score-history__item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 16px;
+  background: var(--color-surface);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.07);
+  font-size: 16px;
+}
+
+.score-history__result { font-weight: 700; }
+.score-history__date   { opacity: 0.6; font-size: 14px; }
+.score-history__empty  { opacity: 0.5; font-style: italic; }
