@@ -4,7 +4,12 @@ import { describe, it, expect, vi } from 'vitest'
 import Dashboard from '../Dashboard'
 
 vi.mock('../../hooks/useScores', () => ({
-  default: () => ({ getBestScore: () => 5, getScoresByGame: () => [], scores: [], getAllScores: () => [] }),
+  default: () => ({
+    getBestScore: (gameId) => gameId === 'animal-sounds' ? 7 : 3,
+    getScoresByGame: () => [],
+    scores: [],
+    getAllScores: () => [],
+  }),
 }))
 
 const manifests = [
@@ -27,5 +32,11 @@ describe('Dashboard', () => {
   it('renders empty state when no manifests', () => {
     render(<MemoryRouter><Dashboard manifests={[]} /></MemoryRouter>)
     expect(screen.getByText(/no games/i)).toBeInTheDocument()
+  })
+
+  it('passes correct bestScore to each GameCard', () => {
+    render(<MemoryRouter><Dashboard manifests={manifests} /></MemoryRouter>)
+    expect(screen.getByText('Best: 7')).toBeInTheDocument()
+    expect(screen.getByText('Best: 3')).toBeInTheDocument()
   })
 })

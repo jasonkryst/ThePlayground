@@ -3,7 +3,7 @@ import GameCard from './GameCard'
 import useScores from '../hooks/useScores'
 import './Dashboard.css'
 
-export default function Dashboard({ manifests }) {
+export default function Dashboard({ manifests = [] }) {
   const { getBestScore } = useScores()
 
   return (

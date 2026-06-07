@@ -15,11 +15,13 @@
 }
 
 .game-card:hover,
-.game-card:focus {
+.game-card:focus-visible {
   transform: translateY(-4px);
   box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-  outline: none;
 }
+
+.game-card:focus { outline: none; }
+.game-card:focus-visible { outline: 3px solid var(--color-lavender); outline-offset: 3px; }
 
 .game-card__icon  { font-size: 52px; line-height: 1; }
 .game-card__name  { font-size: 22px; font-weight: 800; text-align: center; }

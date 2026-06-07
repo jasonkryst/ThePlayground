@@ -40,4 +40,9 @@ describe('GameCard', () => {
     renderCard()
     expect(screen.getByRole('link')).toHaveAttribute('href', '/game/animal-sounds')
   })
+
+  it('does not show best score when bestScore is 0', () => {
+    renderCard(0)
+    expect(screen.queryByText(/best/i)).not.toBeInTheDocument()
+  })
 })

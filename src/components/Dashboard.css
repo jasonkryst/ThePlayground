@@ -26,6 +26,8 @@
 }
 
 .dashboard__admin:hover { background: rgba(0,0,0,0.06); }
+.dashboard__admin:focus { outline: none; }
+.dashboard__admin:focus-visible { outline: 3px solid var(--color-lavender); outline-offset: 3px; }
 
 .dashboard__grid {
   display: grid;
