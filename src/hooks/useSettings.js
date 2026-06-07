@@ -1,16 +1,21 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import adapter from '../storage/index'
-import { DEFAULT_SETTINGS } from '../storage/adapter'
+import { DEFAULT_SETTINGS } from '../storage/index'
 
 export default function useSettings() {
   const [settings, setSettings] = useState({ ...DEFAULT_SETTINGS })
+  const settingsRef = useRef(settings)
 
   useEffect(() => {
-    adapter.getSettings().then(setSettings)
+    adapter.getSettings().then(loaded => {
+      settingsRef.current = loaded
+      setSettings(loaded)
+    })
   }, [])
 
   async function updateSetting(key, value) {
-    const next = { ...settings, [key]: value }
+    const next = { ...settingsRef.current, [key]: value }
+    settingsRef.current = next
     setSettings(next)
     await adapter.saveSettings(next)
   }

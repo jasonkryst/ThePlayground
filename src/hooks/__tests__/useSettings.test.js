@@ -1,13 +1,17 @@
 import { renderHook, act } from '@testing-library/react'
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import useSettings from '../useSettings'
+import { DEFAULT_SETTINGS } from '../../storage/index'
 
 const mockAdapter = vi.hoisted(() => ({
   getSettings: vi.fn(),
   saveSettings: vi.fn(),
 }))
 
-vi.mock('../../storage/index', () => ({ default: mockAdapter }))
+vi.mock('../../storage/index', () => ({
+  default: mockAdapter,
+  DEFAULT_SETTINGS: { numChoices: 2, feedbackMode: 'immediate', questionsPerSession: 10 },
+}))
 
 beforeEach(() => {
   vi.clearAllMocks()
@@ -50,7 +54,8 @@ describe('useSettings', () => {
     await act(async () => {
       await result.current.resetSettings()
     })
-    expect(result.current.settings.numChoices).toBe(2)
-    expect(result.current.settings.feedbackMode).toBe('immediate')
+    expect(result.current.settings.numChoices).toBe(DEFAULT_SETTINGS.numChoices)
+    expect(result.current.settings.feedbackMode).toBe(DEFAULT_SETTINGS.feedbackMode)
+    expect(result.current.settings.questionsPerSession).toBe(DEFAULT_SETTINGS.questionsPerSession)
   })
 })

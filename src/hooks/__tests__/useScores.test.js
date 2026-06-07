@@ -21,14 +21,19 @@ beforeEach(() => {
 })
 
 describe('useScores', () => {
-  it('addScore appends a record', async () => {
-    mockAdapter.getScores.mockResolvedValue([])
+  it('addScore appends a record and refreshes state', async () => {
+    const newScore = makeScore('animal-sounds', 8, 10, 3000)
+    mockAdapter.getScores
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([newScore])
     const { result } = renderHook(() => useScores())
     await act(async () => {})
     await act(async () => {
-      await result.current.addScore(makeScore('animal-sounds', 8, 10))
+      await result.current.addScore(newScore)
     })
     expect(mockAdapter.addScore).toHaveBeenCalledTimes(1)
+    expect(result.current.getAllScores()).toHaveLength(1)
+    expect(result.current.getAllScores()[0].score).toBe(8)
   })
 
   it('getBestScore returns highest score for a game', async () => {

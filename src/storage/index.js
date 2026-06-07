@@ -1,2 +1,3 @@
 export { default } from './localStorageAdapter'
-// To switch adapters in future: replace the above line with your new adapter's path
+export { DEFAULT_SETTINGS } from './adapter'
+// To switch adapters in future: replace the default export line with your new adapter's path

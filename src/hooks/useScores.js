@@ -29,5 +29,5 @@ export default function useScores() {
     return scores
   }
 
-  return { addScore, getScoresByGame, getBestScore, getAllScores }
+  return { scores, addScore, getScoresByGame, getBestScore, getAllScores }
 }
