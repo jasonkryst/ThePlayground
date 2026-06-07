@@ -1,0 +1,31 @@
+import { render, screen } from '@testing-library/react'
+import { MemoryRouter } from 'react-router-dom'
+import { describe, it, expect, vi } from 'vitest'
+import Dashboard from '../Dashboard'
+
+vi.mock('../../hooks/useScores', () => ({
+  default: () => ({ getBestScore: () => 5, getScoresByGame: () => [], scores: [], getAllScores: () => [] }),
+}))
+
+const manifests = [
+  { id: 'animal-sounds', name: 'Animal Sounds', description: 'Sounds!', icon: '🐘', color: '#B39DDB' },
+  { id: 'colors', name: 'Colors', description: 'Colors!', icon: '🎨', color: '#80DEEA' },
+]
+
+describe('Dashboard', () => {
+  it('renders one card per manifest', () => {
+    render(<MemoryRouter><Dashboard manifests={manifests} /></MemoryRouter>)
+    expect(screen.getByText('Animal Sounds')).toBeInTheDocument()
+    expect(screen.getByText('Colors')).toBeInTheDocument()
+  })
+
+  it('renders the admin gear link', () => {
+    render(<MemoryRouter><Dashboard manifests={manifests} /></MemoryRouter>)
+    expect(screen.getByRole('link', { name: /⚙️/i })).toHaveAttribute('href', '/admin')
+  })
+
+  it('renders empty state when no manifests', () => {
+    render(<MemoryRouter><Dashboard manifests={[]} /></MemoryRouter>)
+    expect(screen.getByText(/no games/i)).toBeInTheDocument()
+  })
+})
