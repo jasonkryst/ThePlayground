@@ -10,7 +10,9 @@ const manifests = Object.values(manifestModules).map(m => m.default ?? m)
 
 const gameComponents = Object.fromEntries(
   Object.entries(gameModules).map(([path, loader]) => {
-    const id = path.match(/\.\/games\/(.+)\/index\.jsx/)[1]
+    const match = path.match(/\.\/games\/([^/]+)\/index\.jsx/)
+    if (!match) throw new Error(`Unexpected game module path: ${path}`)
+    const id = match[1]
     return [id, lazy(loader)]
   })
 )
