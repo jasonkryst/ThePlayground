@@ -12,6 +12,9 @@ dist
 dist-ssr
 *.local
 
+# Claude Code local settings (machine-specific, not for version control)
+.claude/settings.local.json
+
 # Generated output
 coverage/
 
