@@ -6,7 +6,8 @@ const SETTINGS_KEY = 'playground_settings'
 const localStorageAdapter = {
   async getScores() {
     try {
-      return JSON.parse(localStorage.getItem(SCORES_KEY) || '[]')
+      const parsed = JSON.parse(localStorage.getItem(SCORES_KEY) || '[]')
+      return Array.isArray(parsed) ? parsed : []
     } catch {
       return []
     }
@@ -20,7 +21,8 @@ const localStorageAdapter = {
 
   async getSettings() {
     try {
-      const stored = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}')
+      const parsed = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}')
+      const stored = parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {}
       return { ...DEFAULT_SETTINGS, ...stored }
     } catch {
       return { ...DEFAULT_SETTINGS }
