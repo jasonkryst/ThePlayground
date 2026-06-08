@@ -150,6 +150,28 @@ Score shape: `{ gameId, score, total, date, timestamp }`
 
 ---
 
+## Docker
+
+**Prerequisites:** Docker with Compose
+
+```bash
+docker compose up --build    # build image and start
+docker compose up -d         # run in background after first build
+```
+
+App is served at [http://localhost:8080](http://localhost:8080).
+
+The production image is a two-stage build: a Node LTS container compiles `dist/`, then a lean `nginx:alpine` container (~25 MB) serves the static files. `nginx.conf` includes an SPA fallback (`try_files`) so React Router routes like `/admin` and `/game/animal-sounds` work on direct navigation and page refresh.
+
+| File | Purpose |
+|---|---|
+| `Dockerfile` | Multi-stage build definition |
+| `nginx.conf` | SPA routing fallback, asset caching, security headers |
+| `docker-compose.yml` | Single-service compose for local/self-hosted use |
+| `.dockerignore` | Excludes `node_modules`, `dist`, `coverage`, tool state |
+
+---
+
 ## Testing
 
 Tests live alongside the code they test in `__tests__/` folders. The stack is **Vitest + React Testing Library + jsdom**.
@@ -159,7 +181,7 @@ npm test          # watch mode
 npm run coverage  # single run with coverage report
 ```
 
-**Current coverage:** 32 tests across 8 files; hooks and shared components at 100%.
+**Current coverage:** 53 tests across 10 files; hooks, shared components, and storage adapter at 100%.
 
 A few patterns used in this codebase worth knowing:
 
