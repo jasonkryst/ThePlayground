@@ -12,6 +12,12 @@ dist
 dist-ssr
 *.local
 
+# Generated output
+coverage/
+
+# Superpowers brainstorm session state (generated, not source)
+.superpowers/brainstorm/
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
