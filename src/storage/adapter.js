@@ -2,6 +2,7 @@ export const DEFAULT_SETTINGS = {
   numChoices: 2,
   feedbackMode: 'immediate',
   questionsPerSession: 10,
+  gaId: '',
 }
 
 /**

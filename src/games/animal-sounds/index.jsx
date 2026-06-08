@@ -3,6 +3,7 @@ import useSettings from '../../hooks/useSettings'
 import useScores from '../../hooks/useScores'
 import animals from './data/animals'
 import { getSoundUrl } from './data/sounds'
+import manifest from './manifest.json'
 import './AnimalSoundsGame.css'
 
 const CHOICE_COLORS = [
@@ -151,6 +152,11 @@ export default function AnimalSoundsGame({ onGameEnd }) {
     <div className="game">
       {/* Hidden testid so tests can find the correct answer id */}
       <span data-testid="correct-animal-id" style={{ display: 'none' }}>{current.correct.id}</span>
+
+      <div className="game__header">
+        <span className="game__name">{manifest.name}</span>
+        <span className="game__version">v{manifest.version}</span>
+      </div>
 
       <div className="game__question">
         <div className="game__progress">Question {index + 1} of {queue.length}</div>

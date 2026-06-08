@@ -36,3 +36,16 @@
 }
 
 .dashboard__empty { opacity: 0.5; font-style: italic; }
+
+.dashboard__footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 48px;
+  padding: 16px 0;
+  border-top: 1px solid rgba(0,0,0,0.08);
+  font-size: 13px;
+  opacity: 0.45;
+}
+
+.dashboard__version { font-variant-numeric: tabular-nums; }

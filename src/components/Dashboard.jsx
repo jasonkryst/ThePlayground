@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import GameCard from './GameCard'
 import useScores from '../hooks/useScores'
+import { version } from '../../package.json'
 import './Dashboard.css'
 
 export default function Dashboard({ manifests = [] }) {
@@ -22,6 +23,11 @@ export default function Dashboard({ manifests = [] }) {
           ))}
         </div>
       )}
+
+      <footer className="dashboard__footer">
+        <span>The Playground</span>
+        <span className="dashboard__version">v{version}</span>
+      </footer>
     </div>
   )
 }

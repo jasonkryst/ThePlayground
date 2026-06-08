@@ -75,6 +75,20 @@ export default function AdminPage() {
         </div>
       </div>
 
+      <div className="admin__section">
+        <h2>Google Analytics</h2>
+        <p className="admin__hint">Enter your Measurement ID to enable analytics tracking.</p>
+        <input
+          className="admin__text-input"
+          type="text"
+          placeholder="G-XXXXXXXXXX"
+          value={settings.gaId || ''}
+          onChange={e => updateSetting('gaId', e.target.value)}
+          aria-label="Google Analytics Measurement ID"
+          spellCheck={false}
+        />
+      </div>
+
       <button className="admin__reset" onClick={resetSettings}>
         Reset to Defaults
       </button>

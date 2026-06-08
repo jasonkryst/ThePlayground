@@ -7,8 +7,10 @@ A browser-based game dashboard designed for infants and toddlers. Games are disp
 - **Ocean & Dream design** — soft aquas, teals, lavenders, and lilacs; 64×64 px minimum tap targets throughout
 - **Auto-discovered games** — drop a folder into `src/games/` and it appears on the dashboard automatically
 - **Animal Sounds** — an animal sound plays automatically; the child picks the matching animal from picture buttons
-- **Admin / Settings** — configure answer choices (2–4), feedback mode, and questions per session
+- **Admin / Settings** — configure answer choices (2–4), feedback mode, questions per session, and Google Analytics ID
 - **Persistent scoring** — game history stored in `localStorage`; swappable for a backend without touching game code
+- **Version display** — app version shown in the dashboard footer; game version shown in the game header
+- **Google Analytics** — optional GA4 tracking configured at runtime via the admin page; fires page view events on every React Router navigation
 
 ---
 
@@ -200,10 +202,21 @@ Accessible from the dashboard via the gear icon (⚙).
 | Answer choices | 2 | 2, 3, 4 |
 | Feedback mode | Immediate | Immediate, Parent tap |
 | Questions per session | 10 | 5, 10, 15, 20 |
+| Google Analytics ID | *(empty)* | Any valid GA4 Measurement ID (e.g. `G-XXXXXXXXXX`) |
 
 **Immediate** — correct/wrong feedback shown instantly; next question advances automatically after 1.5 s.
 
 **Parent tap** — feedback shown after a parent taps "Next", giving time to discuss the answer.
+
+**Google Analytics** — when a Measurement ID is entered, the GA4 script is injected at runtime and page view events fire on every navigation. Leaving the field blank disables tracking entirely. The ID is stored in `localStorage` alongside other settings.
+
+---
+
+## Versioning
+
+The app version is read from `package.json` at build time (via Vite's JSON import) and displayed in the dashboard footer. Each game's version comes from its own `manifest.json` and is shown in the game header.
+
+To release a new version, bump `version` in `package.json` and the relevant game `manifest.json` files, then rebuild.
 
 ---
 
@@ -219,3 +232,9 @@ const sounds = import.meta.glob('../sounds/*.mp3', { eager: true, query: '?url',
 ```
 
 Free CC0 animal sounds are available at [freesound.org](https://freesound.org).
+
+---
+
+## Future Enhancements
+
+A tracked list of ideas for new games, UX improvements, scoring features, and technical work is maintained in [`docs/ENHANCEMENTS.md`](docs/ENHANCEMENTS.md).

@@ -3,5 +3,6 @@
   "name": "Animal Sounds",
   "description": "Match the animal to its sound!",
   "icon": "🐘",
-  "color": "#B39DDB"
+  "color": "#B39DDB",
+  "version": "1.0.0"
 }

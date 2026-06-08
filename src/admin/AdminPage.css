@@ -95,3 +95,27 @@
 }
 
 .admin__reset:hover { background: #ffebee; }
+
+.admin__hint {
+  font-size: 14px;
+  opacity: 0.6;
+  margin-bottom: 10px;
+}
+
+.admin__text-input {
+  width: 100%;
+  padding: 14px 16px;
+  font-size: 16px;
+  font-family: var(--font-main);
+  border: 2px solid var(--color-aqua);
+  border-radius: var(--radius-button);
+  background: var(--color-surface);
+  color: var(--color-text);
+  min-height: 64px;
+  box-sizing: border-box;
+  outline: none;
+  transition: border-color 0.15s;
+}
+
+.admin__text-input:focus { border-color: var(--color-lavender); }
+.admin__text-input::placeholder { opacity: 0.4; }

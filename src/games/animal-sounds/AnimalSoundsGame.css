@@ -1,5 +1,16 @@
 .game { min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 24px 16px; gap: 24px; }
 
+.game__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 480px;
+}
+
+.game__name    { font-size: 15px; font-weight: 700; opacity: 0.55; }
+.game__version { font-size: 12px; opacity: 0.4; font-variant-numeric: tabular-nums; }
+
 .game__question {
   width: 100%;
   max-width: 480px;
