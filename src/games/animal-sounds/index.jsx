@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import useSettings from '../../hooks/useSettings'
 import useScores from '../../hooks/useScores'
 import animals from './data/animals'
+import { getSoundUrl } from './data/sounds'
 import './AnimalSoundsGame.css'
 
 const CHOICE_COLORS = [
@@ -65,11 +66,13 @@ export default function AnimalSoundsGame({ onGameEnd }) {
 
   function playSound() {
     if (!current) return
+    const url = getSoundUrl(current.correct.sound)
+    if (!url) return
     if (audioRef.current) {
       audioRef.current.pause()
       audioRef.current.currentTime = 0
     }
-    const audio = new Audio(`/src/games/animal-sounds/sounds/${current.correct.sound}`)
+    const audio = new Audio(url)
     audioRef.current = audio
     audio.play().catch(() => {})
   }
