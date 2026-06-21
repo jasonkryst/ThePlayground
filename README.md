@@ -7,6 +7,7 @@ A browser-based game dashboard designed for infants and toddlers. Games are disp
 - **Ocean & Dream design** — soft aquas, teals, lavenders, and lilacs; 64×64 px minimum tap targets throughout
 - **Auto-discovered games** — drop a folder into `src/games/` and it appears on the dashboard automatically
 - **Animal Sounds** — an animal sound plays automatically; the child picks the matching animal from picture buttons
+- **Color Match** — a color swatch is shown; the child picks the matching colored object from picture buttons
 - **Admin / Settings** — configure answer choices (2–4), feedback mode, questions per session, and Google Analytics ID
 - **Persistent scoring** — game history stored in `localStorage`; swappable for a backend without touching game code
 - **Version display** — app version shown in the dashboard footer; game version shown in the game header
