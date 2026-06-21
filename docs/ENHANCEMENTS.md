@@ -7,7 +7,6 @@ Ideas for future development. Not committed to any timeline.
 ## Games
 
 ### New Game Types
-- **Color Match** — show a color swatch, child picks the matching colored object from picture buttons
 - **Shape Sort** — present a shape name/picture, child picks the correct shape
 - **Number Tap** — display a number (1–10), child taps that many objects on screen
 - **Alphabet Sounds** — play a letter sound (phonics), child picks the correct letter
