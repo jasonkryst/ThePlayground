@@ -16,6 +16,19 @@ export default function AdminPage() {
       </div>
 
       <div className="admin__section">
+        <h2>Child's Name</h2>
+        <input
+          className="admin__text-input"
+          type="text"
+          placeholder="Enter child's name"
+          value={settings.childName || ''}
+          onChange={e => updateSetting('childName', e.target.value)}
+          aria-label="Child's Name"
+          spellCheck={false}
+        />
+      </div>
+
+      <div className="admin__section">
         <h2>Answer Choices</h2>
         <div className="admin__radios">
           {[2, 3, 4].map(n => (
