@@ -2,13 +2,13 @@
 
 ## Summary
 
-Add a `childName` setting so the home page title can be personalized (e.g. "Mia's Playroom") instead of the hardcoded "Baby's Playroom". The field follows the existing free-text settings pattern already used for `gaId`.
+Add a `childName` setting so the home page title can be personalized (e.g. "Mia's Playground") instead of the hardcoded "Baby's Playground". The field follows the existing free-text settings pattern already used for `gaId`.
 
 ## Goals
 
 - Let a parent enter their child's name in Settings and see it reflected in the dashboard title immediately.
 - Reuse the existing settings storage/hook infrastructure unchanged — no new storage methods.
-- Fall back to today's wording ("Baby's Playroom") when no name is set.
+- Fall back to today's wording ("Baby's Playground") when no name is set.
 
 ## Non-goals
 
@@ -64,7 +64,7 @@ import useSettings from '../hooks/useSettings'
 // inside the component:
 const { settings } = useSettings()
 const name = settings.childName?.trim()
-const title = name ? `${name}'s Playroom` : "Baby's Playroom"
+const title = name ? `${name}'s Playground` : "Baby's Playground"
 ```
 
 Rendered as:
@@ -84,8 +84,8 @@ This is plain JSX text content (not `dangerouslySetInnerHTML`), so React escapes
 
 `src/components/__tests__/Dashboard.test.jsx`:
 - This file does not currently mock `useSettings` — add a `vi.mock('../../hooks/useSettings', ...)` returning `{ settings: { childName: '' } }` by default (mirroring the existing `useScores` mock style), overridable per test via a mutable mock object.
-- New test: with `childName: ''`, title reads "🌊 Baby's Playroom".
-- New test: with `childName: 'Mia'`, title reads "🌊 Mia's Playroom".
+- New test: with `childName: ''`, title reads "🌊 Baby's Playground".
+- New test: with `childName: 'Mia'`, title reads "🌊 Mia's Playground".
 
 ## Documentation
 
