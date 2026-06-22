@@ -17,10 +17,11 @@ export default function AdminPage() {
 
       <div className="admin__section">
         <h2>Child's Name</h2>
+        <p className="admin__hint">Personalize the home page title.</p>
         <input
           className="admin__text-input"
           type="text"
-          placeholder="Enter child's name"
+          placeholder="e.g. Mia"
           value={settings.childName || ''}
           onChange={e => updateSetting('childName', e.target.value)}
           aria-label="Child's Name"
