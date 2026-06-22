@@ -12,6 +12,12 @@ vi.mock('../../hooks/useScores', () => ({
   }),
 }))
 
+const mockSettings = { childName: '' }
+
+vi.mock('../../hooks/useSettings', () => ({
+  default: () => ({ settings: mockSettings }),
+}))
+
 const manifests = [
   { id: 'animal-sounds', name: 'Animal Sounds', description: 'Sounds!', icon: '🐘', color: '#B39DDB' },
   { id: 'colors', name: 'Colors', description: 'Colors!', icon: '🎨', color: '#80DEEA' },
@@ -38,5 +44,17 @@ describe('Dashboard', () => {
     render(<MemoryRouter><Dashboard manifests={manifests} /></MemoryRouter>)
     expect(screen.getByText('Best: 7')).toBeInTheDocument()
     expect(screen.getByText('Best: 3')).toBeInTheDocument()
+  })
+
+  it('shows the default title when no child name is set', () => {
+    mockSettings.childName = ''
+    render(<MemoryRouter><Dashboard manifests={manifests} /></MemoryRouter>)
+    expect(screen.getByText("🌊 Baby's Playground")).toBeInTheDocument()
+  })
+
+  it('shows a personalized title when a child name is set', () => {
+    mockSettings.childName = 'Mia'
+    render(<MemoryRouter><Dashboard manifests={manifests} /></MemoryRouter>)
+    expect(screen.getByText("🌊 Mia's Playground")).toBeInTheDocument()
   })
 })

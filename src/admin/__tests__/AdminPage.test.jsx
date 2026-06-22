@@ -4,7 +4,7 @@ import { MemoryRouter } from 'react-router-dom'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import AdminPage from '../AdminPage'
 
-const mockSettings = { numChoices: 2, feedbackMode: 'immediate', questionsPerSession: 10 }
+const mockSettings = { numChoices: 2, feedbackMode: 'immediate', questionsPerSession: 10, childName: '' }
 const mockUpdateSetting = vi.fn()
 const mockResetSettings = vi.fn()
 
@@ -35,6 +35,18 @@ describe('AdminPage', () => {
     expect(screen.getByText(/answer choices/i)).toBeInTheDocument()
     expect(screen.getByText(/feedback mode/i)).toBeInTheDocument()
     expect(screen.getByText(/questions per session/i)).toBeInTheDocument()
+  })
+
+  it('renders the child name field', () => {
+    render(<MemoryRouter><AdminPage /></MemoryRouter>)
+    expect(screen.getByLabelText(/child's name/i)).toBeInTheDocument()
+  })
+
+  it('calls updateSetting when child name is typed', async () => {
+    render(<MemoryRouter><AdminPage /></MemoryRouter>)
+    const input = screen.getByLabelText(/child's name/i)
+    await userEvent.type(input, 'M')
+    expect(mockUpdateSetting).toHaveBeenCalledWith('childName', 'M')
   })
 
   it('calls updateSetting when a radio changes', async () => {

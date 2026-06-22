@@ -3,6 +3,7 @@ export const DEFAULT_SETTINGS = {
   feedbackMode: 'immediate',
   questionsPerSession: 10,
   gaId: '',
+  childName: '',
 }
 
 /**
@@ -14,5 +15,5 @@ export const DEFAULT_SETTINGS = {
  * saveSettings(settings)   → Promise<void>
  *
  * Score shape:   { gameId, score, total, date, timestamp }
- * Settings shape: { numChoices, feedbackMode, questionsPerSession }
+ * Settings shape: { numChoices, feedbackMode, questionsPerSession, gaId, childName }
  */
