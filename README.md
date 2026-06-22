@@ -8,7 +8,7 @@ A browser-based game dashboard designed for infants and toddlers. Games are disp
 - **Auto-discovered games** — drop a folder into `src/games/` and it appears on the dashboard automatically
 - **Animal Sounds** — an animal sound plays automatically; the child picks the matching animal from picture buttons
 - **Color Match** — a color swatch is shown; the child picks the matching colored object from picture buttons
-- **Admin / Settings** — configure answer choices (2–4), feedback mode, questions per session, and Google Analytics ID
+- **Admin / Settings** — configure child's name, answer choices (2–4), feedback mode, questions per session, and Google Analytics ID
 - **Persistent scoring** — game history stored in `localStorage`; swappable for a backend without touching game code
 - **Version display** — app version shown in the dashboard footer; game version shown in the game header
 - **Google Analytics** — optional GA4 tracking configured at runtime via the admin page; fires page view events on every React Router navigation
@@ -200,6 +200,7 @@ Accessible from the dashboard via the gear icon (⚙).
 
 | Setting | Default | Options |
 |---|---|---|
+| Child's Name | *(empty)* | Any text |
 | Answer choices | 2 | 2, 3, 4 |
 | Feedback mode | Immediate | Immediate, Parent tap |
 | Questions per session | 10 | 5, 10, 15, 20 |
@@ -210,6 +211,8 @@ Accessible from the dashboard via the gear icon (⚙).
 **Parent tap** — feedback shown after a parent taps "Next", giving time to discuss the answer.
 
 **Google Analytics** — when a Measurement ID is entered, the GA4 script is injected at runtime and page view events fire on every navigation. Leaving the field blank disables tracking entirely. The ID is stored in `localStorage` alongside other settings.
+
+**Child's Name** — when set, the dashboard title reads "<Name>'s Playground"; when left blank, it shows the default "Baby's Playground".
 
 ---
 

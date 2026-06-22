@@ -26,7 +26,7 @@ Run a single test file: `npx vitest run src/games/animal-sounds/__tests__/Animal
 
 **Games consume shared state via hooks, not props drilling.** `useSettings()` and `useScores()` (in `src/hooks/`) wrap the storage adapter. Game components call these directly rather than receiving settings/scores from a parent.
 
-**Score shape:** `{ gameId, score, total, date, timestamp }`. **Settings shape:** see `DEFAULT_SETTINGS` in `src/storage/adapter.js` (`numChoices`, `feedbackMode`, `questionsPerSession`, `gaId`).
+**Score shape:** `{ gameId, score, total, date, timestamp }`. **Settings shape:** see `DEFAULT_SETTINGS` in `src/storage/adapter.js` (`numChoices`, `feedbackMode`, `questionsPerSession`, `gaId`, `childName`).
 
 **Design tokens** (colors, radii) are CSS custom properties in `src/index.css` — use `var(--color-aqua)` etc. rather than hardcoding hex values, so games stay visually consistent with the dashboard.
 
