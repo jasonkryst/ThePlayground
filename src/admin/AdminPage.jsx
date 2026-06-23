@@ -1,36 +1,38 @@
 import { Link } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import useSettings from '../hooks/useSettings'
 import useScores from '../hooks/useScores'
 import ScoreHistory from '../components/ScoreHistory'
 import './AdminPage.css'
 
 export default function AdminPage() {
+  const { t } = useTranslation()
   const { settings, updateSetting, resetSettings } = useSettings()
   const { getAllScores } = useScores()
 
   return (
     <div className="admin">
       <div className="admin__header">
-        <Link to="/" className="admin__back" aria-label="Back to dashboard">←</Link>
-        <h1 className="admin__title">⚙️ Settings</h1>
+        <Link to="/" className="admin__back" aria-label={t('admin.back')}>←</Link>
+        <h1 className="admin__title">{t('admin.title')}</h1>
       </div>
 
       <div className="admin__section">
-        <h2>Child's Name</h2>
-        <p className="admin__hint">Personalize the home page title.</p>
+        <h2>{t('admin.childNameHeading')}</h2>
+        <p className="admin__hint">{t('admin.childNameHint')}</p>
         <input
           className="admin__text-input"
           type="text"
-          placeholder="e.g. Mia"
+          placeholder={t('admin.childNamePlaceholder')}
           value={settings.childName || ''}
           onChange={e => updateSetting('childName', e.target.value)}
-          aria-label="Child's Name"
+          aria-label={t('admin.childNameLabel')}
           spellCheck={false}
         />
       </div>
 
       <div className="admin__section">
-        <h2>Answer Choices</h2>
+        <h2>{t('admin.answerChoicesHeading')}</h2>
         <div className="admin__radios">
           {[2, 3, 4].map(n => (
             <label
@@ -51,11 +53,11 @@ export default function AdminPage() {
       </div>
 
       <div className="admin__section">
-        <h2>Feedback Mode</h2>
+        <h2>{t('admin.feedbackModeHeading')}</h2>
         <div className="admin__toggle">
           {[
-            { value: 'immediate', label: '⚡ Immediate' },
-            { value: 'parent-tap', label: '👆 Parent Tap' },
+            { value: 'immediate', label: t('admin.feedbackImmediate') },
+            { value: 'parent-tap', label: t('admin.feedbackParentTap') },
           ].map(opt => (
             <button
               key={opt.value}
@@ -69,7 +71,7 @@ export default function AdminPage() {
       </div>
 
       <div className="admin__section">
-        <h2>Questions Per Session</h2>
+        <h2>{t('admin.questionsPerSessionHeading')}</h2>
         <div className="admin__radios">
           {[5, 10, 15, 20].map(n => (
             <label
@@ -90,25 +92,25 @@ export default function AdminPage() {
       </div>
 
       <div className="admin__section">
-        <h2>Google Analytics</h2>
-        <p className="admin__hint">Enter your Measurement ID to enable analytics tracking.</p>
+        <h2>{t('admin.gaHeading')}</h2>
+        <p className="admin__hint">{t('admin.gaHint')}</p>
         <input
           className="admin__text-input"
           type="text"
           placeholder="G-XXXXXXXXXX"
           value={settings.gaId || ''}
           onChange={e => updateSetting('gaId', e.target.value)}
-          aria-label="Google Analytics Measurement ID"
+          aria-label={t('admin.gaLabel')}
           spellCheck={false}
         />
       </div>
 
       <button className="admin__reset" onClick={resetSettings}>
-        Reset to Defaults
+        {t('admin.reset')}
       </button>
 
       <div className="admin__section">
-        <h2>Score History</h2>
+        <h2>{t('admin.scoreHistoryHeading')}</h2>
         <ScoreHistory scores={getAllScores()} />
       </div>
     </div>

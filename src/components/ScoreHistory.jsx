@@ -1,8 +1,10 @@
+import { useTranslation } from 'react-i18next'
 import './ScoreHistory.css'
 
 export default function ScoreHistory({ scores = [] }) {
+  const { t } = useTranslation()
   if (scores.length === 0) {
-    return <p className="score-history__empty">No scores yet — play a game!</p>
+    return <p className="score-history__empty">{t('scoreHistory.empty')}</p>
   }
   return (
     <ul className="score-history">
