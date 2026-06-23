@@ -10,11 +10,6 @@ const colors = [
   { id: 'black',     name: 'Black',     color: '#212121', emoji: '🎩' },
   { id: 'white',     name: 'White',     color: '#FAFAFA', emoji: '☁️' },
   { id: 'gray',      name: 'Gray',      color: '#9E9E9E', emoji: '🪨' },
-  { id: 'teal',      name: 'Teal',      color: '#00897B', emoji: '🌊' },
-  { id: 'lime',      name: 'Lime',      color: '#C0CA33', emoji: '🎾' },
-  { id: 'turquoise', name: 'Turquoise', color: '#00BCD4', emoji: '💎' },
-  { id: 'gold',      name: 'Gold',      color: '#FFC107', emoji: '⭐' },
-  { id: 'silver',    name: 'Silver',    color: '#B0BEC5', emoji: '🌙' },
 ]
 
 export default colors
