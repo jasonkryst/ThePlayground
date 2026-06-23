@@ -1,0 +1,73 @@
+{
+  "common": {
+    "scoreLabel": "You scored {{score}} out of {{total}}!",
+    "playAgain": "Play Again",
+    "home": "Home",
+    "progress": "Question {{current}} of {{total}}"
+  },
+  "dashboard": {
+    "titleDefault": "Baby's Playground",
+    "titleNamed": "{{name}}'s Playground",
+    "settingsLabel": "⚙️ Settings",
+    "empty": "No games found. Drop a game folder into src/games/.",
+    "footerName": "The Playground"
+  },
+  "gameCard": {
+    "best": "Best: {{score}}"
+  },
+  "admin": {
+    "back": "Back to dashboard",
+    "title": "⚙️ Settings",
+    "childNameHeading": "Child's Name",
+    "childNameHint": "Personalize the home page title.",
+    "childNamePlaceholder": "e.g. Mia",
+    "childNameLabel": "Child's Name",
+    "answerChoicesHeading": "Answer Choices",
+    "feedbackModeHeading": "Feedback Mode",
+    "feedbackImmediate": "⚡ Immediate",
+    "feedbackParentTap": "👆 Parent Tap",
+    "questionsPerSessionHeading": "Questions Per Session",
+    "gaHeading": "Google Analytics",
+    "gaHint": "Enter your Measurement ID to enable analytics tracking.",
+    "gaLabel": "Google Analytics Measurement ID",
+    "reset": "Reset to Defaults",
+    "scoreHistoryHeading": "Score History"
+  },
+  "scoreHistory": {
+    "empty": "No scores yet — play a game!"
+  },
+  "animalSounds": {
+    "prompt": "What animal makes this sound?",
+    "replay": "Replay sound"
+  },
+  "colorMatch": {
+    "prompt": "Which one is this color?"
+  },
+  "animal": {
+    "elephant": { "name": "Elephant" },
+    "lion": { "name": "Lion" },
+    "cow": { "name": "Cow" },
+    "dog": { "name": "Dog" },
+    "cat": { "name": "Cat" },
+    "frog": { "name": "Frog" },
+    "duck": { "name": "Duck" },
+    "horse": { "name": "Horse" },
+    "pig": { "name": "Pig" },
+    "sheep": { "name": "Sheep" },
+    "rooster": { "name": "Rooster" },
+    "owl": { "name": "Owl" }
+  },
+  "color": {
+    "red": { "name": "Red" },
+    "orange": { "name": "Orange" },
+    "yellow": { "name": "Yellow" },
+    "green": { "name": "Green" },
+    "blue": { "name": "Blue" },
+    "purple": { "name": "Purple" },
+    "pink": { "name": "Pink" },
+    "brown": { "name": "Brown" },
+    "black": { "name": "Black" },
+    "white": { "name": "White" },
+    "gray": { "name": "Gray" }
+  }
+}
