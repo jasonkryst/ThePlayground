@@ -5,7 +5,7 @@ import colors from './data/colors'
 import manifest from './manifest.json'
 import './ColorMatchGame.css'
 
-const BORDERED_IDS = new Set(['white', 'silver', 'gray'])
+const BORDERED_IDS = new Set(['white', 'gray'])
 
 function shuffle(arr) {
   const a = [...arr]
