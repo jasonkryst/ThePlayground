@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import useSettings from '../../hooks/useSettings'
 import useScores from '../../hooks/useScores'
 import colors from './data/colors'
@@ -26,6 +27,7 @@ function buildQueue(numChoices, questionsPerSession) {
 }
 
 export default function ColorMatchGame({ onGameEnd }) {
+  const { t } = useTranslation()
   const { settings } = useSettings()
   const { addScore }  = useScores()
 
@@ -112,10 +114,10 @@ export default function ColorMatchGame({ onGameEnd }) {
       <div className="results">
         <div className="results__emoji">{scoreRef.current === total ? '🎉' : '⭐'}</div>
         <div className="results__score">{scoreRef.current} / {total}</div>
-        <div className="results__label">You scored {scoreRef.current} out of {total}!</div>
+        <div className="results__label">{t('common.scoreLabel', { score: scoreRef.current, total })}</div>
         <div className="results__actions">
-          <button className="results__btn results__btn--play" onClick={restart}>Play Again</button>
-          <button className="results__btn results__btn--home" onClick={() => onGameEnd(scoreRef.current, total)}>Home</button>
+          <button className="results__btn results__btn--play" onClick={restart}>{t('common.playAgain')}</button>
+          <button className="results__btn results__btn--home" onClick={() => onGameEnd(scoreRef.current, total)}>{t('common.home')}</button>
         </div>
       </div>
     )
@@ -134,8 +136,8 @@ export default function ColorMatchGame({ onGameEnd }) {
       </div>
 
       <div className="game__question">
-        <div className="game__progress">Question {index + 1} of {queue.length}</div>
-        <div className="game__prompt">Which one is this color?</div>
+        <div className="game__progress">{t('common.progress', { current: index + 1, total: queue.length })}</div>
+        <div className="game__prompt">{t('colorMatch.prompt')}</div>
         <div className="game__swatch" style={{ background: current.correct.color }} />
       </div>
 
@@ -159,7 +161,7 @@ export default function ColorMatchGame({ onGameEnd }) {
               data-color-id={color.id}
             >
               {color.emoji}
-              <span className="game__choice-name">{color.name}</span>
+              <span className="game__choice-name">{t(color.nameKey)}</span>
             </button>
           )
         })}
