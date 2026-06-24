@@ -126,12 +126,12 @@ export default function ColorMatchGame({ onGameEnd }) {
   if (!current) return null
 
   return (
-    <div className="game">
+    <main className="game">
       {/* Hidden testid so tests can find the correct answer id */}
       <span data-testid="correct-color-id" style={{ display: 'none' }}>{current.correct.id}</span>
 
       <div className="game__header">
-        <span className="game__name">{manifest.name}</span>
+        <h1 className="game__name">{manifest.name}</h1>
         <span className="game__version">v{manifest.version}</span>
       </div>
 
@@ -155,7 +155,7 @@ export default function ColorMatchGame({ onGameEnd }) {
             <button
               key={color.id}
               className={cls}
-              style={{ background: color.color }}
+              style={{ background: color.color, color: color.textColor }}
               disabled={answered}
               onClick={() => handleChoice(color)}
               data-color-id={color.id}
@@ -170,6 +170,6 @@ export default function ColorMatchGame({ onGameEnd }) {
       {answered && feedbackMode === 'parent-tap' && (
         <button className="game__next" onClick={advance}>Next →</button>
       )}
-    </div>
+    </main>
   )
 }

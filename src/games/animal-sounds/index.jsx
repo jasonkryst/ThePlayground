@@ -8,10 +8,10 @@ import manifest from './manifest.json'
 import './AnimalSoundsGame.css'
 
 const CHOICE_COLORS = [
-  'var(--color-lavender)',
-  'var(--color-teal)',
-  'var(--color-aqua)',
-  'var(--color-lilac)',
+  'var(--color-lavender-dark)',
+  'var(--color-teal-dark)',
+  'var(--color-aqua-dark)',
+  'var(--color-lilac-dark)',
 ]
 
 function shuffle(arr) {
@@ -151,12 +151,12 @@ export default function AnimalSoundsGame({ onGameEnd }) {
   if (!current) return null
 
   return (
-    <div className="game">
+    <main className="game">
       {/* Hidden testid so tests can find the correct answer id */}
       <span data-testid="correct-animal-id" style={{ display: 'none' }}>{current.correct.id}</span>
 
       <div className="game__header">
-        <span className="game__name">{manifest.name}</span>
+        <h1 className="game__name">{manifest.name}</h1>
         <span className="game__version">v{manifest.version}</span>
       </div>
 
@@ -194,6 +194,6 @@ export default function AnimalSoundsGame({ onGameEnd }) {
       {answered && feedbackMode === 'parent-tap' && (
         <button className="game__next" onClick={advance}>Next →</button>
       )}
-    </div>
+    </main>
   )
 }
