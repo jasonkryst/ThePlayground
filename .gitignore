@@ -22,6 +22,9 @@ coverage/
 playwright-report/
 test-results/
 
+# Storybook
+storybook-static/
+
 # Superpowers brainstorm session state (generated, not source)
 .superpowers/brainstorm/
 
