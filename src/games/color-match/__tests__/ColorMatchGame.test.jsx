@@ -1,6 +1,7 @@
 import { render, screen, act, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { axe } from 'jest-axe'
 import ColorMatchGame from '../index'
 
 vi.mock('../../../hooks/useSettings', () => ({
@@ -77,5 +78,11 @@ describe('ColorMatchGame', () => {
     vi.useRealTimers()
     await act(async () => { await userEvent.click(screen.getByRole('button', { name: /home/i })) })
     expect(onGameEnd).toHaveBeenCalled()
+  })
+
+  it('has no accessibility violations', async () => {
+    let container
+    await act(async () => { container = render(<ColorMatchGame onGameEnd={onGameEnd} />).container })
+    expect(await axe(container)).toHaveNoViolations()
   })
 })
