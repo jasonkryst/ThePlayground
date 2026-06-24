@@ -1,7 +1,7 @@
 import AnimalSoundsGame from './index'
 
 // The game shuffles its choices with Math.random() on mount, which makes
-// screenshots non-deterministic across renders. Seed it to a fixed value
+// screenshots non-deterministic across renders. Pin it to a fixed value
 // so visual regression snapshots stay stable.
 Math.random = () => 0.5
 

@@ -1,3 +1,12 @@
+// Repo lives on a network share; Storybook's own story-indexer watcher
+// (separate from Vite's dev-server watcher below) uses chokidar directly
+// and races on native fs events there, intermittently producing partial
+// file reads ("Could not parse expression with acorn") for *.stories.jsx
+// files unrelated to whatever just changed. CHOKIDAR_USEPOLLING is the
+// env var chokidar itself honors globally, so this covers the indexer's
+// watcher too, not just Vite's.
+process.env.CHOKIDAR_USEPOLLING = 'true'
+
 /** @type { import('@storybook/react-vite').StorybookConfig } */
 const config = {
   stories: ['../src/**/*.stories.@(js|jsx)'],
