@@ -18,6 +18,10 @@ dist-ssr
 # Generated output
 coverage/
 
+# Playwright
+playwright-report/
+test-results/
+
 # Superpowers brainstorm session state (generated, not source)
 .superpowers/brainstorm/
 

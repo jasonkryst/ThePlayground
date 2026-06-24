@@ -1,13 +1,17 @@
 @import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap');
 
 :root {
-  --color-aqua:     #80DEEA;
-  --color-teal:     #80CBC4;
-  --color-lavender: #B39DDB;
-  --color-lilac:    #CE93D8;
-  --color-bg:       #F0FDFF;
-  --color-surface:  #FFFFFF;
-  --color-text:     #37474F;
+  --color-aqua:        #80DEEA;
+  --color-aqua-dark:   #006C7A;
+  --color-teal:        #80CBC4;
+  --color-teal-dark:   #00695C;
+  --color-lavender:      #B39DDB;
+  --color-lavender-dark: #6A4FA3;
+  --color-lilac:       #CE93D8;
+  --color-bg:          #F0FDFF;
+  --color-surface:     #FFFFFF;
+  --color-text:        #37474F;
+  --color-text-muted:  #5B6B70;
   --radius-card:    20px;
   --radius-button:  16px;
   --font-main:      'Nunito', sans-serif;

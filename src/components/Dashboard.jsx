@@ -16,20 +16,22 @@ export default function Dashboard({ manifests = [] }) {
 
   return (
     <div className="dashboard">
-      <div className="dashboard__header">
-        <h1 className="dashboard__title">🌊 {title}</h1>
-        <Link to="/admin" className="dashboard__admin" aria-label={t('dashboard.settingsLabel')}>⚙️</Link>
-      </div>
-
-      {manifests.length === 0 ? (
-        <p className="dashboard__empty">{t('dashboard.empty')}</p>
-      ) : (
-        <div className="dashboard__grid">
-          {manifests.map(m => (
-            <GameCard key={m.id} manifest={m} bestScore={getBestScore(m.id)} />
-          ))}
+      <main>
+        <div className="dashboard__header">
+          <h1 className="dashboard__title">🌊 {title}</h1>
+          <Link to="/admin" className="dashboard__admin" aria-label={t('dashboard.settingsLabel')}>⚙️</Link>
         </div>
-      )}
+
+        {manifests.length === 0 ? (
+          <p className="dashboard__empty">{t('dashboard.empty')}</p>
+        ) : (
+          <div className="dashboard__grid">
+            {manifests.map(m => (
+              <GameCard key={m.id} manifest={m} bestScore={getBestScore(m.id)} />
+            ))}
+          </div>
+        )}
+      </main>
 
       <footer className="dashboard__footer">
         <span>{t('dashboard.footerName')}</span>
