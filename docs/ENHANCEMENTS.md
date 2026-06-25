@@ -60,8 +60,4 @@ Ideas for future development. Not committed to any timeline.
 ## Technical
 
 - **PWA / installable** — `vite-plugin-pwa` to generate a service worker and `manifest.webmanifest` for home-screen install
-- **i18n / localization** — wrap UI strings in an i18n library so animal names and prompts can be translated
-- **Automated accessibility audit** — add `axe-core` to the test suite to catch a11y regressions
-- **End-to-end tests** — add Playwright tests for full game-session flows
-- **Visual regression tests** — snapshot key screens with Storybook or Chromatic
 - **CI pipeline** — GitHub Actions workflow to run `npm test`, `npm run build`, and Docker build on every push

@@ -177,20 +177,13 @@ The production image is a two-stage build: a Node LTS container compiles `dist/`
 
 ## Testing
 
-Tests live alongside the code they test in `__tests__/` folders. The stack is **Vitest + React Testing Library + jsdom**.
+The Playground has four layers of automated testing — unit/component (Vitest + RTL), accessibility audits (jest-axe + axe-core/playwright), end-to-end (Playwright), and visual regression (Storybook + Playwright screenshots) — all runnable locally with no external accounts. See [`docs/TESTING.md`](docs/TESTING.md) for the full reference, including how to run each layer and update visual baselines.
 
 ```bash
-npm test          # watch mode
-npm run coverage  # single run with coverage report
+npm test          # unit/component tests, watch mode
+npm run e2e        # end-to-end + accessibility + visual regression
+npm run storybook  # browse component/game stories locally
 ```
-
-**Current coverage:** 53 tests across 10 files; hooks, shared components, and storage adapter at 100%.
-
-A few patterns used in this codebase worth knowing:
-
-- **Fake timers:** Tests that cover timed feedback (correct/wrong answer delays) use `vi.useFakeTimers()` with `fireEvent` rather than `userEvent` — `userEvent` deadlocks with fake timers in this stack.
-- **Mocking the adapter:** Hook tests mock `src/storage/index.js` via `vi.mock()` with `vi.hoisted()` so mock initialization runs before the hoisted mock call.
-- **`data-testid` for game internals:** The game component exposes `data-testid="correct-animal-id"` on a hidden span so tests can assert which answer is correct without coupling to display order.
 
 ---
 
