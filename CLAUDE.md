@@ -35,7 +35,7 @@ See [`docs/TESTING.md`](docs/TESTING.md) for the full testing reference (a11y, E
 
 **Design tokens** (colors, radii) are CSS custom properties in `src/index.css` — use `var(--color-aqua)` etc. rather than hardcoding hex values, so games stay visually consistent with the dashboard.
 
-**Versioning:** app version is read from `package.json` at build time and shown in the dashboard footer; each game's version comes from its own `manifest.json` and is shown in that game's header. Bump both when releasing.
+**Versioning:** app version is read from `package.json` at build time and shown in the dashboard footer; each game's version comes from its own `manifest.json` and is shown in that game's header. Bump both when releasing, and add an entry to `CHANGELOG.md`.
 
 ## Testing notes
 
