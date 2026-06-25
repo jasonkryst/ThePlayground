@@ -1,0 +1,11 @@
+.streak-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px;
+  border-radius: var(--radius-button);
+  background: var(--color-lilac);
+  color: var(--color-text);
+  font-weight: 700;
+  font-size: 16px;
+}
