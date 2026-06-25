@@ -3,6 +3,7 @@
     "scoreLabel": "You scored {{score}} out of {{total}}!",
     "playAgain": "Play Again",
     "home": "Home",
+    "next": "Next →",
     "progress": "Question {{current}} of {{total}}"
   },
   "dashboard": {

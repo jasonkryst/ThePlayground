@@ -192,7 +192,7 @@ export default function AnimalSoundsGame({ onGameEnd }) {
       </div>
 
       {answered && feedbackMode === 'parent-tap' && (
-        <button className="game__next" onClick={advance}>Next →</button>
+        <button className="game__next" onClick={advance}>{t('common.next')}</button>
       )}
     </main>
   )
