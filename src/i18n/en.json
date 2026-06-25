@@ -4,7 +4,10 @@
     "playAgain": "Play Again",
     "home": "Home",
     "next": "Next →",
-    "progress": "Question {{current}} of {{total}}"
+    "progress": "Question {{current}} of {{total}}",
+    "streak": "🔥 {{count}} in a row!",
+    "perfectRun": "Perfect run! 🎉",
+    "missedHeading": "Let's practice these next time:"
   },
   "dashboard": {
     "titleDefault": "Baby's Playground",
