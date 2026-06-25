@@ -8,8 +8,8 @@
   max-width: 480px;
 }
 
-.game__name    { font-size: 15px; font-weight: 700; opacity: 0.55; }
-.game__version { font-size: 12px; opacity: 0.4; font-variant-numeric: tabular-nums; }
+.game__name    { font-size: 15px; font-weight: 700; color: var(--color-text-muted); }
+.game__version { font-size: 12px; color: var(--color-text-muted); font-variant-numeric: tabular-nums; }
 
 .game__question {
   width: 100%;

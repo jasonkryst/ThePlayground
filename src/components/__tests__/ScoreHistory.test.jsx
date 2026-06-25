@@ -1,5 +1,6 @@
 import { render, screen } from '@testing-library/react'
 import { describe, it, expect } from 'vitest'
+import { axe } from 'jest-axe'
 import ScoreHistory from '../ScoreHistory'
 
 const scores = [
@@ -24,5 +25,10 @@ describe('ScoreHistory', () => {
   it('renders empty message when no scores', () => {
     render(<ScoreHistory scores={[]} />)
     expect(screen.getByText(/no scores yet/i)).toBeInTheDocument()
+  })
+
+  it('has no accessibility violations', async () => {
+    const { container } = render(<ScoreHistory scores={scores} />)
+    expect(await axe(container)).toHaveNoViolations()
   })
 })

@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, it, expect } from 'vitest'
+import { axe } from 'jest-axe'
 import GameCard from '../GameCard'
 
 const manifest = {
@@ -44,5 +45,10 @@ describe('GameCard', () => {
   it('does not show best score when bestScore is 0', () => {
     renderCard(0)
     expect(screen.queryByText(/best/i)).not.toBeInTheDocument()
+  })
+
+  it('has no accessibility violations', async () => {
+    const { container } = renderCard()
+    expect(await axe(container)).toHaveNoViolations()
   })
 })
