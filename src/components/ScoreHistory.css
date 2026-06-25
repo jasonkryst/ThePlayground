@@ -13,4 +13,4 @@
 
 .score-history__result { font-weight: 700; }
 .score-history__date   { opacity: 0.6; font-size: 14px; }
-.score-history__empty  { opacity: 0.5; font-style: italic; }
+.score-history__empty  { color: var(--color-text-muted); font-style: italic; }

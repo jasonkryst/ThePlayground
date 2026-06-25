@@ -23,7 +23,7 @@
 .admin__back:focus { outline: none; }
 .admin__back:focus-visible { outline: 3px solid var(--color-lavender); outline-offset: 3px; }
 
-.admin__title { font-size: 28px; font-weight: 800; color: var(--color-lavender); }
+.admin__title { font-size: 28px; font-weight: 800; color: var(--color-lavender-dark); }
 
 .admin__section { margin-bottom: 28px; }
 
@@ -46,7 +46,7 @@
 }
 
 .admin__radio-label.selected {
-  background: var(--color-aqua);
+  background: var(--color-aqua-dark);
   color: white;
 }
 
@@ -55,7 +55,6 @@
   opacity: 0;
   width: 1px;
   height: 1px;
-  pointer-events: none;
 }
 
 .admin__toggle {
@@ -77,7 +76,7 @@
 }
 
 .admin__toggle-btn.active {
-  background: var(--color-teal);
+  background: var(--color-teal-dark);
   color: white;
 }
 
@@ -98,7 +97,7 @@
 
 .admin__hint {
   font-size: 14px;
-  opacity: 0.6;
+  color: var(--color-text-muted);
   margin-bottom: 10px;
 }
 

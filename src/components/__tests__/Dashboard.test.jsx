@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, it, expect, vi } from 'vitest'
+import { axe } from 'jest-axe'
 import Dashboard from '../Dashboard'
 
 vi.mock('../../hooks/useScores', () => ({
@@ -56,5 +57,10 @@ describe('Dashboard', () => {
     mockSettings.childName = 'Mia'
     render(<MemoryRouter><Dashboard manifests={manifests} /></MemoryRouter>)
     expect(screen.getByText("🌊 Mia's Playground")).toBeInTheDocument()
+  })
+
+  it('has no accessibility violations', async () => {
+    const { container } = render(<MemoryRouter><Dashboard manifests={manifests} /></MemoryRouter>)
+    expect(await axe(container)).toHaveNoViolations()
   })
 })

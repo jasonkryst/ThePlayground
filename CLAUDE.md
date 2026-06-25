@@ -9,14 +9,19 @@ The Playground — a browser-based game dashboard for infants/toddlers. React + 
 ## Commands
 
 ```bash
-npm run dev        # dev server (Vite, polling watcher enabled — repo lives on a network share)
-npm run build       # production build → dist/
-npm run lint         # eslint .
-npm test              # vitest, watch mode
-npm run coverage       # vitest run --coverage (single run)
+npm run dev              # dev server (Vite, polling watcher enabled — repo lives on a network share)
+npm run build             # production build → dist/
+npm run lint               # eslint .
+npm test                     # vitest, watch mode
+npm run coverage              # vitest run --coverage (single run)
+npm run e2e                    # playwright test — E2E, page-level a11y, and visual regression
+npm run storybook                # browse component/game stories at localhost:6006
+npm run build-storybook           # production Storybook build check
 ```
 
 Run a single test file: `npx vitest run src/games/animal-sounds/__tests__/AnimalSoundsGame.test.jsx`
+
+See [`docs/TESTING.md`](docs/TESTING.md) for the full testing reference (a11y, E2E, visual regression, i18n string convention).
 
 ## Architecture
 

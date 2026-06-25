@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { axe } from 'jest-axe'
 import AdminPage from '../AdminPage'
 
 const mockSettings = { numChoices: 2, feedbackMode: 'immediate', questionsPerSession: 10, childName: '' }
@@ -66,5 +67,10 @@ describe('AdminPage', () => {
     render(<MemoryRouter><AdminPage /></MemoryRouter>)
     expect(screen.getByText(/score history/i)).toBeInTheDocument()
     expect(screen.getByText('8 / 10')).toBeInTheDocument()
+  })
+
+  it('has no accessibility violations', async () => {
+    const { container } = render(<MemoryRouter><AdminPage /></MemoryRouter>)
+    expect(await axe(container)).toHaveNoViolations()
   })
 })
