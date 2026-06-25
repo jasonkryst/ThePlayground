@@ -134,6 +134,17 @@ describe('localStorageAdapter — data integrity', () => {
       }))
       await expect(localStorageAdapter.getSettings()).resolves.toBeDefined()
     })
+
+    it('defaults animationsEnabled to true when not stored', async () => {
+      const s = await localStorageAdapter.getSettings()
+      expect(s.animationsEnabled).toBe(true)
+    })
+
+    it('preserves a stored false value for animationsEnabled', async () => {
+      localStorage.setItem(SETTINGS_KEY, JSON.stringify({ animationsEnabled: false }))
+      const s = await localStorageAdapter.getSettings()
+      expect(s.animationsEnabled).toBe(false)
+    })
   })
 
   describe('saveSettings', () => {
