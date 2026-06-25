@@ -5,6 +5,7 @@ import useScores from '../../hooks/useScores'
 import animals from './data/animals'
 import { getSoundUrl } from './data/sounds'
 import manifest from './manifest.json'
+import buildQueue from '../../utils/buildQueue'
 import './AnimalSoundsGame.css'
 
 const CHOICE_COLORS = [
@@ -13,24 +14,6 @@ const CHOICE_COLORS = [
   'var(--color-aqua-dark)',
   'var(--color-lilac-dark)',
 ]
-
-function shuffle(arr) {
-  const a = [...arr]
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]]
-  }
-  return a
-}
-
-function buildQueue(numChoices, questionsPerSession) {
-  const shuffled = shuffle(animals)
-  const count = Math.min(questionsPerSession, animals.length)
-  return shuffled.slice(0, count).map(correct => {
-    const wrong = shuffle(animals.filter(a => a.id !== correct.id)).slice(0, numChoices - 1)
-    return { correct, choices: shuffle([correct, ...wrong]) }
-  })
-}
 
 export default function AnimalSoundsGame({ onGameEnd }) {
   const { t } = useTranslation()
@@ -54,7 +37,7 @@ export default function AnimalSoundsGame({ onGameEnd }) {
 
   useEffect(() => {
     if (numChoices && questionsPerSession) {
-      const q = buildQueue(numChoices, questionsPerSession)
+      const q = buildQueue(animals, numChoices, questionsPerSession)
       queueRef.current = q
       setQueue(q)
     }
@@ -123,7 +106,7 @@ export default function AnimalSoundsGame({ onGameEnd }) {
   function restart() {
     scoreRef.current = 0
     indexRef.current = 0
-    const q = buildQueue(numChoices, questionsPerSession)
+    const q = buildQueue(animals, numChoices, questionsPerSession)
     queueRef.current = q
     setQueue(q)
     setIndex(0)

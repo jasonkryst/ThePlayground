@@ -4,27 +4,10 @@ import useSettings from '../../hooks/useSettings'
 import useScores from '../../hooks/useScores'
 import colors from './data/colors'
 import manifest from './manifest.json'
+import buildQueue from '../../utils/buildQueue'
 import './ColorMatchGame.css'
 
 const BORDERED_IDS = new Set(['white', 'gray'])
-
-function shuffle(arr) {
-  const a = [...arr]
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]]
-  }
-  return a
-}
-
-function buildQueue(numChoices, questionsPerSession) {
-  const shuffled = shuffle(colors)
-  const count = Math.min(questionsPerSession, colors.length)
-  return shuffled.slice(0, count).map(correct => {
-    const wrong = shuffle(colors.filter(c => c.id !== correct.id)).slice(0, numChoices - 1)
-    return { correct, choices: shuffle([correct, ...wrong]) }
-  })
-}
 
 export default function ColorMatchGame({ onGameEnd }) {
   const { t } = useTranslation()
@@ -47,7 +30,7 @@ export default function ColorMatchGame({ onGameEnd }) {
 
   useEffect(() => {
     if (numChoices && questionsPerSession) {
-      const q = buildQueue(numChoices, questionsPerSession)
+      const q = buildQueue(colors, numChoices, questionsPerSession)
       queueRef.current = q
       setQueue(q)
     }
@@ -98,7 +81,7 @@ export default function ColorMatchGame({ onGameEnd }) {
   function restart() {
     scoreRef.current = 0
     indexRef.current = 0
-    const q = buildQueue(numChoices, questionsPerSession)
+    const q = buildQueue(colors, numChoices, questionsPerSession)
     queueRef.current = q
     setQueue(q)
     setIndex(0)
