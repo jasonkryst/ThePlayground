@@ -5,7 +5,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { axe } from 'jest-axe'
 import AdminPage from '../AdminPage'
 
-const mockSettings = { numChoices: 2, feedbackMode: 'immediate', questionsPerSession: 10, childName: '' }
+const mockSettings = { numChoices: 2, feedbackMode: 'immediate', questionsPerSession: 10, childName: '', animationsEnabled: true }
 const mockUpdateSetting = vi.fn()
 const mockResetSettings = vi.fn()
 
@@ -67,6 +67,13 @@ describe('AdminPage', () => {
     render(<MemoryRouter><AdminPage /></MemoryRouter>)
     expect(screen.getByText(/score history/i)).toBeInTheDocument()
     expect(screen.getByText('8 / 10')).toBeInTheDocument()
+  })
+
+  it('renders the animations toggle and calls updateSetting when clicked', async () => {
+    render(<MemoryRouter><AdminPage /></MemoryRouter>)
+    expect(screen.getByText(/celebration animations/i)).toBeInTheDocument()
+    await userEvent.click(screen.getByRole('button', { name: /off/i }))
+    expect(mockUpdateSetting).toHaveBeenCalledWith('animationsEnabled', false)
   })
 
   it('has no accessibility violations', async () => {

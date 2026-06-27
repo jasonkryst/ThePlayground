@@ -72,6 +72,24 @@ export default function AdminPage() {
         </div>
 
         <div className="admin__section">
+          <h2>{t('admin.animationsHeading')}</h2>
+          <div className="admin__toggle">
+            <button
+              className={`admin__toggle-btn${settings.animationsEnabled ? ' active' : ''}`}
+              onClick={() => updateSetting('animationsEnabled', true)}
+            >
+              {t('admin.animationsOn')}
+            </button>
+            <button
+              className={`admin__toggle-btn${!settings.animationsEnabled ? ' active' : ''}`}
+              onClick={() => updateSetting('animationsEnabled', false)}
+            >
+              {t('admin.animationsOff')}
+            </button>
+          </div>
+        </div>
+
+        <div className="admin__section">
           <h2>{t('admin.questionsPerSessionHeading')}</h2>
           <div className="admin__radios">
             {[5, 10, 15, 20].map(n => (
