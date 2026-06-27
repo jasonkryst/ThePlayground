@@ -135,4 +135,88 @@ describe('useGameSession', () => {
     expect(result.current.done).toBe(false)
     expect(result.current.index).toBe(0)
   })
+
+  it('records a timing entry for a correct answer', async () => {
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.current).toBeDefined())
+
+    const correctItem = result.current.current.correct
+    await act(async () => { result.current.handleChoice(correctItem) })
+
+    expect(result.current.timings).toHaveLength(1)
+    expect(result.current.timings[0].questionIndex).toBe(0)
+    expect(result.current.timings[0].correct).toBe(true)
+    expect(result.current.timings[0].durationMs).toBeGreaterThanOrEqual(0)
+  })
+
+  it('records a timing entry for a wrong answer', async () => {
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.current).toBeDefined())
+
+    const correctItem = result.current.current.correct
+    const wrongItem = result.current.current.choices.find(c => c.id !== correctItem.id)
+    await act(async () => { result.current.handleChoice(wrongItem) })
+
+    expect(result.current.timings).toHaveLength(1)
+    expect(result.current.timings[0].correct).toBe(false)
+  })
+
+  it('clears timings on restart', async () => {
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.current).toBeDefined())
+
+    await act(async () => { result.current.handleChoice(result.current.current.correct) })
+    expect(result.current.timings).toHaveLength(1)
+
+    await act(async () => { result.current.restart() })
+    expect(result.current.timings).toHaveLength(0)
+  })
+
+  it('includes timings in the addScore call on finishGame', async () => {
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.current).toBeDefined())
+
+    for (let i = 0; i < 3; i++) {
+      await act(async () => { result.current.handleChoice(result.current.current.correct) })
+      await act(async () => { result.current.advance() })
+    }
+
+    expect(mockAddScore).toHaveBeenCalledWith(
+      expect.objectContaining({
+        gameId: 'test-game',
+        timings: expect.arrayContaining([
+          expect.objectContaining({ questionIndex: expect.any(Number), correct: expect.any(Boolean), durationMs: expect.any(Number) })
+        ])
+      })
+    )
+  })
+
+  it('calls onTimeout after timeLimitMs ms if not yet answered', () => {
+    vi.useFakeTimers()
+    const onTimeout = vi.fn()
+    const { result } = renderHook(() =>
+      useGameSession({ gameId: 'test-game', items, timeLimitMs: 5000, onTimeout })
+    )
+    act(() => {})
+    expect(result.current.current).toBeDefined()
+
+    act(() => { vi.advanceTimersByTime(5001) })
+    expect(onTimeout).toHaveBeenCalledTimes(1)
+    vi.useRealTimers()
+  })
+
+  it('does not call onTimeout if the question was already answered', () => {
+    vi.useFakeTimers()
+    const onTimeout = vi.fn()
+    const { result } = renderHook(() =>
+      useGameSession({ gameId: 'test-game', items, timeLimitMs: 5000, onTimeout })
+    )
+    act(() => {})
+    expect(result.current.current).toBeDefined()
+
+    act(() => { result.current.handleChoice(result.current.current.correct) })
+    act(() => { vi.advanceTimersByTime(5001) })
+    expect(onTimeout).not.toHaveBeenCalled()
+    vi.useRealTimers()
+  })
 })
