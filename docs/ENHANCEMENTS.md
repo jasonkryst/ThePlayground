@@ -22,11 +22,8 @@ Ideas for future development. Not committed to any timeline.
 
 ## Gameplay & UX
 
-- **Celebration animations** — confetti or star burst on a correct answer (CSS keyframes or a lightweight lib like `canvas-confetti`)
-- **Streak tracking** — highlight current correct-answer streak in the game header
 - **Hint system** — after two wrong taps on the same question, highlight the correct answer
 - **Sound replay on wrong answer** — auto-replay the sound when the child picks incorrectly
-- **Session summary screen** — richer end-of-game recap showing which animals were missed
 - **Parental lock on settings** — require a simple PIN or gesture to open the admin page
 
 ---
