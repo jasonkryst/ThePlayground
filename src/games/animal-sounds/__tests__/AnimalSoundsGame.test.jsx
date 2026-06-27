@@ -9,6 +9,8 @@ window.HTMLMediaElement.prototype.play  = vi.fn().mockResolvedValue(undefined)
 window.HTMLMediaElement.prototype.pause = vi.fn()
 window.HTMLMediaElement.prototype.load  = vi.fn()
 
+vi.mock('../../../lib/confetti', () => ({ fireConfetti: vi.fn() }))
+
 vi.mock('../../../hooks/useSettings', () => ({
   default: () => ({
     settings: { numChoices: 2, feedbackMode: 'immediate', questionsPerSession: 3 },
@@ -17,6 +19,10 @@ vi.mock('../../../hooks/useSettings', () => ({
 
 vi.mock('../../../hooks/useScores', () => ({
   default: () => ({ addScore: vi.fn().mockResolvedValue(undefined), scores: [], getBestScore: () => 0, getScoresByGame: () => [], getAllScores: () => [] }),
+}))
+
+vi.mock('../../../hooks/useBestStreak', () => ({
+  default: () => ({ bestStreak: 0, recordStreak: vi.fn().mockResolvedValue(undefined) }),
 }))
 
 const onGameEnd = vi.fn()
@@ -85,5 +91,39 @@ describe('AnimalSoundsGame', () => {
     let container
     await act(async () => { container = render(<AnimalSoundsGame onGameEnd={onGameEnd} />).container })
     expect(await axe(container)).toHaveNoViolations()
+  })
+
+  it('shows the streak badge after 2 correct answers in a row', async () => {
+    vi.useFakeTimers()
+    await act(async () => { render(<AnimalSoundsGame onGameEnd={onGameEnd} />) })
+
+    for (let i = 0; i < 2; i++) {
+      const buttons = screen.getAllByRole('button').filter(b => b.dataset.animalId)
+      const correctId = screen.getByTestId('correct-animal-id').textContent
+      const correctBtn = buttons.find(b => b.dataset.animalId === correctId)
+      act(() => { fireEvent.click(correctBtn) })
+      act(() => { vi.advanceTimersByTime(1600) })
+      await act(async () => {})
+    }
+
+    vi.useRealTimers()
+    expect(screen.getByText(/2/)).toBeInTheDocument()
+  })
+
+  it('shows missed animals in the results screen when an answer is wrong', async () => {
+    vi.useFakeTimers()
+    await act(async () => { render(<AnimalSoundsGame onGameEnd={onGameEnd} />) })
+
+    for (let i = 0; i < 3; i++) {
+      const buttons = screen.getAllByRole('button').filter(b => b.dataset.animalId)
+      const correctId = screen.getByTestId('correct-animal-id').textContent
+      const wrongBtn = buttons.find(b => b.dataset.animalId !== correctId)
+      act(() => { fireEvent.click(wrongBtn) })
+      act(() => { vi.advanceTimersByTime(1600) })
+      await act(async () => {})
+    }
+
+    vi.useRealTimers()
+    expect(screen.getByText(/let's practice/i)).toBeInTheDocument()
   })
 })

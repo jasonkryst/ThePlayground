@@ -1,11 +1,11 @@
-import { useState, useEffect, useRef } from 'react'
+import { useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import useSettings from '../../hooks/useSettings'
-import useScores from '../../hooks/useScores'
+import useGameSession from '../../hooks/useGameSession'
+import StreakBadge from '../../components/StreakBadge'
+import GameResults from '../../components/GameResults'
 import animals from './data/animals'
 import { getSoundUrl } from './data/sounds'
 import manifest from './manifest.json'
-import buildQueue from '../../utils/buildQueue'
 import './AnimalSoundsGame.css'
 
 const CHOICE_COLORS = [
@@ -17,38 +17,12 @@ const CHOICE_COLORS = [
 
 export default function AnimalSoundsGame({ onGameEnd }) {
   const { t } = useTranslation()
-  const { settings } = useSettings()
-  const { addScore }  = useScores()
+  const {
+    current, index, total, answered, selected, score, streak, missed, done,
+    feedbackMode, handleChoice, advance, restart,
+  } = useGameSession({ gameId: 'animal-sounds', items: animals })
 
-  const [queue,    setQueue]    = useState([])
-  const [index,    setIndex]    = useState(0)
-  const [answered, setAnswered] = useState(false)
-  const [selected, setSelected] = useState(null)
-  const [score,    setScore]    = useState(0)
-  const [done,     setDone]     = useState(false)
-
-  // Refs avoid stale closures in setTimeout callbacks
-  const audioRef   = useRef(null)
-  const scoreRef   = useRef(0)
-  const indexRef   = useRef(0)
-  const queueRef   = useRef([])
-
-  const { numChoices, feedbackMode, questionsPerSession } = settings
-
-  useEffect(() => {
-    if (numChoices && questionsPerSession) {
-      const q = buildQueue(animals, numChoices, questionsPerSession)
-      queueRef.current = q
-      setQueue(q)
-    }
-  }, [numChoices, questionsPerSession])
-
-  const current = queue[index]
-
-  useEffect(() => {
-    if (!current) return
-    playSound()
-  }, [index, queue])
+  const audioRef = useRef(null)
 
   function playSound() {
     if (!current) return
@@ -63,71 +37,25 @@ export default function AnimalSoundsGame({ onGameEnd }) {
     audio.play().catch(() => {})
   }
 
-  function handleChoice(animal) {
-    if (answered) return
-    setAnswered(true)
-    setSelected(animal.id)
-
-    const isCorrect = animal.id === current.correct.id
-    if (isCorrect) {
-      scoreRef.current += 1
-      setScore(scoreRef.current)
-    }
-
-    if (feedbackMode === 'immediate') {
-      setTimeout(advance, 1500)
-    }
-  }
-
-  function advance() {
-    const nextIndex = indexRef.current + 1
-    if (nextIndex >= queueRef.current.length) {
-      finishGame()
-    } else {
-      indexRef.current = nextIndex
-      setIndex(nextIndex)
-      setAnswered(false)
-      setSelected(null)
-    }
-  }
-
-  async function finishGame() {
-    const result = {
-      gameId: 'animal-sounds',
-      score: scoreRef.current,
-      total: queueRef.current.length,
-      date: new Date().toISOString().split('T')[0],
-      timestamp: Date.now(),
-    }
-    await addScore(result)
-    setDone(true)
-  }
-
-  function restart() {
-    scoreRef.current = 0
-    indexRef.current = 0
-    const q = buildQueue(animals, numChoices, questionsPerSession)
-    queueRef.current = q
-    setQueue(q)
-    setIndex(0)
-    setAnswered(false)
-    setSelected(null)
-    setScore(0)
-    setDone(false)
-  }
+  useEffect(() => {
+    if (!current) return
+    playSound()
+  }, [index, current])
 
   if (done) {
-    const total = queueRef.current.length
     return (
-      <div className="results">
-        <div className="results__emoji">{scoreRef.current === total ? '🎉' : '⭐'}</div>
-        <div className="results__score">{scoreRef.current} / {total}</div>
-        <div className="results__label">{t('common.scoreLabel', { score: scoreRef.current, total })}</div>
-        <div className="results__actions">
-          <button className="results__btn results__btn--play" onClick={restart}>{t('common.playAgain')}</button>
-          <button className="results__btn results__btn--home" onClick={() => onGameEnd(scoreRef.current, total)}>{t('common.home')}</button>
-        </div>
-      </div>
+      <GameResults
+        score={score}
+        total={total}
+        missed={missed}
+        onPlayAgain={restart}
+        onHome={() => onGameEnd(score, total)}
+        renderMissedItem={animal => (
+          <>
+            <span aria-hidden="true">{animal.emoji}</span> {t(animal.nameKey)}
+          </>
+        )}
+      />
     )
   }
 
@@ -140,11 +68,12 @@ export default function AnimalSoundsGame({ onGameEnd }) {
 
       <div className="game__header">
         <h1 className="game__name">{manifest.name}</h1>
+        <StreakBadge streak={streak} />
         <span className="game__version">v{manifest.version}</span>
       </div>
 
       <div className="game__question">
-        <div className="game__progress">{t('common.progress', { current: index + 1, total: queue.length })}</div>
+        <div className="game__progress">{t('common.progress', { current: index + 1, total })}</div>
         <div className="game__prompt">{t('animalSounds.prompt')}</div>
         <button className="game__replay" aria-label={t('animalSounds.replay')} onClick={playSound}>🔊</button>
       </div>
