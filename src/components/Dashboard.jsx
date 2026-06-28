@@ -1,8 +1,12 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import GameCard from './GameCard'
 import useScores from '../hooks/useScores'
 import useSettings from '../hooks/useSettings'
+import useRecentlyPlayed from '../hooks/useRecentlyPlayed'
+import useFeaturedGame from '../hooks/useFeaturedGame'
+import useGameTags from '../hooks/useGameTags'
 import { version } from '../../package.json'
 import './Dashboard.css'
 
@@ -10,6 +14,10 @@ export default function Dashboard({ manifests = [] }) {
   const { t } = useTranslation()
   const { getBestScore } = useScores()
   const { settings } = useSettings()
+  const recentlyPlayed = useRecentlyPlayed()
+  const featured = useFeaturedGame(manifests)
+  const { tagMap, allTags } = useGameTags(manifests)
+  const [activeTag, setActiveTag] = useState('all')
 
   const name = settings.childName?.trim()
   const title = name ? t('dashboard.titleNamed', { name }) : t('dashboard.titleDefault')
@@ -30,7 +38,12 @@ export default function Dashboard({ manifests = [] }) {
         ) : (
           <div className="dashboard__grid">
             {manifests.map(m => (
-              <GameCard key={m.id} manifest={m} bestScore={getBestScore(m.id)} />
+              <GameCard
+                key={m.id}
+                manifest={m}
+                bestScore={getBestScore(m.id)}
+                recentInfo={recentlyPlayed.get(m.id) ?? null}
+              />
             ))}
           </div>
         )}
