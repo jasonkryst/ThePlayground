@@ -15,7 +15,8 @@ export const DEFAULT_SETTINGS = {
  * getSettings()            → Promise<Settings>
  * saveSettings(settings)   → Promise<void>
  *
- * Score shape:   { gameId, score, total, date, timestamp }
+ * Score shape:   { gameId, score, total, date, timestamp, timings? }
+ *   timings?: Array<{ questionIndex: number, correct: boolean, durationMs: number }>
  * Settings shape: { numChoices, feedbackMode, questionsPerSession, gaId, childName, animationsEnabled }
  *
  * Best-streak adapter methods (added for per-game streak tracking):

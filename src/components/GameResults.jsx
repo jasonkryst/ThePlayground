@@ -5,7 +5,7 @@ export default function GameResults({ score, total, missed, onPlayAgain, onHome,
   const { t } = useTranslation()
   return (
     <div className="results">
-      <div className="results__emoji">{score === total ? '🎉' : '⭐'}</div>
+      <div className="results__emoji">{missed.length === 0 ? '🎉' : '⭐'}</div>
       <div className="results__score">{score} / {total}</div>
       <div className="results__label">{t('common.scoreLabel', { score, total })}</div>
 

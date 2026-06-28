@@ -24,15 +24,20 @@ export default function useGameSession({ gameId, items, timeLimitMs, onTimeout }
   const [timings,           setTimings]           = useState([])
 
   // Refs avoid stale closures in setTimeout/setInterval callbacks
-  const scoreRef    = useRef(0)
-  const streakRef   = useRef(0)
-  const missedRef   = useRef([])
-  const indexRef    = useRef(0)
-  const queueRef    = useRef([])
-  const timingsRef  = useRef([])
-  const answeredRef = useRef(false)
+  const scoreRef        = useRef(0)
+  const streakRef       = useRef(0)
+  const missedRef       = useRef([])
+  const indexRef        = useRef(0)
+  const queueRef        = useRef([])
+  const timingsRef      = useRef([])
+  const answeredRef     = useRef(false)
   const questionStartRef = useRef(Date.now())
+  // Keep onTimeout in a ref so the timer effect doesn't need it as a dep;
+  // an inline function passed by the caller would otherwise reset the timer on every render.
+  const onTimeoutRef    = useRef(onTimeout)
+  useEffect(() => { onTimeoutRef.current = onTimeout })
 
+  // items must be a stable reference (module-level constant); an inline array would rebuild the queue every render.
   useEffect(() => {
     if (numChoices && questionsPerSession) {
       const q = buildQueue(items, numChoices, questionsPerSession)
@@ -57,7 +62,7 @@ export default function useGameSession({ gameId, items, timeLimitMs, onTimeout }
 
     const timeoutId = timeLimitMs
       ? setTimeout(() => {
-          if (!answeredRef.current) onTimeout?.()
+          if (!answeredRef.current) onTimeoutRef.current?.()
         }, timeLimitMs)
       : null
 
@@ -65,7 +70,7 @@ export default function useGameSession({ gameId, items, timeLimitMs, onTimeout }
       if (intervalId) clearInterval(intervalId)
       if (timeoutId)  clearTimeout(timeoutId)
     }
-  }, [index, queue, timeLimitMs, onTimeout])
+  }, [index, queue, timeLimitMs])
 
   const current = queue[index]
 
