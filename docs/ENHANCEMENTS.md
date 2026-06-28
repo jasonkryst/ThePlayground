@@ -35,6 +35,7 @@ Ideas for future development. Not committed to any timeline.
 ## Games
 
 ### New Game Types
+- **Animal Memory Match** — 10 face-down tiles (5 animal pairs); child flips two at a time. Matching pair: brief confetti burst and tiles stay revealed. Non-matching pair: tiles highlight red then flip back over. Reveal all 5 pairs: full fireworks animation.
 - **Shape Sort** — present a shape name/picture, child picks the correct shape
 - **Number Tap** — display a number (1–5), child taps that many objects on screen; builds early counting
 - **Alphabet Sounds** — play a letter sound (phonics), child picks the correct letter card
