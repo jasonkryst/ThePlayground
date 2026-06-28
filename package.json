@@ -1,7 +1,7 @@
 {
   "name": "the-playground",
   "private": true,
-  "version": "0.3.0",
+  "version": "0.4.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -20,7 +20,8 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-i18next": "^17.0.8",
-    "react-router-dom": "^7.6.2"
+    "react-router-dom": "^7.6.2",
+    "recharts": "^3.9.0"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.12.1",

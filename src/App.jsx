@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route, useParams, useNavigate, useLocation } fro
 import { Suspense, lazy, useEffect } from 'react'
 import Dashboard from './components/Dashboard'
 import AdminPage from './admin/AdminPage'
+import ParentDashboard from './parent/ParentDashboard'
 import useSettings from './hooks/useSettings'
 
 const manifestModules = import.meta.glob('./games/*/manifest.json', { eager: true })
@@ -70,6 +71,7 @@ export default function App() {
       <Routes>
         <Route path="/"             element={<Dashboard manifests={manifests} />} />
         <Route path="/admin"        element={<AdminPage />} />
+        <Route path="/parent"       element={<ParentDashboard />} />
         <Route path="/game/:gameId" element={<GameRoute />} />
       </Routes>
     </BrowserRouter>

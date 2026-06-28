@@ -3,6 +3,23 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.4.0] - 2026-06-28
+
+### Added
+- **Parent Progress Dashboard** at `/parent` — accessible via the 📊 button on the main dashboard.
+  - Score trend chart (accuracy % per game over time, powered by Recharts).
+  - Response-time chart (average ms per answer per game over time).
+  - Streak history table (last 7 days / last 30 days / all-time best per game).
+  - Play calendar heatmap (13-week GitHub-style grid showing daily question counts).
+  - Missed-items breakdown (horizontal bar chart of most-missed animals/colors per game).
+  - Export to CSV button (downloads full score history for spreadsheets or clinician sharing).
+- `peakStreak` field saved with each score record — highest consecutive-correct run in that session.
+- `itemId` field added to each timing entry — required for the missed-items breakdown; older records are unaffected.
+
+### Changed
+- Dashboard header now shows two icon links (📊 Progress, ⚙️ Settings) in a `dashboard__nav` group.
+- `recharts` added as a runtime dependency.
+
 ## [0.3.0] - 2026-06-24
 
 ### Added

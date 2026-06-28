@@ -1,0 +1,206 @@
+import { render, screen, fireEvent } from '@testing-library/react'
+import { MemoryRouter } from 'react-router-dom'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { axe } from 'jest-axe'
+import ParentDashboard from '../ParentDashboard'
+
+// Recharts uses ResizeObserver and SVG APIs not available in jsdom.
+// Replace with minimal stubs so component tests stay fast and deterministic.
+vi.mock('recharts', () => ({
+  ResponsiveContainer: ({ children }) => <div data-testid="chart-container">{children}</div>,
+  LineChart:           ({ children }) => <div>{children}</div>,
+  Line:                () => null,
+  CartesianGrid:       () => null,
+  XAxis:               () => null,
+  YAxis:               () => null,
+  Tooltip:             () => null,
+  Legend:              () => null,
+}))
+
+// ─── Storage mocks ───────────────────────────────────────────────────────────
+
+const NOW = Date.now()
+const DAY = 86_400_000
+
+const mockGetBestStreaks = vi.fn().mockResolvedValue({ 'animal-sounds': 5 })
+
+vi.mock('../../storage/index', () => ({
+  default: {
+    getScores:     vi.fn().mockResolvedValue([]),
+    getSettings:   vi.fn().mockResolvedValue({}),
+    getBestStreaks: () => mockGetBestStreaks(),
+  },
+}))
+
+const mockGetAllScores = vi.fn()
+
+vi.mock('../../hooks/useScores', () => ({
+  default: () => ({ getAllScores: mockGetAllScores }),
+}))
+
+vi.mock('../../hooks/useSettings', () => ({
+  default: () => ({ settings: { childName: '' } }),
+}))
+
+// ─── Fixtures ────────────────────────────────────────────────────────────────
+
+function makeScore(overrides = {}) {
+  return {
+    gameId:     'animal-sounds',
+    score:      8,
+    total:      10,
+    date:       new Date(NOW - DAY).toISOString().split('T')[0],
+    timestamp:  NOW - DAY,
+    peakStreak: 4,
+    timings: [
+      { questionIndex: 0, itemId: 'cat',  correct: false, durationMs: 1500 },
+      { questionIndex: 1, itemId: 'dog',  correct: true,  durationMs: 1000 },
+    ],
+    ...overrides,
+  }
+}
+
+function renderDashboard() {
+  return render(<MemoryRouter><ParentDashboard /></MemoryRouter>)
+}
+
+beforeEach(() => {
+  vi.clearAllMocks()
+  mockGetBestStreaks.mockResolvedValue({ 'animal-sounds': 5 })
+})
+
+afterEach(() => { vi.restoreAllMocks() })
+
+// ─── Empty state ─────────────────────────────────────────────────────────────
+
+describe('ParentDashboard — empty state', () => {
+  beforeEach(() => { mockGetAllScores.mockReturnValue([]) })
+
+  it('renders the page title', () => {
+    renderDashboard()
+    expect(screen.getByRole('heading', { name: /progress dashboard/i })).toBeInTheDocument()
+  })
+
+  it('shows an empty-state message when no scores exist', () => {
+    renderDashboard()
+    expect(screen.getByText(/no sessions recorded yet/i)).toBeInTheDocument()
+  })
+
+  it('does not render chart sections in empty state', () => {
+    renderDashboard()
+    expect(screen.queryByText(/score trend/i)).not.toBeInTheDocument()
+  })
+
+  it('renders a back link pointing to /', () => {
+    renderDashboard()
+    const back = screen.getByRole('link', { name: /back to dashboard/i })
+    expect(back).toHaveAttribute('href', '/')
+  })
+
+  it('renders the Export CSV button', () => {
+    renderDashboard()
+    expect(screen.getByRole('button', { name: /export csv/i })).toBeInTheDocument()
+  })
+
+  it('has no accessibility violations', async () => {
+    const { container } = renderDashboard()
+    expect(await axe(container)).toHaveNoViolations()
+  })
+})
+
+// ─── Loaded state ────────────────────────────────────────────────────────────
+
+describe('ParentDashboard — with scores', () => {
+  beforeEach(() => {
+    mockGetAllScores.mockReturnValue([makeScore(), makeScore({ date: new Date(NOW - 2 * DAY).toISOString().split('T')[0], timestamp: NOW - 2 * DAY })])
+  })
+
+  it('renders all five section headings', () => {
+    renderDashboard()
+    expect(screen.getByText(/score trend/i)).toBeInTheDocument()
+    expect(screen.getByText(/response time/i)).toBeInTheDocument()
+    expect(screen.getByText(/streak history/i)).toBeInTheDocument()
+    expect(screen.getByText(/play calendar/i)).toBeInTheDocument()
+    expect(screen.getByText(/missed items/i)).toBeInTheDocument()
+  })
+
+  it('renders the streak history table with correct headers', () => {
+    renderDashboard()
+    expect(screen.getByText(/last 7 days/i)).toBeInTheDocument()
+    expect(screen.getByText(/last 30 days/i)).toBeInTheDocument()
+    expect(screen.getByText(/all-time best/i)).toBeInTheDocument()
+  })
+
+  it('renders chart containers', () => {
+    renderDashboard()
+    const charts = screen.getAllByTestId('chart-container')
+    expect(charts.length).toBeGreaterThanOrEqual(2) // score trend + response time
+  })
+
+  it('renders the heatmap play calendar', () => {
+    renderDashboard()
+    expect(screen.getByRole('img', { name: /play activity calendar/i })).toBeInTheDocument()
+  })
+
+  it('renders the missed items panel with cat as top miss', () => {
+    renderDashboard()
+    // cat was missed in both sessions in makeScore()
+    expect(screen.getAllByText(/cat/i).length).toBeGreaterThan(0)
+  })
+
+  it('has no accessibility violations', async () => {
+    const { container } = renderDashboard()
+    expect(await axe(container)).toHaveNoViolations()
+  })
+})
+
+// ─── Export CSV ──────────────────────────────────────────────────────────────
+
+describe('ParentDashboard — CSV export', () => {
+  it('triggers a download when Export CSV is clicked', () => {
+    mockGetAllScores.mockReturnValue([makeScore()])
+    URL.createObjectURL = vi.fn().mockReturnValue('blob:mock')
+    URL.revokeObjectURL = vi.fn()
+
+    // Render first — spy on createElement afterwards so React's DOM init is unaffected
+    renderDashboard()
+
+    const clickSpy            = vi.fn()
+    const originalCreateEl    = document.createElement.bind(document)
+    vi.spyOn(document, 'createElement').mockImplementation((tag) => {
+      if (tag === 'a') return { click: clickSpy, href: '', download: '' }
+      return originalCreateEl(tag)
+    })
+
+    fireEvent.click(screen.getByRole('button', { name: /export csv/i }))
+    expect(clickSpy).toHaveBeenCalledTimes(1)
+  })
+
+  it('does not throw when no scores exist and Export CSV is clicked', () => {
+    mockGetAllScores.mockReturnValue([])
+    URL.createObjectURL = vi.fn().mockReturnValue('blob:mock')
+    URL.revokeObjectURL = vi.fn()
+
+    renderDashboard()
+
+    const originalCreateEl = document.createElement.bind(document)
+    vi.spyOn(document, 'createElement').mockImplementation((tag) => {
+      if (tag === 'a') return { click: vi.fn(), href: '', download: '' }
+      return originalCreateEl(tag)
+    })
+
+    expect(() => fireEvent.click(screen.getByRole('button', { name: /export csv/i }))).not.toThrow()
+  })
+})
+
+// ─── Insufficient data ───────────────────────────────────────────────────────
+
+describe('ParentDashboard — insufficient data for charts', () => {
+  it('shows "not enough data" hints when only one session exists', () => {
+    mockGetAllScores.mockReturnValue([makeScore()])
+    renderDashboard()
+    const hints = screen.getAllByText(/not enough data/i)
+    // Score trend and response time both need >= 2 data points to render a chart
+    expect(hints.length).toBeGreaterThanOrEqual(2)
+  })
+})
