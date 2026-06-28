@@ -1,0 +1,214 @@
+.parent { min-height: 100vh; padding: 24px 16px; max-width: 800px; margin: 0 auto; }
+
+.parent__header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+}
+
+.parent__back {
+  font-size: 24px;
+  text-decoration: none;
+  min-width: 64px;
+  min-height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-button);
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+.parent__back:hover          { background: rgba(0,0,0,0.06); }
+.parent__back:focus          { outline: none; }
+.parent__back:focus-visible  { outline: 3px solid var(--color-lavender); outline-offset: 3px; }
+
+.parent__title {
+  flex: 1;
+  font-size: 26px;
+  font-weight: 800;
+  color: var(--color-lavender-dark);
+  margin: 0;
+}
+
+.parent__export-btn {
+  padding: 10px 20px;
+  font-size: 15px;
+  font-weight: 700;
+  background: var(--color-aqua-dark);
+  color: #fff;
+  border-radius: var(--radius-button);
+  border: none;
+  min-height: 48px;
+  min-width: auto;
+  transition: opacity 0.15s;
+}
+.parent__export-btn:hover { opacity: 0.85; }
+
+.parent__empty {
+  text-align: center;
+  font-size: 18px;
+  color: var(--color-text-muted);
+  margin-top: 64px;
+}
+
+.parent__section {
+  background: var(--color-surface);
+  border-radius: var(--radius-card);
+  padding: 20px 20px 24px;
+  margin-bottom: 24px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+
+.parent__section h2 {
+  font-size: 18px;
+  font-weight: 800;
+  margin-bottom: 6px;
+  color: var(--color-lavender-dark);
+}
+
+.parent__hint {
+  font-size: 13px;
+  color: var(--color-text-muted);
+  margin-bottom: 16px;
+}
+
+.parent__empty-chart {
+  font-size: 14px;
+  color: var(--color-text-muted);
+  text-align: center;
+  padding: 24px 0;
+  font-style: italic;
+}
+
+/* ── Streak table ── */
+.parent__streak-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 15px;
+}
+.parent__streak-table th,
+.parent__streak-table td {
+  padding: 10px 14px;
+  text-align: center;
+  border-bottom: 1px solid rgba(0,0,0,0.07);
+}
+.parent__streak-table th {
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.parent__streak-table td:first-child { text-align: left; }
+
+/* ── Heatmap ── */
+.heatmap { user-select: none; }
+
+.heatmap__inner {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+}
+
+.heatmap__scroll { overflow-x: auto; flex: 1; min-width: 0; padding-bottom: 4px; }
+
+.heatmap__days {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex-shrink: 0;
+}
+.heatmap__day-label {
+  width: 14px;
+  height: 14px;
+  font-size: 10px;
+  color: var(--color-text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+
+.heatmap__grid {
+  display: grid;
+  grid-template-rows: repeat(7, 14px);
+  grid-auto-columns: 14px;
+  grid-auto-flow: column;
+  gap: 2px;
+  width: max-content;
+}
+
+.heatmap__cell {
+  width: 14px;
+  height: 14px;
+  border-radius: 3px;
+}
+.heatmap__cell--0 { background: #e8f4f6; }
+.heatmap__cell--1 { background: #80cbc4; }
+.heatmap__cell--2 { background: #26a69a; }
+.heatmap__cell--3 { background: #006C7A; }
+
+.heatmap__legend {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--color-text-muted);
+}
+.heatmap__legend .heatmap__cell { flex-shrink: 0; }
+
+/* ── Missed items ── */
+.parent__missed-game { margin-bottom: 20px; }
+.parent__missed-game:last-child { margin-bottom: 0; }
+
+.parent__missed-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 10px;
+}
+
+.parent__missed-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.parent__missed-item {
+  display: grid;
+  grid-template-columns: 90px 1fr 36px;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+}
+
+.parent__missed-label { font-weight: 600; }
+
+.parent__missed-bar-wrap {
+  background: #e8f4f6;
+  border-radius: 4px;
+  height: 10px;
+  overflow: hidden;
+}
+
+.parent__missed-bar {
+  height: 100%;
+  background: var(--color-aqua-dark);
+  border-radius: 4px;
+  min-width: 4px;
+  transition: width 0.3s;
+}
+
+.parent__missed-count {
+  text-align: right;
+  color: var(--color-text-muted);
+  font-variant-numeric: tabular-nums;
+}

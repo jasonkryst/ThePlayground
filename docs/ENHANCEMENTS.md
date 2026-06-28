@@ -6,6 +6,16 @@ Ideas for future development. Not committed to any timeline.
 
 ## Recently Completed
 
+### v0.4.0 — Parent Progress Dashboard (2026-06-28)
+- **`/parent` route** — standalone progress dashboard linked via 📊 button on the main dashboard
+- **Score trend chart** — Recharts LineChart of correct-answer rates per game over time
+- **Response-time chart** — average `durationMs` per question per game plotted over time
+- **Streak history table** — peak streaks per game for the last 7 days, 30 days, and all-time
+- **Play calendar heatmap** — 13-week GitHub-style grid; cell intensity = questions answered that day
+- **Missed-items breakdown** — horizontal bar chart of most-missed animals/colors per game (requires sessions recorded after v0.4.0)
+- **Export to CSV** — downloads full score history with accuracy %, avg response time, and peak streak
+- Score records now include `peakStreak` and timing entries now include `itemId` (both backward-compatible)
+
 ### v0.3.0 — In-Game Feedback (2026-06-28)
 - **Celebration animations** — confetti burst on every correct answer; `animationsEnabled` admin toggle to disable
 - **Streak tracking** — current streak shown in game header (visible at ≥ 2), all-time best streak persisted per game in localStorage
@@ -71,25 +81,9 @@ Ideas for future development. Not committed to any timeline.
 
 ## Scoring & Progress
 
-- **Progress charts** — simple bar or line chart in the admin page showing score trends over time; `timings.durationMs` already stored per answer for speed charts
 - **Milestone badges** — award badges for streaks, perfect sessions, or total questions answered
 - **Per-child profiles** — support multiple child accounts with separate score histories
-- **Export scores** — download score history as CSV from the admin page
-
----
-
-## Parent Progress Dashboard
-
-A dedicated `/parent` or `/admin/dashboard` route (separate from the quick-settings admin page) giving parents a visual overview of their child's learning progress.
-
-- **Score trend chart** — line or bar chart of correct-answer rates per game over time; source data already exists in `getScores()`
-- **Response-time chart** — average `durationMs` per question plotted over time to show whether the child is speeding up; data already stored in `timings[]` on each score
-- **Streak history** — show peak streaks per game over the last 7 / 30 days alongside all-time best
-- **Session heatmap** — calendar view showing which days the child played and for how long (question count × avg `durationMs`)
-- **Missed-items breakdown** — frequency table of which animals/colors are most often missed; identifies items to practice
-- **Export to CSV** — download score history for use in a spreadsheet or sharing with a pediatrician / therapist
-
-`vite-plugin-pwa` + Recharts (or similar lightweight chart library) would be the natural tech stack additions. The adapter interface is already designed for a backend swap, so a parent dashboard built on `getScores()` will work with both localStorage and any future cloud adapter.
+- **Parent Dashboard enhancements** — interactive date-range filter, game-name labels in charts, month labels on the heatmap, PIN protection for the `/parent` route
 
 ---
 

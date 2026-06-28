@@ -26,6 +26,7 @@ export default function useGameSession({ gameId, items, timeLimitMs, onTimeout }
   // Refs avoid stale closures in setTimeout/setInterval callbacks
   const scoreRef        = useRef(0)
   const streakRef       = useRef(0)
+  const peakStreakRef   = useRef(0)
   const missedRef       = useRef([])
   const indexRef        = useRef(0)
   const queueRef        = useRef([])
@@ -83,7 +84,7 @@ export default function useGameSession({ gameId, items, timeLimitMs, onTimeout }
     const durationMs = Date.now() - questionStartRef.current
     const isCorrect = item.id === current.correct.id
 
-    const entry = { questionIndex: index, correct: isCorrect, durationMs }
+    const entry = { questionIndex: index, itemId: current.correct.id, correct: isCorrect, durationMs }
     const nextTimings = [...timingsRef.current, entry]
     timingsRef.current = nextTimings
     setTimings(nextTimings)
@@ -93,6 +94,7 @@ export default function useGameSession({ gameId, items, timeLimitMs, onTimeout }
       setScore(scoreRef.current)
       streakRef.current += 1
       setStreak(streakRef.current)
+      if (streakRef.current > peakStreakRef.current) peakStreakRef.current = streakRef.current
       recordStreak(streakRef.current)
       if (animationsEnabled) fireConfetti()
     } else {
@@ -123,20 +125,22 @@ export default function useGameSession({ gameId, items, timeLimitMs, onTimeout }
   async function finishGame() {
     const result = {
       gameId,
-      score: scoreRef.current,
-      total: queueRef.current.length,
-      date: new Date().toISOString().split('T')[0],
-      timestamp: Date.now(),
-      timings: timingsRef.current,
+      score:      scoreRef.current,
+      total:      queueRef.current.length,
+      date:       new Date().toISOString().split('T')[0],
+      timestamp:  Date.now(),
+      timings:    timingsRef.current,
+      peakStreak: peakStreakRef.current,
     }
     await addScore(result)
     setDone(true)
   }
 
   function restart() {
-    scoreRef.current = 0
-    streakRef.current = 0
-    missedRef.current = []
+    scoreRef.current      = 0
+    streakRef.current     = 0
+    peakStreakRef.current = 0
+    missedRef.current     = []
     indexRef.current = 0
     timingsRef.current = []
     answeredRef.current = false

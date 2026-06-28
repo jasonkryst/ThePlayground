@@ -19,7 +19,10 @@ export default function Dashboard({ manifests = [] }) {
       <main>
         <div className="dashboard__header">
           <h1 className="dashboard__title">🌊 {title}</h1>
-          <Link to="/admin" className="dashboard__admin" aria-label={t('dashboard.settingsLabel')}>⚙️</Link>
+          <div className="dashboard__nav">
+            <Link to="/parent" className="dashboard__nav-link" aria-label={t('dashboard.parentLabel')}>📊</Link>
+            <Link to="/admin"  className="dashboard__nav-link" aria-label={t('dashboard.settingsLabel')}>⚙️</Link>
+          </div>
         </div>
 
         {manifests.length === 0 ? (

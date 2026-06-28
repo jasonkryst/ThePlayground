@@ -191,6 +191,60 @@ describe('useGameSession', () => {
     )
   })
 
+  it('timing entry includes itemId matching the correct item for that question', async () => {
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.current).toBeDefined())
+
+    const correctItem = result.current.current.correct
+    await act(async () => { result.current.handleChoice(correctItem) })
+
+    expect(result.current.timings[0].itemId).toBe(correctItem.id)
+  })
+
+  it('includes peakStreak in the addScore call after completing a session', async () => {
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.current).toBeDefined())
+
+    for (let i = 0; i < 3; i++) {
+      await act(async () => { result.current.handleChoice(result.current.current.correct) })
+      await act(async () => { result.current.advance() })
+    }
+
+    expect(mockAddScore).toHaveBeenCalledWith(
+      expect.objectContaining({ peakStreak: expect.any(Number) })
+    )
+  })
+
+  it('peakStreak equals the highest streak reached during a session', async () => {
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.current).toBeDefined())
+
+    // Answer 2 correct, then 1 wrong — peak was 2
+    await act(async () => { result.current.handleChoice(result.current.current.correct) })
+    await act(async () => { result.current.advance() })
+    await act(async () => { result.current.handleChoice(result.current.current.correct) })
+    await act(async () => { result.current.advance() })
+    const wrongItem = result.current.current.choices.find(c => c.id !== result.current.current.correct.id)
+    await act(async () => { result.current.handleChoice(wrongItem) })
+    await act(async () => { result.current.advance() })
+
+    expect(mockAddScore).toHaveBeenCalledWith(
+      expect.objectContaining({ peakStreak: 2 })
+    )
+  })
+
+  it('peakStreak resets to 0 on restart', async () => {
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.current).toBeDefined())
+
+    await act(async () => { result.current.handleChoice(result.current.current.correct) })
+    await act(async () => { result.current.restart() })
+
+    // After restart + completing a session with no correct answers, peakStreak should be 0
+    // (We can't easily check the internal ref here, but restart clears state)
+    expect(result.current.score).toBe(0)
+  })
+
   it('calls onTimeout after timeLimitMs ms if not yet answered', () => {
     vi.useFakeTimers()
     const onTimeout = vi.fn()

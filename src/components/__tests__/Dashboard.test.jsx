@@ -36,6 +36,11 @@ describe('Dashboard', () => {
     expect(screen.getByRole('link', { name: /⚙️/i })).toHaveAttribute('href', '/admin')
   })
 
+  it('renders the parent dashboard link', () => {
+    render(<MemoryRouter><Dashboard manifests={manifests} /></MemoryRouter>)
+    expect(screen.getByRole('link', { name: /📊/i })).toHaveAttribute('href', '/parent')
+  })
+
   it('renders empty state when no manifests', () => {
     render(<MemoryRouter><Dashboard manifests={[]} /></MemoryRouter>)
     expect(screen.getByText(/no games/i)).toBeInTheDocument()
