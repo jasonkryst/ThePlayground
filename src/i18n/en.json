@@ -15,7 +15,11 @@
     "settingsLabel": "⚙️ Settings",
     "parentLabel": "📊 Progress Dashboard",
     "empty": "No games found. Drop a game folder into src/games/.",
-    "footerName": "The Playground"
+    "footerName": "The Playground",
+    "todaysGame": "Today's Game",
+    "categoryOther": "Other",
+    "tabAll": "All",
+    "featuredAriaLabel": "Play today's featured game: {{name}}"
   },
   "parent": {
     "title": "📊 Progress Dashboard",
