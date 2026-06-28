@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import useGameSession from '../../hooks/useGameSession'
 import StreakBadge from '../../components/StreakBadge'
@@ -24,7 +24,7 @@ export default function AnimalSoundsGame({ onGameEnd }) {
 
   const audioRef = useRef(null)
 
-  function playSound() {
+  const playSound = useCallback(() => {
     if (!current) return
     const url = getSoundUrl(current.correct.sound)
     if (!url) return
@@ -35,12 +35,12 @@ export default function AnimalSoundsGame({ onGameEnd }) {
     const audio = new Audio(url)
     audioRef.current = audio
     audio.play().catch(() => {})
-  }
+  }, [current])
 
   useEffect(() => {
     if (!current) return
     playSound()
-  }, [index, current])
+  }, [index, playSound, current])
 
   if (done) {
     return (

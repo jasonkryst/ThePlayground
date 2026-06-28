@@ -39,7 +39,7 @@ export default function useGameSession({ gameId, items, timeLimitMs, onTimeout }
       queueRef.current = q
       setQueue(q)
     }
-  }, [numChoices, questionsPerSession])
+  }, [numChoices, questionsPerSession, items])
 
   // Per-question timer + optional timeout
   useEffect(() => {
