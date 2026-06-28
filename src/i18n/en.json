@@ -4,7 +4,10 @@
     "playAgain": "Play Again",
     "home": "Home",
     "next": "Next →",
-    "progress": "Question {{current}} of {{total}}"
+    "progress": "Question {{current}} of {{total}}",
+    "streak": "🔥 {{streak}} in a row!",
+    "perfectRun": "Perfect run! 🎉",
+    "missedHeading": "Let's practice these next time:"
   },
   "dashboard": {
     "titleDefault": "Baby's Playground",
@@ -27,6 +30,9 @@
     "feedbackModeHeading": "Feedback Mode",
     "feedbackImmediate": "⚡ Immediate",
     "feedbackParentTap": "👆 Parent Tap",
+    "animationsHeading": "Celebration Animations",
+    "animationsOn": "✨ On",
+    "animationsOff": "Off",
     "questionsPerSessionHeading": "Questions Per Session",
     "gaHeading": "Google Analytics",
     "gaHint": "Enter your Measurement ID to enable analytics tracking.",

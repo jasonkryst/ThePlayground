@@ -197,6 +197,7 @@ Accessible from the dashboard via the gear icon (⚙).
 | Answer choices | 2 | 2, 3, 4 |
 | Feedback mode | Immediate | Immediate, Parent tap |
 | Questions per session | 10 | 5, 10, 15, 20 |
+| Celebration animations | On | On, Off |
 | Google Analytics ID | *(empty)* | Any valid GA4 Measurement ID (e.g. `G-XXXXXXXXXX`) |
 
 **Immediate** — correct/wrong feedback shown instantly; next question advances automatically after 1.5 s.
@@ -206,6 +207,8 @@ Accessible from the dashboard via the gear icon (⚙).
 **Google Analytics** — when a Measurement ID is entered, the GA4 script is injected at runtime and page view events fire on every navigation. Leaving the field blank disables tracking entirely. The ID is stored in `localStorage` alongside other settings.
 
 **Child's Name** — when set, the dashboard title reads "<Name>'s Playground"; when left blank, it shows the default "Baby's Playground".
+
+**Celebration animations** — when on, a confetti burst plays on every correct answer and the game header shows the current answer streak once it reaches 2; the end-of-game screen lists any missed items. Turning this off disables the confetti only — streak tracking and the missed-items summary remain.
 
 ---
 

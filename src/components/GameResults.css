@@ -1,0 +1,2 @@
+.results__missed { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.results__missed-heading { font-size: 16px; font-weight: 700; opacity: 0.8; }

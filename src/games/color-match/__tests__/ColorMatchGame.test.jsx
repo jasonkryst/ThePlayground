@@ -4,6 +4,12 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { axe } from 'jest-axe'
 import ColorMatchGame from '../index'
 
+vi.mock('../../../lib/confetti', () => ({ fireConfetti: vi.fn() }))
+
+vi.mock('../../../hooks/useBestStreak', () => ({
+  default: () => ({ bestStreak: 0, recordStreak: vi.fn().mockResolvedValue(undefined) }),
+}))
+
 vi.mock('../../../hooks/useSettings', () => ({
   default: () => ({
     settings: { numChoices: 2, feedbackMode: 'immediate', questionsPerSession: 3 },
@@ -84,5 +90,39 @@ describe('ColorMatchGame', () => {
     let container
     await act(async () => { container = render(<ColorMatchGame onGameEnd={onGameEnd} />).container })
     expect(await axe(container)).toHaveNoViolations()
+  })
+
+  it('shows the streak badge after 2 correct answers in a row', async () => {
+    vi.useFakeTimers()
+    await act(async () => { render(<ColorMatchGame onGameEnd={onGameEnd} />) })
+
+    for (let i = 0; i < 2; i++) {
+      const buttons = screen.getAllByRole('button').filter(b => b.dataset.colorId)
+      const correctId = screen.getByTestId('correct-color-id').textContent
+      const correctBtn = buttons.find(b => b.dataset.colorId === correctId)
+      act(() => { fireEvent.click(correctBtn) })
+      act(() => { vi.advanceTimersByTime(1600) })
+      await act(async () => {})
+    }
+
+    vi.useRealTimers()
+    expect(screen.getByText(/2/)).toBeInTheDocument()
+  })
+
+  it('shows missed colors in the results screen when an answer is wrong', async () => {
+    vi.useFakeTimers()
+    await act(async () => { render(<ColorMatchGame onGameEnd={onGameEnd} />) })
+
+    for (let i = 0; i < 3; i++) {
+      const buttons = screen.getAllByRole('button').filter(b => b.dataset.colorId)
+      const correctId = screen.getByTestId('correct-color-id').textContent
+      const wrongBtn = buttons.find(b => b.dataset.colorId !== correctId)
+      act(() => { fireEvent.click(wrongBtn) })
+      act(() => { vi.advanceTimersByTime(1600) })
+      await act(async () => {})
+    }
+
+    vi.useRealTimers()
+    expect(screen.getByText(/let's practice/i)).toBeInTheDocument()
   })
 })
