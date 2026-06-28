@@ -43,7 +43,12 @@
     "missedNoData": "No missed-item data yet — requires sessions played after v0.4.0."
   },
   "gameCard": {
-    "best": "Best: {{score}}"
+    "best": "Best: {{score}}",
+    "playedToday": "Today",
+    "playedYesterday": "Yesterday",
+    "playedDaysAgo": "{{days}} days ago",
+    "playCount_one": "{{count}} play",
+    "playCount_other": "{{count}} plays"
   },
   "admin": {
     "back": "Back to dashboard",

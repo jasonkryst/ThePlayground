@@ -12,10 +12,14 @@ const manifest = {
   color: '#B39DDB',
 }
 
-function renderCard(bestScore = 0) {
+const TODAY     = new Date(); TODAY.setHours(12, 0, 0, 0)
+const YESTERDAY = new Date(TODAY); YESTERDAY.setDate(TODAY.getDate() - 1)
+const THREE_AGO = new Date(TODAY); THREE_AGO.setDate(TODAY.getDate() - 3)
+
+function renderCard(bestScore = 0, recentInfo = null) {
   return render(
     <MemoryRouter>
-      <GameCard manifest={manifest} bestScore={bestScore} />
+      <GameCard manifest={manifest} bestScore={bestScore} recentInfo={recentInfo} />
     </MemoryRouter>
   )
 }
@@ -47,8 +51,48 @@ describe('GameCard', () => {
     expect(screen.queryByText(/best/i)).not.toBeInTheDocument()
   })
 
+  it('shows no recently-played badge when recentInfo is null', () => {
+    renderCard(0, null)
+    expect(screen.queryByTestId('recently-played-badge')).not.toBeInTheDocument()
+  })
+
+  it('shows "Today" badge when played today', () => {
+    renderCard(0, { lastPlayed: TODAY, playCount: 4 })
+    expect(screen.getByTestId('recently-played-badge')).toBeInTheDocument()
+    expect(screen.getByTestId('recently-played-badge')).toHaveTextContent('Today')
+    expect(screen.getByTestId('recently-played-badge')).toHaveTextContent('4 plays')
+  })
+
+  it('shows "Yesterday" badge when played yesterday', () => {
+    renderCard(0, { lastPlayed: YESTERDAY, playCount: 2 })
+    expect(screen.getByTestId('recently-played-badge')).toHaveTextContent('Yesterday')
+    expect(screen.getByTestId('recently-played-badge')).toHaveTextContent('2 plays')
+  })
+
+  it('shows "N days ago" badge for older plays', () => {
+    renderCard(0, { lastPlayed: THREE_AGO, playCount: 1 })
+    expect(screen.getByTestId('recently-played-badge')).toHaveTextContent('3 days ago')
+    expect(screen.getByTestId('recently-played-badge')).toHaveTextContent('1 play')
+  })
+
+  it('uses singular "play" for playCount of 1', () => {
+    renderCard(0, { lastPlayed: TODAY, playCount: 1 })
+    expect(screen.getByTestId('recently-played-badge')).toHaveTextContent('1 play')
+    expect(screen.getByTestId('recently-played-badge')).not.toHaveTextContent('1 plays')
+  })
+
+  it('adds recently-played class when recentInfo is present', () => {
+    renderCard(0, { lastPlayed: TODAY, playCount: 1 })
+    expect(screen.getByRole('link')).toHaveClass('game-card--recently-played')
+  })
+
+  it('does not add recently-played class when recentInfo is null', () => {
+    renderCard(0, null)
+    expect(screen.getByRole('link')).not.toHaveClass('game-card--recently-played')
+  })
+
   it('has no accessibility violations', async () => {
-    const { container } = renderCard()
+    const { container } = renderCard(5, { lastPlayed: TODAY, playCount: 3 })
     expect(await axe(container)).toHaveNoViolations()
   })
 })
