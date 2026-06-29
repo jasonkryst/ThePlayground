@@ -1,0 +1,18 @@
+.category-section {
+  margin-bottom: 32px;
+}
+
+.category-section__heading {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-lavender-dark);
+  margin: 0 0 12px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.06);
+}
+
+.category-section__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 20px;
+}
