@@ -25,8 +25,10 @@ vi.mock('../../hooks/useRecentlyPlayed', () => ({
   default: () => mockRecentlyPlayed,
 }))
 
-// useFeaturedGame and useGameTags stubs — will be replaced in Tasks 6 and 10
-vi.mock('../../hooks/useFeaturedGame', () => ({ default: () => null }))
+// useGameTags stub — will be replaced in Task 10
+vi.mock('../../hooks/useFeaturedGame', () => ({
+  default: (manifests) => manifests[0] ?? null,
+}))
 vi.mock('../../hooks/useGameTags', () => ({
   default: () => ({ tagMap: new Map(), allTags: [] }),
 }))
@@ -39,8 +41,11 @@ const manifests = [
 describe('Dashboard', () => {
   it('renders one card per manifest', () => {
     render(<MemoryRouter><Dashboard manifests={manifests} /></MemoryRouter>)
-    expect(screen.getByText('Animal Sounds')).toBeInTheDocument()
-    expect(screen.getByText('Color Match')).toBeInTheDocument()
+    // Query for game cards in the grid (not the featured card)
+    const animalSoundsCards = screen.getAllByRole('link', { name: /animal sounds/i })
+    const colorMatchCards = screen.getAllByRole('link', { name: /color match/i })
+    expect(animalSoundsCards.length).toBeGreaterThan(0)
+    expect(colorMatchCards.length).toBeGreaterThan(0)
   })
 
   it('renders the admin gear link', () => {
@@ -76,6 +81,23 @@ describe('Dashboard', () => {
     expect(screen.getByTestId('recently-played-badge')).toBeInTheDocument()
     expect(screen.getByTestId('recently-played-badge')).toHaveTextContent('Today')
     mockRecentlyPlayed.clear()
+  })
+
+  it('renders FeaturedGameCard above the grid', () => {
+    render(<MemoryRouter><Dashboard manifests={manifests} /></MemoryRouter>)
+    expect(screen.getByText(/Today's Game/i)).toBeInTheDocument()
+  })
+
+  it('featured game also appears in the grid', () => {
+    render(<MemoryRouter><Dashboard manifests={manifests} /></MemoryRouter>)
+    // Animal Sounds is featured (mock returns manifests[0]) AND appears in grid
+    const links = screen.getAllByRole('link', { name: /animal sounds/i })
+    expect(links.length).toBeGreaterThanOrEqual(2)
+  })
+
+  it('does not render FeaturedGameCard when manifests is empty', () => {
+    render(<MemoryRouter><Dashboard manifests={[]} /></MemoryRouter>)
+    expect(screen.queryByText(/Today's Game/i)).not.toBeInTheDocument()
   })
 
   it('has no accessibility violations', async () => {

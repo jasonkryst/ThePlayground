@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import GameCard from './GameCard'
+import FeaturedGameCard from './FeaturedGameCard'
 import useScores from '../hooks/useScores'
 import useSettings from '../hooks/useSettings'
 import useRecentlyPlayed from '../hooks/useRecentlyPlayed'
@@ -32,6 +33,8 @@ export default function Dashboard({ manifests = [] }) {
             <Link to="/admin"  className="dashboard__nav-link" aria-label={t('dashboard.settingsLabel')}>⚙️</Link>
           </div>
         </div>
+
+        <FeaturedGameCard manifest={featured} />
 
         {manifests.length === 0 ? (
           <p className="dashboard__empty">{t('dashboard.empty')}</p>
