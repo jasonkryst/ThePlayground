@@ -20,18 +20,27 @@ test('admin page has no accessibility violations', async ({ page }) => {
 
 test('admin tag override persists across page reload', async ({ page }) => {
   await page.goto('/admin')
-  // Find the input for animal-sounds (id="tags-animal-sounds")
-  const animalInput = page.locator('#tags-animal-sounds')
-  // Fill with new tags
-  await animalInput.fill('numbers, math')
-  // Click the first save button (should be for animal-sounds if it's the first game)
-  const saveButton = page.locator('button.admin__tag-save').first()
-  await saveButton.click()
-  // Wait for async save to complete
-  await page.waitForTimeout(2000)
+  // Get all tag rows and find the one with the animal-sounds input
+  const tagRows = page.locator('.admin__tag-row')
+  let animalTagRow = null
+  for (let i = 0; i < await tagRows.count(); i++) {
+    const input = tagRows.nth(i).locator('input[id="tags-animal-sounds"]')
+    if (await input.count() > 0) {
+      animalTagRow = tagRows.nth(i)
+      break
+    }
+  }
+  // If we found the row, update the input and click save
+  if (animalTagRow) {
+    const animalInput = animalTagRow.locator('input')
+    await animalInput.clear()
+    await animalInput.fill('numbers, math')
+    await animalTagRow.locator('button.admin__tag-save').click()
+    await page.waitForTimeout(1500)
+  }
   // Reload the page
   await page.reload()
   await page.waitForLoadState()
   // Verify the tags were saved
-  await expect(page.locator('#tags-animal-sounds')).toHaveValue('numbers, math')
+  await expect(page.getByLabel('Tags for Animal Sounds')).toHaveValue('numbers, math')
 })
