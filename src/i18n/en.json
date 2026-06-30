@@ -74,7 +74,13 @@
     "gaHint": "Enter your Measurement ID to enable analytics tracking.",
     "gaLabel": "Google Analytics Measurement ID",
     "reset": "Reset to Defaults",
-    "scoreHistoryHeading": "Score History"
+    "scoreHistoryHeading": "Score History",
+    "tagsHeading": "Game Tags",
+    "tagsHint": "Customize how games are categorized. Comma-separated. Empty override restores default.",
+    "tagsGameLabel": "Tags for {{name}}",
+    "tagsInputPlaceholder": "e.g. sounds, animals",
+    "tagsSaveButton": "Save Tags",
+    "tagsResetButton": "Reset"
   },
   "scoreHistory": {
     "empty": "No scores yet — play a game!"
