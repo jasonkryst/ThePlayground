@@ -19,6 +19,7 @@
     "todaysGame": "Today's Game",
     "categoryOther": "Other",
     "tabAll": "All",
+    "tabsLabel": "Filter games by category",
     "featuredAriaLabel": "Play today's featured game: {{name}}"
   },
   "parent": {

@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, it, expect, vi } from 'vitest'
 import { axe } from 'jest-axe'
+import userEvent from '@testing-library/user-event'
 import Dashboard from '../Dashboard'
 
 vi.mock('../../hooks/useScores', () => ({
@@ -25,12 +26,16 @@ vi.mock('../../hooks/useRecentlyPlayed', () => ({
   default: () => mockRecentlyPlayed,
 }))
 
-// useGameTags stub — will be replaced in Task 10
 vi.mock('../../hooks/useFeaturedGame', () => ({
   default: (manifests) => manifests[0] ?? null,
 }))
+
 vi.mock('../../hooks/useGameTags', () => ({
-  default: () => ({ tagMap: new Map(), allTags: [] }),
+  default: (manifests) => {
+    const tagMap = new Map(manifests.map(m => [m.id, m.tags ?? []]))
+    const allTagsSet = new Set(manifests.flatMap(m => m.tags ?? []))
+    return { tagMap, allTags: [...allTagsSet].sort() }
+  },
 }))
 
 const manifests = [
@@ -76,7 +81,7 @@ describe('Dashboard', () => {
   })
 
   it('shows recently-played badge for a game with recent play data', () => {
-    mockRecentlyPlayed.set('animal-sounds', { lastPlayed: TODAY, playCount: 3 })
+    mockRecentlyPlayed.set('color-match', { lastPlayed: TODAY, playCount: 3 })
     render(<MemoryRouter><Dashboard manifests={manifests} /></MemoryRouter>)
     expect(screen.getByTestId('recently-played-badge')).toBeInTheDocument()
     expect(screen.getByTestId('recently-played-badge')).toHaveTextContent('Today')
@@ -88,11 +93,13 @@ describe('Dashboard', () => {
     expect(screen.getByText(/Today's Game/i)).toBeInTheDocument()
   })
 
-  it('featured game also appears in the grid', () => {
+  it('featured game also appears in filtered view', async () => {
+    const user = userEvent.setup()
     render(<MemoryRouter><Dashboard manifests={manifests} /></MemoryRouter>)
-    // Animal Sounds is featured (mock returns manifests[0]) AND appears in grid
+    // click the 'Sounds' tab — animal-sounds should appear in the filtered flat grid
+    await user.click(screen.getByRole('tab', { name: 'Sounds' }))
     const links = screen.getAllByRole('link', { name: /animal sounds/i })
-    expect(links.length).toBeGreaterThanOrEqual(2)
+    expect(links.length).toBeGreaterThanOrEqual(2) // featured card + grid card
   })
 
   it('does not render FeaturedGameCard when manifests is empty', () => {
@@ -103,5 +110,40 @@ describe('Dashboard', () => {
   it('has no accessibility violations', async () => {
     const { container } = render(<MemoryRouter><Dashboard manifests={manifests} /></MemoryRouter>)
     expect(await axe(container)).toHaveNoViolations()
+  })
+
+  it('renders filter tabs for each tag when allTags is non-empty', () => {
+    render(<MemoryRouter><Dashboard manifests={manifests} /></MemoryRouter>)
+    expect(screen.getByRole('tab', { name: 'All' })).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: 'Sounds' })).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: 'Visual' })).toBeInTheDocument()
+  })
+
+  it('"All" tab is selected by default', () => {
+    render(<MemoryRouter><Dashboard manifests={manifests} /></MemoryRouter>)
+    expect(screen.getByRole('tab', { name: 'All' })).toHaveAttribute('aria-selected', 'true')
+  })
+
+  it('renders CategorySection headings in All view', () => {
+    render(<MemoryRouter><Dashboard manifests={manifests} /></MemoryRouter>)
+    expect(screen.getByRole('heading', { name: /visual/i })).toBeInTheDocument()
+  })
+
+  it('clicking a tag tab filters the grid to matching games', async () => {
+    const user = userEvent.setup()
+    render(<MemoryRouter><Dashboard manifests={manifests} /></MemoryRouter>)
+    await user.click(screen.getByRole('tab', { name: 'Sounds' }))
+    expect(screen.getByRole('tab', { name: 'Sounds' })).toHaveAttribute('aria-selected', 'true')
+    expect(screen.getAllByText('Animal Sounds')).toHaveLength(2) // featured card + grid card
+    expect(screen.queryByText('Color Match')).not.toBeInTheDocument()
+  })
+
+  it('clicking All tab restores full view', async () => {
+    const user = userEvent.setup()
+    render(<MemoryRouter><Dashboard manifests={manifests} /></MemoryRouter>)
+    await user.click(screen.getByRole('tab', { name: 'Sounds' }))
+    await user.click(screen.getByRole('tab', { name: 'All' }))
+    expect(screen.getByText('Animal Sounds')).toBeInTheDocument()
+    expect(screen.getByText('Color Match')).toBeInTheDocument()
   })
 })
