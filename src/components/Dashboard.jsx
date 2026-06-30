@@ -72,7 +72,7 @@ export default function Dashboard({ manifests = [] }) {
           </div>
         </div>
 
-        <FeaturedGameCard manifest={featured} />
+        {activeTag === 'all' && <FeaturedGameCard manifest={featured} />}
 
         {manifests.length === 0 ? (
           <p className="dashboard__empty">{t('dashboard.empty')}</p>

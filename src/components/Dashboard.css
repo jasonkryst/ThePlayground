@@ -80,8 +80,8 @@
 }
 
 .dashboard__tab--active {
-  background: var(--color-lavender);
-  border-color: var(--color-lavender);
+  background: var(--color-lavender-dark);
+  border-color: var(--color-lavender-dark);
   color: #fff;
 }
 
