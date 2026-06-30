@@ -20,20 +20,18 @@ test('admin page has no accessibility violations', async ({ page }) => {
 
 test('admin tag override persists across page reload', async ({ page }) => {
   await page.goto('/admin')
-  // Find the input by id (second game in the tags list)
+  // Find the input for animal-sounds (id="tags-animal-sounds")
   const animalInput = page.locator('#tags-animal-sounds')
-  // Clear and fill the input
+  // Fill with new tags
   await animalInput.fill('numbers, math')
-  // Find all save buttons and click the second one (for animal-sounds)
-  const saveButtons = page.locator('button.admin__tag-save')
-  const count = await saveButtons.count()
-  if (count >= 1) {
-    // Click the save button - since animal-sounds is typically the first game in manifest order
-    await page.locator('.admin__tag-row').nth(0).locator('.admin__tag-save').click()
-  }
-  await page.waitForTimeout(1500)
-  // Reload and verify
+  // Click the first save button (should be for animal-sounds if it's the first game)
+  const saveButton = page.locator('button.admin__tag-save').first()
+  await saveButton.click()
+  // Wait for async save to complete
+  await page.waitForTimeout(2000)
+  // Reload the page
   await page.reload()
   await page.waitForLoadState()
+  // Verify the tags were saved
   await expect(page.locator('#tags-animal-sounds')).toHaveValue('numbers, math')
 })
