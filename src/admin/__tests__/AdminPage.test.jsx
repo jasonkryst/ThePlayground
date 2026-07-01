@@ -75,8 +75,10 @@ describe('AdminPage', () => {
     expect(mockResetSettings).toHaveBeenCalled()
   })
 
-  it('renders score history section', () => {
+  it('renders score history section', async () => {
+    const user = userEvent.setup()
     render(<MemoryRouter><AdminPage /></MemoryRouter>)
+    await user.click(screen.getByRole('tab', { name: /history/i }))
     expect(screen.getByText(/score history/i)).toBeInTheDocument()
     expect(screen.getByText('8 / 10')).toBeInTheDocument()
   })
@@ -93,21 +95,26 @@ describe('AdminPage', () => {
     expect(await axe(container)).toHaveNoViolations()
   })
 
-  it('renders a tag input for each game', () => {
+  it('renders a tag input for each game', async () => {
+    const user = userEvent.setup()
     renderAdmin()
+    await user.click(screen.getByRole('tab', { name: /games/i }))
     expect(screen.getByRole('heading', { name: /game tags/i })).toBeInTheDocument()
     expect(screen.getByLabelText(/tags for animal sounds/i)).toBeInTheDocument()
     expect(screen.getByLabelText(/tags for color match/i)).toBeInTheDocument()
   })
 
-  it('pre-populates tag input with current effective tags', () => {
+  it('pre-populates tag input with current effective tags', async () => {
+    const user = userEvent.setup()
     renderAdmin()
+    await user.click(screen.getByRole('tab', { name: /games/i }))
     expect(screen.getByLabelText(/tags for animal sounds/i)).toHaveValue('sounds, animals')
   })
 
   it('deletes override when empty string is saved', async () => {
     const user = userEvent.setup()
     renderAdmin()
+    await user.click(screen.getByRole('tab', { name: /games/i }))
     const input = screen.getByLabelText(/tags for animal sounds/i)
     await user.clear(input)
     await user.click(screen.getAllByRole('button', { name: /save tags/i })[0])
@@ -120,6 +127,7 @@ describe('AdminPage', () => {
   it('saves tagOverrides when valid tags are entered', async () => {
     const user = userEvent.setup()
     renderAdmin()
+    await user.click(screen.getByRole('tab', { name: /games/i }))
     const input = screen.getByLabelText(/tags for animal sounds/i)
     await user.clear(input)
     await user.type(input, 'numbers, math')
@@ -133,6 +141,7 @@ describe('AdminPage', () => {
   it('reset button clears override and restores manifest default', async () => {
     const user = userEvent.setup()
     renderAdmin()
+    await user.click(screen.getByRole('tab', { name: /games/i }))
     const input = screen.getByLabelText(/tags for animal sounds/i)
     const tagResetButtons = screen.getAllByRole('button', { name: 'Reset' })
     await user.click(tagResetButtons[0])
