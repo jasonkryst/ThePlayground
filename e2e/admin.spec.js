@@ -20,27 +20,26 @@ test('admin page has no accessibility violations', async ({ page }) => {
 
 test('admin tag override persists across page reload', async ({ page }) => {
   await page.goto('/admin')
-  // Get all tag rows and find the one with the animal-sounds input
-  const tagRows = page.locator('.admin__tag-row')
-  let animalTagRow = null
-  for (let i = 0; i < await tagRows.count(); i++) {
-    const input = tagRows.nth(i).locator('input[id="tags-animal-sounds"]')
-    if (await input.count() > 0) {
-      animalTagRow = tagRows.nth(i)
-      break
-    }
-  }
-  // If we found the row, update the input and click save
-  if (animalTagRow) {
-    const animalInput = animalTagRow.locator('input')
-    await animalInput.clear()
-    await animalInput.fill('numbers, math')
-    await animalTagRow.locator('button.admin__tag-save').click()
-    await page.waitForTimeout(1500)
-  }
+
+  // Use stable locator for the animal sounds tags input
+  const animalSoundsInput = page.locator('input#tags-animal-sounds')
+
+  // Clear and fill with new tags
+  await animalSoundsInput.clear()
+  await animalSoundsInput.fill('numbers, math')
+
+  // Find and click the save button for this input using stable locator
+  // The save button is a direct sibling within the same tag-buttons container
+  const tagRow = animalSoundsInput.locator('xpath=ancestor::div[@class="admin__tag-row"]')
+  const saveButton = tagRow.locator('button.admin__tag-save')
+  await saveButton.click()
+
+  // Wait for the network to complete
+  await page.waitForLoadState('networkidle')
+
   // Reload the page
   await page.reload()
-  await page.waitForLoadState()
-  // Verify the tags were saved
-  await expect(page.getByLabel('Tags for Animal Sounds')).toHaveValue('numbers, math')
+
+  // Verify the tags were saved and persisted
+  await expect(page.getByLabel(/tags for animal sounds/i)).toHaveValue('numbers, math')
 })

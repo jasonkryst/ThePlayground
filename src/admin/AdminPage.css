@@ -93,7 +93,7 @@
   min-height: 64px;
 }
 
-.admin__reset:hover { background: rgba(229, 115, 115, 0.1); }
+.admin__reset:hover { background: color-mix(in srgb, var(--color-error) 10%, transparent); }
 
 .admin__hint {
   font-size: 14px;
@@ -169,4 +169,4 @@
   cursor: pointer;
 }
 
-.admin__tag-reset:hover { background: rgba(229, 115, 115, 0.1); }
+.admin__tag-reset:hover { background: color-mix(in srgb, var(--color-error) 10%, transparent); }
