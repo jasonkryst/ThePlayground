@@ -15,6 +15,29 @@ A browser-based game dashboard designed for infants and toddlers. Games are disp
 
 ---
 
+## Dashboard Features
+
+### Daily Challenge
+
+Each day, one game is automatically selected as "Today's Game" and displayed as a featured hero card above the game grid. The selection is deterministic (based on a date-seeded hash), so all users see the same featured game each day. This encourages daily return visits and variety in play.
+
+### Recently Played Badges
+
+When a game has been played, its card displays a colored glow border and a badge showing when it was last played:
+- "Today · N plays" — played today
+- "Yesterday · N plays" — played yesterday
+- "N days ago · N plays" — played N days ago
+
+This visual indicator comes from your existing score history with no additional storage needed.
+
+### Game Categories & Tags
+
+Games are now organized under category headings ("Sounds 🔊", "Visual 👁️", etc.) on the dashboard. A tab strip at the top of the dashboard lets parents filter by category to see only games in a particular group.
+
+Each game's category is defined by a `"tags"` array in its `manifest.json` (required field, minimum one tag). Tags can be customized per-game in the admin panel under Settings → **Game Tags**, allowing you to reorganize games without modifying code.
+
+---
+
 ## Getting Started
 
 **Prerequisites:** Node.js 18+
