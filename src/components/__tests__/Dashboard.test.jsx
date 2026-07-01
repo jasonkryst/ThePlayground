@@ -99,7 +99,7 @@ describe('Dashboard', () => {
     // click the 'Sounds' tab — animal-sounds should appear in the filtered flat grid
     await user.click(screen.getByRole('tab', { name: 'Sounds' }))
     const links = screen.getAllByRole('link', { name: /animal sounds/i })
-    expect(links.length).toBeGreaterThanOrEqual(2) // featured card + grid card
+    expect(links.length).toBeGreaterThanOrEqual(1) // grid card only (featured card hidden when filtering)
   })
 
   it('does not render FeaturedGameCard when manifests is empty', () => {
@@ -134,7 +134,7 @@ describe('Dashboard', () => {
     render(<MemoryRouter><Dashboard manifests={manifests} /></MemoryRouter>)
     await user.click(screen.getByRole('tab', { name: 'Sounds' }))
     expect(screen.getByRole('tab', { name: 'Sounds' })).toHaveAttribute('aria-selected', 'true')
-    expect(screen.getAllByText('Animal Sounds')).toHaveLength(2) // featured card + grid card
+    expect(screen.getAllByText('Animal Sounds')).toHaveLength(1) // grid card only (featured card hidden when filtering)
     expect(screen.queryByText('Color Match')).not.toBeInTheDocument()
   })
 
