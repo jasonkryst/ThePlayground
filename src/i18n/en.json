@@ -15,7 +15,12 @@
     "settingsLabel": "⚙️ Settings",
     "parentLabel": "📊 Progress Dashboard",
     "empty": "No games found. Drop a game folder into src/games/.",
-    "footerName": "The Playground"
+    "footerName": "The Playground",
+    "todaysGame": "Today's Game",
+    "categoryOther": "Other",
+    "tabAll": "All",
+    "tabsLabel": "Filter games by category",
+    "featuredAriaLabel": "Play today's featured game: {{name}}"
   },
   "parent": {
     "title": "📊 Progress Dashboard",
@@ -43,7 +48,12 @@
     "missedNoData": "No missed-item data yet — requires sessions played after v0.4.0."
   },
   "gameCard": {
-    "best": "Best: {{score}}"
+    "best": "Best: {{score}}",
+    "playedToday": "Today",
+    "playedYesterday": "Yesterday",
+    "playedDaysAgo": "{{days}} days ago",
+    "playCount_one": "{{count}} play",
+    "playCount_other": "{{count}} plays"
   },
   "admin": {
     "back": "Back to dashboard",
@@ -64,7 +74,16 @@
     "gaHint": "Enter your Measurement ID to enable analytics tracking.",
     "gaLabel": "Google Analytics Measurement ID",
     "reset": "Reset to Defaults",
-    "scoreHistoryHeading": "Score History"
+    "scoreHistoryHeading": "Score History",
+    "tabSettings": "Settings",
+    "tabGames": "Games",
+    "tabHistory": "History",
+    "tagsHeading": "Game Tags",
+    "tagsHint": "Customize how games are categorized. Comma-separated. Empty override restores default.",
+    "tagsGameLabel": "Tags for {{name}}",
+    "tagsInputPlaceholder": "e.g. sounds, animals",
+    "tagsSaveButton": "Save Tags",
+    "tagsResetButton": "Reset"
   },
   "scoreHistory": {
     "empty": "No scores yet — play a game!"

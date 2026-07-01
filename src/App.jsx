@@ -70,7 +70,7 @@ export default function App() {
       <GoogleAnalytics />
       <Routes>
         <Route path="/"             element={<Dashboard manifests={manifests} />} />
-        <Route path="/admin"        element={<AdminPage />} />
+        <Route path="/admin"        element={<AdminPage manifests={manifests} />} />
         <Route path="/parent"       element={<ParentDashboard />} />
         <Route path="/game/:gameId" element={<GameRoute />} />
       </Routes>

@@ -5,6 +5,7 @@ export const DEFAULT_SETTINGS = {
   gaId: '',
   childName: '',
   animationsEnabled: true,
+  tagOverrides: {},
 }
 
 /**
