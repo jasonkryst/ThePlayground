@@ -21,25 +21,22 @@ test('admin page has no accessibility violations', async ({ page }) => {
 test('admin tag override persists across page reload', async ({ page }) => {
   await page.goto('/admin')
 
-  // Use stable locator for the animal sounds tags input
-  const animalSoundsInput = page.locator('input#tags-animal-sounds')
+  const input = page.getByLabel('Tags for Animal Sounds')
+  await input.clear()
+  await input.fill('numbers, math')
 
-  // Clear and fill with new tags
-  await animalSoundsInput.clear()
-  await animalSoundsInput.fill('numbers, math')
-
-  // Find and click the save button for this input using stable locator
-  // The save button is a direct sibling within the same tag-buttons container
-  const tagRow = animalSoundsInput.locator('xpath=ancestor::div[@class="admin__tag-row"]')
-  const saveButton = tagRow.locator('button.admin__tag-save')
+  // Click the Save Tags button in the same row
+  const saveButton = page.getByRole('button', { name: 'Save Tags' }).first()
   await saveButton.click()
 
-  // Wait for the network to complete
-  await page.waitForLoadState('networkidle')
+  // Verify localStorage was updated before reloading (guards against reload race)
+  await expect.poll(async () => {
+    const raw = await page.evaluate(() => localStorage.getItem('playground_settings'))
+    if (!raw) return null
+    const s = JSON.parse(raw)
+    return s?.tagOverrides?.['animal-sounds']
+  }).toEqual(['numbers', 'math'])
 
-  // Reload the page
   await page.reload()
-
-  // Verify the tags were saved and persisted
-  await expect(page.getByLabel(/tags for animal sounds/i)).toHaveValue('numbers, math')
+  await expect(page.getByLabel('Tags for Animal Sounds')).toHaveValue('numbers, math')
 })
