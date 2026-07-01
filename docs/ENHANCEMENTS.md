@@ -6,6 +6,14 @@ Ideas for future development. Not committed to any timeline.
 
 ## Recently Completed
 
+### v0.5.0 — Dashboard Enhancements (2026-06-30)
+- **Recently Played badge** — GameCards show a glow highlight and "Today · N plays" badge for games played today, yesterday, or within the past week
+- **Daily Challenge hero card** — date-seeded featured game shown above the dashboard grid each day; hidden when a category filter is active
+- **Game Categories / Tags** — each game manifest has a required `tags` field; filter tab strip (All · Sounds · Visual · …) and labeled section groupings in the All view
+- **AdminPage tag editor** — parents can override per-game tags from a new tabbed AdminPage (Settings / Games / History)
+- **Tabbed AdminPage layout** — settings, game tag editor, and score history split into three tabs
+- **`--color-error` design token** and accessibility contrast improvements (active tabs, featured card label, error colors)
+
 ### v0.4.0 — Parent Progress Dashboard (2026-06-28)
 - **`/parent` route** — standalone progress dashboard linked via 📊 button on the main dashboard
 - **Score trend chart** — Recharts LineChart of correct-answer rates per game over time
@@ -73,10 +81,7 @@ Ideas for future development. Not committed to any timeline.
 
 ## Dashboard
 
-- **Recently played** — show a "last played" badge on game cards
-- **Game categories / tags** — group cards by type (sounds, visual, numbers) when the library grows
 - **Drag to reorder** — let parents arrange game cards by preference
-- **Daily challenge** — highlight one game per day as the featured game
 
 ---
 
