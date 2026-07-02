@@ -7,6 +7,8 @@ const stories = [
   'components-dashboard--empty',
   'components-scorehistory--default',
   'components-scorehistory--empty',
+  'components-timer--start',
+  'components-timer--midtick',
   'pages-adminpage--default',
   'games-animalsoundsgame--default',
   'games-colormatchgame--default',
