@@ -43,4 +43,46 @@ describe('GameResults', () => {
     const { container } = render(<GameResults score={3} total={5} missed={[{ id: 'a', label: 'Apple' }]} onPlayAgain={vi.fn()} onHome={vi.fn()} renderMissedItem={renderMissedItem} />)
     expect(await axe(container)).toHaveNoViolations()
   })
+
+  it('does not show the difficulty-offer banner by default', () => {
+    render(<GameResults score={3} total={5} missed={[]} onPlayAgain={vi.fn()} onHome={vi.fn()} renderMissedItem={renderMissedItem} />)
+    expect(screen.queryByText(/perfect session/i)).not.toBeInTheDocument()
+  })
+
+  it('shows the difficulty-offer banner when offerDifficultyBump is true', () => {
+    render(
+      <GameResults
+        score={5} total={5} missed={[]} onPlayAgain={vi.fn()} onHome={vi.fn()} renderMissedItem={renderMissedItem}
+        offerDifficultyBump numChoices={2}
+        onAcceptDifficultyBump={vi.fn()} onDismissDifficultyBump={vi.fn()}
+      />
+    )
+    expect(screen.getByText('Perfect session! Try 3 choices next time?')).toBeInTheDocument()
+  })
+
+  it('calls onAcceptDifficultyBump when accepted', async () => {
+    const onAccept = vi.fn()
+    render(
+      <GameResults
+        score={5} total={5} missed={[]} onPlayAgain={vi.fn()} onHome={vi.fn()} renderMissedItem={renderMissedItem}
+        offerDifficultyBump numChoices={2}
+        onAcceptDifficultyBump={onAccept} onDismissDifficultyBump={vi.fn()}
+      />
+    )
+    await userEvent.click(screen.getByRole('button', { name: /level up/i }))
+    expect(onAccept).toHaveBeenCalledTimes(1)
+  })
+
+  it('calls onDismissDifficultyBump when dismissed', async () => {
+    const onDismiss = vi.fn()
+    render(
+      <GameResults
+        score={5} total={5} missed={[]} onPlayAgain={vi.fn()} onHome={vi.fn()} renderMissedItem={renderMissedItem}
+        offerDifficultyBump numChoices={2}
+        onAcceptDifficultyBump={vi.fn()} onDismissDifficultyBump={onDismiss}
+      />
+    )
+    await userEvent.click(screen.getByRole('button', { name: /not yet/i }))
+    expect(onDismiss).toHaveBeenCalledTimes(1)
+  })
 })

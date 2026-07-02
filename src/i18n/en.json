@@ -7,7 +7,10 @@
     "progress": "Question {{current}} of {{total}}",
     "streak": "🔥 {{streak}} in a row!",
     "perfectRun": "Perfect run! 🎉",
-    "missedHeading": "Let's practice these next time:"
+    "missedHeading": "Let's practice these next time:",
+    "difficultyOfferHeading": "Perfect session! Try {{count}} choices next time?",
+    "difficultyOfferAccept": "Yes, level up!",
+    "difficultyOfferDismiss": "Not yet"
   },
   "dashboard": {
     "titleDefault": "Baby's Playground",
