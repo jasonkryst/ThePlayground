@@ -393,6 +393,7 @@ describe('useGameSession — spaced repetition', () => {
     const missedCorrect = result.current.current.correct
     const wrongItem = result.current.current.choices.find(c => c.id !== missedCorrect.id)
     await act(async () => { result.current.handleChoice(wrongItem) })
+    await act(async () => { result.current.advance() })
 
     // Walk the rest of the queue and confirm the missed item's id reappears as a `.correct.id`
     const seenCorrectIds = []
@@ -412,6 +413,7 @@ describe('useGameSession — spaced repetition', () => {
     const missedCorrect = result.current.current.correct
     const wrongItem = result.current.current.choices.find(c => c.id !== missedCorrect.id)
     await act(async () => { result.current.handleChoice(wrongItem) })
+    await act(async () => { result.current.advance() })
 
     const seenCorrectIds = []
     while (!result.current.done) {
