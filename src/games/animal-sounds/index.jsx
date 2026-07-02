@@ -3,6 +3,8 @@ import { useTranslation } from 'react-i18next'
 import useGameSession from '../../hooks/useGameSession'
 import StreakBadge from '../../components/StreakBadge'
 import GameResults from '../../components/GameResults'
+import GameChoiceGrid from '../../components/GameChoiceGrid'
+import Timer from '../../components/Timer'
 import animals from './data/animals'
 import { getSoundUrl } from './data/sounds'
 import manifest from './manifest.json'
@@ -18,8 +20,10 @@ const CHOICE_COLORS = [
 export default function AnimalSoundsGame({ onGameEnd }) {
   const { t } = useTranslation()
   const {
-    current, index, total, answered, selected, score, streak, missed, done,
-    feedbackMode, handleChoice, advance, restart,
+    current, index, total, locked, disabledChoiceIds, hintActive, selected,
+    score, streak, missed, done, feedbackMode, handleChoice, advance, restart,
+    currentElapsedMs, timerDisplayEnabled, offerDifficultyBump, numChoices,
+    acceptDifficultyBump, dismissDifficultyBump,
   } = useGameSession({ gameId: 'animal-sounds', items: animals })
 
   const audioRef = useRef(null)
@@ -55,6 +59,10 @@ export default function AnimalSoundsGame({ onGameEnd }) {
             <span aria-hidden="true">{animal.emoji}</span> {t(animal.nameKey)}
           </>
         )}
+        offerDifficultyBump={offerDifficultyBump}
+        numChoices={numChoices}
+        onAcceptDifficultyBump={acceptDifficultyBump}
+        onDismissDifficultyBump={dismissDifficultyBump}
       />
     )
   }
@@ -76,34 +84,30 @@ export default function AnimalSoundsGame({ onGameEnd }) {
         <div className="game__progress">{t('common.progress', { current: index + 1, total })}</div>
         <div className="game__prompt">{t('animalSounds.prompt')}</div>
         <button className="game__replay" aria-label={t('animalSounds.replay')} onClick={playSound}>🔊</button>
+        {timerDisplayEnabled && <Timer elapsedMs={currentElapsedMs} />}
       </div>
 
-      <div className="game__choices">
-        {current.choices.map((animal, i) => {
-          const isSelected = selected === animal.id
-          const isCorrect  = animal.id === current.correct.id
-          let cls = 'game__choice'
-          if (answered && isSelected && isCorrect)  cls += ' correct'
-          if (answered && isSelected && !isCorrect) cls += ' wrong'
-          if (answered && !isSelected && isCorrect) cls += ' highlight-correct'
-
-          return (
-            <button
-              key={animal.id}
-              className={cls}
-              style={{ background: CHOICE_COLORS[i % CHOICE_COLORS.length] }}
-              disabled={answered}
-              onClick={() => handleChoice(animal)}
-              data-animal-id={animal.id}
-            >
-              {animal.emoji}
-              <span className="game__choice-name">{t(animal.nameKey)}</span>
-            </button>
-          )
+      <GameChoiceGrid
+        choices={current.choices}
+        correctId={current.correct.id}
+        selected={selected}
+        locked={locked}
+        disabledChoiceIds={disabledChoiceIds}
+        hintActive={hintActive}
+        onChoose={handleChoice}
+        getChoiceProps={(animal, i) => ({
+          style: { background: CHOICE_COLORS[i % CHOICE_COLORS.length] },
+          'data-animal-id': animal.id,
         })}
-      </div>
+        renderChoiceContent={animal => (
+          <>
+            {animal.emoji}
+            <span className="game__choice-name">{t(animal.nameKey)}</span>
+          </>
+        )}
+      />
 
-      {answered && feedbackMode === 'parent-tap' && (
+      {locked && feedbackMode === 'parent-tap' && (
         <button className="game__next" onClick={advance}>{t('common.next')}</button>
       )}
     </main>
