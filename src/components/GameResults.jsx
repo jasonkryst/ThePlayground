@@ -1,7 +1,10 @@
 import { useTranslation } from 'react-i18next'
 import './GameResults.css'
 
-export default function GameResults({ score, total, missed, onPlayAgain, onHome, renderMissedItem }) {
+export default function GameResults({
+  score, total, missed, onPlayAgain, onHome, renderMissedItem,
+  offerDifficultyBump = false, numChoices, onAcceptDifficultyBump, onDismissDifficultyBump,
+}) {
   const { t } = useTranslation()
   return (
     <div className="results">
@@ -19,6 +22,20 @@ export default function GameResults({ score, total, missed, onPlayAgain, onHome,
               <li key={`${item.id}-${i}`}>{renderMissedItem(item)}</li>
             ))}
           </ul>
+        </div>
+      )}
+
+      {offerDifficultyBump && (
+        <div className="results__difficulty-offer">
+          <div className="results__label">{t('common.difficultyOfferHeading', { count: numChoices + 1 })}</div>
+          <div className="results__actions">
+            <button className="results__btn results__btn--play" onClick={onAcceptDifficultyBump}>
+              {t('common.difficultyOfferAccept')}
+            </button>
+            <button className="results__btn results__btn--home" onClick={onDismissDifficultyBump}>
+              {t('common.difficultyOfferDismiss')}
+            </button>
+          </div>
         </div>
       )}
 

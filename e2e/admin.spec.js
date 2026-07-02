@@ -4,12 +4,18 @@ import AxeBuilder from '@axe-core/playwright'
 test('admin settings persist after reload', async ({ page }) => {
   await page.goto('/admin')
   await page.getByLabel("Child's Name").fill('Mia')
-  await page.getByRole('radio', { name: '4' }).check()
+
+  // "Answer Choices" and "Retry Attempts" both have a radio named "4", so scope
+  // from the section heading rather than using an unscoped role query.
+  const answerChoicesRadio4 = page.getByRole('heading', { name: 'Answer Choices' })
+    .locator('xpath=..')
+    .getByRole('radio', { name: '4', exact: true })
+  await answerChoicesRadio4.check()
 
   await page.reload()
 
   await expect(page.getByLabel("Child's Name")).toHaveValue('Mia')
-  await expect(page.getByRole('radio', { name: '4' })).toBeChecked()
+  await expect(answerChoicesRadio4).toBeChecked()
 })
 
 test('admin page has no accessibility violations', async ({ page }) => {
@@ -20,6 +26,7 @@ test('admin page has no accessibility violations', async ({ page }) => {
 
 test('admin tag override persists across page reload', async ({ page }) => {
   await page.goto('/admin')
+  await page.getByRole('tab', { name: /games/i }).click()
 
   const input = page.getByLabel('Tags for Animal Sounds')
   await input.clear()
@@ -38,5 +45,31 @@ test('admin tag override persists across page reload', async ({ page }) => {
   }).toEqual(['numbers', 'math'])
 
   await page.reload()
+  await page.getByRole('tab', { name: /games/i }).click()
   await expect(page.getByLabel('Tags for Animal Sounds')).toHaveValue('numbers, math')
+})
+
+test('new engine settings persist after reload', async ({ page }) => {
+  await page.goto('/admin')
+
+  // Scope to the "Timer Display" section — "Off" is rendered by six different
+  // toggle sections on this page, so an unscoped button lookup is ambiguous.
+  const timerSection = page.getByRole('heading', { name: 'Timer Display' }).locator('xpath=..')
+  await timerSection.getByRole('button', { name: 'Off', exact: true }).click()
+  await timerSection.getByRole('button', { name: '⏱️ On' }).click() // force a write back to true
+
+  // "Retry Attempts" and "Answer Choices" share radios named "2"/"3"/"4", so scope
+  // from the section heading rather than using an unscoped role query.
+  await page.getByRole('heading', { name: 'Retry Attempts' })
+    .locator('xpath=..')
+    .getByRole('radio', { name: 'Unlimited' })
+    .check()
+
+  await page.reload()
+
+  await expect(
+    page.getByRole('heading', { name: 'Retry Attempts' })
+      .locator('xpath=..')
+      .getByRole('radio', { name: 'Unlimited' })
+  ).toBeChecked()
 })

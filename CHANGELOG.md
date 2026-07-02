@@ -3,6 +3,22 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.6.0] - 2026-07-01
+
+### Added
+- **Timer display** — a running stopwatch shown next to each question, togglable in admin settings.
+- **Retry attempts** — a configurable number of wrong taps (None / 1-5 / Unlimited) allowed before a question locks in as missed; wrong choices become disabled but stay visible so the child can try again.
+- **Hints** — after a configurable number of wrong taps, the correct answer is highlighted without locking the question.
+- **Retry counts toward streak** — configurable whether a correct-after-retry keeps the answer streak alive.
+- **Spaced repetition queue** — missed items reappear a few questions later in the same session, replacing a not-yet-asked item so session length stays fixed.
+- **Difficulty auto-progression** — after a perfect session (with the setting enabled), the results screen offers to raise the number of answer choices by 1.
+- 7 new settings: `timerDisplayEnabled`, `maxTries`, `hintsEnabled`, `hintAfterWrongTaps`, `retryCountsAsStreak`, `spacedRepetitionEnabled`, `difficultyAutoProgressionEnabled`.
+- `Timer`, `GameChoiceGrid` shared components.
+- `attemptNumber` field on each timing entry.
+
+### Changed
+- `useGameSession`'s `answered` field is renamed to `locked`, and gains `disabledChoiceIds`/`hintActive`. Both games updated to match.
+
 ## [0.5.0] - 2026-06-30
 
 ### Added

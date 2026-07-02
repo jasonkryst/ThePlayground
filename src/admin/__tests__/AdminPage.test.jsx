@@ -1,11 +1,15 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { axe } from 'jest-axe'
 import AdminPage from '../AdminPage'
 
-const mockSettingsDefaults = { numChoices: 2, feedbackMode: 'immediate', questionsPerSession: 10, childName: '', animationsEnabled: true }
+const mockSettingsDefaults = {
+  numChoices: 2, feedbackMode: 'immediate', questionsPerSession: 10, childName: '', animationsEnabled: true,
+  timerDisplayEnabled: true, maxTries: 'none', hintsEnabled: false, hintAfterWrongTaps: 2,
+  retryCountsAsStreak: true, spacedRepetitionEnabled: false, difficultyAutoProgressionEnabled: false,
+}
 const mockUpdateSetting = vi.fn()
 const mockResetSettings = vi.fn()
 
@@ -64,7 +68,9 @@ describe('AdminPage', () => {
 
   it('calls updateSetting when a radio changes', async () => {
     render(<MemoryRouter><AdminPage /></MemoryRouter>)
-    const radioFor4 = screen.getByRole('radio', { name: '4' })
+    const answerChoicesSection = screen.getByText(/answer choices/i).closest('.admin__section')
+    const { getByRole } = within(answerChoicesSection)
+    const radioFor4 = getByRole('radio', { name: '4' })
     await userEvent.click(radioFor4)
     expect(mockUpdateSetting).toHaveBeenCalledWith('numChoices', 4)
   })
@@ -85,9 +91,76 @@ describe('AdminPage', () => {
 
   it('renders the animations toggle and calls updateSetting when clicked', async () => {
     render(<MemoryRouter><AdminPage /></MemoryRouter>)
-    expect(screen.getByText(/celebration animations/i)).toBeInTheDocument()
-    await userEvent.click(screen.getByRole('button', { name: /off/i }))
+    const animationsSection = screen.getByText(/celebration animations/i).closest('.admin__section')
+    expect(animationsSection).toBeInTheDocument()
+    const { getByRole } = within(animationsSection)
+    await userEvent.click(getByRole('button', { name: /off/i }))
     expect(mockUpdateSetting).toHaveBeenCalledWith('animationsEnabled', false)
+  })
+
+  it('renders the timer display toggle and calls updateSetting when turned off', async () => {
+    render(<MemoryRouter><AdminPage /></MemoryRouter>)
+    const timerSection = screen.getByText(/timer display/i).closest('.admin__section')
+    expect(timerSection).toBeInTheDocument()
+    const { getByRole } = within(timerSection)
+    await userEvent.click(getByRole('button', { name: /^off$/i }))
+    expect(mockUpdateSetting).toHaveBeenCalledWith('timerDisplayEnabled', false)
+  })
+
+  it('renders the retry attempts radio group and calls updateSetting when changed', async () => {
+    render(<MemoryRouter><AdminPage /></MemoryRouter>)
+    const retrySection = screen.getByText(/retry attempts/i).closest('.admin__section')
+    expect(retrySection).toBeInTheDocument()
+    const { getByRole } = within(retrySection)
+    await userEvent.click(getByRole('radio', { name: '3' }))
+    expect(mockUpdateSetting).toHaveBeenCalledWith('maxTries', 3)
+  })
+
+  it('calls updateSetting with "unlimited" when that option is selected', async () => {
+    render(<MemoryRouter><AdminPage /></MemoryRouter>)
+    await userEvent.click(screen.getByRole('radio', { name: /unlimited/i }))
+    expect(mockUpdateSetting).toHaveBeenCalledWith('maxTries', 'unlimited')
+  })
+
+  it('renders the hints toggle and only shows hintAfterWrongTaps when hints are on', async () => {
+    render(<MemoryRouter><AdminPage /></MemoryRouter>)
+    expect(screen.queryByText(/show hint after/i)).not.toBeInTheDocument()
+  })
+
+  it('renders hintAfterWrongTaps when hintsEnabled is true', async () => {
+    mockSettingsDefaults.hintsEnabled = true
+    render(<MemoryRouter><AdminPage /></MemoryRouter>)
+    expect(screen.getByText(/show hint after/i)).toBeInTheDocument()
+    mockSettingsDefaults.hintsEnabled = false
+  })
+
+  it('calls updateSetting when the hints toggle is turned on', async () => {
+    render(<MemoryRouter><AdminPage /></MemoryRouter>)
+    const hintsSection = screen.getByRole('heading', { name: /hints/i }).closest('.admin__section')
+    const { getByRole } = within(hintsSection)
+    await userEvent.click(getByRole('button', { name: /💡.*on/i }))
+    expect(mockUpdateSetting).toHaveBeenCalledWith('hintsEnabled', true)
+  })
+
+  it('renders the retry-counts-as-streak toggle', () => {
+    render(<MemoryRouter><AdminPage /></MemoryRouter>)
+    expect(screen.getByText(/retry counts toward streak/i)).toBeInTheDocument()
+  })
+
+  it('renders the spaced repetition toggle and calls updateSetting when turned on', async () => {
+    render(<MemoryRouter><AdminPage /></MemoryRouter>)
+    const spacedRepSection = screen.getByText(/spaced repetition/i).closest('.admin__section')
+    const { getByRole } = within(spacedRepSection)
+    await userEvent.click(getByRole('button', { name: /^on$/i }))
+    expect(mockUpdateSetting).toHaveBeenCalledWith('spacedRepetitionEnabled', true)
+  })
+
+  it('renders the difficulty auto-progression toggle and calls updateSetting when turned on', async () => {
+    render(<MemoryRouter><AdminPage /></MemoryRouter>)
+    const section = screen.getByText(/difficulty auto-progression/i).closest('.admin__section')
+    const { getByRole } = within(section)
+    await userEvent.click(getByRole('button', { name: /^on$/i }))
+    expect(mockUpdateSetting).toHaveBeenCalledWith('difficultyAutoProgressionEnabled', true)
   })
 
   it('has no accessibility violations', async () => {

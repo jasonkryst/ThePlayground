@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import useSettings from '../hooks/useSettings'
@@ -8,7 +8,7 @@ import './AdminPage.css'
 
 export default function AdminPage({ manifests = [] }) {
   const { t } = useTranslation()
-  const { settings, updateSetting, resetSettings } = useSettings()
+  const { settings, loaded, updateSetting, resetSettings } = useSettings()
   const { getAllScores } = useScores()
 
   const [activeTab, setActiveTab] = useState('settings')
@@ -21,6 +21,21 @@ export default function AdminPage({ manifests = [] }) {
       })
     )
   )
+
+  // Settings load asynchronously after mount; the tagDraft initializer above
+  // runs before that resolves, so it captures manifest defaults instead of
+  // any persisted overrides. Re-sync once loaded flips true (a single
+  // one-time transition), so persisted tag overrides actually appear.
+  useEffect(() => {
+    if (!loaded) return
+    setTagDraft(Object.fromEntries(
+      manifests.map(m => {
+        const effective = (settings.tagOverrides ?? {})[m.id] ?? m.tags ?? []
+        return [m.id, { value: effective.join(', '), error: false }]
+      })
+    ))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loaded])
 
   function handleTagChange(gameId, value) {
     setTagDraft(d => ({ ...d, [gameId]: { value } }))
@@ -182,6 +197,138 @@ export default function AdminPage({ manifests = [] }) {
                 aria-label={t('admin.gaLabel')}
                 spellCheck={false}
               />
+            </div>
+
+            <div className="admin__section">
+              <h2>{t('admin.timerDisplayHeading')}</h2>
+              <div className="admin__toggle">
+                <button
+                  className={`admin__toggle-btn${settings.timerDisplayEnabled ? ' active' : ''}`}
+                  onClick={() => updateSetting('timerDisplayEnabled', true)}
+                >
+                  {t('admin.timerDisplayOn')}
+                </button>
+                <button
+                  className={`admin__toggle-btn${!settings.timerDisplayEnabled ? ' active' : ''}`}
+                  onClick={() => updateSetting('timerDisplayEnabled', false)}
+                >
+                  {t('admin.timerDisplayOff')}
+                </button>
+              </div>
+            </div>
+
+            <div className="admin__section">
+              <h2>{t('admin.maxTriesHeading')}</h2>
+              <p className="admin__hint">{t('admin.maxTriesHint')}</p>
+              <div className="admin__radios">
+                {['none', 1, 2, 3, 4, 5, 'unlimited'].map(value => (
+                  <label
+                    key={value}
+                    className={`admin__radio-label${settings.maxTries === value ? ' selected' : ''}`}
+                  >
+                    <input
+                      type="radio"
+                      name="maxTries"
+                      checked={settings.maxTries === value}
+                      onChange={() => updateSetting('maxTries', value)}
+                      aria-label={value === 'none' ? t('admin.maxTriesNone') : value === 'unlimited' ? t('admin.maxTriesUnlimited') : String(value)}
+                    />
+                    {value === 'none' ? t('admin.maxTriesNone') : value === 'unlimited' ? t('admin.maxTriesUnlimited') : value}
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div className="admin__section">
+              <h2>{t('admin.hintsHeading')}</h2>
+              <div className="admin__toggle">
+                <button
+                  className={`admin__toggle-btn${settings.hintsEnabled ? ' active' : ''}`}
+                  onClick={() => updateSetting('hintsEnabled', true)}
+                >
+                  {t('admin.hintsOn')}
+                </button>
+                <button
+                  className={`admin__toggle-btn${!settings.hintsEnabled ? ' active' : ''}`}
+                  onClick={() => updateSetting('hintsEnabled', false)}
+                >
+                  {t('admin.hintsOff')}
+                </button>
+              </div>
+              {settings.hintsEnabled && (
+                <div className="admin__radios">
+                  <h3>{t('admin.hintAfterWrongTapsHeading')}</h3>
+                  {[1, 2, 3, 4, 5].map(n => (
+                    <label
+                      key={n}
+                      className={`admin__radio-label${settings.hintAfterWrongTaps === n ? ' selected' : ''}`}
+                    >
+                      <input
+                        type="radio"
+                        name="hintAfterWrongTaps"
+                        checked={settings.hintAfterWrongTaps === n}
+                        onChange={() => updateSetting('hintAfterWrongTaps', n)}
+                        aria-label={String(n)}
+                      />
+                      {n}
+                    </label>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="admin__section">
+              <h2>{t('admin.retryStreakHeading')}</h2>
+              <div className="admin__toggle">
+                <button
+                  className={`admin__toggle-btn${settings.retryCountsAsStreak ? ' active' : ''}`}
+                  onClick={() => updateSetting('retryCountsAsStreak', true)}
+                >
+                  {t('admin.retryStreakOn')}
+                </button>
+                <button
+                  className={`admin__toggle-btn${!settings.retryCountsAsStreak ? ' active' : ''}`}
+                  onClick={() => updateSetting('retryCountsAsStreak', false)}
+                >
+                  {t('admin.retryStreakOff')}
+                </button>
+              </div>
+            </div>
+
+            <div className="admin__section">
+              <h2>{t('admin.spacedRepetitionHeading')}</h2>
+              <div className="admin__toggle">
+                <button
+                  className={`admin__toggle-btn${settings.spacedRepetitionEnabled ? ' active' : ''}`}
+                  onClick={() => updateSetting('spacedRepetitionEnabled', true)}
+                >
+                  {t('admin.spacedRepetitionOn')}
+                </button>
+                <button
+                  className={`admin__toggle-btn${!settings.spacedRepetitionEnabled ? ' active' : ''}`}
+                  onClick={() => updateSetting('spacedRepetitionEnabled', false)}
+                >
+                  {t('admin.spacedRepetitionOff')}
+                </button>
+              </div>
+            </div>
+
+            <div className="admin__section">
+              <h2>{t('admin.difficultyAutoProgressionHeading')}</h2>
+              <div className="admin__toggle">
+                <button
+                  className={`admin__toggle-btn${settings.difficultyAutoProgressionEnabled ? ' active' : ''}`}
+                  onClick={() => updateSetting('difficultyAutoProgressionEnabled', true)}
+                >
+                  {t('admin.difficultyAutoProgressionOn')}
+                </button>
+                <button
+                  className={`admin__toggle-btn${!settings.difficultyAutoProgressionEnabled ? ' active' : ''}`}
+                  onClick={() => updateSetting('difficultyAutoProgressionEnabled', false)}
+                >
+                  {t('admin.difficultyAutoProgressionOff')}
+                </button>
+              </div>
             </div>
 
             <button className="admin__reset" onClick={resetSettings}>

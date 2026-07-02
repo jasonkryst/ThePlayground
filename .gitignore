@@ -38,3 +38,6 @@ storybook-static/
 *.njsproj
 *.sln
 *.sw?
+
+# superpowers subagent-driven-development scratch state
+.superpowers/

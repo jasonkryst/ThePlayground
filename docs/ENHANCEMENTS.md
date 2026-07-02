@@ -6,6 +6,13 @@ Ideas for future development. Not committed to any timeline.
 
 ## Recently Completed
 
+### v0.6.0 — Game Engine Core (2026-07-01)
+- **Timer display** — running stopwatch shown next to each question, togglable in admin settings
+- **Retry attempts (maxTries)** — configurable number of wrong taps allowed before a question locks in as missed
+- **Hint system** — highlights the correct answer after a configurable number of wrong taps, without locking the question
+- **Spaced repetition queue** — missed items reappear a few questions later in the same session
+- **Difficulty auto-progression** — offers to raise the number of answer choices by 1 after a perfect session
+
 ### v0.5.0 — Dashboard Enhancements (2026-06-30)
 - **Recently Played badge** — GameCards show a glow highlight and "Today · N plays" badge for games played today, yesterday, or within the past week
 - **Daily Challenge hero card** — date-seeded featured game shown above the dashboard grid each day; hidden when a category filter is active
@@ -63,10 +70,7 @@ Ideas for future development. Not committed to any timeline.
 
 ## Core Game Engine
 
-- **Timer display** — surface `currentElapsedMs` from `useGameSession` as a progress bar or countdown; the data is already captured, just needs a UI component
-- **Spaced repetition queue** — weight `buildQueue` to re-ask recently missed items more often within a session, rather than a pure random shuffle
-- **Difficulty auto-progression** — after a perfect session, automatically offer to increase `numChoices` by 1 (up to the max); gives a natural growth curve
-- **Hint system** — after two wrong taps on the same question, highlight the correct answer; `useGameSession` already tracks `answered` state to key off
+- **Answer within N seconds** — enforce `timeLimitMs`/`onTimeout` (already wired as unused parameters in `useGameSession`, reserved during the v0.6.0 timer work) as a configurable per-question time limit, pairing with the existing timer display
 - **Sound effects layer** — shared audio feedback (chime on correct, low tone on wrong) independent of game-specific audio; configurable in admin alongside animations
 - **Per-session "personal best"** — compare the current session's score and speed against the stored best; show a "New record!" banner on the results screen using the `timings` data already saved
 

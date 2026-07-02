@@ -2,6 +2,8 @@ import { useTranslation } from 'react-i18next'
 import useGameSession from '../../hooks/useGameSession'
 import StreakBadge from '../../components/StreakBadge'
 import GameResults from '../../components/GameResults'
+import GameChoiceGrid from '../../components/GameChoiceGrid'
+import Timer from '../../components/Timer'
 import colors from './data/colors'
 import manifest from './manifest.json'
 import './ColorMatchGame.css'
@@ -11,8 +13,10 @@ const BORDERED_IDS = new Set(['white', 'gray'])
 export default function ColorMatchGame({ onGameEnd }) {
   const { t } = useTranslation()
   const {
-    current, index, total, answered, selected, score, streak, missed, done,
-    feedbackMode, handleChoice, advance, restart,
+    current, index, total, locked, disabledChoiceIds, hintActive, selected,
+    score, streak, missed, done, feedbackMode, handleChoice, advance, restart,
+    currentElapsedMs, timerDisplayEnabled, offerDifficultyBump, numChoices,
+    acceptDifficultyBump, dismissDifficultyBump,
   } = useGameSession({ gameId: 'color-match', items: colors })
 
   if (done) {
@@ -32,6 +36,10 @@ export default function ColorMatchGame({ onGameEnd }) {
             {t(color.nameKey)}
           </>
         )}
+        offerDifficultyBump={offerDifficultyBump}
+        numChoices={numChoices}
+        onAcceptDifficultyBump={acceptDifficultyBump}
+        onDismissDifficultyBump={dismissDifficultyBump}
       />
     )
   }
@@ -53,35 +61,31 @@ export default function ColorMatchGame({ onGameEnd }) {
         <div className="game__progress">{t('common.progress', { current: index + 1, total })}</div>
         <div className="game__prompt">{t('colorMatch.prompt')}</div>
         <div className="game__swatch" style={{ background: current.correct.color }} />
+        {timerDisplayEnabled && <Timer elapsedMs={currentElapsedMs} />}
       </div>
 
-      <div className="game__choices">
-        {current.choices.map(color => {
-          const isSelected = selected === color.id
-          const isCorrect  = color.id === current.correct.id
-          let cls = 'game__choice'
-          if (BORDERED_IDS.has(color.id)) cls += ' game__choice--bordered'
-          if (answered && isSelected && isCorrect)  cls += ' correct'
-          if (answered && isSelected && !isCorrect) cls += ' wrong'
-          if (answered && !isSelected && isCorrect) cls += ' highlight-correct'
-
-          return (
-            <button
-              key={color.id}
-              className={cls}
-              style={{ background: color.color, color: color.textColor }}
-              disabled={answered}
-              onClick={() => handleChoice(color)}
-              data-color-id={color.id}
-            >
-              {color.emoji}
-              <span className="game__choice-name">{t(color.nameKey)}</span>
-            </button>
-          )
+      <GameChoiceGrid
+        choices={current.choices}
+        correctId={current.correct.id}
+        selected={selected}
+        locked={locked}
+        disabledChoiceIds={disabledChoiceIds}
+        hintActive={hintActive}
+        onChoose={handleChoice}
+        getChoiceProps={color => ({
+          style: { background: color.color, color: color.textColor },
+          className: BORDERED_IDS.has(color.id) ? 'game__choice--bordered' : undefined,
+          'data-color-id': color.id,
         })}
-      </div>
+        renderChoiceContent={color => (
+          <>
+            {color.emoji}
+            <span className="game__choice-name">{t(color.nameKey)}</span>
+          </>
+        )}
+      />
 
-      {answered && feedbackMode === 'parent-tap' && (
+      {locked && feedbackMode === 'parent-tap' && (
         <button className="game__next" onClick={advance}>{t('common.next')}</button>
       )}
     </main>
