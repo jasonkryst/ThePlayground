@@ -56,3 +56,4 @@ button {
 .correct { animation: pulse-green 0.6s ease forwards; background: #a5d6a7 !important; }
 .wrong   { animation: shake-red   0.6s ease forwards; }
 .highlight-correct { background: #a5d6a7 !important; }
+.game__choice--disabled-wrong { opacity: 0.45; filter: grayscale(60%); animation: shake-red 0.6s ease; }

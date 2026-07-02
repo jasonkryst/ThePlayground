@@ -1,0 +1,81 @@
+import { render, screen } from '@testing-library/react'
+import { describe, it, expect, vi } from 'vitest'
+import { axe } from 'jest-axe'
+import GameChoiceGrid from '../GameChoiceGrid'
+
+const choices = [{ id: 'a' }, { id: 'b' }, { id: 'c' }]
+
+function renderGrid(props = {}) {
+  return render(
+    <GameChoiceGrid
+      choices={choices}
+      correctId="a"
+      selected={null}
+      locked={false}
+      disabledChoiceIds={[]}
+      hintActive={false}
+      onChoose={vi.fn()}
+      getChoiceProps={item => ({ 'data-choice-id': item.id })}
+      renderChoiceContent={item => item.id.toUpperCase()}
+      {...props}
+    />
+  )
+}
+
+describe('GameChoiceGrid', () => {
+  it('renders one button per choice', () => {
+    renderGrid()
+    expect(screen.getAllByRole('button')).toHaveLength(3)
+  })
+
+  it('calls onChoose with the tapped item', async () => {
+    const onChoose = vi.fn()
+    renderGrid({ onChoose })
+    screen.getByText('A').click()
+    expect(onChoose).toHaveBeenCalledWith(choices[0])
+  })
+
+  it('applies extra props from getChoiceProps', () => {
+    renderGrid()
+    expect(screen.getByText('A').closest('button')).toHaveAttribute('data-choice-id', 'a')
+  })
+
+  it('disables all choices when locked', () => {
+    renderGrid({ locked: true })
+    for (const btn of screen.getAllByRole('button')) {
+      expect(btn).toBeDisabled()
+    }
+  })
+
+  it('disables only the wrong-tapped choice when not locked', () => {
+    renderGrid({ disabledChoiceIds: ['b'] })
+    expect(screen.getByText('B').closest('button')).toBeDisabled()
+    expect(screen.getByText('A').closest('button')).not.toBeDisabled()
+  })
+
+  it('marks a disabled wrong choice with the disabled-wrong class, not locked', () => {
+    renderGrid({ disabledChoiceIds: ['b'] })
+    expect(screen.getByText('B').closest('button')).toHaveClass('game__choice--disabled-wrong')
+  })
+
+  it('shows correct/wrong classes only once locked', () => {
+    renderGrid({ locked: true, selected: 'b', disabledChoiceIds: ['b'] })
+    expect(screen.getByText('A').closest('button')).toHaveClass('highlight-correct')
+    expect(screen.getByText('B').closest('button')).toHaveClass('wrong')
+  })
+
+  it('shows highlight-correct when hintActive is true even if not locked', () => {
+    renderGrid({ hintActive: true })
+    expect(screen.getByText('A').closest('button')).toHaveClass('highlight-correct')
+  })
+
+  it('does not show highlight-correct when neither locked nor hintActive', () => {
+    renderGrid()
+    expect(screen.getByText('A').closest('button')).not.toHaveClass('highlight-correct')
+  })
+
+  it('has no accessibility violations', async () => {
+    const { container } = renderGrid()
+    expect(await axe(container)).toHaveNoViolations()
+  })
+})
