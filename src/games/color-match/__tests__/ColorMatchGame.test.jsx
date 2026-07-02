@@ -6,23 +6,35 @@ import ColorMatchGame from '../index'
 
 vi.mock('../../../lib/confetti', () => ({ fireConfetti: vi.fn() }))
 
-vi.mock('../../../hooks/useBestStreak', () => ({
-  default: () => ({ bestStreak: 0, recordStreak: vi.fn().mockResolvedValue(undefined) }),
-}))
+let mockSettings = {
+  numChoices: 2, feedbackMode: 'immediate', questionsPerSession: 3,
+  maxTries: 'none', hintsEnabled: false, hintAfterWrongTaps: 2, retryCountsAsStreak: true,
+  spacedRepetitionEnabled: false, difficultyAutoProgressionEnabled: false, timerDisplayEnabled: true,
+}
+const mockUpdateSetting = vi.fn()
 
 vi.mock('../../../hooks/useSettings', () => ({
-  default: () => ({
-    settings: { numChoices: 2, feedbackMode: 'immediate', questionsPerSession: 3 },
-  }),
+  default: () => ({ settings: mockSettings, updateSetting: mockUpdateSetting }),
 }))
 
 vi.mock('../../../hooks/useScores', () => ({
   default: () => ({ addScore: vi.fn().mockResolvedValue(undefined), scores: [], getBestScore: () => 0, getScoresByGame: () => [], getAllScores: () => [] }),
 }))
 
+vi.mock('../../../hooks/useBestStreak', () => ({
+  default: () => ({ bestStreak: 0, recordStreak: vi.fn().mockResolvedValue(undefined) }),
+}))
+
 const onGameEnd = vi.fn()
 
-beforeEach(() => { vi.clearAllMocks() })
+beforeEach(() => {
+  vi.clearAllMocks()
+  mockSettings = {
+    numChoices: 2, feedbackMode: 'immediate', questionsPerSession: 3,
+    maxTries: 'none', hintsEnabled: false, hintAfterWrongTaps: 2, retryCountsAsStreak: true,
+    spacedRepetitionEnabled: false, difficultyAutoProgressionEnabled: false, timerDisplayEnabled: true,
+  }
+})
 
 describe('ColorMatchGame', () => {
   it('renders a question with a swatch and answer buttons', async () => {
@@ -106,7 +118,7 @@ describe('ColorMatchGame', () => {
     }
 
     vi.useRealTimers()
-    expect(screen.getByText(/2/)).toBeInTheDocument()
+    expect(screen.getByText(/2 in a row/i)).toBeInTheDocument()
   })
 
   it('shows missed colors in the results screen when an answer is wrong', async () => {
@@ -124,5 +136,45 @@ describe('ColorMatchGame', () => {
 
     vi.useRealTimers()
     expect(screen.getByText(/let's practice/i)).toBeInTheDocument()
+  })
+
+  it('shows the timer when timerDisplayEnabled is true', async () => {
+    await act(async () => { render(<ColorMatchGame onGameEnd={onGameEnd} />) })
+    expect(screen.getByLabelText(/elapsed time/i)).toBeInTheDocument()
+  })
+
+  it('hides the timer when timerDisplayEnabled is false', async () => {
+    mockSettings = { ...mockSettings, timerDisplayEnabled: false }
+    await act(async () => { render(<ColorMatchGame onGameEnd={onGameEnd} />) })
+    expect(screen.queryByLabelText(/elapsed time/i)).not.toBeInTheDocument()
+  })
+
+  it('allows a retry when maxTries permits it, without locking the question', async () => {
+    mockSettings = { ...mockSettings, feedbackMode: 'parent-tap', maxTries: 2, numChoices: 3 }
+    await act(async () => { render(<ColorMatchGame onGameEnd={onGameEnd} />) })
+
+    const buttons = screen.getAllByRole('button').filter(b => b.dataset.colorId)
+    const correctId = screen.getByTestId('correct-color-id').textContent
+    const wrongBtn = buttons.find(b => b.dataset.colorId !== correctId)
+    await act(async () => { await userEvent.click(wrongBtn) })
+
+    expect(wrongBtn).toBeDisabled()
+    const correctBtn = buttons.find(b => b.dataset.colorId === correctId)
+    expect(correctBtn).not.toBeDisabled()
+  })
+
+  it('shows the difficulty-offer banner after a perfect session when enabled', async () => {
+    mockSettings = { ...mockSettings, feedbackMode: 'parent-tap', difficultyAutoProgressionEnabled: true, questionsPerSession: 3, numChoices: 2 }
+    await act(async () => { render(<ColorMatchGame onGameEnd={onGameEnd} />) })
+
+    for (let i = 0; i < 3; i++) {
+      const buttons = screen.getAllByRole('button').filter(b => b.dataset.colorId)
+      const correctId = screen.getByTestId('correct-color-id').textContent
+      const correctBtn = buttons.find(b => b.dataset.colorId === correctId)
+      await act(async () => { await userEvent.click(correctBtn) })
+      await act(async () => { await userEvent.click(screen.getByRole('button', { name: /next/i })) })
+    }
+
+    expect(screen.getByText(/perfect session/i)).toBeInTheDocument()
   })
 })
