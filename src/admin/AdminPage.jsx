@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import useSettings from '../hooks/useSettings'
@@ -8,7 +8,7 @@ import './AdminPage.css'
 
 export default function AdminPage({ manifests = [] }) {
   const { t } = useTranslation()
-  const { settings, updateSetting, resetSettings } = useSettings()
+  const { settings, loaded, updateSetting, resetSettings } = useSettings()
   const { getAllScores } = useScores()
 
   const [activeTab, setActiveTab] = useState('settings')
@@ -21,6 +21,21 @@ export default function AdminPage({ manifests = [] }) {
       })
     )
   )
+
+  // Settings load asynchronously after mount; the tagDraft initializer above
+  // runs before that resolves, so it captures manifest defaults instead of
+  // any persisted overrides. Re-sync once loaded flips true (a single
+  // one-time transition), so persisted tag overrides actually appear.
+  useEffect(() => {
+    if (!loaded) return
+    setTagDraft(Object.fromEntries(
+      manifests.map(m => {
+        const effective = (settings.tagOverrides ?? {})[m.id] ?? m.tags ?? []
+        return [m.id, { value: effective.join(', '), error: false }]
+      })
+    ))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [loaded])
 
   function handleTagChange(gameId, value) {
     setTagDraft(d => ({ ...d, [gameId]: { value } }))

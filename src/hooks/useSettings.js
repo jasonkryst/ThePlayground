@@ -4,12 +4,14 @@ import { DEFAULT_SETTINGS } from '../storage/index'
 
 export default function useSettings() {
   const [settings, setSettings] = useState({ ...DEFAULT_SETTINGS })
+  const [loaded, setLoaded] = useState(false)
   const settingsRef = useRef(settings)
 
   useEffect(() => {
     adapter.getSettings().then(loaded => {
       settingsRef.current = loaded
       setSettings(loaded)
+      setLoaded(true)
     })
   }, [])
 
@@ -25,5 +27,5 @@ export default function useSettings() {
     await adapter.saveSettings({ ...DEFAULT_SETTINGS })
   }
 
-  return { settings, updateSetting, resetSettings }
+  return { settings, loaded, updateSetting, resetSettings }
 }
