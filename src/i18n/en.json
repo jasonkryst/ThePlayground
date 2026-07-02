@@ -11,7 +11,9 @@
     "difficultyOfferHeading": "Perfect session! Try {{count}} choices next time?",
     "difficultyOfferAccept": "Yes, level up!",
     "difficultyOfferDismiss": "Not yet",
-    "timerAriaLabel": "Elapsed time: {{seconds}} seconds"
+    "timerAriaLabel": "Elapsed time: {{seconds}} seconds",
+    "gameIntroStart": "Let's Play!",
+    "gameIntroDontShowAgain": "Don't show this again"
   },
   "dashboard": {
     "titleDefault": "Baby's Playground",
