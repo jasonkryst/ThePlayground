@@ -13,6 +13,7 @@ export const DEFAULT_SETTINGS = {
   retryCountsAsStreak: true,
   spacedRepetitionEnabled: false,
   difficultyAutoProgressionEnabled: false,
+  introDismissed: {},
 }
 
 /**
@@ -30,8 +31,9 @@ export const DEFAULT_SETTINGS = {
  *     attemptNumber added in v0.6.0 (1 = first tap, 2 = first retry, etc.); older records omit it
  * Settings shape: { numChoices, feedbackMode, questionsPerSession, gaId, childName, animationsEnabled, tagOverrides,
  *                    timerDisplayEnabled, maxTries, hintsEnabled, hintAfterWrongTaps, retryCountsAsStreak,
- *                    spacedRepetitionEnabled, difficultyAutoProgressionEnabled }
+ *                    spacedRepetitionEnabled, difficultyAutoProgressionEnabled, introDismissed }
  *   maxTries: 'none' | 1 | 2 | 3 | 4 | 5 | 'unlimited' — 'none' reproduces pre-v0.6.0 behavior (locks on first wrong tap)
+ *   introDismissed: { [gameId: string]: true } — gameIds present here permanently suppress that game's how-to-play intro
  *
  * Best-streak adapter methods (added for per-game streak tracking):
  * getBestStreaks()            → Promise<{ [gameId: string]: number }>

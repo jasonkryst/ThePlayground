@@ -13,10 +13,12 @@ let mockSettings = {
   timerDisplayEnabled: true,
   maxTries: 'none', hintsEnabled: false, hintAfterWrongTaps: 2, retryCountsAsStreak: true,
   spacedRepetitionEnabled: false, difficultyAutoProgressionEnabled: false,
+  introDismissed: {},
 }
+let mockLoaded = true
 
 vi.mock('../useSettings', () => ({
-  default: () => ({ settings: mockSettings, updateSetting: mockUpdateSetting }),
+  default: () => ({ settings: mockSettings, loaded: mockLoaded, updateSetting: mockUpdateSetting }),
 }))
 
 vi.mock('../useScores', () => ({
@@ -43,11 +45,13 @@ function setSettings(overrides) {
 
 beforeEach(() => {
   vi.clearAllMocks()
+  mockLoaded = true
   mockSettings = {
     numChoices: 2, feedbackMode: 'parent-tap', questionsPerSession: 3, animationsEnabled: true,
     timerDisplayEnabled: true,
     maxTries: 'none', hintsEnabled: false, hintAfterWrongTaps: 2, retryCountsAsStreak: true,
     spacedRepetitionEnabled: false, difficultyAutoProgressionEnabled: false,
+    introDismissed: {},
   }
 })
 
@@ -539,5 +543,84 @@ describe('useGameSession — difficulty auto-progression', () => {
     await act(async () => { result.current.restart() })
 
     expect(result.current.offerDifficultyBump).toBe(false)
+  })
+})
+
+describe('useGameSession — how-to-play intro', () => {
+  it('shows the intro on initial mount when the game has no introDismissed entry', async () => {
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.settingsLoaded).toBe(true))
+    expect(result.current.showIntro).toBe(true)
+  })
+
+  it('does not show the intro when introDismissed is set for this gameId', async () => {
+    setSettings({ introDismissed: { 'test-game': true } })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.settingsLoaded).toBe(true))
+    expect(result.current.showIntro).toBe(false)
+  })
+
+  it('shows the intro when only a different gameId is dismissed', async () => {
+    setSettings({ introDismissed: { 'other-game': true } })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.settingsLoaded).toBe(true))
+    expect(result.current.showIntro).toBe(true)
+  })
+
+  it('settingsLoaded and showIntro are both false before settings resolve', () => {
+    mockLoaded = false
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    expect(result.current.settingsLoaded).toBe(false)
+    expect(result.current.showIntro).toBe(false)
+  })
+
+  it('dismissIntro(false) hides the intro without persisting a setting', async () => {
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.showIntro).toBe(true))
+
+    await act(async () => { result.current.dismissIntro(false) })
+
+    expect(result.current.showIntro).toBe(false)
+    expect(mockUpdateSetting).not.toHaveBeenCalled()
+  })
+
+  it('dismissIntro(true) hides the intro and persists introDismissed for this gameId', async () => {
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.showIntro).toBe(true))
+
+    await act(async () => { result.current.dismissIntro(true) })
+
+    expect(result.current.showIntro).toBe(false)
+    expect(mockUpdateSetting).toHaveBeenCalledWith('introDismissed', { 'test-game': true })
+  })
+
+  it('dismissIntro(true) preserves other games\' existing introDismissed entries', async () => {
+    setSettings({ introDismissed: { 'other-game': true } })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.showIntro).toBe(true))
+
+    await act(async () => { result.current.dismissIntro(true) })
+
+    expect(mockUpdateSetting).toHaveBeenCalledWith('introDismissed', { 'other-game': true, 'test-game': true })
+  })
+
+  it('showIntro does not reappear after restart()', async () => {
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.showIntro).toBe(true))
+
+    await act(async () => { result.current.dismissIntro(false) })
+    await act(async () => { result.current.restart() })
+
+    expect(result.current.showIntro).toBe(false)
+  })
+
+  it('setDontShowAgain toggles the dontShowAgain flag, defaulting to false', async () => {
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.settingsLoaded).toBe(true))
+    expect(result.current.dontShowAgain).toBe(false)
+
+    act(() => { result.current.setDontShowAgain(true) })
+
+    expect(result.current.dontShowAgain).toBe(true)
   })
 })
