@@ -221,6 +221,13 @@ Accessible from the dashboard via the gear icon (⚙).
 | Feedback mode | Immediate | Immediate, Parent tap |
 | Questions per session | 10 | 5, 10, 15, 20 |
 | Celebration animations | On | On, Off |
+| Timer display | On | On, Off |
+| Retry attempts | None | None, 1, 2, 3, 4, 5, Unlimited |
+| Hints | Off | On, Off |
+| Show hint after | 2 | 1, 2, 3, 4, 5 (only shown when Hints is On) |
+| Retry counts toward streak | On | On, Off |
+| Spaced repetition | Off | On, Off |
+| Difficulty auto-progression | Off | On, Off |
 | Google Analytics ID | *(empty)* | Any valid GA4 Measurement ID (e.g. `G-XXXXXXXXXX`) |
 
 **Immediate** — correct/wrong feedback shown instantly; next question advances automatically after 1.5 s.
@@ -232,6 +239,18 @@ Accessible from the dashboard via the gear icon (⚙).
 **Child's Name** — when set, the dashboard title reads "<Name>'s Playground"; when left blank, it shows the default "Baby's Playground".
 
 **Celebration animations** — when on, a confetti burst plays on every correct answer and the game header shows the current answer streak once it reaches 2; the end-of-game screen lists any missed items. Turning this off disables the confetti only — streak tracking and the missed-items summary remain.
+
+**Timer display** — shows a running stopwatch next to the question, counting up from 0 each time a new question appears. Purely informational; there is no time limit today.
+
+**Retry attempts** — how many wrong taps are allowed on a question before it locks in as missed. "None" reproduces the original behavior (locks on the very first wrong tap). Each wrong choice becomes disabled (but stays visible) so the child can try a different one.
+
+**Hints** — when on, the correct answer is highlighted once the child has reached "Show hint after" wrong taps on the current question, without locking it.
+
+**Retry counts toward streak** — when on, getting a question right after 1+ wrong taps still counts toward the answer streak. When off, a correct-after-retry still scores as correct but resets the streak to 0.
+
+**Spaced repetition** — when on, a missed item reappears a few questions later in the same session (replacing one of the not-yet-asked items, so the session length stays the same).
+
+**Difficulty auto-progression** — when on, finishing a session with a perfect score offers to raise Answer Choices by 1 (up to the maximum of 4) on the results screen.
 
 ---
 
