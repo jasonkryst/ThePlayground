@@ -10,7 +10,8 @@
     "missedHeading": "Let's practice these next time:",
     "difficultyOfferHeading": "Perfect session! Try {{count}} choices next time?",
     "difficultyOfferAccept": "Yes, level up!",
-    "difficultyOfferDismiss": "Not yet"
+    "difficultyOfferDismiss": "Not yet",
+    "timerAriaLabel": "Elapsed time: {{seconds}} seconds"
   },
   "dashboard": {
     "titleDefault": "Baby's Playground",

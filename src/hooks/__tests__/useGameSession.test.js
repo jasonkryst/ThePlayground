@@ -10,6 +10,7 @@ const { mockAddScore, mockFireConfetti, mockRecordStreak, mockUpdateSetting } = 
 
 let mockSettings = {
   numChoices: 2, feedbackMode: 'parent-tap', questionsPerSession: 3, animationsEnabled: true,
+  timerDisplayEnabled: true,
   maxTries: 'none', hintsEnabled: false, hintAfterWrongTaps: 2, retryCountsAsStreak: true,
   spacedRepetitionEnabled: false, difficultyAutoProgressionEnabled: false,
 }
@@ -44,6 +45,7 @@ beforeEach(() => {
   vi.clearAllMocks()
   mockSettings = {
     numChoices: 2, feedbackMode: 'parent-tap', questionsPerSession: 3, animationsEnabled: true,
+    timerDisplayEnabled: true,
     maxTries: 'none', hintsEnabled: false, hintAfterWrongTaps: 2, retryCountsAsStreak: true,
     spacedRepetitionEnabled: false, difficultyAutoProgressionEnabled: false,
   }
@@ -422,6 +424,22 @@ describe('useGameSession — spaced repetition', () => {
       await act(async () => { result.current.advance() })
     }
     expect(seenCorrectIds.filter(id => id === missedCorrect.id)).toHaveLength(0)
+  })
+
+  it('stays locked after a wrong tap that triggers reinsertion (parent-tap mode)', async () => {
+    // Regression test: reinsertMissed() gives the queue a new array reference,
+    // which must not re-trigger the per-question reset effect and undo the
+    // setLocked(true) that handleChoice just applied for this same question.
+    setSettings({ spacedRepetitionEnabled: true, questionsPerSession: 4, feedbackMode: 'parent-tap' })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.total).toBe(4))
+
+    const missedCorrect = result.current.current.correct
+    const wrongItem = result.current.current.choices.find(c => c.id !== missedCorrect.id)
+    await act(async () => { result.current.handleChoice(wrongItem) })
+
+    expect(result.current.locked).toBe(true)
+    expect(result.current.index).toBe(0)
   })
 })
 

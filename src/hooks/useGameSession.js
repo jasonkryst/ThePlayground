@@ -50,6 +50,7 @@ export default function useGameSession({ gameId, items, timeLimitMs, onTimeout }
   const disabledChoiceIdsRef = useRef([])
   const questionStartRef = useRef(Date.now())
   const onTimeoutRef    = useRef(onTimeout)
+  const pendingReinsertRef = useRef(null)
   useEffect(() => { onTimeoutRef.current = onTimeout })
 
   useEffect(() => {
@@ -72,9 +73,11 @@ export default function useGameSession({ gameId, items, timeLimitMs, onTimeout }
     setDisabledChoiceIds([])
     setCurrentElapsedMs(0)
 
-    const intervalId = setInterval(() => {
-      setCurrentElapsedMs(Date.now() - questionStartRef.current)
-    }, 100)
+    const intervalId = (timerDisplayEnabled || timeLimitMs)
+      ? setInterval(() => {
+          setCurrentElapsedMs(Date.now() - questionStartRef.current)
+        }, 100)
+      : null
 
     const timeoutId = timeLimitMs
       ? setTimeout(() => {
@@ -86,7 +89,7 @@ export default function useGameSession({ gameId, items, timeLimitMs, onTimeout }
       clearInterval(intervalId)
       if (timeoutId) clearTimeout(timeoutId)
     }
-  }, [index, queue, timeLimitMs])
+  }, [index, queue, timeLimitMs, timerDisplayEnabled])
 
   const current = queue[index]
   const hintActive = hintsEnabled && !locked && wrongAttempts >= hintAfterWrongTaps
@@ -141,8 +144,11 @@ export default function useGameSession({ gameId, items, timeLimitMs, onTimeout }
         setMissed(missedRef.current)
 
         if (spacedRepetitionEnabled) {
-          queueRef.current = reinsertMissed(queueRef.current, indexRef.current, current)
-          setQueue(queueRef.current)
+          // Deferred to advance() rather than applied here: mutating `queue`
+          // now would change the per-question effect's `queue` dependency
+          // while `index` stays the same, re-running it and immediately
+          // undoing the `setLocked(true)` below.
+          pendingReinsertRef.current = { missedIndex: indexRef.current, missedEntry: current }
         }
 
         willLock = true
@@ -159,6 +165,13 @@ export default function useGameSession({ gameId, items, timeLimitMs, onTimeout }
   }
 
   function advance() {
+    if (pendingReinsertRef.current) {
+      const { missedIndex, missedEntry } = pendingReinsertRef.current
+      queueRef.current = reinsertMissed(queueRef.current, missedIndex, missedEntry)
+      setQueue(queueRef.current)
+      pendingReinsertRef.current = null
+    }
+
     const nextIndex = indexRef.current + 1
     if (nextIndex >= queueRef.current.length) {
       finishGame()
@@ -215,6 +228,7 @@ export default function useGameSession({ gameId, items, timeLimitMs, onTimeout }
     indexRef.current = 0
     timingsRef.current = []
     lockedRef.current = false
+    pendingReinsertRef.current = null
     wrongAttemptsRef.current = 0
     disabledChoiceIdsRef.current = []
     const q = buildQueue(items, numChoices, questionsPerSession)
