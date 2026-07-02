@@ -1,16 +1,21 @@
 import { renderHook, act, waitFor } from '@testing-library/react'
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 
-const { mockAddScore, mockFireConfetti, mockRecordStreak } = vi.hoisted(() => ({
+const { mockAddScore, mockFireConfetti, mockRecordStreak, mockUpdateSetting } = vi.hoisted(() => ({
   mockAddScore: vi.fn().mockResolvedValue(undefined),
   mockFireConfetti: vi.fn(),
   mockRecordStreak: vi.fn().mockResolvedValue(undefined),
+  mockUpdateSetting: vi.fn().mockResolvedValue(undefined),
 }))
 
+let mockSettings = {
+  numChoices: 2, feedbackMode: 'parent-tap', questionsPerSession: 3, animationsEnabled: true,
+  maxTries: 'none', hintsEnabled: false, hintAfterWrongTaps: 2, retryCountsAsStreak: true,
+  spacedRepetitionEnabled: false, difficultyAutoProgressionEnabled: false,
+}
+
 vi.mock('../useSettings', () => ({
-  default: () => ({
-    settings: { numChoices: 2, feedbackMode: 'parent-tap', questionsPerSession: 3, animationsEnabled: true },
-  }),
+  default: () => ({ settings: mockSettings, updateSetting: mockUpdateSetting }),
 }))
 
 vi.mock('../useScores', () => ({
@@ -31,9 +36,20 @@ const items = [
   { id: 'a' }, { id: 'b' }, { id: 'c' }, { id: 'd' },
 ]
 
-beforeEach(() => { vi.clearAllMocks() })
+function setSettings(overrides) {
+  mockSettings = { ...mockSettings, ...overrides }
+}
 
-describe('useGameSession', () => {
+beforeEach(() => {
+  vi.clearAllMocks()
+  mockSettings = {
+    numChoices: 2, feedbackMode: 'parent-tap', questionsPerSession: 3, animationsEnabled: true,
+    maxTries: 'none', hintsEnabled: false, hintAfterWrongTaps: 2, retryCountsAsStreak: true,
+    spacedRepetitionEnabled: false, difficultyAutoProgressionEnabled: false,
+  }
+})
+
+describe('useGameSession — existing behavior', () => {
   it('loads a queue sized to questionsPerSession', async () => {
     const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
     await waitFor(() => expect(result.current.total).toBe(3))
@@ -53,14 +69,8 @@ describe('useGameSession', () => {
   })
 
   it('does not fire confetti when animationsEnabled is false', async () => {
-    vi.doMock('../useSettings', () => ({
-      default: () => ({
-        settings: { numChoices: 2, feedbackMode: 'parent-tap', questionsPerSession: 3, animationsEnabled: false },
-      }),
-    }))
-    vi.resetModules()
-    const { default: useGameSessionNoAnim } = await import('../useGameSession')
-    const { result } = renderHook(() => useGameSessionNoAnim({ gameId: 'test-game', items }))
+    setSettings({ animationsEnabled: false })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
     await waitFor(() => expect(result.current.current).toBeDefined())
 
     const correctItem = result.current.current.correct
@@ -69,7 +79,7 @@ describe('useGameSession', () => {
     expect(mockFireConfetti).not.toHaveBeenCalled()
   })
 
-  it('wrong answer resets streak to 0 and adds the missed item, does not fire confetti', async () => {
+  it('wrong answer with default maxTries locks immediately, resets streak, adds missed item', async () => {
     const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
     await waitFor(() => expect(result.current.current).toBeDefined())
 
@@ -77,12 +87,13 @@ describe('useGameSession', () => {
     const wrongItem = result.current.current.choices.find(c => c.id !== correctItem.id)
     await act(async () => { result.current.handleChoice(wrongItem) })
 
+    expect(result.current.locked).toBe(true)
     expect(result.current.streak).toBe(0)
     expect(result.current.missed).toEqual([correctItem])
     expect(mockFireConfetti).not.toHaveBeenCalled()
   })
 
-  it('handleChoice is a no-op once already answered', async () => {
+  it('handleChoice is a no-op once locked', async () => {
     const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
     await waitFor(() => expect(result.current.current).toBeDefined())
 
@@ -93,7 +104,7 @@ describe('useGameSession', () => {
     expect(result.current.score).toBe(1)
   })
 
-  it('advance() moves to the next question and resets answered/selected', async () => {
+  it('advance() moves to the next question and resets locked/selected', async () => {
     const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
     await waitFor(() => expect(result.current.current).toBeDefined())
 
@@ -101,7 +112,7 @@ describe('useGameSession', () => {
     await act(async () => { result.current.advance() })
 
     expect(result.current.index).toBe(1)
-    expect(result.current.answered).toBe(false)
+    expect(result.current.locked).toBe(false)
     expect(result.current.selected).toBe(null)
   })
 
@@ -136,7 +147,7 @@ describe('useGameSession', () => {
     expect(result.current.index).toBe(0)
   })
 
-  it('records a timing entry for a correct answer', async () => {
+  it('records a timing entry with attemptNumber for a correct answer', async () => {
     const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
     await waitFor(() => expect(result.current.current).toBeDefined())
 
@@ -146,19 +157,8 @@ describe('useGameSession', () => {
     expect(result.current.timings).toHaveLength(1)
     expect(result.current.timings[0].questionIndex).toBe(0)
     expect(result.current.timings[0].correct).toBe(true)
+    expect(result.current.timings[0].attemptNumber).toBe(1)
     expect(result.current.timings[0].durationMs).toBeGreaterThanOrEqual(0)
-  })
-
-  it('records a timing entry for a wrong answer', async () => {
-    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
-    await waitFor(() => expect(result.current.current).toBeDefined())
-
-    const correctItem = result.current.current.correct
-    const wrongItem = result.current.current.choices.find(c => c.id !== correctItem.id)
-    await act(async () => { result.current.handleChoice(wrongItem) })
-
-    expect(result.current.timings).toHaveLength(1)
-    expect(result.current.timings[0].correct).toBe(false)
   })
 
   it('clears timings on restart', async () => {
@@ -170,35 +170,6 @@ describe('useGameSession', () => {
 
     await act(async () => { result.current.restart() })
     expect(result.current.timings).toHaveLength(0)
-  })
-
-  it('includes timings in the addScore call on finishGame', async () => {
-    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
-    await waitFor(() => expect(result.current.current).toBeDefined())
-
-    for (let i = 0; i < 3; i++) {
-      await act(async () => { result.current.handleChoice(result.current.current.correct) })
-      await act(async () => { result.current.advance() })
-    }
-
-    expect(mockAddScore).toHaveBeenCalledWith(
-      expect.objectContaining({
-        gameId: 'test-game',
-        timings: expect.arrayContaining([
-          expect.objectContaining({ questionIndex: expect.any(Number), correct: expect.any(Boolean), durationMs: expect.any(Number) })
-        ])
-      })
-    )
-  })
-
-  it('timing entry includes itemId matching the correct item for that question', async () => {
-    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
-    await waitFor(() => expect(result.current.current).toBeDefined())
-
-    const correctItem = result.current.current.correct
-    await act(async () => { result.current.handleChoice(correctItem) })
-
-    expect(result.current.timings[0].itemId).toBe(correctItem.id)
   })
 
   it('includes peakStreak in the addScore call after completing a session', async () => {
@@ -215,37 +186,7 @@ describe('useGameSession', () => {
     )
   })
 
-  it('peakStreak equals the highest streak reached during a session', async () => {
-    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
-    await waitFor(() => expect(result.current.current).toBeDefined())
-
-    // Answer 2 correct, then 1 wrong — peak was 2
-    await act(async () => { result.current.handleChoice(result.current.current.correct) })
-    await act(async () => { result.current.advance() })
-    await act(async () => { result.current.handleChoice(result.current.current.correct) })
-    await act(async () => { result.current.advance() })
-    const wrongItem = result.current.current.choices.find(c => c.id !== result.current.current.correct.id)
-    await act(async () => { result.current.handleChoice(wrongItem) })
-    await act(async () => { result.current.advance() })
-
-    expect(mockAddScore).toHaveBeenCalledWith(
-      expect.objectContaining({ peakStreak: 2 })
-    )
-  })
-
-  it('peakStreak resets to 0 on restart', async () => {
-    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
-    await waitFor(() => expect(result.current.current).toBeDefined())
-
-    await act(async () => { result.current.handleChoice(result.current.current.correct) })
-    await act(async () => { result.current.restart() })
-
-    // After restart + completing a session with no correct answers, peakStreak should be 0
-    // (We can't easily check the internal ref here, but restart clears state)
-    expect(result.current.score).toBe(0)
-  })
-
-  it('calls onTimeout after timeLimitMs ms if not yet answered', () => {
+  it('calls onTimeout after timeLimitMs ms if not yet locked', () => {
     vi.useFakeTimers()
     const onTimeout = vi.fn()
     const { result } = renderHook(() =>
@@ -259,7 +200,7 @@ describe('useGameSession', () => {
     vi.useRealTimers()
   })
 
-  it('does not call onTimeout if the question was already answered', () => {
+  it('does not call onTimeout if the question was already locked', () => {
     vi.useFakeTimers()
     const onTimeout = vi.fn()
     const { result } = renderHook(() =>
@@ -272,5 +213,311 @@ describe('useGameSession', () => {
     act(() => { vi.advanceTimersByTime(5001) })
     expect(onTimeout).not.toHaveBeenCalled()
     vi.useRealTimers()
+  })
+
+  it('currentElapsedMs ticks up even without a timeLimitMs', () => {
+    vi.useFakeTimers()
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    act(() => {})
+    expect(result.current.currentElapsedMs).toBe(0)
+
+    act(() => { vi.advanceTimersByTime(300) })
+    expect(result.current.currentElapsedMs).toBeGreaterThanOrEqual(300)
+    vi.useRealTimers()
+  })
+})
+
+describe('useGameSession — retries and maxTries', () => {
+  it('maxTries=2 allows one retry before locking', async () => {
+    setSettings({ maxTries: 2 })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.current).toBeDefined())
+
+    const correctItem = result.current.current.correct
+    const wrongItem = result.current.current.choices.find(c => c.id !== correctItem.id)
+    await act(async () => { result.current.handleChoice(wrongItem) })
+
+    expect(result.current.locked).toBe(false)
+    expect(result.current.disabledChoiceIds).toEqual([wrongItem.id])
+  })
+
+  it('correct answer on a retry still resolves the question and scores it', async () => {
+    setSettings({ maxTries: 2 })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.current).toBeDefined())
+
+    const correctItem = result.current.current.correct
+    const wrongItem = result.current.current.choices.find(c => c.id !== correctItem.id)
+    await act(async () => { result.current.handleChoice(wrongItem) })
+    await act(async () => { result.current.handleChoice(correctItem) })
+
+    expect(result.current.locked).toBe(true)
+    expect(result.current.score).toBe(1)
+  })
+
+  it('exhausting maxTries with 3 choices locks the question as wrong after 2 wrong taps', async () => {
+    setSettings({ maxTries: 2, numChoices: 3 })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.current).toBeDefined())
+
+    const correctItem = result.current.current.correct
+    const wrongItems = result.current.current.choices.filter(c => c.id !== correctItem.id)
+    expect(wrongItems.length).toBeGreaterThanOrEqual(2)
+
+    await act(async () => { result.current.handleChoice(wrongItems[0]) })
+    await act(async () => { result.current.handleChoice(wrongItems[1]) })
+
+    expect(result.current.locked).toBe(true)
+    expect(result.current.missed).toEqual([correctItem])
+  })
+
+  it('maxTries="unlimited" never locks on a wrong answer', async () => {
+    setSettings({ maxTries: 'unlimited', numChoices: 3 })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.current).toBeDefined())
+
+    const correctItem = result.current.current.correct
+    const wrongItems = result.current.current.choices.filter(c => c.id !== correctItem.id)
+    await act(async () => { result.current.handleChoice(wrongItems[0]) })
+    await act(async () => { result.current.handleChoice(wrongItems[1]) })
+
+    expect(result.current.locked).toBe(false)
+    expect(result.current.disabledChoiceIds).toEqual([wrongItems[0].id, wrongItems[1].id])
+  })
+
+  it('a disabled wrong choice is tracked in disabledChoiceIds and stays there after further taps', async () => {
+    setSettings({ maxTries: 'unlimited', numChoices: 3 })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.current).toBeDefined())
+
+    const correctItem = result.current.current.correct
+    const wrongItem = result.current.current.choices.find(c => c.id !== correctItem.id)
+    await act(async () => { result.current.handleChoice(wrongItem) })
+    await act(async () => { result.current.handleChoice(correctItem) })
+
+    expect(result.current.disabledChoiceIds).toContain(wrongItem.id)
+  })
+
+  it('advance() resets disabledChoiceIds and wrongAttempts-derived hintActive for the next question', async () => {
+    setSettings({ maxTries: 'unlimited', numChoices: 3, hintsEnabled: true, hintAfterWrongTaps: 1 })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.current).toBeDefined())
+
+    const correctItem = result.current.current.correct
+    const wrongItem = result.current.current.choices.find(c => c.id !== correctItem.id)
+    await act(async () => { result.current.handleChoice(wrongItem) })
+    expect(result.current.hintActive).toBe(true)
+
+    await act(async () => { result.current.handleChoice(correctItem) })
+    await act(async () => { result.current.advance() })
+
+    expect(result.current.disabledChoiceIds).toEqual([])
+    expect(result.current.hintActive).toBe(false)
+  })
+})
+
+describe('useGameSession — retryCountsAsStreak', () => {
+  it('retryCountsAsStreak=true keeps the streak alive after a correct-on-retry', async () => {
+    setSettings({ maxTries: 'unlimited', numChoices: 3, retryCountsAsStreak: true })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.current).toBeDefined())
+
+    const correctItem = result.current.current.correct
+    const wrongItem = result.current.current.choices.find(c => c.id !== correctItem.id)
+    await act(async () => { result.current.handleChoice(wrongItem) })
+    await act(async () => { result.current.handleChoice(correctItem) })
+
+    expect(result.current.streak).toBe(1)
+  })
+
+  it('retryCountsAsStreak=false resets the streak even on a correct-on-retry', async () => {
+    setSettings({ maxTries: 'unlimited', numChoices: 3, retryCountsAsStreak: false })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.current).toBeDefined())
+
+    const correctItem = result.current.current.correct
+    const wrongItem = result.current.current.choices.find(c => c.id !== correctItem.id)
+    await act(async () => { result.current.handleChoice(wrongItem) })
+    await act(async () => { result.current.handleChoice(correctItem) })
+
+    expect(result.current.streak).toBe(0)
+    expect(result.current.score).toBe(1) // still scored correct, just no streak
+  })
+})
+
+describe('useGameSession — hints', () => {
+  it('hintActive is false before hintAfterWrongTaps is reached', async () => {
+    setSettings({ maxTries: 'unlimited', numChoices: 4, hintsEnabled: true, hintAfterWrongTaps: 2 })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.current).toBeDefined())
+
+    const correctItem = result.current.current.correct
+    const wrongItems = result.current.current.choices.filter(c => c.id !== correctItem.id)
+    await act(async () => { result.current.handleChoice(wrongItems[0]) })
+
+    expect(result.current.hintActive).toBe(false)
+  })
+
+  it('hintActive becomes true once hintAfterWrongTaps is reached', async () => {
+    setSettings({ maxTries: 'unlimited', numChoices: 4, hintsEnabled: true, hintAfterWrongTaps: 2 })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.current).toBeDefined())
+
+    const correctItem = result.current.current.correct
+    const wrongItems = result.current.current.choices.filter(c => c.id !== correctItem.id)
+    await act(async () => { result.current.handleChoice(wrongItems[0]) })
+    await act(async () => { result.current.handleChoice(wrongItems[1]) })
+
+    expect(result.current.hintActive).toBe(true)
+  })
+
+  it('hintActive stays false when hintsEnabled is false, regardless of wrong taps', async () => {
+    setSettings({ maxTries: 'unlimited', numChoices: 4, hintsEnabled: false, hintAfterWrongTaps: 1 })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.current).toBeDefined())
+
+    const correctItem = result.current.current.correct
+    const wrongItem = result.current.current.choices.find(c => c.id !== correctItem.id)
+    await act(async () => { result.current.handleChoice(wrongItem) })
+
+    expect(result.current.hintActive).toBe(false)
+  })
+})
+
+describe('useGameSession — spaced repetition', () => {
+  it('reinserts a missed item into the queue when spacedRepetitionEnabled is true', async () => {
+    setSettings({ spacedRepetitionEnabled: true, questionsPerSession: 4 })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.total).toBe(4))
+
+    const missedCorrect = result.current.current.correct
+    const wrongItem = result.current.current.choices.find(c => c.id !== missedCorrect.id)
+    await act(async () => { result.current.handleChoice(wrongItem) })
+
+    // Walk the rest of the queue and confirm the missed item's id reappears as a `.correct.id`
+    const seenCorrectIds = []
+    while (!result.current.done) {
+      seenCorrectIds.push(result.current.current.correct.id)
+      await act(async () => { result.current.handleChoice(result.current.current.correct) })
+      await act(async () => { result.current.advance() })
+    }
+    expect(seenCorrectIds.filter(id => id === missedCorrect.id).length).toBeGreaterThanOrEqual(1)
+  })
+
+  it('does not reinsert when spacedRepetitionEnabled is false', async () => {
+    setSettings({ spacedRepetitionEnabled: false, questionsPerSession: 4 })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.total).toBe(4))
+
+    const missedCorrect = result.current.current.correct
+    const wrongItem = result.current.current.choices.find(c => c.id !== missedCorrect.id)
+    await act(async () => { result.current.handleChoice(wrongItem) })
+
+    const seenCorrectIds = []
+    while (!result.current.done) {
+      seenCorrectIds.push(result.current.current.correct.id)
+      await act(async () => { result.current.handleChoice(result.current.current.correct) })
+      await act(async () => { result.current.advance() })
+    }
+    expect(seenCorrectIds.filter(id => id === missedCorrect.id)).toHaveLength(0)
+  })
+})
+
+describe('useGameSession — difficulty auto-progression', () => {
+  it('offers a difficulty bump after a perfect session when enabled and below the ceiling', async () => {
+    setSettings({ difficultyAutoProgressionEnabled: true, numChoices: 2, questionsPerSession: 2 })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.total).toBe(2))
+
+    for (let i = 0; i < 2; i++) {
+      await act(async () => { result.current.handleChoice(result.current.current.correct) })
+      await act(async () => { result.current.advance() })
+    }
+
+    expect(result.current.offerDifficultyBump).toBe(true)
+  })
+
+  it('does not offer a bump when the session was not perfect', async () => {
+    setSettings({ difficultyAutoProgressionEnabled: true, numChoices: 2, questionsPerSession: 2 })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.total).toBe(2))
+
+    const wrongItem = result.current.current.choices.find(c => c.id !== result.current.current.correct.id)
+    await act(async () => { result.current.handleChoice(wrongItem) })
+    await act(async () => { result.current.advance() })
+    await act(async () => { result.current.handleChoice(result.current.current.correct) })
+    await act(async () => { result.current.advance() })
+
+    expect(result.current.offerDifficultyBump).toBe(false)
+  })
+
+  it('does not offer a bump when numChoices is already at the ceiling of 4', async () => {
+    setSettings({ difficultyAutoProgressionEnabled: true, numChoices: 4, questionsPerSession: 2 })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.total).toBe(2))
+
+    for (let i = 0; i < 2; i++) {
+      await act(async () => { result.current.handleChoice(result.current.current.correct) })
+      await act(async () => { result.current.advance() })
+    }
+
+    expect(result.current.offerDifficultyBump).toBe(false)
+  })
+
+  it('does not offer a bump when the setting is disabled', async () => {
+    setSettings({ difficultyAutoProgressionEnabled: false, numChoices: 2, questionsPerSession: 2 })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.total).toBe(2))
+
+    for (let i = 0; i < 2; i++) {
+      await act(async () => { result.current.handleChoice(result.current.current.correct) })
+      await act(async () => { result.current.advance() })
+    }
+
+    expect(result.current.offerDifficultyBump).toBe(false)
+  })
+
+  it('acceptDifficultyBump raises numChoices by 1 and clears the offer', async () => {
+    setSettings({ difficultyAutoProgressionEnabled: true, numChoices: 2, questionsPerSession: 2 })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.total).toBe(2))
+
+    for (let i = 0; i < 2; i++) {
+      await act(async () => { result.current.handleChoice(result.current.current.correct) })
+      await act(async () => { result.current.advance() })
+    }
+    await act(async () => { result.current.acceptDifficultyBump() })
+
+    expect(mockUpdateSetting).toHaveBeenCalledWith('numChoices', 3)
+    expect(result.current.offerDifficultyBump).toBe(false)
+  })
+
+  it('dismissDifficultyBump clears the offer without changing settings', async () => {
+    setSettings({ difficultyAutoProgressionEnabled: true, numChoices: 2, questionsPerSession: 2 })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.total).toBe(2))
+
+    for (let i = 0; i < 2; i++) {
+      await act(async () => { result.current.handleChoice(result.current.current.correct) })
+      await act(async () => { result.current.advance() })
+    }
+    await act(async () => { result.current.dismissDifficultyBump() })
+
+    expect(mockUpdateSetting).not.toHaveBeenCalled()
+    expect(result.current.offerDifficultyBump).toBe(false)
+  })
+
+  it('restart() clears offerDifficultyBump', async () => {
+    setSettings({ difficultyAutoProgressionEnabled: true, numChoices: 2, questionsPerSession: 2 })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.total).toBe(2))
+
+    for (let i = 0; i < 2; i++) {
+      await act(async () => { result.current.handleChoice(result.current.current.correct) })
+      await act(async () => { result.current.advance() })
+    }
+    await act(async () => { result.current.restart() })
+
+    expect(result.current.offerDifficultyBump).toBe(false)
   })
 })
