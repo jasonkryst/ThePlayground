@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from 'react'
 import useSettings from './useSettings'
 import useScores from './useScores'
 import useBestStreak from './useBestStreak'
+import usePersonalBest from './usePersonalBest'
+import useBadges from './useBadges'
 import { fireConfetti } from '../lib/confetti'
 import buildQueue from '../utils/buildQueue'
 import reinsertMissed from '../utils/reinsertMissed'
@@ -16,11 +18,14 @@ export default function useGameSession({ gameId, items }) {
   const { settings, loaded, updateSetting } = useSettings()
   const { addScore } = useScores()
   const { bestStreak, recordStreak } = useBestStreak(gameId)
+  const { personalBest, recordSession: recordPersonalBestSession } = usePersonalBest(gameId)
+  const { awardSession } = useBadges()
 
   const {
     numChoices, feedbackMode, questionsPerSession, animationsEnabled,
     timerMode, timeLimitSeconds, maxTries, hintsEnabled, hintAfterWrongTaps,
     retryCountsAsStreak, spacedRepetitionEnabled, difficultyAutoProgressionEnabled,
+    speedRecordMinAccuracy,
   } = settings
 
   const timeLimitMs = timerMode === 'countdown' ? timeLimitSeconds * 1000 : undefined
@@ -38,6 +43,8 @@ export default function useGameSession({ gameId, items }) {
   const [currentElapsedMs,     setCurrentElapsedMs]    = useState(0)
   const [timings,              setTimings]             = useState([])
   const [offerDifficultyBump,  setOfferDifficultyBump] = useState(false)
+  const [personalBestResult,  setPersonalBestResult]  = useState(null)
+  const [newBadges,           setNewBadges]            = useState([])
   const [timedOut,             setTimedOut]            = useState(false)
   const [showIntro,            setShowIntro]           = useState(false)
   const [introResolved,        setIntroResolved]       = useState(false)
@@ -238,10 +245,12 @@ export default function useGameSession({ gameId, items }) {
   }
 
   async function finishGame() {
+    const total = queueRef.current.length
+    const isPerfect = scoreRef.current === total
     const result = {
       gameId,
       score:      scoreRef.current,
-      total:      queueRef.current.length,
+      total,
       date:       new Date().toISOString().split('T')[0],
       timestamp:  Date.now(),
       timings:    timingsRef.current,
@@ -249,11 +258,17 @@ export default function useGameSession({ gameId, items }) {
     }
     await addScore(result)
 
-    if (
-      difficultyAutoProgressionEnabled &&
-      scoreRef.current === queueRef.current.length &&
-      numChoices < 4
-    ) {
+    const bestResult = await recordPersonalBestSession({
+      score: scoreRef.current, total, timings: timingsRef.current, minAccuracyPct: speedRecordMinAccuracy,
+    })
+    setPersonalBestResult(bestResult)
+
+    const earnedBadges = await awardSession(gameId, {
+      peakStreak: peakStreakRef.current, isPerfect, questionsAnswered: total,
+    })
+    setNewBadges(earnedBadges)
+
+    if (difficultyAutoProgressionEnabled && isPerfect && numChoices < 4) {
       setOfferDifficultyBump(true)
     }
 
@@ -295,6 +310,8 @@ export default function useGameSession({ gameId, items }) {
     setTimings([])
     setCurrentElapsedMs(0)
     setTimedOut(false)
+    setPersonalBestResult(null)
+    setNewBadges([])
     setOfferDifficultyBump(false)
   }
 
@@ -309,6 +326,7 @@ export default function useGameSession({ gameId, items }) {
     current, index, total: queue.length, locked, disabledChoiceIds, hintActive, selected,
     score, streak, bestStreak, missed, done, feedbackMode, numChoices,
     currentElapsedMs, timings, timerMode, timeLimitMs, timedOut, offerDifficultyBump,
+    personalBestResult, newBadges,
     showIntro, introResolved, settingsLoaded: loaded, dontShowAgain, setDontShowAgain,
     handleChoice, advance, restart, acceptDifficultyBump, dismissDifficultyBump, dismissIntro,
   }

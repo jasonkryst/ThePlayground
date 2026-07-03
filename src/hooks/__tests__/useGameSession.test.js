@@ -8,9 +8,15 @@ const { mockAddScore, mockFireConfetti, mockRecordStreak, mockUpdateSetting } = 
   mockUpdateSetting: vi.fn().mockResolvedValue(undefined),
 }))
 
+const mockRecordSession = vi.fn().mockResolvedValue({
+  accuracy: { isNewRecord: false, value: 0, previous: null },
+  speed: { isNewRecord: false, value: null, previous: null },
+})
+const mockAwardSession = vi.fn().mockResolvedValue([])
+
 let mockSettings = {
   numChoices: 2, feedbackMode: 'parent-tap', questionsPerSession: 3, animationsEnabled: true,
-  timerMode: 'countUp', timeLimitSeconds: 10,
+  timerMode: 'countUp', timeLimitSeconds: 10, speedRecordMinAccuracy: 70,
   maxTries: 'none', hintsEnabled: false, hintAfterWrongTaps: 2, retryCountsAsStreak: true,
   spacedRepetitionEnabled: false, difficultyAutoProgressionEnabled: false,
   introDismissed: {},
@@ -27,6 +33,14 @@ vi.mock('../useScores', () => ({
 
 vi.mock('../useBestStreak', () => ({
   default: () => ({ bestStreak: 4, recordStreak: mockRecordStreak }),
+}))
+
+vi.mock('../usePersonalBest', () => ({
+  default: () => ({ personalBest: null, recordSession: mockRecordSession }),
+}))
+
+vi.mock('../useBadges', () => ({
+  default: () => ({ badgeData: { awards: {}, lifetimeQuestions: {} }, awardSession: mockAwardSession }),
 }))
 
 vi.mock('../../lib/confetti', () => ({
@@ -46,9 +60,14 @@ function setSettings(overrides) {
 beforeEach(() => {
   vi.clearAllMocks()
   mockLoaded = true
+  mockRecordSession.mockResolvedValue({
+    accuracy: { isNewRecord: false, value: 0, previous: null },
+    speed: { isNewRecord: false, value: null, previous: null },
+  })
+  mockAwardSession.mockResolvedValue([])
   mockSettings = {
     numChoices: 2, feedbackMode: 'parent-tap', questionsPerSession: 3, animationsEnabled: true,
-    timerMode: 'countUp', timeLimitSeconds: 10,
+    timerMode: 'countUp', timeLimitSeconds: 10, speedRecordMinAccuracy: 70,
     maxTries: 'none', hintsEnabled: false, hintAfterWrongTaps: 2, retryCountsAsStreak: true,
     spacedRepetitionEnabled: false, difficultyAutoProgressionEnabled: false,
     introDismissed: {},
@@ -751,5 +770,99 @@ describe('useGameSession — countdown timer', () => {
     act(() => { vi.advanceTimersByTime(300) })
     expect(result.current.currentElapsedMs).toBeGreaterThanOrEqual(300)
     vi.useRealTimers()
+  })
+})
+
+describe('useGameSession — personal best and badges on finish', () => {
+  it('calls recordSession with the session summary and minAccuracyPct when the session finishes', async () => {
+    setSettings({ questionsPerSession: 2, speedRecordMinAccuracy: 80 })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.total).toBe(2))
+
+    for (let i = 0; i < 2; i++) {
+      await act(async () => { result.current.handleChoice(result.current.current.correct) })
+      await act(async () => { result.current.advance() })
+    }
+
+    expect(mockRecordSession).toHaveBeenCalledWith(
+      expect.objectContaining({ score: 2, total: 2, minAccuracyPct: 80 })
+    )
+  })
+
+  it('exposes personalBestResult once the session finishes', async () => {
+    mockRecordSession.mockResolvedValue({
+      accuracy: { isNewRecord: true, value: 1, previous: { ratio: 0.5, score: 1, total: 2, timestamp: 1 } },
+      speed: { isNewRecord: false, value: 900, previous: null },
+    })
+    setSettings({ questionsPerSession: 2 })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.total).toBe(2))
+
+    for (let i = 0; i < 2; i++) {
+      await act(async () => { result.current.handleChoice(result.current.current.correct) })
+      await act(async () => { result.current.advance() })
+    }
+
+    expect(result.current.personalBestResult.accuracy.isNewRecord).toBe(true)
+  })
+
+  it('personalBestResult is null before any session has finished', async () => {
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.current).toBeDefined())
+    expect(result.current.personalBestResult).toBe(null)
+  })
+
+  it('calls awardSession with peakStreak, isPerfect, and questionsAnswered when the session finishes', async () => {
+    setSettings({ questionsPerSession: 2 })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.total).toBe(2))
+
+    for (let i = 0; i < 2; i++) {
+      await act(async () => { result.current.handleChoice(result.current.current.correct) })
+      await act(async () => { result.current.advance() })
+    }
+
+    expect(mockAwardSession).toHaveBeenCalledWith('test-game', { peakStreak: 2, isPerfect: true, questionsAnswered: 2 })
+  })
+
+  it('exposes newBadges resolved from awardSession once the session finishes', async () => {
+    mockAwardSession.mockResolvedValue([{ id: 'perfectSession', category: 'perfect', icon: '🎯', nameKey: 'badges.perfectSession.name', descKey: 'badges.perfectSession.desc' }])
+    setSettings({ questionsPerSession: 2 })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.total).toBe(2))
+
+    for (let i = 0; i < 2; i++) {
+      await act(async () => { result.current.handleChoice(result.current.current.correct) })
+      await act(async () => { result.current.advance() })
+    }
+
+    expect(result.current.newBadges.map(b => b.id)).toEqual(['perfectSession'])
+  })
+
+  it('newBadges defaults to an empty array before any session has finished', () => {
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    expect(result.current.newBadges).toEqual([])
+  })
+
+  it('restart() clears personalBestResult and newBadges', async () => {
+    mockAwardSession.mockResolvedValue([{ id: 'perfectSession', category: 'perfect', icon: '🎯', nameKey: 'x', descKey: 'y' }])
+    mockRecordSession.mockResolvedValue({
+      accuracy: { isNewRecord: true, value: 1, previous: { ratio: 0.5, score: 1, total: 2, timestamp: 1 } },
+      speed: { isNewRecord: false, value: null, previous: null },
+    })
+    setSettings({ questionsPerSession: 2 })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.total).toBe(2))
+
+    for (let i = 0; i < 2; i++) {
+      await act(async () => { result.current.handleChoice(result.current.current.correct) })
+      await act(async () => { result.current.advance() })
+    }
+    expect(result.current.newBadges).toHaveLength(1)
+
+    await act(async () => { result.current.restart() })
+
+    expect(result.current.personalBestResult).toBe(null)
+    expect(result.current.newBadges).toEqual([])
   })
 })
