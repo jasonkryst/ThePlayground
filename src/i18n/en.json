@@ -84,9 +84,12 @@
     "gaHeading": "Google Analytics",
     "gaHint": "Enter your Measurement ID to enable analytics tracking.",
     "gaLabel": "Google Analytics Measurement ID",
-    "timerDisplayHeading": "Timer Display",
-    "timerDisplayOn": "⏱️ On",
-    "timerDisplayOff": "Off",
+    "timerHeading": "Timer",
+    "timerOff": "Off",
+    "timerCountUp": "⏱️ Show timer",
+    "timerCountdown": "Answer within {{seconds}}s",
+    "speedRecordThresholdHeading": "Speed Record Threshold",
+    "speedRecordThresholdHint": "Minimum session accuracy required for a new average-speed record to count.",
     "maxTriesHeading": "Retry Attempts",
     "maxTriesHint": "How many wrong taps are allowed before a question locks in as missed.",
     "maxTriesNone": "None",
@@ -115,7 +118,9 @@
     "tagsInputPlaceholder": "e.g. sounds, animals",
     "tagsSaveButton": "Save Tags",
     "tagsResetButton": "Reset",
-    "introReplayButton": "Replay Intro"
+    "introReplayButton": "Replay Intro",
+    "tabBadges": "Badges",
+    "badgesHeading": "Badges"
   },
   "scoreHistory": {
     "empty": "No scores yet — play a game!"
