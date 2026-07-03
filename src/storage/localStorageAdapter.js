@@ -3,6 +3,7 @@ import { DEFAULT_SETTINGS } from './adapter'
 const SCORES_KEY   = 'playground_scores'
 const SETTINGS_KEY = 'playground_settings'
 const STREAKS_KEY = 'playground_best_streaks'
+const PERSONAL_BESTS_KEY = 'playground_personal_bests'
 
 const localStorageAdapter = {
   async getScores() {
@@ -49,6 +50,19 @@ const localStorageAdapter = {
 
   async saveBestStreaks(streaks) {
     localStorage.setItem(STREAKS_KEY, JSON.stringify(streaks))
+  },
+
+  async getPersonalBests() {
+    try {
+      const parsed = JSON.parse(localStorage.getItem(PERSONAL_BESTS_KEY) || '{}')
+      return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {}
+    } catch {
+      return {}
+    }
+  },
+
+  async savePersonalBests(bests) {
+    localStorage.setItem(PERSONAL_BESTS_KEY, JSON.stringify(bests))
   },
 }
 
