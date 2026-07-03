@@ -1,8 +1,46 @@
 import { test, expect } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
 
+test('animal sounds: how-to-play intro shows on first visit and starts the session', async ({ page }) => {
+  await page.goto('/game/animal-sounds')
+
+  await expect(page.getByTestId('game-intro-start')).toBeVisible()
+  expect(await page.locator('[data-animal-id]').count()).toBe(0)
+
+  await page.getByTestId('game-intro-start').click()
+
+  await expect(page.locator('[data-animal-id]').first()).toBeVisible()
+})
+
+test('animal sounds: "don\'t show again" suppresses the intro on the next visit', async ({ page }) => {
+  await page.goto('/game/animal-sounds')
+  await page.getByTestId('game-intro-dont-show-again').click()
+  await page.getByTestId('game-intro-start').click()
+
+  await page.goto('/game/animal-sounds')
+  await expect(page.getByTestId('game-intro-start')).not.toBeVisible()
+  await expect(page.locator('[data-animal-id]').first()).toBeVisible()
+})
+
+test('animal sounds: intro does not reappear after Play Again in the same visit', async ({ page }) => {
+  await page.goto('/game/animal-sounds')
+  await page.getByTestId('game-intro-start').click()
+
+  for (let i = 0; i < 10; i++) {
+    if (await page.getByText(/you scored/i).isVisible()) break
+    await page.locator('[data-animal-id]').first().click()
+    await page.waitForTimeout(1600)
+  }
+  await expect(page.getByText(/you scored/i)).toBeVisible()
+
+  await page.getByRole('button', { name: 'Play Again' }).click()
+  await expect(page.getByTestId('game-intro-start')).not.toBeVisible()
+  await expect(page.locator('[data-animal-id]').first()).toBeVisible()
+})
+
 test('animal sounds: full play-through reaches results and returns home', async ({ page }) => {
   await page.goto('/game/animal-sounds')
+  await page.getByTestId('game-intro-start').click()
 
   for (let i = 0; i < 10; i++) {
     if (await page.getByText(/you scored/i).isVisible()) break
@@ -18,7 +56,15 @@ test('animal sounds: full play-through reaches results and returns home', async 
 
 test('animal sounds game screen has no accessibility violations', async ({ page }) => {
   await page.goto('/game/animal-sounds')
+  await page.getByTestId('game-intro-start').click()
   await page.locator('[data-animal-id]').first().waitFor()
+  const results = await new AxeBuilder({ page }).analyze()
+  expect(results.violations).toEqual([])
+})
+
+test('animal sounds: how-to-play intro screen has no accessibility violations', async ({ page }) => {
+  await page.goto('/game/animal-sounds')
+  await page.getByTestId('game-intro-start').waitFor()
   const results = await new AxeBuilder({ page }).analyze()
   expect(results.violations).toEqual([])
 })
@@ -39,6 +85,7 @@ test('animal sounds: a wrong tap with retries enabled does not lock the question
     .check() // maxTries=2
 
   await page.goto('/game/animal-sounds')
+  await page.getByTestId('game-intro-start').click()
 
   const choices = page.locator('[data-animal-id]')
   const correctId = await page.getByTestId('correct-animal-id').textContent()
