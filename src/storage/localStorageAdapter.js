@@ -24,7 +24,11 @@ const localStorageAdapter = {
     try {
       const parsed = JSON.parse(localStorage.getItem(SETTINGS_KEY) || '{}')
       const stored = parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {}
-      return { ...DEFAULT_SETTINGS, ...stored }
+      const migrated = { ...stored }
+      if (migrated.timerMode === undefined && migrated.timerDisplayEnabled !== undefined) {
+        migrated.timerMode = migrated.timerDisplayEnabled ? 'countUp' : 'off'
+      }
+      return { ...DEFAULT_SETTINGS, ...migrated }
     } catch {
       return { ...DEFAULT_SETTINGS }
     }

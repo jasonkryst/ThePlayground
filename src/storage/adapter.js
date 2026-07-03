@@ -6,7 +6,8 @@ export const DEFAULT_SETTINGS = {
   childName: '',
   animationsEnabled: true,
   tagOverrides: {},
-  timerDisplayEnabled: true,
+  timerMode: 'countUp',
+  timeLimitSeconds: 10,
   maxTries: 'none',
   hintsEnabled: false,
   hintAfterWrongTaps: 2,
@@ -14,6 +15,7 @@ export const DEFAULT_SETTINGS = {
   spacedRepetitionEnabled: false,
   difficultyAutoProgressionEnabled: false,
   introDismissed: {},
+  speedRecordMinAccuracy: 70,
 }
 
 /**
@@ -21,21 +23,33 @@ export const DEFAULT_SETTINGS = {
  *
  * getScores()              → Promise<Score[]>
  * addScore(score)          → Promise<void>
- * getSettings()            → Promise<Settings>
+ * getSettings()             → Promise<Settings>
  * saveSettings(settings)   → Promise<void>
  *
  * Score shape:   { gameId, score, total, date, timestamp, peakStreak?, timings? }
  *   peakStreak?: number — highest consecutive-correct run in that session (added v0.4.0)
- *   timings?: Array<{ questionIndex: number, itemId: string, correct: boolean, durationMs: number, attemptNumber: number }>
+ *   timings?: Array<{ questionIndex: number, itemId: string, correct: boolean, durationMs: number, attemptNumber: number, timedOut?: boolean }>
  *     itemId added in v0.4.0; older records omit it
  *     attemptNumber added in v0.6.0 (1 = first tap, 2 = first retry, etc.); older records omit it
+ *     timedOut added in v0.8.0 (true when the entry was recorded because the countdown ran out); older records omit it
  * Settings shape: { numChoices, feedbackMode, questionsPerSession, gaId, childName, animationsEnabled, tagOverrides,
- *                    timerDisplayEnabled, maxTries, hintsEnabled, hintAfterWrongTaps, retryCountsAsStreak,
- *                    spacedRepetitionEnabled, difficultyAutoProgressionEnabled, introDismissed }
+ *                    timerMode, timeLimitSeconds, maxTries, hintsEnabled, hintAfterWrongTaps, retryCountsAsStreak,
+ *                    spacedRepetitionEnabled, difficultyAutoProgressionEnabled, introDismissed, speedRecordMinAccuracy }
  *   maxTries: 'none' | 1 | 2 | 3 | 4 | 5 | 'unlimited' — 'none' reproduces pre-v0.6.0 behavior (locks on first wrong tap)
  *   introDismissed: { [gameId: string]: true } — gameIds present here permanently suppress that game's how-to-play intro
+ *   timerMode: 'off' | 'countUp' | 'countdown' — replaces the v0.6.0 boolean `timerDisplayEnabled` (added v0.8.0)
+ *   timeLimitSeconds: 5 | 10 | 15 | 20 — only enforced when timerMode === 'countdown' (added v0.8.0)
+ *   speedRecordMinAccuracy: 70 | 75 | 80 | 85 | 90 | 95 | 100 — minimum session accuracy % for a speed record to be eligible (added v0.8.0)
  *
  * Best-streak adapter methods (added for per-game streak tracking):
  * getBestStreaks()            → Promise<{ [gameId: string]: number }>
  * saveBestStreaks(streaksMap) → Promise<void>
+ *
+ * Personal-best adapter methods (added v0.8.0):
+ * getPersonalBests()           → Promise<{ [gameId: string]: { accuracy?: {...}, speedMs?: {...} } }>
+ * savePersonalBests(bestsMap)  → Promise<void>
+ *
+ * Badge adapter methods (added v0.8.0):
+ * getBadgeData()  → Promise<{ awards: { [gameId: string]: { [badgeId: string]: number } }, lifetimeQuestions: { [gameId: string]: number } }>
+ * saveBadgeData(data) → Promise<void>
  */
