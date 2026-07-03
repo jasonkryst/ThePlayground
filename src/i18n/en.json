@@ -150,5 +150,16 @@
     "black": { "name": "Black" },
     "white": { "name": "White" },
     "gray": { "name": "Gray" }
+  },
+  "badges": {
+    "hotStreak": { "name": "Hot Streak", "desc": "Reach a streak of 5 correct answers in a row." },
+    "onFire": { "name": "On Fire", "desc": "Reach a streak of 10 correct answers in a row." },
+    "unstoppable": { "name": "Unstoppable", "desc": "Reach a streak of 25 correct answers in a row." },
+    "perfectSession": { "name": "Perfect Session", "desc": "Answer every question correctly in one session." },
+    "gettingStarted": { "name": "Getting Started", "desc": "Answer 50 questions in this game." },
+    "centuryClub": { "name": "Century Club", "desc": "Answer 100 questions in this game." },
+    "dedicatedPlayer": { "name": "Dedicated Player", "desc": "Answer 500 questions in this game." },
+    "grandMaster": { "name": "Grand Master", "desc": "Answer 1000 questions in this game." },
+    "locked": "Locked"
   }
 }
