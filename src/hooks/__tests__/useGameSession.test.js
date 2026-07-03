@@ -10,7 +10,7 @@ const { mockAddScore, mockFireConfetti, mockRecordStreak, mockUpdateSetting } = 
 
 let mockSettings = {
   numChoices: 2, feedbackMode: 'parent-tap', questionsPerSession: 3, animationsEnabled: true,
-  timerDisplayEnabled: true,
+  timerMode: 'countUp', timeLimitSeconds: 10,
   maxTries: 'none', hintsEnabled: false, hintAfterWrongTaps: 2, retryCountsAsStreak: true,
   spacedRepetitionEnabled: false, difficultyAutoProgressionEnabled: false,
   introDismissed: {},
@@ -48,7 +48,7 @@ beforeEach(() => {
   mockLoaded = true
   mockSettings = {
     numChoices: 2, feedbackMode: 'parent-tap', questionsPerSession: 3, animationsEnabled: true,
-    timerDisplayEnabled: true,
+    timerMode: 'countUp', timeLimitSeconds: 10,
     maxTries: 'none', hintsEnabled: false, hintAfterWrongTaps: 2, retryCountsAsStreak: true,
     spacedRepetitionEnabled: false, difficultyAutoProgressionEnabled: false,
     introDismissed: {},
@@ -192,36 +192,7 @@ describe('useGameSession — existing behavior', () => {
     )
   })
 
-  it('calls onTimeout after timeLimitMs ms if not yet locked', () => {
-    vi.useFakeTimers()
-    const onTimeout = vi.fn()
-    const { result } = renderHook(() =>
-      useGameSession({ gameId: 'test-game', items, timeLimitMs: 5000, onTimeout })
-    )
-    act(() => {})
-    expect(result.current.current).toBeDefined()
-
-    act(() => { vi.advanceTimersByTime(5001) })
-    expect(onTimeout).toHaveBeenCalledTimes(1)
-    vi.useRealTimers()
-  })
-
-  it('does not call onTimeout if the question was already locked', () => {
-    vi.useFakeTimers()
-    const onTimeout = vi.fn()
-    const { result } = renderHook(() =>
-      useGameSession({ gameId: 'test-game', items, timeLimitMs: 5000, onTimeout })
-    )
-    act(() => {})
-    expect(result.current.current).toBeDefined()
-
-    act(() => { result.current.handleChoice(result.current.current.correct) })
-    act(() => { vi.advanceTimersByTime(5001) })
-    expect(onTimeout).not.toHaveBeenCalled()
-    vi.useRealTimers()
-  })
-
-  it('currentElapsedMs ticks up even without a timeLimitMs', () => {
+  it('currentElapsedMs ticks up in countUp mode', () => {
     vi.useFakeTimers()
     const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
     act(() => {})
@@ -662,5 +633,123 @@ describe('useGameSession — how-to-play intro', () => {
     act(() => { result.current.setDontShowAgain(true) })
 
     expect(result.current.dontShowAgain).toBe(true)
+  })
+})
+
+describe('useGameSession — countdown timer', () => {
+  it('does not enforce a limit or expose timeLimitMs when timerMode is "countUp"', () => {
+    setSettings({ timerMode: 'countUp' })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    expect(result.current.timeLimitMs).toBeUndefined()
+  })
+
+  it('exposes timeLimitMs derived from timeLimitSeconds when timerMode is "countdown"', () => {
+    setSettings({ timerMode: 'countdown', timeLimitSeconds: 5 })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    expect(result.current.timeLimitMs).toBe(5000)
+  })
+
+  it('locks the question, marks timedOut, and records a timedOut timing entry when the countdown runs out', async () => {
+    vi.useFakeTimers()
+    setSettings({ timerMode: 'countdown', timeLimitSeconds: 5 })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    act(() => {})
+    expect(result.current.current).toBeDefined()
+
+    act(() => { vi.advanceTimersByTime(5001) })
+
+    expect(result.current.locked).toBe(true)
+    expect(result.current.timedOut).toBe(true)
+    expect(result.current.streak).toBe(0)
+    expect(result.current.missed).toHaveLength(1)
+    expect(result.current.timings).toHaveLength(1)
+    expect(result.current.timings[0]).toEqual(expect.objectContaining({ correct: false, timedOut: true }))
+    vi.useRealTimers()
+  })
+
+  it('does not time out a question that was already answered correctly', async () => {
+    vi.useFakeTimers()
+    setSettings({ timerMode: 'countdown', timeLimitSeconds: 5 })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    act(() => {})
+
+    act(() => { result.current.handleChoice(result.current.current.correct) })
+    act(() => { vi.advanceTimersByTime(5001) })
+
+    expect(result.current.timedOut).toBe(false)
+    expect(result.current.timings).toHaveLength(1)
+    vi.useRealTimers()
+  })
+
+  it('auto-advances after a timeout even in parent-tap feedback mode', async () => {
+    vi.useFakeTimers()
+    setSettings({ timerMode: 'countdown', timeLimitSeconds: 5, feedbackMode: 'parent-tap', questionsPerSession: 3 })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    act(() => {})
+
+    act(() => { vi.advanceTimersByTime(5001) }) // triggers timeout
+    expect(result.current.index).toBe(0)
+
+    act(() => { vi.advanceTimersByTime(1501) }) // triggers the auto-advance delay
+    expect(result.current.index).toBe(1)
+    vi.useRealTimers()
+  })
+
+  it('does not auto-advance a normal wrong answer in parent-tap mode (regression guard)', async () => {
+    setSettings({ feedbackMode: 'parent-tap' })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.current).toBeDefined())
+
+    const correctItem = result.current.current.correct
+    const wrongItem = result.current.current.choices.find(c => c.id !== correctItem.id)
+    await act(async () => { result.current.handleChoice(wrongItem) })
+
+    expect(result.current.locked).toBe(true)
+    expect(result.current.index).toBe(0)
+  })
+
+  it('resets timedOut on advance() to the next question', async () => {
+    vi.useFakeTimers()
+    setSettings({ timerMode: 'countdown', timeLimitSeconds: 5, questionsPerSession: 3 })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    act(() => {})
+
+    act(() => { vi.advanceTimersByTime(5001) })
+    expect(result.current.timedOut).toBe(true)
+    act(() => { vi.advanceTimersByTime(1501) }) // auto-advance fires
+    expect(result.current.timedOut).toBe(false)
+    vi.useRealTimers()
+  })
+
+  it('respects spaced repetition on a timeout, reinserting the missed item', async () => {
+    vi.useFakeTimers()
+    setSettings({ timerMode: 'countdown', timeLimitSeconds: 5, spacedRepetitionEnabled: true, questionsPerSession: 4 })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    act(() => {})
+    const missedCorrectId = result.current.current.correct.id
+
+    act(() => { vi.advanceTimersByTime(5001) }) // timeout
+    act(() => { vi.advanceTimersByTime(1501) }) // auto-advance
+
+    const seenCorrectIds = []
+    while (!result.current.done) {
+      seenCorrectIds.push(result.current.current.correct.id)
+      await act(async () => { result.current.handleChoice(result.current.current.correct) })
+      await act(async () => { result.current.advance() })
+    }
+    expect(seenCorrectIds.filter(id => id === missedCorrectId).length).toBeGreaterThanOrEqual(1)
+    vi.useRealTimers()
+  })
+
+  it('currentElapsedMs still ticks up when timerMode is "off"', () => {
+    vi.useFakeTimers()
+    setSettings({ timerMode: 'off' })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    act(() => {})
+    expect(result.current.currentElapsedMs).toBe(0)
+
+    act(() => { vi.advanceTimersByTime(300) })
+    expect(result.current.currentElapsedMs).toBeGreaterThanOrEqual(300)
+    vi.useRealTimers()
   })
 })
