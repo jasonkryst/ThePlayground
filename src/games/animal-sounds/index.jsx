@@ -30,23 +30,48 @@ export default function AnimalSoundsGame({ onGameEnd }) {
 
   const audioRef = useRef(null)
 
+  const stopSound = useCallback(() => {
+    if (!audioRef.current) return
+    audioRef.current.pause()
+    audioRef.current.currentTime = 0
+    audioRef.current = null
+  }, [])
+
   const playSound = useCallback(() => {
     if (!current) return
     const url = getSoundUrl(current.correct.sound)
     if (!url) return
-    if (audioRef.current) {
-      audioRef.current.pause()
-      audioRef.current.currentTime = 0
-    }
+    stopSound()
     const audio = new Audio(url)
     audioRef.current = audio
     audio.play().catch(() => {})
-  }, [current])
+  }, [current, stopSound])
+
+  useEffect(() => {
+    if (!current) return
+
+    // Stop any in-flight audio when moving away from this question.
+    return () => {
+      stopSound()
+    }
+  }, [current, stopSound])
+
+  useEffect(() => {
+    return () => {
+      stopSound()
+    }
+  }, [stopSound])
 
   useEffect(() => {
     if (!current || showIntro || !introResolved) return
     playSound()
   }, [index, playSound, current, showIntro, introResolved])
+
+  useEffect(() => {
+    if (done || showIntro) {
+      stopSound()
+    }
+  }, [done, showIntro, stopSound])
 
   if (!settingsLoaded || !introResolved) return null
 
