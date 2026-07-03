@@ -1054,7 +1054,7 @@ describe('useBadges', () => {
     expect(result.current.badgeData.awards['animal-sounds']).toEqual({ hotStreak: 1 })
   })
 
-  it('awardSession increments lifetimeQuestions and persists newly earned badges', async () => {
+  it('awardSession crosses a totalQuestions tier and returns its resolved catalog entry', async () => {
     const { result } = renderHook(() => useBadges())
     await waitFor(() => expect(result.current.badgeData.lifetimeQuestions['animal-sounds']).toBe(45))
 
@@ -1063,7 +1063,8 @@ describe('useBadges', () => {
       earned = await result.current.awardSession('animal-sounds', { peakStreak: 0, isPerfect: false, questionsAnswered: 10 })
     })
 
-    expect(earned).toEqual([]) // 45 + 10 = 55, crosses no new tier (50 already passed... wait see step below)
+    expect(earned.map(b => b.id)).toEqual(['gettingStarted']) // 45 -> 55 crosses the 50-question tier
+    expect(result.current.badgeData.lifetimeQuestions['animal-sounds']).toBe(55)
   })
 
   it('awardSession returns resolved catalog entries for badges earned this session', async () => {
@@ -1105,36 +1106,6 @@ describe('useBadges', () => {
     )
   })
 })
-```
-
-Note the second test's inline comment documents the expected math (45 + 10 = 55, which is below the next tier boundary — 50 was already crossed before this session since `prevLifetimeTotal` is 45 < 50 but wait, 45 < 50 ≤ 55, so `gettingStarted` **is** crossed this call). Fix that test to assert the correct outcome:
-
-- [ ] **Step 1b: Correct the second test's assertion before running**
-
-Replace:
-```js
-    expect(earned).toEqual([]) // 45 + 10 = 55, crosses no new tier (50 already passed... wait see step below)
-```
-with:
-```js
-    expect(earned.map(b => b.id)).toEqual(['gettingStarted']) // 45 -> 55 crosses the 50-question tier
-```
-
-And change that test's name/body to reflect resolved catalog entries consistently — full corrected test:
-
-```js
-  it('awardSession crosses a totalQuestions tier and returns its resolved catalog entry', async () => {
-    const { result } = renderHook(() => useBadges())
-    await waitFor(() => expect(result.current.badgeData.lifetimeQuestions['animal-sounds']).toBe(45))
-
-    let earned
-    await act(async () => {
-      earned = await result.current.awardSession('animal-sounds', { peakStreak: 0, isPerfect: false, questionsAnswered: 10 })
-    })
-
-    expect(earned.map(b => b.id)).toEqual(['gettingStarted'])
-    expect(result.current.badgeData.lifetimeQuestions['animal-sounds']).toBe(55)
-  })
 ```
 
 - [ ] **Step 2: Run test to verify it fails**
