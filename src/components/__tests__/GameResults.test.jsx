@@ -85,4 +85,83 @@ describe('GameResults', () => {
     await userEvent.click(screen.getByRole('button', { name: /not yet/i }))
     expect(onDismiss).toHaveBeenCalledTimes(1)
   })
+
+  it('does not show a personal-best banner by default', () => {
+    render(<GameResults score={3} total={5} missed={[]} onPlayAgain={vi.fn()} onHome={vi.fn()} renderMissedItem={renderMissedItem} />)
+    expect(screen.queryByText(/new accuracy record/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/new speed record/i)).not.toBeInTheDocument()
+  })
+
+  it('shows the accuracy-record banner with previous score/total when isNewRecord is true', () => {
+    render(
+      <GameResults
+        score={9} total={10} missed={[]} onPlayAgain={vi.fn()} onHome={vi.fn()} renderMissedItem={renderMissedItem}
+        personalBestResult={{
+          accuracy: { isNewRecord: true, value: 0.9, previous: { ratio: 0.8, score: 8, total: 10, timestamp: 1 } },
+          speed: { isNewRecord: false, value: null, previous: null },
+        }}
+      />
+    )
+    expect(screen.getByText('🏆 New accuracy record! 9/10 (was 8/10)')).toBeInTheDocument()
+  })
+
+  it('shows the speed-record banner with previous seconds when isNewRecord is true', () => {
+    render(
+      <GameResults
+        score={9} total={10} missed={[]} onPlayAgain={vi.fn()} onHome={vi.fn()} renderMissedItem={renderMissedItem}
+        personalBestResult={{
+          accuracy: { isNewRecord: false, value: 0.9, previous: null },
+          speed: { isNewRecord: true, value: 2100, previous: { avgMs: 2600, timestamp: 1 } },
+        }}
+      />
+    )
+    expect(screen.getByText('⚡ New speed record! 2.1s avg (was 2.6s avg)')).toBeInTheDocument()
+  })
+
+  it('shows both banners at once when both records are broken', () => {
+    render(
+      <GameResults
+        score={10} total={10} missed={[]} onPlayAgain={vi.fn()} onHome={vi.fn()} renderMissedItem={renderMissedItem}
+        personalBestResult={{
+          accuracy: { isNewRecord: true, value: 1, previous: { ratio: 0.9, score: 9, total: 10, timestamp: 1 } },
+          speed: { isNewRecord: true, value: 1000, previous: { avgMs: 1500, timestamp: 1 } },
+        }}
+      />
+    )
+    expect(screen.getByText(/new accuracy record/i)).toBeInTheDocument()
+    expect(screen.getByText(/new speed record/i)).toBeInTheDocument()
+  })
+
+  it('does not show any badge announcement by default', () => {
+    render(<GameResults score={3} total={5} missed={[]} onPlayAgain={vi.fn()} onHome={vi.fn()} renderMissedItem={renderMissedItem} />)
+    expect(screen.queryByText(/new badge/i)).not.toBeInTheDocument()
+  })
+
+  it('shows a line per newly earned badge', () => {
+    render(
+      <GameResults
+        score={5} total={5} missed={[]} onPlayAgain={vi.fn()} onHome={vi.fn()} renderMissedItem={renderMissedItem}
+        newBadges={[
+          { id: 'hotStreak', icon: '🔥', nameKey: 'badges.hotStreak.name' },
+          { id: 'perfectSession', icon: '🎯', nameKey: 'badges.perfectSession.name' },
+        ]}
+      />
+    )
+    expect(screen.getByText('🎉 New Badge! 🔥 Hot Streak')).toBeInTheDocument()
+    expect(screen.getByText('🎉 New Badge! 🎯 Perfect Session')).toBeInTheDocument()
+  })
+
+  it('has no accessibility violations with all banners present', async () => {
+    const { container } = render(
+      <GameResults
+        score={10} total={10} missed={[]} onPlayAgain={vi.fn()} onHome={vi.fn()} renderMissedItem={renderMissedItem}
+        personalBestResult={{
+          accuracy: { isNewRecord: true, value: 1, previous: { ratio: 0.9, score: 9, total: 10, timestamp: 1 } },
+          speed: { isNewRecord: true, value: 1000, previous: { avgMs: 1500, timestamp: 1 } },
+        }}
+        newBadges={[{ id: 'perfectSession', icon: '🎯', nameKey: 'badges.perfectSession.name' }]}
+      />
+    )
+    expect(await axe(container)).toHaveNoViolations()
+  })
 })

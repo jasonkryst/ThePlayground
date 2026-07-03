@@ -26,3 +26,23 @@ export const PerfectWithDifficultyOffer = {
     onAcceptDifficultyBump: () => {}, onDismissDifficultyBump: () => {},
   },
 }
+
+export const WithPersonalBestRecords = {
+  args: {
+    score: 10, total: 10, missed: [], onPlayAgain: () => {}, onHome: () => {}, renderMissedItem,
+    personalBestResult: {
+      accuracy: { isNewRecord: true, value: 1, previous: { ratio: 0.9, score: 9, total: 10, timestamp: 1 } },
+      speed: { isNewRecord: true, value: 1000, previous: { avgMs: 1500, timestamp: 1 } },
+    },
+  },
+}
+
+export const WithNewBadges = {
+  args: {
+    score: 5, total: 5, missed: [], onPlayAgain: () => {}, onHome: () => {}, renderMissedItem,
+    newBadges: [
+      { id: 'hotStreak', icon: '🔥', nameKey: 'badges.hotStreak.name' },
+      { id: 'perfectSession', icon: '🎯', nameKey: 'badges.perfectSession.name' },
+    ],
+  },
+}

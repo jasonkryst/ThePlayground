@@ -14,7 +14,11 @@
     "timerAriaLabel": "Elapsed time: {{seconds}} seconds",
     "timerCountdownAriaLabel": "Time remaining: {{seconds}} seconds",
     "gameIntroStart": "Let's Play!",
-    "gameIntroDontShowAgain": "Don't show this again"
+    "gameIntroDontShowAgain": "Don't show this again",
+    "timeUp": "⏰ Time's up!",
+    "newAccuracyRecord": "🏆 New accuracy record! {{score}}/{{total}} (was {{prevScore}}/{{prevTotal}})",
+    "newSpeedRecord": "⚡ New speed record! {{seconds}}s avg (was {{prevSeconds}}s avg)",
+    "newBadgeAnnounce": "🎉 New Badge!"
   },
   "dashboard": {
     "titleDefault": "Baby's Playground",

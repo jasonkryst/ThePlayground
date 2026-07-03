@@ -4,6 +4,7 @@ import './GameResults.css'
 export default function GameResults({
   score, total, missed, onPlayAgain, onHome, renderMissedItem,
   offerDifficultyBump = false, numChoices, onAcceptDifficultyBump, onDismissDifficultyBump,
+  personalBestResult = null, newBadges = [],
 }) {
   const { t } = useTranslation()
   return (
@@ -11,6 +12,31 @@ export default function GameResults({
       <div className="results__emoji">{missed.length === 0 ? '🎉' : '⭐'}</div>
       <div className="results__score">{score} / {total}</div>
       <div className="results__label">{t('common.scoreLabel', { score, total })}</div>
+
+      {personalBestResult?.accuracy?.isNewRecord && (
+        <div className="results__record">
+          {t('common.newAccuracyRecord', {
+            score, total,
+            prevScore: personalBestResult.accuracy.previous.score,
+            prevTotal: personalBestResult.accuracy.previous.total,
+          })}
+        </div>
+      )}
+
+      {personalBestResult?.speed?.isNewRecord && (
+        <div className="results__record">
+          {t('common.newSpeedRecord', {
+            seconds: (personalBestResult.speed.value / 1000).toFixed(1),
+            prevSeconds: (personalBestResult.speed.previous.avgMs / 1000).toFixed(1),
+          })}
+        </div>
+      )}
+
+      {newBadges.map(badge => (
+        <div key={badge.id} className="results__badge-award">
+          {t('common.newBadgeAnnounce')} {badge.icon} {t(badge.nameKey)}
+        </div>
+      ))}
 
       {missed.length === 0 ? (
         <div className="results__label">{t('common.perfectRun')}</div>
