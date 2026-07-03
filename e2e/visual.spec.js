@@ -16,6 +16,8 @@ const stories = [
   'components-gameresults--perfect-run',
   'components-gameresults--with-missed-items',
   'components-gameresults--perfect-with-difficulty-offer',
+  'components-gameintro--default',
+  'components-gameintro--dont-show-again-checked',
   'pages-adminpage--default',
   'games-animalsoundsgame--default',
   'games-colormatchgame--default',
