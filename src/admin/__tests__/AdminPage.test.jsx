@@ -12,12 +12,14 @@ const mockSettingsDefaults = {
 }
 const mockUpdateSetting = vi.fn()
 const mockResetSettings = vi.fn()
+let mockIntroDismissed = {}
 
 vi.mock('../../hooks/useSettings', () => ({
   default: () => ({
     settings: {
       ...mockSettingsDefaults,
       tagOverrides: {},
+      introDismissed: mockIntroDismissed,
     },
     updateSetting: mockUpdateSetting,
     resetSettings: mockResetSettings,
@@ -44,7 +46,10 @@ function renderAdmin() {
   return render(<MemoryRouter><AdminPage manifests={manifestsFixture} /></MemoryRouter>)
 }
 
-beforeEach(() => { vi.clearAllMocks() })
+beforeEach(() => {
+  vi.clearAllMocks()
+  mockIntroDismissed = {}
+})
 
 describe('AdminPage', () => {
   it('renders all setting controls', () => {
@@ -223,5 +228,21 @@ describe('AdminPage', () => {
       'tagOverrides',
       expect.not.objectContaining({ 'animal-sounds': expect.anything() })
     )
+  })
+
+  it('renders a Replay Intro button for each game', async () => {
+    const user = userEvent.setup()
+    renderAdmin()
+    await user.click(screen.getByRole('tab', { name: /games/i }))
+    expect(screen.getAllByRole('button', { name: /replay intro/i })).toHaveLength(2)
+  })
+
+  it('clears introDismissed for the clicked game only, leaving other games untouched', async () => {
+    mockIntroDismissed = { 'animal-sounds': true, 'color-match': true }
+    const user = userEvent.setup()
+    renderAdmin()
+    await user.click(screen.getByRole('tab', { name: /games/i }))
+    await user.click(screen.getAllByRole('button', { name: /replay intro/i })[0])
+    expect(mockUpdateSetting).toHaveBeenCalledWith('introDismissed', { 'color-match': true })
   })
 })

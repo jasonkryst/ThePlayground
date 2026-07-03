@@ -109,7 +109,8 @@
     "tagsGameLabel": "Tags for {{name}}",
     "tagsInputPlaceholder": "e.g. sounds, animals",
     "tagsSaveButton": "Save Tags",
-    "tagsResetButton": "Reset"
+    "tagsResetButton": "Reset",
+    "introReplayButton": "Replay Intro"
   },
   "scoreHistory": {
     "empty": "No scores yet — play a game!"
