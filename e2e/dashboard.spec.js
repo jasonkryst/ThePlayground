@@ -51,13 +51,18 @@ test('clicking All tab restores full grid', async ({ page }) => {
 test('recently-played badge appears for a game with seeded scores', async ({ page }) => {
   await page.goto('/')
   await page.evaluate(() => {
-    const scores = [{
-      gameId: 'animal-sounds',
-      score: 8,
-      total: 10,
-      date: new Date().toISOString().split('T')[0],
-      timestamp: Date.now(),
-    }]
+    // Seed scores for both games rather than a single hardcoded gameId: the
+    // dashboard's "Today's Game" feature deterministically hides whichever game
+    // is featured today from the "All" tab's category sections (it's already
+    // shown as the hero card above, which does not render a recently-played
+    // badge). Seeding only one game's score would make this test's outcome
+    // depend on the current date. Seeding both guarantees the non-featured
+    // game's card — and its badge — is visible regardless of the date.
+    const today = new Date().toISOString().split('T')[0]
+    const scores = [
+      { gameId: 'animal-sounds', score: 8, total: 10, date: today, timestamp: Date.now() },
+      { gameId: 'color-match', score: 8, total: 10, date: today, timestamp: Date.now() },
+    ]
     localStorage.setItem('playground_scores', JSON.stringify(scores))
   })
   await page.reload()
