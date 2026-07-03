@@ -41,7 +41,11 @@ test('clicking All tab restores full grid', async ({ page }) => {
   await page.goto('/')
   await page.getByRole('tab', { name: 'Sounds' }).click()
   await page.getByRole('tab', { name: 'All' }).click()
-  await expect(page.getByText('Color Match')).toBeVisible()
+  // Color Match carries two tags ("visual" and "colors"), so in the "All" view it
+  // legitimately renders once per matching category section (see Dashboard.jsx's
+  // buildSections). .first() just confirms the grid is restored, not that there's
+  // exactly one card.
+  await expect(page.getByText('Color Match').first()).toBeVisible()
 })
 
 test('recently-played badge appears for a game with seeded scores', async ({ page }) => {
