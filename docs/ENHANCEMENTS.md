@@ -6,6 +6,11 @@ Ideas for future development. Not committed to any timeline.
 
 ## Recently Completed
 
+### v0.7.0 — How-to-Play Intro Screens (2026-07-02)
+- **How-to-play intro screens** (issue #13) — a core engine mechanic in `useGameSession` that shows a `GameIntro` screen (icon, name, instructions) before a game's first question on initial mount; skipped on subsequent "Play Again" rounds in the same visit
+- **"Don't show this again"** checkbox permanently suppresses a game's intro via the new `introDismissed` setting
+- **"Replay Intro"** admin control (Games tab) clears a game's dismissed flag
+
 ### v0.6.0 — Game Engine Core (2026-07-01)
 - **Timer display** — running stopwatch shown next to each question, togglable in admin settings
 - **Retry attempts (maxTries)** — configurable number of wrong taps allowed before a question locks in as missed

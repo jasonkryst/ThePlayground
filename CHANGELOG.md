@@ -3,6 +3,14 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.7.0] - 2026-07-02
+
+### Added
+- **How-to-play intro screens** — each game now shows an intro screen (icon, name, one-line instructions) before its first question on initial visit. A "Don't show this again" checkbox lets a parent permanently dismiss it per game; the admin Games tab gains a "Replay Intro" button to bring a dismissed intro back. The intro does not reappear after "Play Again" within the same visit.
+- `introDismissed` setting: `{ [gameId]: true }`, default `{}`.
+- `GameIntro` shared component.
+- `useGameSession` gains `showIntro`, `settingsLoaded`, `dontShowAgain`, `setDontShowAgain`, `dismissIntro`.
+
 ## [0.6.0] - 2026-07-01
 
 ### Added

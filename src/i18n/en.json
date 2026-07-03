@@ -11,7 +11,9 @@
     "difficultyOfferHeading": "Perfect session! Try {{count}} choices next time?",
     "difficultyOfferAccept": "Yes, level up!",
     "difficultyOfferDismiss": "Not yet",
-    "timerAriaLabel": "Elapsed time: {{seconds}} seconds"
+    "timerAriaLabel": "Elapsed time: {{seconds}} seconds",
+    "gameIntroStart": "Let's Play!",
+    "gameIntroDontShowAgain": "Don't show this again"
   },
   "dashboard": {
     "titleDefault": "Baby's Playground",
@@ -107,17 +109,20 @@
     "tagsGameLabel": "Tags for {{name}}",
     "tagsInputPlaceholder": "e.g. sounds, animals",
     "tagsSaveButton": "Save Tags",
-    "tagsResetButton": "Reset"
+    "tagsResetButton": "Reset",
+    "introReplayButton": "Replay Intro"
   },
   "scoreHistory": {
     "empty": "No scores yet — play a game!"
   },
   "animalSounds": {
     "prompt": "What animal makes this sound?",
-    "replay": "Replay sound"
+    "replay": "Replay sound",
+    "howToPlay": "Listen to the sound, then tap the matching animal!"
   },
   "colorMatch": {
-    "prompt": "Which one is this color?"
+    "prompt": "Which one is this color?",
+    "howToPlay": "A color swatch shows — tap the matching colored object!"
   },
   "animal": {
     "elephant": { "name": "Elephant" },

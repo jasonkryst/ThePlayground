@@ -4,6 +4,7 @@ import StreakBadge from '../../components/StreakBadge'
 import GameResults from '../../components/GameResults'
 import GameChoiceGrid from '../../components/GameChoiceGrid'
 import Timer from '../../components/Timer'
+import GameIntro from '../../components/GameIntro'
 import colors from './data/colors'
 import manifest from './manifest.json'
 import './ColorMatchGame.css'
@@ -17,7 +18,23 @@ export default function ColorMatchGame({ onGameEnd }) {
     score, streak, missed, done, feedbackMode, handleChoice, advance, restart,
     currentElapsedMs, timerDisplayEnabled, offerDifficultyBump, numChoices,
     acceptDifficultyBump, dismissDifficultyBump,
+    showIntro, introResolved, settingsLoaded, dontShowAgain, setDontShowAgain, dismissIntro,
   } = useGameSession({ gameId: 'color-match', items: colors })
+
+  if (!settingsLoaded || !introResolved) return null
+
+  if (showIntro) {
+    return (
+      <GameIntro
+        icon={manifest.icon}
+        name={manifest.name}
+        instructions={t('colorMatch.howToPlay')}
+        dontShowAgain={dontShowAgain}
+        onDontShowAgainChange={setDontShowAgain}
+        onStart={() => dismissIntro(dontShowAgain)}
+      />
+    )
+  }
 
   if (done) {
     return (

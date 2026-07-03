@@ -13,7 +13,7 @@ function resolveMaxTries(maxTries) {
 }
 
 export default function useGameSession({ gameId, items, timeLimitMs, onTimeout }) {
-  const { settings, updateSetting } = useSettings()
+  const { settings, loaded, updateSetting } = useSettings()
   const { addScore } = useScores()
   const { bestStreak, recordStreak } = useBestStreak(gameId)
 
@@ -36,6 +36,9 @@ export default function useGameSession({ gameId, items, timeLimitMs, onTimeout }
   const [currentElapsedMs,     setCurrentElapsedMs]    = useState(0)
   const [timings,              setTimings]             = useState([])
   const [offerDifficultyBump,  setOfferDifficultyBump] = useState(false)
+  const [showIntro,            setShowIntro]           = useState(false)
+  const [introResolved,        setIntroResolved]       = useState(false)
+  const [dontShowAgain,        setDontShowAgain]       = useState(false)
 
   // Refs avoid stale closures in setTimeout/setInterval callbacks
   const scoreRef        = useRef(0)
@@ -51,7 +54,25 @@ export default function useGameSession({ gameId, items, timeLimitMs, onTimeout }
   const questionStartRef = useRef(Date.now())
   const onTimeoutRef    = useRef(onTimeout)
   const pendingReinsertRef = useRef(null)
+  const introInitializedRef = useRef(false)
   useEffect(() => { onTimeoutRef.current = onTimeout })
+
+  // Runs once, when settings finish their initial async load. The ref guard
+  // prevents later introDismissed writes (including this hook's own
+  // dismissIntro call) from re-evaluating and re-showing/re-hiding the intro
+  // mid-session.
+  //
+  // introResolved is set in this same tick as showIntro's correct value so
+  // that consumers gating on introResolved can never observe showIntro's
+  // stale initial `false` on the render where `loaded` first flips true but
+  // this effect hasn't run yet (effects always commit one render after the
+  // state change that triggered them).
+  useEffect(() => {
+    if (!loaded || introInitializedRef.current) return
+    introInitializedRef.current = true
+    setIntroResolved(true)
+    setShowIntro(!settings.introDismissed?.[gameId])
+  }, [loaded, settings.introDismissed, gameId])
 
   useEffect(() => {
     if (numChoices && questionsPerSession) {
@@ -248,10 +269,18 @@ export default function useGameSession({ gameId, items, timeLimitMs, onTimeout }
     setOfferDifficultyBump(false)
   }
 
+  function dismissIntro(dontShowAgainFlag) {
+    setShowIntro(false)
+    if (dontShowAgainFlag) {
+      updateSetting('introDismissed', { ...settings.introDismissed, [gameId]: true })
+    }
+  }
+
   return {
     current, index, total: queue.length, locked, disabledChoiceIds, hintActive, selected,
     score, streak, bestStreak, missed, done, feedbackMode, numChoices,
     currentElapsedMs, timings, timerDisplayEnabled, offerDifficultyBump,
-    handleChoice, advance, restart, acceptDifficultyBump, dismissDifficultyBump,
+    showIntro, introResolved, settingsLoaded: loaded, dontShowAgain, setDontShowAgain,
+    handleChoice, advance, restart, acceptDifficultyBump, dismissDifficultyBump, dismissIntro,
   }
 }

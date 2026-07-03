@@ -14,11 +14,13 @@ let mockSettings = {
   numChoices: 2, feedbackMode: 'immediate', questionsPerSession: 3,
   maxTries: 'none', hintsEnabled: false, hintAfterWrongTaps: 2, retryCountsAsStreak: true,
   spacedRepetitionEnabled: false, difficultyAutoProgressionEnabled: false, timerDisplayEnabled: true,
+  introDismissed: { 'animal-sounds': true },
 }
 const mockUpdateSetting = vi.fn()
+let mockLoaded = true
 
 vi.mock('../../../hooks/useSettings', () => ({
-  default: () => ({ settings: mockSettings, updateSetting: mockUpdateSetting }),
+  default: () => ({ settings: mockSettings, loaded: mockLoaded, updateSetting: mockUpdateSetting }),
 }))
 
 vi.mock('../../../hooks/useScores', () => ({
@@ -33,10 +35,12 @@ const onGameEnd = vi.fn()
 
 beforeEach(() => {
   vi.clearAllMocks()
+  mockLoaded = true
   mockSettings = {
     numChoices: 2, feedbackMode: 'immediate', questionsPerSession: 3,
     maxTries: 'none', hintsEnabled: false, hintAfterWrongTaps: 2, retryCountsAsStreak: true,
     spacedRepetitionEnabled: false, difficultyAutoProgressionEnabled: false, timerDisplayEnabled: true,
+    introDismissed: { 'animal-sounds': true },
   }
 })
 
@@ -174,5 +178,59 @@ describe('AnimalSoundsGame', () => {
     }
 
     expect(screen.getByText(/perfect session/i)).toBeInTheDocument()
+  })
+})
+
+describe('AnimalSoundsGame — how-to-play intro', () => {
+  it('shows the intro screen before the first question when not dismissed', async () => {
+    mockSettings = { ...mockSettings, introDismissed: {} }
+    await act(async () => { render(<AnimalSoundsGame onGameEnd={onGameEnd} />) })
+    expect(screen.getByTestId('game-intro-start')).toBeInTheDocument()
+    expect(screen.queryByText(/what animal/i)).not.toBeInTheDocument()
+  })
+
+  it('starts the session after "Let\'s Play!" is clicked', async () => {
+    mockSettings = { ...mockSettings, introDismissed: {} }
+    await act(async () => { render(<AnimalSoundsGame onGameEnd={onGameEnd} />) })
+    await act(async () => { await userEvent.click(screen.getByTestId('game-intro-start')) })
+    expect(screen.getByText(/what animal/i)).toBeInTheDocument()
+  })
+
+  it('persists introDismissed for this game when "don\'t show again" is checked before starting', async () => {
+    mockSettings = { ...mockSettings, introDismissed: {} }
+    await act(async () => { render(<AnimalSoundsGame onGameEnd={onGameEnd} />) })
+    await act(async () => { await userEvent.click(screen.getByTestId('game-intro-dont-show-again')) })
+    await act(async () => { await userEvent.click(screen.getByTestId('game-intro-start')) })
+    expect(mockUpdateSetting).toHaveBeenCalledWith('introDismissed', { 'animal-sounds': true })
+  })
+
+  it('does not persist a setting when "don\'t show again" is left unchecked', async () => {
+    mockSettings = { ...mockSettings, introDismissed: {} }
+    await act(async () => { render(<AnimalSoundsGame onGameEnd={onGameEnd} />) })
+    await act(async () => { await userEvent.click(screen.getByTestId('game-intro-start')) })
+    expect(mockUpdateSetting).not.toHaveBeenCalled()
+  })
+
+  it('does not show the intro when already dismissed for this game', async () => {
+    await act(async () => { render(<AnimalSoundsGame onGameEnd={onGameEnd} />) })
+    expect(screen.queryByTestId('game-intro-start')).not.toBeInTheDocument()
+    expect(screen.getByText(/what animal/i)).toBeInTheDocument()
+  })
+
+  it('does not autoplay a sound while settings/intro have not finished resolving (no audio leak)', async () => {
+    // Regression test for the render-N race: useGameSession's queue-build
+    // effect runs independent of `loaded`, so `current` (and thus the
+    // sound-autoplay effect's other guard condition) can be truthy before
+    // useSettings() has resolved and before the intro decision (showIntro)
+    // has settled. Without the introResolved gate, the autoplay effect's
+    // guard `!current || showIntro` would be `false || false` here and
+    // fire playSound() out loud even though the intro screen (or a loading
+    // state) is what should be on display — before "Let's Play!" is ever
+    // tapped.
+    mockLoaded = false
+    mockSettings = { ...mockSettings, introDismissed: {} }
+    await act(async () => { render(<AnimalSoundsGame onGameEnd={onGameEnd} />) })
+
+    expect(window.HTMLMediaElement.prototype.play).not.toHaveBeenCalled()
   })
 })

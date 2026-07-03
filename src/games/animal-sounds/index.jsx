@@ -5,6 +5,7 @@ import StreakBadge from '../../components/StreakBadge'
 import GameResults from '../../components/GameResults'
 import GameChoiceGrid from '../../components/GameChoiceGrid'
 import Timer from '../../components/Timer'
+import GameIntro from '../../components/GameIntro'
 import animals from './data/animals'
 import { getSoundUrl } from './data/sounds'
 import manifest from './manifest.json'
@@ -24,6 +25,7 @@ export default function AnimalSoundsGame({ onGameEnd }) {
     score, streak, missed, done, feedbackMode, handleChoice, advance, restart,
     currentElapsedMs, timerDisplayEnabled, offerDifficultyBump, numChoices,
     acceptDifficultyBump, dismissDifficultyBump,
+    showIntro, introResolved, settingsLoaded, dontShowAgain, setDontShowAgain, dismissIntro,
   } = useGameSession({ gameId: 'animal-sounds', items: animals })
 
   const audioRef = useRef(null)
@@ -42,9 +44,24 @@ export default function AnimalSoundsGame({ onGameEnd }) {
   }, [current])
 
   useEffect(() => {
-    if (!current) return
+    if (!current || showIntro || !introResolved) return
     playSound()
-  }, [index, playSound, current])
+  }, [index, playSound, current, showIntro, introResolved])
+
+  if (!settingsLoaded || !introResolved) return null
+
+  if (showIntro) {
+    return (
+      <GameIntro
+        icon={manifest.icon}
+        name={manifest.name}
+        instructions={t('animalSounds.howToPlay')}
+        dontShowAgain={dontShowAgain}
+        onDontShowAgainChange={setDontShowAgain}
+        onStart={() => dismissIntro(dontShowAgain)}
+      />
+    )
+  }
 
   if (done) {
     return (

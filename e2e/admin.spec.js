@@ -73,3 +73,27 @@ test('new engine settings persist after reload', async ({ page }) => {
       .getByRole('radio', { name: 'Unlimited' })
   ).toBeChecked()
 })
+
+test('replay intro brings back a dismissed game intro', async ({ page }) => {
+  await page.goto('/game/animal-sounds')
+  await page.getByTestId('game-intro-dont-show-again').click()
+  await page.getByTestId('game-intro-start').click()
+
+  // Verify localStorage was updated before navigating away (guards against a navigation race)
+  await expect.poll(async () => {
+    const raw = await page.evaluate(() => localStorage.getItem('playground_settings'))
+    if (!raw) return null
+    const s = JSON.parse(raw)
+    return s?.introDismissed?.['animal-sounds']
+  }).toBe(true)
+
+  await page.goto('/game/animal-sounds')
+  await expect(page.getByTestId('game-intro-start')).not.toBeVisible()
+
+  await page.goto('/admin')
+  await page.getByRole('tab', { name: /games/i }).click()
+  await page.getByRole('button', { name: 'Replay Intro' }).first().click()
+
+  await page.goto('/game/animal-sounds')
+  await expect(page.getByTestId('game-intro-start')).toBeVisible()
+})

@@ -1,8 +1,46 @@
 import { test, expect } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
 
+test('color match: how-to-play intro shows on first visit and starts the session', async ({ page }) => {
+  await page.goto('/game/color-match')
+
+  await expect(page.getByTestId('game-intro-start')).toBeVisible()
+  expect(await page.locator('[data-color-id]').count()).toBe(0)
+
+  await page.getByTestId('game-intro-start').click()
+
+  await expect(page.locator('[data-color-id]').first()).toBeVisible()
+})
+
+test('color match: "don\'t show again" suppresses the intro on the next visit', async ({ page }) => {
+  await page.goto('/game/color-match')
+  await page.getByTestId('game-intro-dont-show-again').click()
+  await page.getByTestId('game-intro-start').click()
+
+  await page.goto('/game/color-match')
+  await expect(page.getByTestId('game-intro-start')).not.toBeVisible()
+  await expect(page.locator('[data-color-id]').first()).toBeVisible()
+})
+
+test('color match: intro does not reappear after Play Again in the same visit', async ({ page }) => {
+  await page.goto('/game/color-match')
+  await page.getByTestId('game-intro-start').click()
+
+  for (let i = 0; i < 10; i++) {
+    if (await page.getByText(/you scored/i).isVisible()) break
+    await page.locator('[data-color-id]').first().click()
+    await page.waitForTimeout(1600)
+  }
+  await expect(page.getByText(/you scored/i)).toBeVisible()
+
+  await page.getByRole('button', { name: 'Play Again' }).click()
+  await expect(page.getByTestId('game-intro-start')).not.toBeVisible()
+  await expect(page.locator('[data-color-id]').first()).toBeVisible()
+})
+
 test('color match: full play-through reaches results and returns home', async ({ page }) => {
   await page.goto('/game/color-match')
+  await page.getByTestId('game-intro-start').click()
 
   for (let i = 0; i < 10; i++) {
     if (await page.getByText(/you scored/i).isVisible()) break
@@ -18,7 +56,15 @@ test('color match: full play-through reaches results and returns home', async ({
 
 test('color match game screen has no accessibility violations', async ({ page }) => {
   await page.goto('/game/color-match')
+  await page.getByTestId('game-intro-start').click()
   await page.locator('[data-color-id]').first().waitFor()
+  const results = await new AxeBuilder({ page }).analyze()
+  expect(results.violations).toEqual([])
+})
+
+test('color match: how-to-play intro screen has no accessibility violations', async ({ page }) => {
+  await page.goto('/game/color-match')
+  await page.getByTestId('game-intro-start').waitFor()
   const results = await new AxeBuilder({ page }).analyze()
   expect(results.violations).toEqual([])
 })
@@ -39,6 +85,7 @@ test('color match: a wrong tap with retries enabled does not lock the question',
     .check() // maxTries=2
 
   await page.goto('/game/color-match')
+  await page.getByTestId('game-intro-start').click()
 
   const choices = page.locator('[data-color-id]')
   const correctId = await page.getByTestId('correct-color-id').textContent()

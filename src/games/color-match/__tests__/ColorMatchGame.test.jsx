@@ -10,11 +10,12 @@ let mockSettings = {
   numChoices: 2, feedbackMode: 'immediate', questionsPerSession: 3,
   maxTries: 'none', hintsEnabled: false, hintAfterWrongTaps: 2, retryCountsAsStreak: true,
   spacedRepetitionEnabled: false, difficultyAutoProgressionEnabled: false, timerDisplayEnabled: true,
+  introDismissed: { 'color-match': true },
 }
 const mockUpdateSetting = vi.fn()
 
 vi.mock('../../../hooks/useSettings', () => ({
-  default: () => ({ settings: mockSettings, updateSetting: mockUpdateSetting }),
+  default: () => ({ settings: mockSettings, loaded: true, updateSetting: mockUpdateSetting }),
 }))
 
 vi.mock('../../../hooks/useScores', () => ({
@@ -33,6 +34,7 @@ beforeEach(() => {
     numChoices: 2, feedbackMode: 'immediate', questionsPerSession: 3,
     maxTries: 'none', hintsEnabled: false, hintAfterWrongTaps: 2, retryCountsAsStreak: true,
     spacedRepetitionEnabled: false, difficultyAutoProgressionEnabled: false, timerDisplayEnabled: true,
+    introDismissed: { 'color-match': true },
   }
 })
 
@@ -176,5 +178,42 @@ describe('ColorMatchGame', () => {
     }
 
     expect(screen.getByText(/perfect session/i)).toBeInTheDocument()
+  })
+})
+
+describe('ColorMatchGame — how-to-play intro', () => {
+  it('shows the intro screen before the first question when not dismissed', async () => {
+    mockSettings = { ...mockSettings, introDismissed: {} }
+    await act(async () => { render(<ColorMatchGame onGameEnd={onGameEnd} />) })
+    expect(screen.getByTestId('game-intro-start')).toBeInTheDocument()
+    expect(screen.queryByText(/which one is this color/i)).not.toBeInTheDocument()
+  })
+
+  it('starts the session after "Let\'s Play!" is clicked', async () => {
+    mockSettings = { ...mockSettings, introDismissed: {} }
+    await act(async () => { render(<ColorMatchGame onGameEnd={onGameEnd} />) })
+    await act(async () => { await userEvent.click(screen.getByTestId('game-intro-start')) })
+    expect(screen.getByText(/which one is this color/i)).toBeInTheDocument()
+  })
+
+  it('persists introDismissed for this game when "don\'t show again" is checked before starting', async () => {
+    mockSettings = { ...mockSettings, introDismissed: {} }
+    await act(async () => { render(<ColorMatchGame onGameEnd={onGameEnd} />) })
+    await act(async () => { await userEvent.click(screen.getByTestId('game-intro-dont-show-again')) })
+    await act(async () => { await userEvent.click(screen.getByTestId('game-intro-start')) })
+    expect(mockUpdateSetting).toHaveBeenCalledWith('introDismissed', { 'color-match': true })
+  })
+
+  it('does not persist a setting when "don\'t show again" is left unchecked', async () => {
+    mockSettings = { ...mockSettings, introDismissed: {} }
+    await act(async () => { render(<ColorMatchGame onGameEnd={onGameEnd} />) })
+    await act(async () => { await userEvent.click(screen.getByTestId('game-intro-start')) })
+    expect(mockUpdateSetting).not.toHaveBeenCalled()
+  })
+
+  it('does not show the intro when already dismissed for this game', async () => {
+    await act(async () => { render(<ColorMatchGame onGameEnd={onGameEnd} />) })
+    expect(screen.queryByTestId('game-intro-start')).not.toBeInTheDocument()
+    expect(screen.getByText(/which one is this color/i)).toBeInTheDocument()
   })
 })

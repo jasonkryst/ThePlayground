@@ -9,6 +9,7 @@ A browser-based game dashboard designed for infants and toddlers. Games are disp
 - **Animal Sounds** — an animal sound plays automatically; the child picks the matching animal from picture buttons
 - **Color Match** — a color swatch is shown; the child picks the matching colored object from picture buttons
 - **Admin / Settings** — tabbed settings page (Settings · Games · History); configure child's name, answer choices (2–4), feedback mode, questions per session, Google Analytics ID, and per-game tag overrides
+- **How-to-play intro screens** — each game shows a brief instructional screen before its first question; parents can permanently dismiss it per game, or bring it back from the admin Games tab
 - **Persistent scoring** — game history stored in `localStorage`; swappable for a backend without touching game code
 - **Version display** — app version shown in the dashboard footer; game version shown in the game header
 - **Google Analytics** — optional GA4 tracking configured at runtime via the admin page; fires page view events on every React Router navigation
@@ -35,6 +36,10 @@ This visual indicator comes from your existing score history with no additional 
 Games are now organized under category headings ("Sounds 🔊", "Visual 👁️", etc.) on the dashboard. A tab strip at the top of the dashboard lets parents filter by category to see only games in a particular group.
 
 Each game's category is defined by a `"tags"` array in its `manifest.json` (required field, minimum one tag). Tags can be customized per-game in the admin panel under the **Games** tab, allowing you to reorganize games without modifying code.
+
+### How-to-Play Intro
+
+The first time a game is opened, it shows a full-screen intro with the game's icon, name, and a one-sentence explanation of how to play, before any question appears. A "Don't show this again" checkbox permanently dismisses it for that game (stored in the `introDismissed` setting); leaving it unchecked means the intro reappears the next time the game is opened fresh (it does not reappear after tapping "Play Again" within the same visit). Parents can bring back a dismissed intro from the admin page's **Games** tab via the "Replay Intro" button next to each game's tags.
 
 ---
 

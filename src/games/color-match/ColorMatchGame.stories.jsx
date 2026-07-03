@@ -23,10 +23,40 @@ const pinRandom = (Story) => {
   return <PinnedRandom />
 }
 
+// useSettings() loads settings from localStorage inside an async effect that
+// resolves during the commit phase, same timing hazard as pinRandom above.
+// Seed 'playground_settings' with introDismissed for this game during the
+// wrapper's render (parent-before-child) so useGameSession() sees the intro
+// as already dismissed on its very first settings read and renders gameplay,
+// not the GameIntro screen. Merge with whatever's already in localStorage
+// (e.g. from other stories sharing the same browser context) instead of
+// clobbering it.
+const seedIntroDismissed = (Story) => {
+  function SeededIntroDismissed() {
+    const seeded = useRef(false)
+    if (!seeded.current) {
+      seeded.current = true
+      let existing = {}
+      try {
+        const parsed = JSON.parse(localStorage.getItem('playground_settings') || '{}')
+        existing = parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {}
+      } catch {
+        existing = {}
+      }
+      localStorage.setItem('playground_settings', JSON.stringify({
+        ...existing,
+        introDismissed: { ...existing.introDismissed, 'color-match': true },
+      }))
+    }
+    return Story()
+  }
+  return <SeededIntroDismissed />
+}
+
 export default {
   title: 'Games/ColorMatchGame',
   component: ColorMatchGame,
-  decorators: [pinRandom],
+  decorators: [pinRandom, seedIntroDismissed],
 }
 
 export const Default = { args: { onGameEnd: () => {} } }

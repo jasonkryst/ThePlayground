@@ -203,3 +203,18 @@
   background: color-mix(in srgb, var(--color-error) 10%, transparent);
   color: var(--color-error);
 }
+
+.admin__intro-replay {
+  padding: 6px 16px;
+  border-radius: var(--radius-button);
+  border: 2px solid var(--color-aqua);
+  background: transparent;
+  color: var(--color-text);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.admin__intro-replay:hover {
+  background: color-mix(in srgb, var(--color-aqua) 15%, transparent);
+}

@@ -63,6 +63,11 @@ export default function AdminPage({ manifests = [] }) {
     }
   }
 
+  function handleIntroReplay(gameId) {
+    const { [gameId]: _, ...rest } = settings.introDismissed ?? {}
+    updateSetting('introDismissed', rest)
+  }
+
   const tabs = [
     { id: 'settings', label: t('admin.tabSettings') },
     { id: 'games',    label: t('admin.tabGames') },
@@ -365,6 +370,9 @@ export default function AdminPage({ manifests = [] }) {
                   </button>
                   <button className="admin__tag-reset" onClick={() => handleTagReset(m.id)}>
                     {t('admin.tagsResetButton')}
+                  </button>
+                  <button className="admin__intro-replay" onClick={() => handleIntroReplay(m.id)}>
+                    {t('admin.introReplayButton')}
                   </button>
                 </div>
               </div>
