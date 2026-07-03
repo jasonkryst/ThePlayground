@@ -151,6 +151,40 @@ describe('AnimalSoundsGame', () => {
     expect(screen.queryByLabelText(/elapsed time/i)).not.toBeInTheDocument()
   })
 
+  it('stops in-flight audio before advancing to the next question', async () => {
+    vi.useFakeTimers()
+    await act(async () => { render(<AnimalSoundsGame onGameEnd={onGameEnd} />) })
+
+    const buttons = screen.getAllByRole('button').filter(b => b.dataset.animalId)
+    const correctId = screen.getByTestId('correct-animal-id').textContent
+    const correctBtn = buttons.find(b => b.dataset.animalId === correctId)
+
+    act(() => { fireEvent.click(correctBtn) })
+    act(() => { vi.advanceTimersByTime(1600) })
+    await act(async () => {})
+
+    vi.useRealTimers()
+    expect(window.HTMLMediaElement.prototype.pause).toHaveBeenCalled()
+  })
+
+  it('stops in-flight audio when the session ends', async () => {
+    mockSettings = { ...mockSettings, questionsPerSession: 1 }
+    vi.useFakeTimers()
+    await act(async () => { render(<AnimalSoundsGame onGameEnd={onGameEnd} />) })
+
+    const buttons = screen.getAllByRole('button').filter(b => b.dataset.animalId)
+    const correctId = screen.getByTestId('correct-animal-id').textContent
+    const correctBtn = buttons.find(b => b.dataset.animalId === correctId)
+
+    act(() => { fireEvent.click(correctBtn) })
+    act(() => { vi.advanceTimersByTime(1600) })
+    await act(async () => {})
+
+    vi.useRealTimers()
+    expect(screen.getByText(/you scored/i)).toBeInTheDocument()
+    expect(window.HTMLMediaElement.prototype.pause).toHaveBeenCalled()
+  })
+
   it('allows a retry when maxTries permits it, without locking the question', async () => {
     mockSettings = { ...mockSettings, feedbackMode: 'parent-tap', maxTries: 2, numChoices: 3 }
     await act(async () => { render(<AnimalSoundsGame onGameEnd={onGameEnd} />) })
