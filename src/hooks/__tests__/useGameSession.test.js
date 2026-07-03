@@ -574,6 +574,46 @@ describe('useGameSession — how-to-play intro', () => {
     expect(result.current.showIntro).toBe(false)
   })
 
+  it('introResolved starts false before settings resolve, alongside settingsLoaded and showIntro', () => {
+    mockLoaded = false
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    expect(result.current.settingsLoaded).toBe(false)
+    expect(result.current.introResolved).toBe(false)
+    expect(result.current.showIntro).toBe(false)
+  })
+
+  it('introResolved becomes true in the same tick showIntro resolves — never a render behind, ' +
+     'unlike settingsLoaded (which flips a render before showIntro is correct)', () => {
+    // Regression test for the render-N race: settingsLoaded flips true the
+    // moment useSettings()'s async load resolves, but showIntro only gets
+    // its correct value one render later, from an effect reacting to that
+    // flip. Consumers that gated only on settingsLoaded could therefore
+    // render for one commit with a stale showIntro=false (briefly showing
+    // real game content, and — in Animal Sounds — firing the sound-autoplay
+    // effect, before the intro was ever dismissed).
+    //
+    // introResolved is set in the exact same effect invocation that
+    // resolves showIntro, so the two must always be observed together: by
+    // the time introResolved is true, showIntro already holds its final,
+    // correct value.
+    mockLoaded = false
+    const { result, rerender } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+
+    expect(result.current.settingsLoaded).toBe(false)
+    expect(result.current.introResolved).toBe(false)
+    expect(result.current.showIntro).toBe(false)
+
+    mockLoaded = true
+    act(() => { rerender() })
+
+    // The instant settingsLoaded flips true (and the intro-init effect has
+    // had a chance to run), introResolved must already be true too — and
+    // showIntro must already hold its final, correct value alongside it.
+    expect(result.current.settingsLoaded).toBe(true)
+    expect(result.current.introResolved).toBe(true)
+    expect(result.current.showIntro).toBe(true)
+  })
+
   it('dismissIntro(false) hides the intro without persisting a setting', async () => {
     const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
     await waitFor(() => expect(result.current.showIntro).toBe(true))

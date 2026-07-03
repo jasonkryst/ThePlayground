@@ -17,9 +17,10 @@ let mockSettings = {
   introDismissed: { 'animal-sounds': true },
 }
 const mockUpdateSetting = vi.fn()
+let mockLoaded = true
 
 vi.mock('../../../hooks/useSettings', () => ({
-  default: () => ({ settings: mockSettings, loaded: true, updateSetting: mockUpdateSetting }),
+  default: () => ({ settings: mockSettings, loaded: mockLoaded, updateSetting: mockUpdateSetting }),
 }))
 
 vi.mock('../../../hooks/useScores', () => ({
@@ -34,6 +35,7 @@ const onGameEnd = vi.fn()
 
 beforeEach(() => {
   vi.clearAllMocks()
+  mockLoaded = true
   mockSettings = {
     numChoices: 2, feedbackMode: 'immediate', questionsPerSession: 3,
     maxTries: 'none', hintsEnabled: false, hintAfterWrongTaps: 2, retryCountsAsStreak: true,
@@ -213,5 +215,22 @@ describe('AnimalSoundsGame — how-to-play intro', () => {
     await act(async () => { render(<AnimalSoundsGame onGameEnd={onGameEnd} />) })
     expect(screen.queryByTestId('game-intro-start')).not.toBeInTheDocument()
     expect(screen.getByText(/what animal/i)).toBeInTheDocument()
+  })
+
+  it('does not autoplay a sound while settings/intro have not finished resolving (no audio leak)', async () => {
+    // Regression test for the render-N race: useGameSession's queue-build
+    // effect runs independent of `loaded`, so `current` (and thus the
+    // sound-autoplay effect's other guard condition) can be truthy before
+    // useSettings() has resolved and before the intro decision (showIntro)
+    // has settled. Without the introResolved gate, the autoplay effect's
+    // guard `!current || showIntro` would be `false || false` here and
+    // fire playSound() out loud even though the intro screen (or a loading
+    // state) is what should be on display — before "Let's Play!" is ever
+    // tapped.
+    mockLoaded = false
+    mockSettings = { ...mockSettings, introDismissed: {} }
+    await act(async () => { render(<AnimalSoundsGame onGameEnd={onGameEnd} />) })
+
+    expect(window.HTMLMediaElement.prototype.play).not.toHaveBeenCalled()
   })
 })
