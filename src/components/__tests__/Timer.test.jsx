@@ -24,6 +24,11 @@ describe('Timer', () => {
     expect(screen.getByLabelText('Elapsed time: 1.0 seconds')).toBeInTheDocument()
   })
 
+  it('has an aria-label describing the time remaining in countdown mode', () => {
+    render(<Timer elapsedMs={2000} mode="countdown" limitMs={5000} />)
+    expect(screen.getByLabelText('Time remaining: 3.0 seconds')).toBeInTheDocument()
+  })
+
   it('has no accessibility violations', async () => {
     const { container } = render(<Timer elapsedMs={2000} />)
     expect(await axe(container)).toHaveNoViolations()

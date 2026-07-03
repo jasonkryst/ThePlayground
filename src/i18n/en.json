@@ -12,6 +12,7 @@
     "difficultyOfferAccept": "Yes, level up!",
     "difficultyOfferDismiss": "Not yet",
     "timerAriaLabel": "Elapsed time: {{seconds}} seconds",
+    "timerCountdownAriaLabel": "Time remaining: {{seconds}} seconds",
     "gameIntroStart": "Let's Play!",
     "gameIntroDontShowAgain": "Don't show this again"
   },
