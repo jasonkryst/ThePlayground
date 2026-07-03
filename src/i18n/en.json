@@ -120,7 +120,8 @@
     "howToPlay": "Listen to the sound, then tap the matching animal!"
   },
   "colorMatch": {
-    "prompt": "Which one is this color?"
+    "prompt": "Which one is this color?",
+    "howToPlay": "A color swatch shows — tap the matching colored object!"
   },
   "animal": {
     "elephant": { "name": "Elephant" },
