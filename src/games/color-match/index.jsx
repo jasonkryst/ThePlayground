@@ -18,10 +18,10 @@ export default function ColorMatchGame({ onGameEnd }) {
     score, streak, missed, done, feedbackMode, handleChoice, advance, restart,
     currentElapsedMs, timerDisplayEnabled, offerDifficultyBump, numChoices,
     acceptDifficultyBump, dismissDifficultyBump,
-    showIntro, settingsLoaded, dontShowAgain, setDontShowAgain, dismissIntro,
+    showIntro, introResolved, settingsLoaded, dontShowAgain, setDontShowAgain, dismissIntro,
   } = useGameSession({ gameId: 'color-match', items: colors })
 
-  if (!settingsLoaded) return null
+  if (!settingsLoaded || !introResolved) return null
 
   if (showIntro) {
     return (

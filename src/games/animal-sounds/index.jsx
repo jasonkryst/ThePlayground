@@ -25,7 +25,7 @@ export default function AnimalSoundsGame({ onGameEnd }) {
     score, streak, missed, done, feedbackMode, handleChoice, advance, restart,
     currentElapsedMs, timerDisplayEnabled, offerDifficultyBump, numChoices,
     acceptDifficultyBump, dismissDifficultyBump,
-    showIntro, settingsLoaded, dontShowAgain, setDontShowAgain, dismissIntro,
+    showIntro, introResolved, settingsLoaded, dontShowAgain, setDontShowAgain, dismissIntro,
   } = useGameSession({ gameId: 'animal-sounds', items: animals })
 
   const audioRef = useRef(null)
@@ -44,11 +44,11 @@ export default function AnimalSoundsGame({ onGameEnd }) {
   }, [current])
 
   useEffect(() => {
-    if (!current || showIntro) return
+    if (!current || showIntro || !introResolved) return
     playSound()
-  }, [index, playSound, current, showIntro])
+  }, [index, playSound, current, showIntro, introResolved])
 
-  if (!settingsLoaded) return null
+  if (!settingsLoaded || !introResolved) return null
 
   if (showIntro) {
     return (
