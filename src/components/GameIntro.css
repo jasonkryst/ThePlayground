@@ -45,7 +45,7 @@
   font-weight: 700;
   border-radius: var(--radius-button);
   min-height: 64px;
-  background: var(--color-lavender);
+  background: var(--color-lavender-dark);
   color: white;
   border: none;
 }
