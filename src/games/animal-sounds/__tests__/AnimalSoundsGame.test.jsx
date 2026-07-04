@@ -183,12 +183,21 @@ describe('AnimalSoundsGame', () => {
     mockSettings = { ...mockSettings, feedbackMode: 'parent-tap', difficultyAutoProgressionEnabled: true, questionsPerSession: 3, numChoices: 2 }
     await act(async () => { render(<AnimalSoundsGame onGameEnd={onGameEnd} />) })
 
-    for (let i = 0; i < 3; i++) {
-      const buttons = screen.getAllByRole('button').filter(b => b.dataset.animalId)
-      const correctId = screen.getByTestId('correct-animal-id').textContent
-      const correctBtn = buttons.find(b => b.dataset.animalId === correctId)
-      await act(async () => { await userEvent.click(correctBtn) })
-      await act(async () => { await userEvent.click(screen.getByRole('button', { name: /next/i })) })
+    vi.useFakeTimers()
+    try {
+      for (let i = 0; i < 3; i++) {
+        const buttons = screen.getAllByRole('button').filter(b => b.dataset.animalId)
+        const correctId = screen.getByTestId('correct-animal-id').textContent
+        const correctBtn = buttons.find(b => b.dataset.animalId === correctId)
+        act(() => { fireEvent.click(correctBtn) })
+        act(() => { fireEvent.click(screen.getByRole('button', { name: /next/i })) })
+        await act(async () => {})
+      }
+
+      // Flush remaining microtasks from finishGame()'s async chain
+      await act(async () => {})
+    } finally {
+      vi.useRealTimers()
     }
 
     expect(screen.getByText(/perfect session/i)).toBeInTheDocument()
