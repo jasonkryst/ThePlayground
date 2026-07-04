@@ -68,6 +68,7 @@ export default function Dashboard({ manifests = [] }) {
           <h1 className="dashboard__title">🌊 {title}</h1>
           <div className="dashboard__nav">
             <Link to="/parent" className="dashboard__nav-link" aria-label={t('dashboard.parentLabel')}>📊</Link>
+            <Link to="/my-progress" className="dashboard__nav-link" aria-label={t('dashboard.myProgressLabel')}>🌟</Link>
             <Link to="/admin"  className="dashboard__nav-link" aria-label={t('dashboard.settingsLabel')}>⚙️</Link>
           </div>
         </div>

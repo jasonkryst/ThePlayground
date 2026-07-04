@@ -25,6 +25,7 @@
     "titleNamed": "{{name}}'s Playground",
     "settingsLabel": "⚙️ Settings",
     "parentLabel": "📊 Progress Dashboard",
+    "myProgressLabel": "🌟 My Progress",
     "empty": "No games found. Drop a game folder into src/games/.",
     "footerName": "The Playground",
     "todaysGame": "Today's Game",
