@@ -29,8 +29,10 @@ const manifestsFixture = [
   { id: 'color-match',   name: 'Color Match',   icon: '🎨', color: '#CE93D8' },
 ]
 
-function renderPage() {
-  return render(<MemoryRouter><KidsProgressPage manifests={manifestsFixture} /></MemoryRouter>)
+async function renderPage() {
+  const utils = render(<MemoryRouter><KidsProgressPage manifests={manifestsFixture} /></MemoryRouter>)
+  await screen.findByRole('heading', { name: /my progress/i })
+  return utils
 }
 
 beforeEach(() => {
@@ -55,55 +57,55 @@ describe('KidsProgressPage — with progress data', () => {
     }
   })
 
-  it('renders the page title', () => {
-    renderPage()
+  it('renders the page title', async () => {
+    await renderPage()
     expect(screen.getByRole('heading', { name: /my progress/i })).toBeInTheDocument()
   })
 
-  it('renders a back link pointing to /', () => {
-    renderPage()
+  it('renders a back link pointing to /', async () => {
+    await renderPage()
     expect(screen.getByRole('link', { name: /back/i })).toHaveAttribute('href', '/')
   })
 
-  it('renders one section per manifest', () => {
-    renderPage()
+  it('renders one section per manifest', async () => {
+    await renderPage()
     expect(screen.getByRole('heading', { name: /animal sounds/i })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: /color match/i })).toBeInTheDocument()
   })
 
-  it('shows the best accuracy stat computed from scores', () => {
-    renderPage()
+  it('shows the best accuracy stat computed from scores', async () => {
+    await renderPage()
     const section = screen.getByRole('heading', { name: /animal sounds/i }).closest('section')
     expect(within(section).getByText('90%')).toBeInTheDocument()
   })
 
   it('shows the best streak stat resolved from adapter.getBestStreaks', async () => {
-    renderPage()
+    await renderPage()
     const section = screen.getByRole('heading', { name: /animal sounds/i }).closest('section')
-    expect(await within(section).findByText('7')).toBeInTheDocument()
+    expect(within(section).getByText('7')).toBeInTheDocument()
   })
 
-  it('shows the lifetime total-played stat', () => {
-    renderPage()
+  it('shows the lifetime total-played stat', async () => {
+    await renderPage()
     const section = screen.getByRole('heading', { name: /animal sounds/i }).closest('section')
     expect(within(section).getByText('62')).toBeInTheDocument()
   })
 
-  it('shows an earned badge with its count and no "Locked" text anywhere on the page', () => {
-    renderPage()
+  it('shows an earned badge with its count and no "Locked" text anywhere on the page', async () => {
+    await renderPage()
     expect(screen.getByText('Hot Streak ×3')).toBeInTheDocument()
     expect(screen.queryByText(/Locked/i)).not.toBeInTheDocument()
   })
 
-  it('shows a locked badge with an aria-label ending in "locked" and no visible name text', () => {
-    renderPage()
+  it('shows a locked badge with an aria-label ending in "locked" and no visible name text', async () => {
+    await renderPage()
     const section = screen.getByRole('heading', { name: /animal sounds/i }).closest('section')
     const lockedBadge = within(section).getByRole('group', { name: /on fire.*locked/i })
     expect(within(lockedBadge).queryByText('On Fire')).not.toBeInTheDocument()
   })
 
   it('has no accessibility violations', async () => {
-    const { container } = renderPage()
+    const { container } = await renderPage()
     expect(await axe(container)).toHaveNoViolations()
   })
 })
@@ -111,21 +113,21 @@ describe('KidsProgressPage — with progress data', () => {
 // ─── No data yet ─────────────────────────────────────────────────────────────
 
 describe('KidsProgressPage — no data yet', () => {
-  it('shows a dash for best accuracy and zero for streak and total played, without crashing', () => {
-    renderPage()
+  it('shows a dash for best accuracy and zero for streak and total played, without crashing', async () => {
+    await renderPage()
     const section = screen.getByRole('heading', { name: /animal sounds/i }).closest('section')
     expect(within(section).getByText('—')).toBeInTheDocument()
     expect(within(section).getAllByText('0')).toHaveLength(2)
   })
 
-  it('shows every badge as locked', () => {
-    renderPage()
+  it('shows every badge as locked', async () => {
+    await renderPage()
     const section = screen.getByRole('heading', { name: /animal sounds/i }).closest('section')
     expect(within(section).getAllByRole('group', { name: /locked/i })).toHaveLength(8) // BADGE_CATALOG has 8 entries
   })
 
   it('has no accessibility violations in the empty state', async () => {
-    const { container } = renderPage()
+    const { container } = await renderPage()
     expect(await axe(container)).toHaveNoViolations()
   })
 })
@@ -133,8 +135,9 @@ describe('KidsProgressPage — no data yet', () => {
 // ─── Empty manifests ─────────────────────────────────────────────────────────
 
 describe('KidsProgressPage — no games', () => {
-  it('renders the title without crashing when manifests is empty', () => {
+  it('renders the title without crashing when manifests is empty', async () => {
     render(<MemoryRouter><KidsProgressPage manifests={[]} /></MemoryRouter>)
+    await screen.findByRole('heading', { name: /my progress/i })
     expect(screen.getByRole('heading', { name: /my progress/i })).toBeInTheDocument()
   })
 })
