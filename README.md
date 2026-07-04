@@ -9,6 +9,7 @@ A browser-based game dashboard designed for infants and toddlers. Games are disp
 - **Animal Sounds** — an animal sound plays automatically; the child picks the matching animal from picture buttons
 - **Color Match** — a color swatch is shown; the child picks the matching colored object from picture buttons
 - **Admin / Settings** — tabbed settings page (Settings · Games · History); configure child's name, answer choices (2–4), feedback mode, questions per session, Google Analytics ID, and per-game tag overrides
+- **My Progress page** — a kid-facing `/my-progress` page (🌟 link on the dashboard) showing each game's best score, best streak, total questions answered, and earned badges, with locked badges shown dimmed rather than as unreadable text; separate from the parent-facing `/parent` analytics dashboard and the admin `/admin` settings page
 - **How-to-play intro screens** — each game shows a brief instructional screen before its first question; parents can permanently dismiss it per game, or bring it back from the admin Games tab
 - **Persistent scoring** — game history stored in `localStorage`; swappable for a backend without touching game code
 - **Version display** — app version shown in the dashboard footer; game version shown in the game header
@@ -40,6 +41,10 @@ Each game's category is defined by a `"tags"` array in its `manifest.json` (requ
 ### How-to-Play Intro
 
 The first time a game is opened, it shows a full-screen intro with the game's icon, name, and a one-sentence explanation of how to play, before any question appears. A "Don't show this again" checkbox permanently dismisses it for that game (stored in the `introDismissed` setting); leaving it unchecked means the intro reappears the next time the game is opened fresh (it does not reappear after tapping "Play Again" within the same visit). Parents can bring back a dismissed intro from the admin page's **Games** tab via the "Replay Intro" button next to each game's tags.
+
+### My Progress Page
+
+A dedicated `/my-progress` page, linked via the 🌟 button on the main dashboard, shows kids their own progress: for each game, a best-score percentage, best streak, and lifetime questions answered, plus every milestone badge earned so far. Locked badges are shown as dimmed icons with no text label (rather than the admin page's "Locked" text), since the intended audience can't read yet — earned/locked state is still conveyed to assistive tech via each badge's `aria-label`.
 
 ---
 
@@ -192,7 +197,7 @@ docker compose up -d         # run in background after first build
 
 App is served at [http://localhost:8080](http://localhost:8080).
 
-The production image is a two-stage build: a Node LTS container compiles `dist/`, then a lean `nginx:alpine` container (~25 MB) serves the static files. `nginx.conf` includes an SPA fallback (`try_files`) so React Router routes like `/admin` and `/game/animal-sounds` work on direct navigation and page refresh.
+The production image is a two-stage build: a Node LTS container compiles `dist/`, then a lean `nginx:alpine` container (~25 MB) serves the static files. `nginx.conf` includes an SPA fallback (`try_files`) so React Router routes like `/admin`, `/my-progress`, and `/game/animal-sounds` work on direct navigation and page refresh.
 
 | File | Purpose |
 |---|---|
