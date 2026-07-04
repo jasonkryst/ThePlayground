@@ -25,6 +25,7 @@ const stories = [
   'components-badgegallery--all-locked',
   'components-badgegallery--mixed-progress',
   'pages-adminpage--default',
+  'pages-kidsprogresspage--default',
   'games-animalsoundsgame--default',
   'games-colormatchgame--default',
 ]

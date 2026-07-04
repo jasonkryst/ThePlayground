@@ -3,6 +3,7 @@ import { Suspense, lazy, useEffect } from 'react'
 import Dashboard from './components/Dashboard'
 import AdminPage from './admin/AdminPage'
 import ParentDashboard from './parent/ParentDashboard'
+import KidsProgressPage from './kids/KidsProgressPage'
 import useSettings from './hooks/useSettings'
 
 const manifestModules = import.meta.glob('./games/*/manifest.json', { eager: true })
@@ -72,6 +73,7 @@ export default function App() {
         <Route path="/"             element={<Dashboard manifests={manifests} />} />
         <Route path="/admin"        element={<AdminPage manifests={manifests} />} />
         <Route path="/parent"       element={<ParentDashboard />} />
+        <Route path="/my-progress" element={<KidsProgressPage manifests={manifests} />} />
         <Route path="/game/:gameId" element={<GameRoute />} />
       </Routes>
     </BrowserRouter>

@@ -6,6 +6,12 @@ Ideas for future development. Not committed to any timeline.
 
 ## Recently Completed
 
+### v0.9.0 — Kids' "My Progress" Page (2026-07-04)
+- **`/my-progress` route** — a kid-facing progress page, linked via a new 🌟 button on the main dashboard, separate from the existing admin Badge Gallery (`/admin`) and parent analytics dashboard (`/parent`), both of which are unchanged
+- **Per-game stat tiles** — best accuracy %, best streak, and lifetime questions answered, shown with icons rather than text-heavy tables
+- **Toddler-legible badge display** — locked badges are dimmed/grayscale icons with no text label (vs. the admin gallery's "Locked" text), with locked/earned state still exposed to assistive tech via `aria-label`
+- `computeBestAccuracy` pure utility function in `src/utils/kidStats.js`
+
 ### v0.8.0 — Time Limit, Personal Best, and Milestone Badges (2026-07-03)
 - **Answer within N seconds** (issue: core engine backlog) — configurable countdown mode, mutually exclusive with the passive count-up timer; a timeout locks the question as missed and always auto-advances
 - **Per-session personal best** — accuracy and speed records per game, with results-screen banners and a configurable minimum-accuracy gate for speed records

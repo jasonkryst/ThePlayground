@@ -25,6 +25,7 @@
     "titleNamed": "{{name}}'s Playground",
     "settingsLabel": "⚙️ Settings",
     "parentLabel": "📊 Progress Dashboard",
+    "myProgressLabel": "🌟 My Progress",
     "empty": "No games found. Drop a game folder into src/games/.",
     "footerName": "The Playground",
     "todaysGame": "Today's Game",
@@ -124,6 +125,15 @@
   },
   "scoreHistory": {
     "empty": "No scores yet — play a game!"
+  },
+  "kids": {
+    "title": "🌟 My Progress",
+    "back": "Back to dashboard",
+    "statBestScore": "Best Score",
+    "statBestStreak": "Best Streak",
+    "statTotalPlayed": "Total Played",
+    "badgeEarned": "{{name}} — earned",
+    "badgeLocked": "{{name}} — locked"
   },
   "animalSounds": {
     "prompt": "What animal makes this sound?",
