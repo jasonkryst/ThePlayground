@@ -55,6 +55,19 @@
   color: #fff;
 }
 
+/* `.admin__tab:hover` (a class + a pseudo-class) has higher specificity than the
+   single-class `.admin__tab--active`, so without this rule, hovering the active
+   tab silently strips its solid background back to a faint rgba(0,0,0,0.05) tint
+   while its white text color is untouched -- a real WCAG 2 AA color-contrast
+   failure (white text on a near-transparent background) that occurs whenever a
+   user's pointer rests on the active tab. Re-assert the active styling at equal
+   specificity so it wins the cascade on hover too. */
+.admin__tab--active:hover {
+  background: var(--color-lavender-dark);
+  border-color: var(--color-lavender-dark);
+  color: #fff;
+}
+
 .admin__section { margin-bottom: 28px; }
 
 .admin__section h2 { font-size: 18px; font-weight: 700; margin-bottom: 12px; }

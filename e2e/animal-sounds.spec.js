@@ -96,3 +96,24 @@ test('animal sounds: a wrong tap with retries enabled does not lock the question
   const correctChoice = page.locator(`[data-animal-id="${correctId}"]`)
   await expect(correctChoice).toBeEnabled()
 })
+
+test('animal sounds: a countdown timeout auto-advances to the next question', async ({ page }) => {
+  await page.goto('/admin')
+  const timerSection = page.getByRole('heading', { name: 'Timer' }).locator('xpath=..')
+  await timerSection.getByRole('radio', { name: 'Answer within 5s' }).check()
+
+  await page.goto('/game/animal-sounds')
+  await page.getByTestId('game-intro-start').click()
+
+  await expect(page.getByText("Question 1 of")).toBeVisible()
+  await page.waitForTimeout(5200) // countdown expires
+  await expect(page.getByText("⏰ Time's up!")).toBeVisible()
+  await page.waitForTimeout(1600) // auto-advance delay
+  await expect(page.getByText("Question 2 of")).toBeVisible()
+
+  // Reset the timer setting so later specs in this file aren't affected
+  // (each Playwright test gets a fresh browser context, so this is
+  // defense-in-depth rather than strictly required, but keeps intent explicit).
+  await page.goto('/admin')
+  await timerSection.getByRole('radio', { name: '⏱️ Show timer' }).check()
+})

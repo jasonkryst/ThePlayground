@@ -20,9 +20,15 @@
 }
 
 .badge-gallery__badge--locked {
-  opacity: 0.45;
+  /* Do not dilute text opacity here -- it drags already-borderline text
+     colors below the WCAG 2 AA 4.5:1 contrast minimum. "Locked" is instead
+     conveyed via the muted border/background tint plus reduced opacity on
+     the decorative icon only (see .badge-gallery__badge--locked .badge-gallery__icon). */
   border-color: var(--color-text-muted);
+  background: rgba(91, 107, 112, 0.08);
 }
+
+.badge-gallery__badge--locked .badge-gallery__icon { opacity: 0.45; }
 
 .badge-gallery__icon { font-size: 28px; }
 .badge-gallery__name { font-size: 13px; font-weight: 700; }

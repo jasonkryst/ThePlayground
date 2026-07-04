@@ -110,3 +110,25 @@ test('replay intro brings back a dismissed game intro', async ({ page }) => {
   await page.goto('/game/animal-sounds')
   await expect(page.getByTestId('game-intro-start')).toBeVisible()
 })
+
+test('badges tab shows the badge gallery for each game', async ({ page }) => {
+  await page.goto('/admin')
+  await page.getByRole('tab', { name: 'Badges' }).click()
+
+  await expect(page.getByText('Animal Sounds')).toBeVisible()
+  await expect(page.getByText('Color Match')).toBeVisible()
+
+  // "Hot Streak" is a badge name shared by both games' badge sets, so scope from
+  // the game heading rather than using an unscoped locator (same pattern as the
+  // "Answer Choices" radio scoping above).
+  const animalSoundsSection = page.getByRole('heading', { name: 'Animal Sounds' }).locator('xpath=..')
+  await expect(animalSoundsSection.getByText('Hot Streak')).toBeVisible()
+})
+
+test('badges tab has no accessibility violations', async ({ page }) => {
+  await page.goto('/admin')
+  await page.getByRole('tab', { name: 'Badges' }).click()
+  await page.waitForTimeout(200) // let the tab's 150ms background/color transition settle before scanning
+  const results = await new AxeBuilder({ page }).analyze()
+  expect(results.violations).toEqual([])
+})
