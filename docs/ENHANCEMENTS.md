@@ -6,6 +6,11 @@ Ideas for future development. Not committed to any timeline.
 
 ## Recently Completed
 
+### v0.8.0 — Time Limit, Personal Best, and Milestone Badges (2026-07-03)
+- **Answer within N seconds** (issue: core engine backlog) — configurable countdown mode, mutually exclusive with the passive count-up timer; a timeout locks the question as missed and always auto-advances
+- **Per-session personal best** — accuracy and speed records per game, with results-screen banners and a configurable minimum-accuracy gate for speed records
+- **Milestone badges** — 8 repeatable per-game achievements (streak tiers, perfect sessions, lifetime questions answered), with a new AdminPage "Badges" gallery tab
+
 ### v0.7.0 — How-to-Play Intro Screens (2026-07-02)
 - **How-to-play intro screens** (issue #13) — a core engine mechanic in `useGameSession` that shows a `GameIntro` screen (icon, name, instructions) before a game's first question on initial mount; skipped on subsequent "Play Again" rounds in the same visit
 - **"Don't show this again"** checkbox permanently suppresses a game's intro via the new `introDismissed` setting
@@ -75,9 +80,7 @@ Ideas for future development. Not committed to any timeline.
 
 ## Core Game Engine
 
-- **Answer within N seconds** — enforce `timeLimitMs`/`onTimeout` (already wired as unused parameters in `useGameSession`, reserved during the v0.6.0 timer work) as a configurable per-question time limit, pairing with the existing timer display
 - **Sound effects layer** — shared audio feedback (chime on correct, low tone on wrong) independent of game-specific audio; configurable in admin alongside animations
-- **Per-session "personal best"** — compare the current session's score and speed against the stored best; show a "New record!" banner on the results screen using the `timings` data already saved
 
 ---
 
@@ -96,7 +99,6 @@ Ideas for future development. Not committed to any timeline.
 
 ## Scoring & Progress
 
-- **Milestone badges** — award badges for streaks, perfect sessions, or total questions answered
 - **Per-child profiles** — support multiple child accounts with separate score histories
 - **Parent Dashboard enhancements** — interactive date-range filter, game-name labels in charts, month labels on the heatmap, PIN protection for the `/parent` route
 
