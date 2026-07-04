@@ -125,6 +125,15 @@
   "scoreHistory": {
     "empty": "No scores yet — play a game!"
   },
+  "kids": {
+    "title": "🌟 My Progress",
+    "back": "Back to dashboard",
+    "statBestScore": "Best Score",
+    "statBestStreak": "Best Streak",
+    "statTotalPlayed": "Total Played",
+    "badgeEarned": "{{name}} — earned",
+    "badgeLocked": "{{name}} — locked"
+  },
   "animalSounds": {
     "prompt": "What animal makes this sound?",
     "replay": "Replay sound",

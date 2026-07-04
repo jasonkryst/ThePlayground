@@ -1,0 +1,85 @@
+.kid-progress { min-height: 100vh; padding: 24px 16px; }
+
+.kid-progress__header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.kid-progress__back {
+  font-size: 28px;
+  text-decoration: none;
+  min-width: 56px;
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-button);
+  color: inherit;
+}
+
+.kid-progress__back:hover         { background: rgba(0,0,0,0.06); }
+.kid-progress__back:focus         { outline: none; }
+.kid-progress__back:focus-visible { outline: 3px solid var(--color-lavender); outline-offset: 3px; }
+
+.kid-progress__title { font-size: 28px; font-weight: 800; color: var(--color-lavender-dark); }
+
+.kid-progress__game {
+  background: var(--color-surface);
+  border-radius: var(--radius-card);
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.kid-progress__game-name { font-size: 22px; font-weight: 800; margin-bottom: 16px; }
+
+.kid-progress__stats {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.kid-progress__stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  background: var(--color-bg);
+  border-radius: var(--radius-button);
+  padding: 12px 16px;
+  min-width: 96px;
+}
+
+.kid-progress__stat-icon  { font-size: 28px; }
+.kid-progress__stat-value { font-size: 22px; font-weight: 800; color: var(--color-teal-dark); }
+.kid-progress__stat-label { font-size: 12px; font-weight: 700; color: var(--color-text-muted); text-align: center; }
+
+.kid-progress__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.kid-progress__badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 14px;
+  border-radius: var(--radius-button);
+  border: 2px solid var(--color-aqua);
+  min-width: 72px;
+  text-align: center;
+}
+
+.kid-progress__badge--locked {
+  border-color: var(--color-text-muted);
+  background: rgba(91, 107, 112, 0.08);
+}
+
+.kid-progress__badge--locked .kid-progress__badge-icon { opacity: 0.45; filter: grayscale(100%); }
+
+.kid-progress__badge-icon { font-size: 32px; }
+.kid-progress__badge-name { font-size: 13px; font-weight: 700; }
