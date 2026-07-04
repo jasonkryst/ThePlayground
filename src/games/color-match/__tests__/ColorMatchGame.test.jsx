@@ -9,7 +9,7 @@ vi.mock('../../../lib/confetti', () => ({ fireConfetti: vi.fn() }))
 let mockSettings = {
   numChoices: 2, feedbackMode: 'immediate', questionsPerSession: 3,
   maxTries: 'none', hintsEnabled: false, hintAfterWrongTaps: 2, retryCountsAsStreak: true,
-  spacedRepetitionEnabled: false, difficultyAutoProgressionEnabled: false, timerDisplayEnabled: true,
+  spacedRepetitionEnabled: false, difficultyAutoProgressionEnabled: false, timerMode: 'countUp',
   introDismissed: { 'color-match': true },
 }
 const mockUpdateSetting = vi.fn()
@@ -26,6 +26,20 @@ vi.mock('../../../hooks/useBestStreak', () => ({
   default: () => ({ bestStreak: 0, recordStreak: vi.fn().mockResolvedValue(undefined) }),
 }))
 
+vi.mock('../../../hooks/usePersonalBest', () => ({
+  default: () => ({
+    personalBest: null,
+    recordSession: vi.fn().mockResolvedValue({
+      accuracy: { isNewRecord: false, value: 0, previous: null },
+      speed: { isNewRecord: false, value: null, previous: null },
+    }),
+  }),
+}))
+
+vi.mock('../../../hooks/useBadges', () => ({
+  default: () => ({ badgeData: { awards: {}, lifetimeQuestions: {} }, awardSession: vi.fn().mockResolvedValue([]) }),
+}))
+
 const onGameEnd = vi.fn()
 
 beforeEach(() => {
@@ -33,7 +47,7 @@ beforeEach(() => {
   mockSettings = {
     numChoices: 2, feedbackMode: 'immediate', questionsPerSession: 3,
     maxTries: 'none', hintsEnabled: false, hintAfterWrongTaps: 2, retryCountsAsStreak: true,
-    spacedRepetitionEnabled: false, difficultyAutoProgressionEnabled: false, timerDisplayEnabled: true,
+    spacedRepetitionEnabled: false, difficultyAutoProgressionEnabled: false, timerMode: 'countUp',
     introDismissed: { 'color-match': true },
   }
 })
@@ -140,13 +154,13 @@ describe('ColorMatchGame', () => {
     expect(screen.getByText(/let's practice/i)).toBeInTheDocument()
   })
 
-  it('shows the timer when timerDisplayEnabled is true', async () => {
+  it('shows the timer when timerMode is not "off"', async () => {
     await act(async () => { render(<ColorMatchGame onGameEnd={onGameEnd} />) })
     expect(screen.getByLabelText(/elapsed time/i)).toBeInTheDocument()
   })
 
-  it('hides the timer when timerDisplayEnabled is false', async () => {
-    mockSettings = { ...mockSettings, timerDisplayEnabled: false }
+  it('hides the timer when timerMode is "off"', async () => {
+    mockSettings = { ...mockSettings, timerMode: 'off' }
     await act(async () => { render(<ColorMatchGame onGameEnd={onGameEnd} />) })
     expect(screen.queryByLabelText(/elapsed time/i)).not.toBeInTheDocument()
   })
