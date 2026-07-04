@@ -16,7 +16,8 @@ export default function ColorMatchGame({ onGameEnd }) {
   const {
     current, index, total, locked, disabledChoiceIds, hintActive, selected,
     score, streak, missed, done, feedbackMode, handleChoice, advance, restart,
-    currentElapsedMs, timerDisplayEnabled, offerDifficultyBump, numChoices,
+    currentElapsedMs, timerMode, timeLimitMs, timedOut, offerDifficultyBump, numChoices,
+    personalBestResult, newBadges,
     acceptDifficultyBump, dismissDifficultyBump,
     showIntro, introResolved, settingsLoaded, dontShowAgain, setDontShowAgain, dismissIntro,
   } = useGameSession({ gameId: 'color-match', items: colors })
@@ -57,6 +58,8 @@ export default function ColorMatchGame({ onGameEnd }) {
         numChoices={numChoices}
         onAcceptDifficultyBump={acceptDifficultyBump}
         onDismissDifficultyBump={dismissDifficultyBump}
+        personalBestResult={personalBestResult}
+        newBadges={newBadges}
       />
     )
   }
@@ -78,7 +81,9 @@ export default function ColorMatchGame({ onGameEnd }) {
         <div className="game__progress">{t('common.progress', { current: index + 1, total })}</div>
         <div className="game__prompt">{t('colorMatch.prompt')}</div>
         <div className="game__swatch" style={{ background: current.correct.color }} />
-        {timerDisplayEnabled && <Timer elapsedMs={currentElapsedMs} />}
+        {timerMode !== 'off' && (
+          <Timer elapsedMs={currentElapsedMs} mode={timerMode === 'countdown' ? 'countdown' : 'countUp'} limitMs={timeLimitMs} />
+        )}
       </div>
 
       <GameChoiceGrid
@@ -102,7 +107,9 @@ export default function ColorMatchGame({ onGameEnd }) {
         )}
       />
 
-      {locked && feedbackMode === 'parent-tap' && (
+      {timedOut && <div className="game__timeout" role="status">{t('common.timeUp')}</div>}
+
+      {locked && feedbackMode === 'parent-tap' && !timedOut && (
         <button className="game__next" onClick={advance}>{t('common.next')}</button>
       )}
     </main>

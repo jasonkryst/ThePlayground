@@ -78,3 +78,5 @@
 .results__btn { padding: 16px 36px; font-size: 20px; font-weight: 700; border-radius: var(--radius-button); min-height: 64px; }
 .results__btn--play  { background: var(--color-lavender); color: white; border: none; }
 .results__btn--home  { background: transparent; border: 2px solid var(--color-aqua); color: var(--color-text); }
+
+.game__timeout { text-align: center; font-size: 18px; font-weight: 700; color: var(--color-error); margin-top: 8px; }

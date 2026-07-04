@@ -7,7 +7,8 @@ import AdminPage from '../AdminPage'
 
 const mockSettingsDefaults = {
   numChoices: 2, feedbackMode: 'immediate', questionsPerSession: 10, childName: '', animationsEnabled: true,
-  timerDisplayEnabled: true, maxTries: 'none', hintsEnabled: false, hintAfterWrongTaps: 2,
+  timerMode: 'countUp', timeLimitSeconds: 10, speedRecordMinAccuracy: 70,
+  maxTries: 'none', hintsEnabled: false, hintAfterWrongTaps: 2,
   retryCountsAsStreak: true, spacedRepetitionEnabled: false, difficultyAutoProgressionEnabled: false,
 }
 const mockUpdateSetting = vi.fn()
@@ -34,6 +35,15 @@ vi.mock('../../hooks/useScores', () => ({
     getBestScore: () => 0,
     getScoresByGame: () => [],
     scores: [],
+  }),
+}))
+
+vi.mock('../../hooks/useBadges', () => ({
+  default: () => ({
+    badgeData: {
+      awards: { 'animal-sounds': { hotStreak: 2 } },
+      lifetimeQuestions: { 'animal-sounds': 45 },
+    },
   }),
 }))
 
@@ -101,15 +111,6 @@ describe('AdminPage', () => {
     const { getByRole } = within(animationsSection)
     await userEvent.click(getByRole('button', { name: /off/i }))
     expect(mockUpdateSetting).toHaveBeenCalledWith('animationsEnabled', false)
-  })
-
-  it('renders the timer display toggle and calls updateSetting when turned off', async () => {
-    render(<MemoryRouter><AdminPage /></MemoryRouter>)
-    const timerSection = screen.getByText(/timer display/i).closest('.admin__section')
-    expect(timerSection).toBeInTheDocument()
-    const { getByRole } = within(timerSection)
-    await userEvent.click(getByRole('button', { name: /^off$/i }))
-    expect(mockUpdateSetting).toHaveBeenCalledWith('timerDisplayEnabled', false)
   })
 
   it('renders the retry attempts radio group and calls updateSetting when changed', async () => {
@@ -244,5 +245,57 @@ describe('AdminPage', () => {
     await user.click(screen.getByRole('tab', { name: /games/i }))
     await user.click(screen.getAllByRole('button', { name: /replay intro/i })[0])
     expect(mockUpdateSetting).toHaveBeenCalledWith('introDismissed', { 'color-match': true })
+  })
+
+  it('renders the timer radio row with 6 options', () => {
+    render(<MemoryRouter><AdminPage /></MemoryRouter>)
+    const timerSection = screen.getByRole('heading', { name: 'Timer' }).closest('.admin__section')
+    expect(within(timerSection).getByRole('radio', { name: 'Off' })).toBeInTheDocument()
+    expect(within(timerSection).getByRole('radio', { name: '⏱️ Show timer' })).toBeInTheDocument()
+    expect(within(timerSection).getByRole('radio', { name: 'Answer within 5s' })).toBeInTheDocument()
+    expect(within(timerSection).getByRole('radio', { name: 'Answer within 10s' })).toBeInTheDocument()
+    expect(within(timerSection).getByRole('radio', { name: 'Answer within 15s' })).toBeInTheDocument()
+    expect(within(timerSection).getByRole('radio', { name: 'Answer within 20s' })).toBeInTheDocument()
+  })
+
+  it('selecting a countdown option updates both timerMode and timeLimitSeconds', async () => {
+    render(<MemoryRouter><AdminPage /></MemoryRouter>)
+    const timerSection = screen.getByRole('heading', { name: 'Timer' }).closest('.admin__section')
+    await userEvent.click(within(timerSection).getByRole('radio', { name: 'Answer within 15s' }))
+    expect(mockUpdateSetting).toHaveBeenCalledWith('timerMode', 'countdown')
+    expect(mockUpdateSetting).toHaveBeenCalledWith('timeLimitSeconds', 15)
+  })
+
+  it('selecting "Off" sets timerMode to off', async () => {
+    render(<MemoryRouter><AdminPage /></MemoryRouter>)
+    const timerSection = screen.getByRole('heading', { name: 'Timer' }).closest('.admin__section')
+    await userEvent.click(within(timerSection).getByRole('radio', { name: 'Off' }))
+    expect(mockUpdateSetting).toHaveBeenCalledWith('timerMode', 'off')
+  })
+
+  it('renders the speed record threshold radio row', () => {
+    render(<MemoryRouter><AdminPage /></MemoryRouter>)
+    const section = screen.getByRole('heading', { name: 'Speed Record Threshold' }).closest('.admin__section')
+    expect(within(section).getByRole('radio', { name: '70%' })).toBeInTheDocument()
+    expect(within(section).getByRole('radio', { name: '100%' })).toBeInTheDocument()
+  })
+
+  it('selecting a speed threshold option calls updateSetting', async () => {
+    render(<MemoryRouter><AdminPage /></MemoryRouter>)
+    const section = screen.getByRole('heading', { name: 'Speed Record Threshold' }).closest('.admin__section')
+    await userEvent.click(within(section).getByRole('radio', { name: '90%' }))
+    expect(mockUpdateSetting).toHaveBeenCalledWith('speedRecordMinAccuracy', 90)
+  })
+
+  it('renders a Badges tab', () => {
+    render(<MemoryRouter><AdminPage manifests={manifestsFixture} /></MemoryRouter>)
+    expect(screen.getByRole('tab', { name: 'Badges' })).toBeInTheDocument()
+  })
+
+  it('shows the badge gallery when the Badges tab is active', async () => {
+    render(<MemoryRouter><AdminPage manifests={manifestsFixture} /></MemoryRouter>)
+    await userEvent.click(screen.getByRole('tab', { name: 'Badges' }))
+    expect(screen.getByText('Animal Sounds')).toBeInTheDocument()
+    expect(screen.getByText('×2')).toBeInTheDocument() // hotStreak count for animal-sounds
   })
 })

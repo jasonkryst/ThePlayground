@@ -3,13 +3,16 @@ import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import useSettings from '../hooks/useSettings'
 import useScores from '../hooks/useScores'
+import useBadges from '../hooks/useBadges'
 import ScoreHistory from '../components/ScoreHistory'
+import BadgeGallery from '../components/BadgeGallery'
 import './AdminPage.css'
 
 export default function AdminPage({ manifests = [] }) {
   const { t } = useTranslation()
   const { settings, loaded, updateSetting, resetSettings } = useSettings()
   const { getAllScores } = useScores()
+  const { badgeData } = useBadges()
 
   const [activeTab, setActiveTab] = useState('settings')
 
@@ -71,6 +74,7 @@ export default function AdminPage({ manifests = [] }) {
   const tabs = [
     { id: 'settings', label: t('admin.tabSettings') },
     { id: 'games',    label: t('admin.tabGames') },
+    { id: 'badges',   label: t('admin.tabBadges') },
     { id: 'history',  label: t('admin.tabHistory') },
   ]
 
@@ -205,20 +209,68 @@ export default function AdminPage({ manifests = [] }) {
             </div>
 
             <div className="admin__section">
-              <h2>{t('admin.timerDisplayHeading')}</h2>
-              <div className="admin__toggle">
-                <button
-                  className={`admin__toggle-btn${settings.timerDisplayEnabled ? ' active' : ''}`}
-                  onClick={() => updateSetting('timerDisplayEnabled', true)}
-                >
-                  {t('admin.timerDisplayOn')}
-                </button>
-                <button
-                  className={`admin__toggle-btn${!settings.timerDisplayEnabled ? ' active' : ''}`}
-                  onClick={() => updateSetting('timerDisplayEnabled', false)}
-                >
-                  {t('admin.timerDisplayOff')}
-                </button>
+              <h2>{t('admin.timerHeading')}</h2>
+              <div className="admin__radios">
+                <label className={`admin__radio-label${settings.timerMode === 'off' ? ' selected' : ''}`}>
+                  <input
+                    type="radio"
+                    name="timerMode"
+                    checked={settings.timerMode === 'off'}
+                    onChange={() => updateSetting('timerMode', 'off')}
+                    aria-label={t('admin.timerOff')}
+                  />
+                  {t('admin.timerOff')}
+                </label>
+                <label className={`admin__radio-label${settings.timerMode === 'countUp' ? ' selected' : ''}`}>
+                  <input
+                    type="radio"
+                    name="timerMode"
+                    checked={settings.timerMode === 'countUp'}
+                    onChange={() => updateSetting('timerMode', 'countUp')}
+                    aria-label={t('admin.timerCountUp')}
+                  />
+                  {t('admin.timerCountUp')}
+                </label>
+                {[5, 10, 15, 20].map(n => (
+                  <label
+                    key={n}
+                    className={`admin__radio-label${settings.timerMode === 'countdown' && settings.timeLimitSeconds === n ? ' selected' : ''}`}
+                  >
+                    <input
+                      type="radio"
+                      name="timerMode"
+                      checked={settings.timerMode === 'countdown' && settings.timeLimitSeconds === n}
+                      onChange={() => {
+                        updateSetting('timerMode', 'countdown')
+                        updateSetting('timeLimitSeconds', n)
+                      }}
+                      aria-label={t('admin.timerCountdown', { seconds: n })}
+                    />
+                    {t('admin.timerCountdown', { seconds: n })}
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div className="admin__section">
+              <h2>{t('admin.speedRecordThresholdHeading')}</h2>
+              <p className="admin__hint">{t('admin.speedRecordThresholdHint')}</p>
+              <div className="admin__radios">
+                {[70, 75, 80, 85, 90, 95, 100].map(pct => (
+                  <label
+                    key={pct}
+                    className={`admin__radio-label${settings.speedRecordMinAccuracy === pct ? ' selected' : ''}`}
+                  >
+                    <input
+                      type="radio"
+                      name="speedRecordMinAccuracy"
+                      checked={settings.speedRecordMinAccuracy === pct}
+                      onChange={() => updateSetting('speedRecordMinAccuracy', pct)}
+                      aria-label={`${pct}%`}
+                    />
+                    {pct}%
+                  </label>
+                ))}
               </div>
             </div>
 
@@ -377,6 +429,13 @@ export default function AdminPage({ manifests = [] }) {
                 </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {activeTab === 'badges' && (
+          <div className="admin__section">
+            <h2>{t('admin.badgesHeading')}</h2>
+            <BadgeGallery manifests={manifests} badgeData={badgeData} />
           </div>
         )}
 

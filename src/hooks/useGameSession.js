@@ -2,6 +2,8 @@ import { useState, useEffect, useRef } from 'react'
 import useSettings from './useSettings'
 import useScores from './useScores'
 import useBestStreak from './useBestStreak'
+import usePersonalBest from './usePersonalBest'
+import useBadges from './useBadges'
 import { fireConfetti } from '../lib/confetti'
 import buildQueue from '../utils/buildQueue'
 import reinsertMissed from '../utils/reinsertMissed'
@@ -12,16 +14,21 @@ function resolveMaxTries(maxTries) {
   return Number(maxTries)
 }
 
-export default function useGameSession({ gameId, items, timeLimitMs, onTimeout }) {
+export default function useGameSession({ gameId, items }) {
   const { settings, loaded, updateSetting } = useSettings()
   const { addScore } = useScores()
   const { bestStreak, recordStreak } = useBestStreak(gameId)
+  const { personalBest, recordSession: recordPersonalBestSession } = usePersonalBest(gameId)
+  const { awardSession } = useBadges()
 
   const {
     numChoices, feedbackMode, questionsPerSession, animationsEnabled,
-    timerDisplayEnabled, maxTries, hintsEnabled, hintAfterWrongTaps,
+    timerMode, timeLimitSeconds, maxTries, hintsEnabled, hintAfterWrongTaps,
     retryCountsAsStreak, spacedRepetitionEnabled, difficultyAutoProgressionEnabled,
+    speedRecordMinAccuracy,
   } = settings
+
+  const timeLimitMs = timerMode === 'countdown' ? timeLimitSeconds * 1000 : undefined
 
   const [queue,               setQueue]               = useState([])
   const [index,                setIndex]               = useState(0)
@@ -36,6 +43,9 @@ export default function useGameSession({ gameId, items, timeLimitMs, onTimeout }
   const [currentElapsedMs,     setCurrentElapsedMs]    = useState(0)
   const [timings,              setTimings]             = useState([])
   const [offerDifficultyBump,  setOfferDifficultyBump] = useState(false)
+  const [personalBestResult,  setPersonalBestResult]  = useState(null)
+  const [newBadges,           setNewBadges]            = useState([])
+  const [timedOut,             setTimedOut]            = useState(false)
   const [showIntro,            setShowIntro]           = useState(false)
   const [introResolved,        setIntroResolved]       = useState(false)
   const [dontShowAgain,        setDontShowAgain]       = useState(false)
@@ -52,10 +62,9 @@ export default function useGameSession({ gameId, items, timeLimitMs, onTimeout }
   const wrongAttemptsRef    = useRef(0)
   const disabledChoiceIdsRef = useRef([])
   const questionStartRef = useRef(Date.now())
-  const onTimeoutRef    = useRef(onTimeout)
+  const handleTimeoutRef = useRef(null)
   const pendingReinsertRef = useRef(null)
   const introInitializedRef = useRef(false)
-  useEffect(() => { onTimeoutRef.current = onTimeout })
 
   // Runs once, when settings finish their initial async load. The ref guard
   // prevents later introDismissed writes (including this hook's own
@@ -93,16 +102,22 @@ export default function useGameSession({ gameId, items, timeLimitMs, onTimeout }
     setWrongAttempts(0)
     setDisabledChoiceIds([])
     setCurrentElapsedMs(0)
+    setTimedOut(false)
 
-    const intervalId = (timerDisplayEnabled || timeLimitMs)
-      ? setInterval(() => {
-          setCurrentElapsedMs(Date.now() - questionStartRef.current)
-        }, 100)
-      : null
+    // currentElapsedMs is tracked unconditionally (not gated on timerMode):
+    // this keeps the effect's behavior uniform across timer modes so the
+    // Timer component's currentElapsedMs prop ticks smoothly whenever it's
+    // rendered, including across timerMode transitions. It has no bearing on
+    // scored timing data — durationMs values come from a separate
+    // Date.now() - questionStartRef.current computation in
+    // handleChoice/handleTimeout.
+    const intervalId = setInterval(() => {
+      setCurrentElapsedMs(Date.now() - questionStartRef.current)
+    }, 100)
 
     const timeoutId = timeLimitMs
       ? setTimeout(() => {
-          if (!lockedRef.current) onTimeoutRef.current?.()
+          if (!lockedRef.current) handleTimeoutRef.current?.()
         }, timeLimitMs)
       : null
 
@@ -110,10 +125,42 @@ export default function useGameSession({ gameId, items, timeLimitMs, onTimeout }
       clearInterval(intervalId)
       if (timeoutId) clearTimeout(timeoutId)
     }
-  }, [index, queue, timeLimitMs, timerDisplayEnabled])
+  }, [index, queue, timeLimitMs, timerMode])
 
   const current = queue[index]
   const hintActive = hintsEnabled && !locked && wrongAttempts >= hintAfterWrongTaps
+
+  function lockAsMissed(missedItem) {
+    streakRef.current = 0
+    setStreak(0)
+    missedRef.current = [...missedRef.current, missedItem]
+    setMissed(missedRef.current)
+
+    if (spacedRepetitionEnabled) {
+      pendingReinsertRef.current = { missedIndex: indexRef.current, missedEntry: queueRef.current[indexRef.current] }
+    }
+  }
+
+  function handleTimeout() {
+    if (lockedRef.current) return
+    const q = queueRef.current[indexRef.current]
+    const attemptNumber = wrongAttemptsRef.current + 1
+    const entry = {
+      questionIndex: indexRef.current, itemId: q.correct.id, correct: false,
+      durationMs: timeLimitMs, attemptNumber, timedOut: true,
+    }
+    const nextTimings = [...timingsRef.current, entry]
+    timingsRef.current = nextTimings
+    setTimings(nextTimings)
+
+    lockAsMissed(q.correct)
+    setLocked(true)
+    lockedRef.current = true
+    setTimedOut(true)
+    setTimeout(advance, 1500)
+  }
+
+  useEffect(() => { handleTimeoutRef.current = handleTimeout })
 
   function handleChoice(item) {
     if (lockedRef.current) return
@@ -159,19 +206,12 @@ export default function useGameSession({ gameId, items, timeLimitMs, onTimeout }
 
       const resolvedMax = resolveMaxTries(maxTries)
       if (nextWrongAttempts >= resolvedMax) {
-        streakRef.current = 0
-        setStreak(0)
-        missedRef.current = [...missedRef.current, current.correct]
-        setMissed(missedRef.current)
-
-        if (spacedRepetitionEnabled) {
-          // Deferred to advance() rather than applied here: mutating `queue`
-          // now would change the per-question effect's `queue` dependency
-          // while `index` stays the same, re-running it and immediately
-          // undoing the `setLocked(true)` below.
-          pendingReinsertRef.current = { missedIndex: indexRef.current, missedEntry: current }
-        }
-
+        // Deferred reinsertion note (still applies): mutating `queue` now
+        // would change the per-question effect's `queue` dependency while
+        // `index` stays the same, re-running it and immediately undoing the
+        // `setLocked(true)` below — so lockAsMissed only stages the pending
+        // reinsertion; advance() applies it.
+        lockAsMissed(current.correct)
         willLock = true
       }
     }
@@ -210,10 +250,12 @@ export default function useGameSession({ gameId, items, timeLimitMs, onTimeout }
   }
 
   async function finishGame() {
+    const total = queueRef.current.length
+    const isPerfect = scoreRef.current === total
     const result = {
       gameId,
       score:      scoreRef.current,
-      total:      queueRef.current.length,
+      total,
       date:       new Date().toISOString().split('T')[0],
       timestamp:  Date.now(),
       timings:    timingsRef.current,
@@ -221,11 +263,17 @@ export default function useGameSession({ gameId, items, timeLimitMs, onTimeout }
     }
     await addScore(result)
 
-    if (
-      difficultyAutoProgressionEnabled &&
-      scoreRef.current === queueRef.current.length &&
-      numChoices < 4
-    ) {
+    const bestResult = await recordPersonalBestSession({
+      score: scoreRef.current, total, timings: timingsRef.current, minAccuracyPct: speedRecordMinAccuracy,
+    })
+    setPersonalBestResult(bestResult)
+
+    const earnedBadges = await awardSession(gameId, {
+      peakStreak: peakStreakRef.current, isPerfect, questionsAnswered: total,
+    })
+    setNewBadges(earnedBadges)
+
+    if (difficultyAutoProgressionEnabled && isPerfect && numChoices < 4) {
       setOfferDifficultyBump(true)
     }
 
@@ -266,6 +314,9 @@ export default function useGameSession({ gameId, items, timeLimitMs, onTimeout }
     setDone(false)
     setTimings([])
     setCurrentElapsedMs(0)
+    setTimedOut(false)
+    setPersonalBestResult(null)
+    setNewBadges([])
     setOfferDifficultyBump(false)
   }
 
@@ -279,7 +330,8 @@ export default function useGameSession({ gameId, items, timeLimitMs, onTimeout }
   return {
     current, index, total: queue.length, locked, disabledChoiceIds, hintActive, selected,
     score, streak, bestStreak, missed, done, feedbackMode, numChoices,
-    currentElapsedMs, timings, timerDisplayEnabled, offerDifficultyBump,
+    currentElapsedMs, timings, timerMode, timeLimitMs, timedOut, offerDifficultyBump,
+    personalBestResult, newBadges,
     showIntro, introResolved, settingsLoaded: loaded, dontShowAgain, setDontShowAgain,
     handleChoice, advance, restart, acceptDifficultyBump, dismissDifficultyBump, dismissIntro,
   }

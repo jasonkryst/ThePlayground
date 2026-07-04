@@ -226,7 +226,8 @@ Accessible from the dashboard via the gear icon (⚙).
 | Feedback mode | Immediate | Immediate, Parent tap |
 | Questions per session | 10 | 5, 10, 15, 20 |
 | Celebration animations | On | On, Off |
-| Timer display | On | On, Off |
+| Timer | Show timer | Off, Show timer, Answer within 5/10/15/20s |
+| Speed record threshold | 70% | 70, 75, 80, 85, 90, 95, 100 |
 | Retry attempts | None | None, 1, 2, 3, 4, 5, Unlimited |
 | Hints | Off | On, Off |
 | Show hint after | 2 | 1, 2, 3, 4, 5 (only shown when Hints is On) |
@@ -245,7 +246,9 @@ Accessible from the dashboard via the gear icon (⚙).
 
 **Celebration animations** — when on, a confetti burst plays on every correct answer and the game header shows the current answer streak once it reaches 2; the end-of-game screen lists any missed items. Turning this off disables the confetti only — streak tracking and the missed-items summary remain.
 
-**Timer display** — shows a running stopwatch next to the question, counting up from 0 each time a new question appears. Purely informational; there is no time limit today.
+**Timer** — "Show timer" is a running stopwatch, purely informational. "Answer within Ns" instead counts down; when it reaches zero the question locks in as missed (same as exhausting retries) and always advances after a "Time's up!" message, regardless of feedback mode. "Off" hides the timer and enforces no limit.
+
+**Speed record threshold** — the minimum session accuracy required for a new average-speed personal best to be announced, so a fast-but-mostly-wrong session can't set a "speed record."
 
 **Retry attempts** — how many wrong taps are allowed on a question before it locks in as missed. "None" reproduces the original behavior (locks on the very first wrong tap). Each wrong choice becomes disabled (but stays visible) so the child can try a different one.
 
