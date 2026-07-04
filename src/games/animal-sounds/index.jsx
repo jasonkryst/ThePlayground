@@ -131,7 +131,7 @@ export default function AnimalSoundsGame({ onGameEnd }) {
 
       {timedOut && <div className="game__timeout" role="status">{t('common.timeUp')}</div>}
 
-      {locked && feedbackMode === 'parent-tap' && (
+      {locked && feedbackMode === 'parent-tap' && !timedOut && (
         <button className="game__next" onClick={advance}>{t('common.next')}</button>
       )}
     </main>

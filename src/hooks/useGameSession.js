@@ -105,7 +105,12 @@ export default function useGameSession({ gameId, items }) {
     setTimedOut(false)
 
     // currentElapsedMs is tracked unconditionally (not gated on timerMode):
-    // it feeds timing data independent of whether a timer is displayed.
+    // this keeps the effect's behavior uniform across timer modes so the
+    // Timer component's currentElapsedMs prop ticks smoothly whenever it's
+    // rendered, including across timerMode transitions. It has no bearing on
+    // scored timing data — durationMs values come from a separate
+    // Date.now() - questionStartRef.current computation in
+    // handleChoice/handleTimeout.
     const intervalId = setInterval(() => {
       setCurrentElapsedMs(Date.now() - questionStartRef.current)
     }, 100)

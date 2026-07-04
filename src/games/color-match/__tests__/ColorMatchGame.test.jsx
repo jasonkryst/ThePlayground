@@ -179,6 +179,19 @@ describe('ColorMatchGame', () => {
     expect(correctBtn).not.toBeDisabled()
   })
 
+  it('does not render a Next button while the countdown timeout message is showing in parent-tap mode (regression guard against double-advance)', async () => {
+    vi.useFakeTimers()
+    mockSettings = { ...mockSettings, feedbackMode: 'parent-tap', timerMode: 'countdown', timeLimitSeconds: 5 }
+    await act(async () => { render(<ColorMatchGame onGameEnd={onGameEnd} />) })
+
+    act(() => { vi.advanceTimersByTime(5001) })
+
+    expect(screen.getByText(/time's up/i)).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: /next/i })).not.toBeInTheDocument()
+
+    vi.useRealTimers()
+  })
+
   it('shows the difficulty-offer banner after a perfect session when enabled', async () => {
     mockSettings = { ...mockSettings, feedbackMode: 'parent-tap', difficultyAutoProgressionEnabled: true, questionsPerSession: 3, numChoices: 2 }
     await act(async () => { render(<ColorMatchGame onGameEnd={onGameEnd} />) })
