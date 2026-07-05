@@ -5,6 +5,7 @@ import AdminPage from './admin/AdminPage'
 import ParentDashboard from './parent/ParentDashboard'
 import KidsProgressPage from './kids/KidsProgressPage'
 import useSettings from './hooks/useSettings'
+import i18n from './i18n'
 
 const manifestModules = import.meta.glob('./games/*/manifest.json', { eager: true })
 const gameModules     = import.meta.glob('./games/*/index.jsx')
@@ -51,6 +52,19 @@ function GoogleAnalytics() {
   return null
 }
 
+function LocaleSync() {
+  const { settings, loaded } = useSettings()
+
+  useEffect(() => {
+    if (!loaded || !settings.locale) return
+    if (settings.locale !== i18n.language) {
+      i18n.changeLanguage(settings.locale)
+    }
+  }, [loaded, settings.locale])
+
+  return null
+}
+
 function GameRoute() {
   const { gameId } = useParams()
   const navigate   = useNavigate()
@@ -69,6 +83,7 @@ export default function App() {
   return (
     <BrowserRouter>
       <GoogleAnalytics />
+      <LocaleSync />
       <Routes>
         <Route path="/"             element={<Dashboard manifests={manifests} />} />
         <Route path="/admin"        element={<AdminPage manifests={manifests} />} />
