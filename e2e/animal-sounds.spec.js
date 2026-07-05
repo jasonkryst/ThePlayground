@@ -87,9 +87,14 @@ test('animal sounds: a wrong tap with retries enabled does not lock the question
   await page.goto('/game/animal-sounds')
   await page.getByTestId('game-intro-start').click()
 
-  const choices = page.locator('[data-animal-id]')
   const correctId = await page.getByTestId('correct-animal-id').textContent()
-  const wrongChoice = choices.filter({ hasNot: page.locator(`[data-animal-id="${correctId}"]`) }).first()
+  // NB: `choices.filter({ hasNot: ... })` is a no-op here — Playwright's
+  // hasNot only matches descendants, and these choice buttons have no
+  // descendant carrying data-animal-id (only the button itself does), so the
+  // filter matches every choice and `.first()` can land on the correct answer
+  // by DOM-order coincidence. Exclude the correct id directly in the selector
+  // instead so this test deterministically clicks a wrong choice.
+  const wrongChoice = page.locator(`[data-animal-id]:not([data-animal-id="${correctId}"])`).first()
   await wrongChoice.click()
 
   await expect(wrongChoice).toBeDisabled()
