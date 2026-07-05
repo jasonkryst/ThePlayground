@@ -2,8 +2,8 @@
   "id": "character-match",
   "name": "Character Match",
   "description": "Match the name to the character!",
-  "icon": "/src/games/character-match/images/bluey.webp",
+  "icon": "/games/character-match/icon.webp",
   "color": "#FFB74D",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "tags": ["visual", "characters"]
 }
