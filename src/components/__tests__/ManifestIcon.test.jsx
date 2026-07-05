@@ -34,10 +34,12 @@ describe('ManifestIcon', () => {
     expect(img).toHaveClass('tile-icon')
   })
 
-  it('renders an image for .gif and .jpg paths too', () => {
+  it('renders an image for .gif, .jpg, and .webp paths too', () => {
     const { container: gifContainer } = render(<ManifestIcon icon="/a/b.gif" />)
     expect(gifContainer.querySelector('img')).not.toBeNull()
     const { container: jpgContainer } = render(<ManifestIcon icon="/a/b.jpg" />)
     expect(jpgContainer.querySelector('img')).not.toBeNull()
+    const { container: webpContainer } = render(<ManifestIcon icon="/a/b.webp" />)
+    expect(webpContainer.querySelector('img')).not.toBeNull()
   })
 })

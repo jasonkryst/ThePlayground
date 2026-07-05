@@ -1,4 +1,4 @@
-const IMAGE_ICON_RE = /\.(png|gif|jpe?g)$/i
+const IMAGE_ICON_RE = /\.(png|gif|jpe?g|webp)$/i
 
 export default function ManifestIcon({ icon, as: Tag = 'span', className, ariaHidden = false }) {
   if (IMAGE_ICON_RE.test(icon)) {

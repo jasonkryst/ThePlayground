@@ -12,7 +12,7 @@ describe('characters data', () => {
       expect(character.id,      `${character.nameKey} missing id`).toBeTruthy()
       expect(character.nameKey, `${character.id} missing nameKey`).toBeTruthy()
       expect(character.show,    `${character.id} missing show`).toBeTruthy()
-      expect(character.image,   `${character.id} missing image`).toMatch(/\.(png|gif|jpe?g)$/i)
+      expect(character.image,   `${character.id} missing image`).toMatch(/\.(png|gif|jpe?g|webp)$/i)
     }
   })
 
