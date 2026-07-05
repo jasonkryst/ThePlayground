@@ -60,8 +60,8 @@ function makeScore(overrides = {}) {
   }
 }
 
-function renderDashboard() {
-  return render(<MemoryRouter><ParentDashboard /></MemoryRouter>)
+function renderDashboard(manifests = []) {
+  return render(<MemoryRouter><ParentDashboard manifests={manifests} /></MemoryRouter>)
 }
 
 beforeEach(() => {
@@ -190,6 +190,27 @@ describe('ParentDashboard — CSV export', () => {
     })
 
     expect(() => fireEvent.click(screen.getByRole('button', { name: /export csv/i }))).not.toThrow()
+  })
+})
+
+// ─── Game display names ──────────────────────────────────────────────────────
+
+describe('ParentDashboard — game display names', () => {
+  const manifests = [{ id: 'animal-sounds', name: 'Animal Sounds' }]
+
+  it('shows the manifest name instead of the raw gameId in the missed-items heading', () => {
+    mockGetAllScores.mockReturnValue([makeScore()])
+    renderDashboard(manifests)
+    // Both the streak table and the missed-items panel render the game name,
+    // so multiple elements are expected — assert at least one and no raw id.
+    expect(screen.getAllByText('Animal Sounds').length).toBeGreaterThan(0)
+    expect(screen.queryByText('animal-sounds')).not.toBeInTheDocument()
+  })
+
+  it('falls back to the raw gameId when no manifest is found', () => {
+    mockGetAllScores.mockReturnValue([makeScore()])
+    renderDashboard([]) // no manifests passed
+    expect(screen.getAllByText('animal-sounds').length).toBeGreaterThan(0)
   })
 })
 

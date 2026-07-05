@@ -87,7 +87,7 @@ export default function App() {
       <Routes>
         <Route path="/"             element={<Dashboard manifests={manifests} />} />
         <Route path="/admin"        element={<AdminPage manifests={manifests} />} />
-        <Route path="/parent"       element={<ParentDashboard />} />
+        <Route path="/parent"       element={<ParentDashboard manifests={manifests} />} />
         <Route path="/my-progress" element={<KidsProgressPage manifests={manifests} />} />
         <Route path="/game/:gameId" element={<GameRoute />} />
       </Routes>

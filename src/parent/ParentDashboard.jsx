@@ -44,7 +44,7 @@ function formatMs(ms) {
 
 // ─── Section: Score Trend ────────────────────────────────────────────────────
 
-function ScoreTrendChart({ data, gameIds }) {
+function ScoreTrendChart({ data, gameIds, gameNames }) {
   const { t } = useTranslation()
   if (data.length < 2) return <p className="parent__empty-chart">{t('parent.notEnoughData')}</p>
   return (
@@ -60,7 +60,7 @@ function ScoreTrendChart({ data, gameIds }) {
             key={id}
             type="monotone"
             dataKey={id}
-            name={id}
+            name={gameNames[id] ?? id}
             stroke={CHART_COLORS[i % CHART_COLORS.length]}
             dot={false}
             strokeWidth={2}
@@ -74,7 +74,7 @@ function ScoreTrendChart({ data, gameIds }) {
 
 // ─── Section: Response Time ──────────────────────────────────────────────────
 
-function ResponseTimeChart({ data, gameIds }) {
+function ResponseTimeChart({ data, gameIds, gameNames }) {
   const { t } = useTranslation()
   if (data.length < 2) return <p className="parent__empty-chart">{t('parent.notEnoughData')}</p>
   return (
@@ -90,7 +90,7 @@ function ResponseTimeChart({ data, gameIds }) {
             key={id}
             type="monotone"
             dataKey={id}
-            name={id}
+            name={gameNames[id] ?? id}
             stroke={CHART_COLORS[i % CHART_COLORS.length]}
             dot={false}
             strokeWidth={2}
@@ -104,7 +104,7 @@ function ResponseTimeChart({ data, gameIds }) {
 
 // ─── Section: Streak History ─────────────────────────────────────────────────
 
-function StreakHistoryPanel({ streakHistory }) {
+function StreakHistoryPanel({ streakHistory, gameNames }) {
   const { t }  = useTranslation()
   const games  = Object.keys(streakHistory)
   if (games.length === 0) return <p className="parent__empty-chart">{t('parent.notEnoughData')}</p>
@@ -123,7 +123,7 @@ function StreakHistoryPanel({ streakHistory }) {
           const { last7, last30, allTime } = streakHistory[gameId]
           return (
             <tr key={gameId}>
-              <td>{gameId}</td>
+              <td>{gameNames[gameId] ?? gameId}</td>
               <td>{last7}</td>
               <td>{last30}</td>
               <td>{allTime}</td>
@@ -206,7 +206,7 @@ function SessionHeatmap({ heatmapData }) {
 
 // ─── Section: Missed Items ───────────────────────────────────────────────────
 
-function MissedItemsPanel({ missedItems }) {
+function MissedItemsPanel({ missedItems, gameNames }) {
   const { t }  = useTranslation()
   const games  = Object.keys(missedItems)
 
@@ -220,10 +220,11 @@ function MissedItemsPanel({ missedItems }) {
         const ns    = GAME_ITEM_NS[gameId]
         const items = missedItems[gameId]
         const max   = items[0]?.count ?? 1
+        const name  = gameNames[gameId] ?? gameId
         return (
           <div key={gameId} className="parent__missed-game">
-            <h3 className="parent__missed-title">{gameId}</h3>
-            <ul className="parent__missed-list" aria-label={`${gameId} missed items`}>
+            <h3 className="parent__missed-title">{name}</h3>
+            <ul className="parent__missed-list" aria-label={t('parent.missedItemsAriaLabel', { name })}>
               {items.map(({ itemId, count }) => {
                 const label = ns ? t(`${ns}.${itemId}.name`, { defaultValue: itemId }) : itemId
                 return (
@@ -249,12 +250,16 @@ function MissedItemsPanel({ missedItems }) {
 
 // ─── Main Page ───────────────────────────────────────────────────────────────
 
-export default function ParentDashboard() {
+export default function ParentDashboard({ manifests = [] }) {
   const { t }          = useTranslation()
   const { getAllScores } = useScores()
   const [bestStreaks, setBestStreaks] = useState({})
   const scores  = getAllScores()
   const gameIds = useMemo(() => [...new Set(scores.map(s => s.gameId))], [scores])
+  const gameNames = useMemo(
+    () => Object.fromEntries(manifests.map(m => [m.id, m.name])),
+    [manifests]
+  )
 
   useEffect(() => {
     adapter.getBestStreaks().then(setBestStreaks)
@@ -290,19 +295,19 @@ export default function ParentDashboard() {
             <section className="parent__section" aria-labelledby="score-trend-heading">
               <h2 id="score-trend-heading">{t('parent.scoreTrendHeading')}</h2>
               <p className="parent__hint">{t('parent.scoreTrendHint')}</p>
-              <ScoreTrendChart data={scoreTrend} gameIds={gameIds} />
+              <ScoreTrendChart data={scoreTrend} gameIds={gameIds} gameNames={gameNames} />
             </section>
 
             <section className="parent__section" aria-labelledby="response-time-heading">
               <h2 id="response-time-heading">{t('parent.responseTimeHeading')}</h2>
               <p className="parent__hint">{t('parent.responseTimeHint')}</p>
-              <ResponseTimeChart data={responseTimes} gameIds={gameIds} />
+              <ResponseTimeChart data={responseTimes} gameIds={gameIds} gameNames={gameNames} />
             </section>
 
             <section className="parent__section" aria-labelledby="streak-heading">
               <h2 id="streak-heading">{t('parent.streakHistoryHeading')}</h2>
               <p className="parent__hint">{t('parent.streakHistoryHint')}</p>
-              <StreakHistoryPanel streakHistory={streakHistory} />
+              <StreakHistoryPanel streakHistory={streakHistory} gameNames={gameNames} />
             </section>
 
             <section className="parent__section" aria-labelledby="heatmap-heading">
@@ -314,7 +319,7 @@ export default function ParentDashboard() {
             <section className="parent__section" aria-labelledby="missed-heading">
               <h2 id="missed-heading">{t('parent.missedHeading')}</h2>
               <p className="parent__hint">{t('parent.missedHint')}</p>
-              <MissedItemsPanel missedItems={missedItems} />
+              <MissedItemsPanel missedItems={missedItems} gameNames={gameNames} />
             </section>
           </>
         )}
