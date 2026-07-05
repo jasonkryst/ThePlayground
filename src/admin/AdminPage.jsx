@@ -6,6 +6,8 @@ import useScores from '../hooks/useScores'
 import useBadges from '../hooks/useBadges'
 import ScoreHistory from '../components/ScoreHistory'
 import BadgeGallery from '../components/BadgeGallery'
+import LocaleSelector from '../components/LocaleSelector'
+import { SUPPORTED_LOCALES } from '../i18n'
 import './AdminPage.css'
 
 export default function AdminPage({ manifests = [] }) {
@@ -102,6 +104,12 @@ export default function AdminPage({ manifests = [] }) {
 
         {activeTab === 'settings' && (
           <>
+            <LocaleSelector
+              locales={SUPPORTED_LOCALES}
+              value={settings.locale}
+              onChange={val => updateSetting('locale', val)}
+            />
+
             <div className="admin__section">
               <h2>{t('admin.childNameHeading')}</h2>
               <p className="admin__hint">{t('admin.childNameHint')}</p>

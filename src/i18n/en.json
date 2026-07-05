@@ -68,6 +68,7 @@
     "playCount_other": "{{count}} plays"
   },
   "admin": {
+    "localeHeading": "Language",
     "back": "Back to dashboard",
     "title": "⚙️ Settings",
     "childNameHeading": "Child's Name",
