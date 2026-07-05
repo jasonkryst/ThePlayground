@@ -30,6 +30,12 @@ i18next.use(initReactI18next).init({
   interpolation: { escapeValue: false },
 })
 
+function syncHtmlLang(lng) {
+  if (typeof document !== 'undefined') document.documentElement.lang = lng
+}
+i18next.on('languageChanged', syncHtmlLang)
+syncHtmlLang(i18next.language)
+
 export const SUPPORTED_LOCALES = ['en']
 
 export default i18next

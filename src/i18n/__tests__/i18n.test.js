@@ -12,6 +12,17 @@ describe('i18n', () => {
   })
 })
 
+describe('html lang sync', () => {
+  it('sets document.documentElement.lang to the active language on init', () => {
+    expect(document.documentElement.lang).toBe(i18n.language)
+  })
+
+  it('updates document.documentElement.lang when the language changes', async () => {
+    await i18n.changeLanguage('en')
+    expect(document.documentElement.lang).toBe('en')
+  })
+})
+
 describe('mergeLocaleResources', () => {
   it('merges core resources with every game locale file', () => {
     const core = { common: { home: 'Home' } }
