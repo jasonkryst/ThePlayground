@@ -13,11 +13,12 @@ import { version } from '../../package.json'
 import './Dashboard.css'
 
 const TAG_ICONS = {
-  sounds:  '🔊',
-  visual:  '👁️',
-  numbers: '🔢',
-  animals: '🐾',
-  colors:  '🎨',
+  sounds:     '🔊',
+  visual:     '👁️',
+  numbers:    '🔢',
+  animals:    '🐾',
+  colors:     '🎨',
+  characters: '🎭',
 }
 
 function buildSections(manifests, tagMap, featuredId, allTags, t) {
