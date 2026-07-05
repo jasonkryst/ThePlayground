@@ -122,7 +122,8 @@
     "tagsResetButton": "Reset",
     "introReplayButton": "Replay Intro",
     "tabBadges": "Badges",
-    "badgesHeading": "Badges"
+    "badgesHeading": "Badges",
+    "noGamesFound": "No games found."
   },
   "scoreHistory": {
     "empty": "No scores yet — play a game!"

@@ -247,6 +247,12 @@ describe('AdminPage', () => {
     expect(mockUpdateSetting).toHaveBeenCalledWith('introDismissed', { 'color-match': true })
   })
 
+  it('shows a translated empty-state message on the Games tab when there are no games', async () => {
+    render(<MemoryRouter><AdminPage manifests={[]} /></MemoryRouter>)
+    await userEvent.click(screen.getByRole('tab', { name: /games/i }))
+    expect(screen.getByText('No games found.')).toBeInTheDocument()
+  })
+
   it('renders the timer radio row with 6 options', () => {
     render(<MemoryRouter><AdminPage /></MemoryRouter>)
     const timerSection = screen.getByRole('heading', { name: 'Timer' }).closest('.admin__section')

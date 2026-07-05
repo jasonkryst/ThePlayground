@@ -407,7 +407,7 @@ export default function AdminPage({ manifests = [] }) {
             <h2>{t('admin.tagsHeading')}</h2>
             <p className="admin__hint">{t('admin.tagsHint')}</p>
             {manifests.length === 0 && (
-              <p className="admin__hint">No games found.</p>
+              <p className="admin__hint">{t('admin.noGamesFound')}</p>
             )}
             {manifests.map(m => (
               <div key={m.id} className="admin__tag-row">
