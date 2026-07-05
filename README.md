@@ -8,6 +8,7 @@ A browser-based game dashboard designed for infants and toddlers. Games are disp
 - **Auto-discovered games** — drop a folder into `src/games/` and it appears on the dashboard automatically
 - **Animal Sounds** — an animal sound plays automatically; the child picks the matching animal from picture buttons
 - **Color Match** — a color swatch is shown; the child picks the matching colored object from picture buttons
+- **Character Match** — a character's name is shown; the child picks the matching character from picture buttons
 - **Admin / Settings** — tabbed settings page (Settings · Games · History); configure child's name, answer choices (2–4), feedback mode, questions per session, Google Analytics ID, and per-game tag overrides
 - **My Progress page** — a kid-facing `/my-progress` page (🌟 link on the dashboard) showing each game's best score, best streak, total questions answered, and earned badges, with locked badges shown dimmed rather than as unreadable text; separate from the parent-facing `/parent` analytics dashboard and the admin `/admin` settings page
 - **How-to-play intro screens** — each game shows a brief instructional screen before its first question; parents can permanently dismiss it per game, or bring it back from the admin Games tab
