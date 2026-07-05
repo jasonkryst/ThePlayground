@@ -21,6 +21,10 @@ const TAG_ICONS = {
   characters: '🎭',
 }
 
+function tagLabel(tag, t) {
+  return t(`dashboard.tag.${tag}`, { defaultValue: tag.charAt(0).toUpperCase() + tag.slice(1) })
+}
+
 function buildSections(manifests, tagMap, featuredId, allTags, t) {
   const sections = []
   for (const tag of allTags) {
@@ -29,7 +33,7 @@ function buildSections(manifests, tagMap, featuredId, allTags, t) {
     )
     if (games.length > 0) {
       const icon = TAG_ICONS[tag] ?? ''
-      const label = `${icon} ${tag.charAt(0).toUpperCase() + tag.slice(1)}`.trim()
+      const label = `${icon} ${tagLabel(tag, t)}`.trim()
       sections.push({ heading: label, games })
     }
   }
@@ -98,7 +102,7 @@ export default function Dashboard({ manifests = [] }) {
                     className={`dashboard__tab${activeTag === tag ? ' dashboard__tab--active' : ''}`}
                     onClick={() => setActiveTag(tag)}
                   >
-                    {tag.charAt(0).toUpperCase() + tag.slice(1)}
+                    {tagLabel(tag, t)}
                   </button>
                 ))}
               </div>

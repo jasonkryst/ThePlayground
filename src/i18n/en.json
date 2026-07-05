@@ -32,7 +32,15 @@
     "categoryOther": "Other",
     "tabAll": "All",
     "tabsLabel": "Filter games by category",
-    "featuredAriaLabel": "Play today's featured game: {{name}}"
+    "featuredAriaLabel": "Play today's featured game: {{name}}",
+    "tag": {
+      "sounds": "Sounds",
+      "visual": "Visual",
+      "numbers": "Numbers",
+      "animals": "Animals",
+      "colors": "Colors",
+      "characters": "Characters"
+    }
   },
   "parent": {
     "title": "📊 Progress Dashboard",
