@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import ManifestIcon from './ManifestIcon'
 import './GameCard.css'
 
 const MS_PER_DAY = 86_400_000
@@ -40,7 +41,7 @@ export default function GameCard({ manifest, bestScore, recentInfo = null }) {
       className={`game-card${recentInfo ? ' game-card--recently-played' : ''}`}
       style={cardStyle}
     >
-      <span className="game-card__icon">{icon}</span>
+      <ManifestIcon icon={icon} className="game-card__icon" />
       <span className="game-card__name">{name}</span>
       <span className="game-card__desc">{description}</span>
       {bestScore > 0 && (

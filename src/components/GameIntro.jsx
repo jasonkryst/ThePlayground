@@ -1,11 +1,12 @@
 import { useTranslation } from 'react-i18next'
+import ManifestIcon from './ManifestIcon'
 import './GameIntro.css'
 
 export default function GameIntro({ icon, name, instructions, dontShowAgain, onDontShowAgainChange, onStart }) {
   const { t } = useTranslation()
   return (
     <main className="game-intro">
-      <div className="game-intro__icon" aria-hidden="true">{icon}</div>
+      <ManifestIcon icon={icon} as="div" className="game-intro__icon" ariaHidden />
       <h1 className="game-intro__name">{name}</h1>
       <p className="game-intro__instructions">{instructions}</p>
 

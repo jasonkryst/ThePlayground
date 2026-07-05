@@ -24,6 +24,7 @@
 .game-card:focus-visible { outline: 3px solid var(--color-lavender); outline-offset: 3px; }
 
 .game-card__icon  { font-size: 52px; line-height: 1; }
+img.game-card__icon { width: 52px; height: 52px; object-fit: contain; }
 .game-card__name  { font-size: 22px; font-weight: 800; text-align: center; }
 .game-card__desc  { font-size: 15px; text-align: center; opacity: 0.75; }
 .game-card__score { font-size: 14px; font-weight: 700; opacity: 0.6; }

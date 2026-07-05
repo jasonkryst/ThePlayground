@@ -6,6 +6,7 @@ import useBadges from '../hooks/useBadges'
 import adapter from '../storage/index'
 import { computeBestAccuracy } from '../utils/kidStats'
 import { BADGE_CATALOG } from '../lib/badges'
+import ManifestIcon from '../components/ManifestIcon'
 import './KidsProgressPage.css'
 
 function StatTile({ icon, value, label }) {
@@ -53,7 +54,7 @@ function GameProgressSection({ manifest, scores, badgeData, bestStreak, t }) {
       aria-labelledby={`kid-progress-${manifest.id}`}
     >
       <h2 id={`kid-progress-${manifest.id}`} className="kid-progress__game-name">
-        <span aria-hidden="true">{manifest.icon}</span> {manifest.name}
+        <ManifestIcon icon={manifest.icon} className="kid-progress__game-icon" ariaHidden /> {manifest.name}
       </h2>
 
       <div className="kid-progress__stats">
