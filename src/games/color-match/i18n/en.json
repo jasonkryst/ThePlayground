@@ -1,0 +1,19 @@
+{
+  "colorMatch": {
+    "prompt": "Which one is this color?",
+    "howToPlay": "A color swatch shows — tap the matching colored object!"
+  },
+  "color": {
+    "red": { "name": "Red" },
+    "orange": { "name": "Orange" },
+    "yellow": { "name": "Yellow" },
+    "green": { "name": "Green" },
+    "blue": { "name": "Blue" },
+    "purple": { "name": "Purple" },
+    "pink": { "name": "Pink" },
+    "brown": { "name": "Brown" },
+    "black": { "name": "Black" },
+    "white": { "name": "White" },
+    "gray": { "name": "Gray" }
+  }
+}
