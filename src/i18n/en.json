@@ -21,7 +21,7 @@
     "newBadgeAnnounce": "🎉 New Badge!"
   },
   "dashboard": {
-    "titleDefault": "Baby's Playground",
+    "titleDefault": "My Playground",
     "titleNamed": "{{name}}'s Playground",
     "settingsLabel": "⚙️ Settings",
     "parentLabel": "📊 Progress Dashboard",
