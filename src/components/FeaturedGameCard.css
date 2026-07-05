@@ -32,5 +32,6 @@
 }
 
 .featured-card__icon { font-size: 72px; line-height: 1; }
+img.featured-card__icon { width: 72px; height: 72px; object-fit: contain; }
 .featured-card__name { font-size: 28px; font-weight: 800; text-align: center; }
 .featured-card__desc { font-size: 16px; text-align: center; opacity: 0.75; }

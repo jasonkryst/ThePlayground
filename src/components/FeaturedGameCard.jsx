@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import ManifestIcon from './ManifestIcon'
 import './FeaturedGameCard.css'
 
 export default function FeaturedGameCard({ manifest }) {
@@ -14,7 +15,7 @@ export default function FeaturedGameCard({ manifest }) {
       aria-label={t('dashboard.featuredAriaLabel', { name })}
     >
       <span className="featured-card__label">⭐ {t('dashboard.todaysGame')}</span>
-      <span className="featured-card__icon">{icon}</span>
+      <ManifestIcon icon={icon} className="featured-card__icon" />
       <span className="featured-card__name">{name}</span>
       <span className="featured-card__desc">{description}</span>
     </Link>

@@ -27,6 +27,7 @@ const stories = [
   'pages-adminpage--default',
   'pages-kidsprogresspage--default',
   'games-animalsoundsgame--default',
+  'games-charactermatchgame--default',
   'games-colormatchgame--default',
 ]
 

@@ -33,6 +33,7 @@
 }
 
 .kid-progress__game-name { font-size: 22px; font-weight: 800; margin-bottom: 16px; }
+img.kid-progress__game-icon { width: 22px; height: 22px; object-fit: contain; vertical-align: middle; }
 
 .kid-progress__stats {
   display: flex;

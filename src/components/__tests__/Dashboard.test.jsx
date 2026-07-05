@@ -76,7 +76,7 @@ describe('Dashboard', () => {
   it('shows the default title when no child name is set', () => {
     mockSettings.childName = ''
     render(<MemoryRouter><Dashboard manifests={manifests} /></MemoryRouter>)
-    expect(screen.getByText("🌊 Baby's Playground")).toBeInTheDocument()
+    expect(screen.getByText("🌊 My Playground")).toBeInTheDocument()
   })
 
   it('shows a personalized title when a child name is set', () => {

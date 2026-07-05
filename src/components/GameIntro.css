@@ -13,6 +13,8 @@
   font-size: 96px;
 }
 
+img.game-intro__icon { width: 96px; height: 96px; object-fit: contain; }
+
 .game-intro__name {
   font-size: 28px;
   font-weight: 800;

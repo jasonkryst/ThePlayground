@@ -21,7 +21,7 @@
     "newBadgeAnnounce": "🎉 New Badge!"
   },
   "dashboard": {
-    "titleDefault": "Baby's Playground",
+    "titleDefault": "My Playground",
     "titleNamed": "{{name}}'s Playground",
     "settingsLabel": "⚙️ Settings",
     "parentLabel": "📊 Progress Dashboard",
@@ -144,6 +144,10 @@
     "prompt": "Which one is this color?",
     "howToPlay": "A color swatch shows — tap the matching colored object!"
   },
+  "characterMatch": {
+    "prompt": "Which one is {{name}}?",
+    "howToPlay": "See the name, then tap the matching character!"
+  },
   "animal": {
     "elephant": { "name": "Elephant" },
     "lion": { "name": "Lion" },
@@ -170,6 +174,25 @@
     "black": { "name": "Black" },
     "white": { "name": "White" },
     "gray": { "name": "Gray" }
+  },
+  "character": {
+    "bluey": { "name": "Bluey" },
+    "bingo": { "name": "Bingo" },
+    "bandit": { "name": "Bandit" },
+    "chilli": { "name": "Chilli" },
+    "muffin": { "name": "Muffin" },
+    "socks": { "name": "Socks" },
+    "pete": { "name": "Pete" },
+    "callie": { "name": "Callie" },
+    "grumpy-toad": { "name": "Grumpy Toad" },
+    "marty": { "name": "Marty" },
+    "gus": { "name": "Gus" },
+    "molly": { "name": "Molly" },
+    "gil": { "name": "Gil" },
+    "deema": { "name": "Deema" },
+    "goby": { "name": "Goby" },
+    "oona": { "name": "Oona" },
+    "nonny": { "name": "Nonny" }
   },
   "badges": {
     "hotStreak": { "name": "Hot Streak", "desc": "Reach a streak of 5 correct answers in a row." },
