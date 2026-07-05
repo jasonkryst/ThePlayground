@@ -51,3 +51,6 @@ img.game-intro__icon { width: 96px; height: 96px; object-fit: contain; }
   color: white;
   border: none;
 }
+
+.game-intro__start:focus         { outline: none; }
+.game-intro__start:focus-visible { outline: 3px solid var(--color-lavender); outline-offset: 3px; }
