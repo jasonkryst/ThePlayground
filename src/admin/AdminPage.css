@@ -93,6 +93,11 @@
   color: white;
 }
 
+.admin__radio-label:has(input:focus-visible) {
+  outline: 3px solid var(--color-lavender);
+  outline-offset: 3px;
+}
+
 .admin__radio-label input {
   position: absolute;
   opacity: 0;
@@ -123,6 +128,9 @@
   color: white;
 }
 
+.admin__toggle-btn:focus         { outline: none; }
+.admin__toggle-btn:focus-visible { outline: 3px solid var(--color-lavender); outline-offset: 3px; }
+
 .admin__reset {
   margin-top: 32px;
   margin-bottom: 28px;
@@ -137,6 +145,8 @@
 }
 
 .admin__reset:hover { background: color-mix(in srgb, var(--color-error) 10%, transparent); }
+.admin__reset:focus         { outline: none; }
+.admin__reset:focus-visible { outline: 3px solid var(--color-lavender); outline-offset: 3px; }
 
 .admin__hint {
   font-size: 14px;
@@ -200,6 +210,8 @@
 }
 
 .admin__tag-save:hover { opacity: 0.9; }
+.admin__tag-save:focus         { outline: none; }
+.admin__tag-save:focus-visible { outline: 3px solid var(--color-lavender); outline-offset: 3px; }
 
 .admin__tag-reset {
   padding: 6px 16px;
@@ -216,6 +228,8 @@
   background: color-mix(in srgb, var(--color-error) 10%, transparent);
   color: var(--color-error);
 }
+.admin__tag-reset:focus         { outline: none; }
+.admin__tag-reset:focus-visible { outline: 3px solid var(--color-lavender); outline-offset: 3px; }
 
 .admin__intro-replay {
   padding: 6px 16px;
@@ -231,3 +245,5 @@
 .admin__intro-replay:hover {
   background: color-mix(in srgb, var(--color-aqua) 15%, transparent);
 }
+.admin__intro-replay:focus         { outline: none; }
+.admin__intro-replay:focus-visible { outline: 3px solid var(--color-lavender); outline-offset: 3px; }
