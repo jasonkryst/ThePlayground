@@ -146,7 +146,7 @@
   },
   "characterMatch": {
     "prompt": "Which one is {{name}}?",
-    "howToPlay": "Hear the name, then tap the matching character!"
+    "howToPlay": "See the name, then tap the matching character!"
   },
   "animal": {
     "elephant": { "name": "Elephant" },
