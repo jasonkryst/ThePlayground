@@ -6,6 +6,10 @@ Ideas for future development. Not committed to any timeline.
 
 ## Recently Completed
 
+### v0.13.0 — Standards Audit & Contrast Fix (2026-07-06)
+- **Combined standards audit** — W3C HTML5/CSS3 validity, WCAG 2.2 AA, i18n, usability, and code-quality tooling, run against the `accessibility` branch. See `docs/superpowers/specs/2026-07-05-standards-audit-findings.md` for findings and `docs/superpowers/plans/2026-07-05-standards-audit-remediation.md` for the prioritized remediation plan — the "Standards & Accessibility Backlog" section below tracks what's left.
+- **Fixed a real WCAG 1.4.3 gap** — the disabled-wrong-choice filter introduced in v0.12.0 actually failed AA contrast (< 4.5:1) for Color Match's red and blue swatches; retuned and pinned with a regression test (`src/__tests__/disabledWrongChoiceContrast.test.js`) covering every choice color in all three games.
+
 ### v0.9.0 — Kids' "My Progress" Page (2026-07-04)
 - **`/my-progress` route** — a kid-facing progress page, linked via a new 🌟 button on the main dashboard, separate from the existing admin Badge Gallery (`/admin`) and parent analytics dashboard (`/parent`), both of which are unchanged
 - **Per-game stat tiles** — best accuracy %, best streak, and lifetime questions answered, shown with icons rather than text-heavy tables
@@ -60,6 +64,30 @@ Ideas for future development. Not committed to any timeline.
 
 ### v0.1.0 — Initial Platform
 - Auto-discovery plugin system, Ocean & Dream theme, Animal Sounds and Color Match games, admin settings, localStorage adapter, score history, i18n
+
+---
+
+## Standards & Accessibility Backlog
+
+Tracked in full detail in `docs/superpowers/plans/2026-07-05-standards-audit-remediation.md`; summarized here for visibility. Ordered by risk/impact, not effort.
+
+- [x] ~~Verify/fix disabled-wrong-choice contrast (WCAG 1.4.3)~~ — done in v0.13.0.
+- [ ] Complete the ARIA Tabs pattern (`role="tabpanel"` + `aria-controls`) on Dashboard/Admin tab strips.
+- [ ] Verify gameplay tap-target size against WCAG 2.2 SC 2.5.8's 24×24px minimum (likely already fine — base buttons are 64px — but unverified).
+- [ ] Confirm no keyboard traps exist anywhere in the app (verification-only; no modal/dialog pattern is known to exist).
+- [ ] Route `src/components/Dashboard.css:85`'s hardcoded `color: #fff` through a design token.
+- [ ] Resolve the two `!important` overrides in `src/index.css` (`.correct`, `.highlight-correct`) via selector specificity instead.
+- [ ] Add a confirmation step before Admin's reset action takes effect.
+- [ ] Clean up `act()` warnings from the focus-management effects in 4 test files.
+- [ ] Add `eslint-plugin-jsx-a11y` for edit-time accessibility linting (currently a11y is only checked at test time).
+- [ ] Add Stylelint + `.editorconfig`.
+- [ ] Fix `vite.config.js`'s coverage scoping so the "All files" rollup reflects `src/` instead of printing `0 | 0 | 0 | 0`.
+- [ ] Stop linting the generated `coverage/` folder (add it to `eslint.config.js`'s `ignores`).
+- [ ] Wire an offline HTML5 validator (`html-validate`) against rendered routes — the live audit couldn't reach the W3C Nu Checker from its sandbox.
+
+**Deferred by design, not scheduled:** RTL logical CSS properties (`ParentDashboard.css`), an i18next plural form for `common.difficultyOfferHeading` — both revisit only when a second/RTL locale is actually planned.
+
+**Informational, no action:** the app's opt-in Google Analytics integration has no COPPA exposure while self-hosted and GA-off-by-default; revisit only if this is ever distributed to other families with GA switched on.
 
 ---
 

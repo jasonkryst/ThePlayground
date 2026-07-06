@@ -78,4 +78,9 @@ button {
 .correct { background: #a5d6a7 !important; }
 .wrong   { background: #ef9a9a; }
 .highlight-correct { background: #a5d6a7 !important; }
-.game__choice--disabled-wrong { filter: grayscale(85%) brightness(0.88); }
+/* grayscale(85%)/brightness(0.88) (this rule's pre-2026-07-06 values) dropped some
+   Color Match swatches (red, blue) below WCAG 1.4.3's 4.5:1 text contrast once their
+   black/white textColor was filtered along with the background. These values are
+   verified >=4.5:1 across every choice color in use by src/__tests__/disabledWrongChoiceContrast.test.js —
+   re-run that test before changing either these numbers or the color palettes it checks. */
+.game__choice--disabled-wrong { filter: grayscale(40%) brightness(1.2); }

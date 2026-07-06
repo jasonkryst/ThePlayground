@@ -3,6 +3,15 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.13.0] - 2026-07-06
+
+### Added
+- `docs/superpowers/specs/2026-07-05-standards-audit-findings.md` — a combined audit of W3C HTML5/CSS3 validity, WCAG 2.2 AA accessibility, internationalization, usability, and code-quality tooling, plus a companion prioritized remediation plan (`docs/superpowers/plans/2026-07-05-standards-audit-remediation.md`).
+- `src/__tests__/disabledWrongChoiceContrast.test.js` — a regression test that recomputes WCAG 1.4.3 contrast for every choice color/text pairing across all three games after the `.game__choice--disabled-wrong` CSS filter is applied, so a future palette change can't silently drop back below AA.
+
+### Fixed
+- Corrected the 0.12.0 disabled-wrong-choice contrast fix: `grayscale(85%) brightness(0.88)` looked fine on its own but actually failed WCAG 1.4.3 (< 4.5:1) for two Color Match swatches (red, blue) once their black/white choice text was filtered along with the background. Retuned to `grayscale(40%) brightness(1.2)`, verified >= 4.5:1 across every choice color used by any of the three games.
+
 ## [0.12.0] - 2026-07-05
 
 ### Added

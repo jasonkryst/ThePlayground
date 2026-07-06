@@ -26,6 +26,8 @@ Two layers:
 
 If either layer reports a violation, the failure message names the specific rule and element — fix the underlying component (usually a missing `aria-label`, invalid role, or heading order issue), don't suppress the check.
 
+**CSS-filter contrast checks:** jsdom doesn't compute rendered CSS filter effects (e.g. `grayscale()`/`brightness()`), so `jest-axe` can't catch a filter that visually drops a color combination below WCAG contrast thresholds — it only sees the unfiltered DOM. `src/__tests__/disabledWrongChoiceContrast.test.js` is the pattern for this: it reimplements the relevant CSS Filter Effects math in plain JS and checks the WCAG contrast formula directly against every real color/text pairing in the data (not just one example), so a future palette addition that breaks contrast fails a fast unit test instead of shipping unnoticed. Reuse this pattern for any other CSS-filter-dependent contrast state.
+
 ## End-to-end tests (Playwright)
 
 ```bash
