@@ -1870,3 +1870,176 @@ Expected: PASS. If any visual regression baseline fails due to a legitimate rend
 git add docs/TESTING.md CLAUDE.md CHANGELOG.md package.json src/games/character-match/manifest.json src/games/animal-sounds/manifest.json src/games/color-match/manifest.json
 git commit -m "docs: document i18n/a11y hardening, bump to v0.12.0"
 ```
+
+---
+
+## Task 20: Auto-discover locales instead of hardcoding `SUPPORTED_LOCALES`
+
+**Added post-implementation, during final review.** The final whole-branch review flagged that `SUPPORTED_LOCALES = ['en']` (from Task 1) is a hardcoded registry that someone must remember to update by hand when a second language is added — mildly at odds with this plan's own auto-discovery ethos. Worse than cosmetic: the glob in `src/i18n/index.js` is hardcoded to `'../games/*/i18n/en.json'` specifically, so even if every game folder grew an `i18n/es.json` tomorrow, nothing would pick it up — the auto-discovery promise doesn't actually extend to new locales, only to new games within the existing locale. This task fixes the mechanism, not just the constant, so dropping in a second locale's files later is genuinely sufficient — no code changes required in `src/i18n/index.js` at that point.
+
+**Files:**
+- Modify: `src/i18n/index.js`
+- Modify: `src/i18n/__tests__/i18n.test.js`
+
+**Interfaces:**
+- Produces: `groupModulesByLocale(modules)` — pure function, exported from `src/i18n/index.js`. Takes a glob-shaped `{ [path]: module }` object and returns `{ [localeCode]: { [path]: module } }`, grouping by the filename (minus `.json`) at the end of each path.
+- Produces: `buildResources(coreModules, gameLocaleModules)` — pure function, exported from `src/i18n/index.js`. Takes two glob-shaped module maps (core locale files and game locale files) and returns an i18next-shaped `{ [localeCode]: { translation: {...} } }` resources object, one entry per locale discovered across either input.
+- Consumes: `mergeLocaleResources` (unchanged in behavior, gains an optional third parameter).
+
+- [ ] **Step 1: Write the failing tests**
+
+Add to `src/i18n/__tests__/i18n.test.js`, replacing the existing `mergeLocaleResources` describe block's import line at the top of the file:
+
+```js
+import { describe, it, expect } from 'vitest'
+import i18n, { mergeLocaleResources, groupModulesByLocale, buildResources } from '../index'
+```
+
+Add these new describe blocks (after the existing `mergeLocaleResources` block):
+
+```js
+describe('groupModulesByLocale', () => {
+  it('groups modules by the locale code in their filename', () => {
+    const modules = {
+      './en.json': { common: {} },
+      '../games/foo/i18n/en.json': { default: { foo: true } },
+      '../games/foo/i18n/es.json': { default: { foo: 'es' } },
+    }
+    const grouped = groupModulesByLocale(modules)
+    expect(Object.keys(grouped).sort()).toEqual(['en', 'es'])
+    expect(Object.keys(grouped.en).sort()).toEqual(['../games/foo/i18n/en.json', './en.json'])
+    expect(Object.keys(grouped.es)).toEqual(['../games/foo/i18n/es.json'])
+  })
+})
+
+describe('buildResources', () => {
+  it('builds one merged resource bundle per discovered locale', () => {
+    const coreModules = {
+      './en.json': { common: { home: 'Home' } },
+      './es.json': { common: { home: 'Inicio' } },
+    }
+    const gameModules = {
+      '../games/foo/i18n/en.json': { default: { foo: { prompt: 'Pick foo' } } },
+      '../games/foo/i18n/es.json': { default: { foo: { prompt: 'Elige foo' } } },
+    }
+    const resources = buildResources(coreModules, gameModules)
+    expect(Object.keys(resources).sort()).toEqual(['en', 'es'])
+    expect(resources.en.translation).toEqual({ common: { home: 'Home' }, foo: { prompt: 'Pick foo' } })
+    expect(resources.es.translation).toEqual({ common: { home: 'Inicio' }, foo: { prompt: 'Elige foo' } })
+  })
+
+  it('supports a locale that exists only via a game file, with no matching core file', () => {
+    const coreModules = { './en.json': { common: {} } }
+    const gameModules = { '../games/foo/i18n/fr.json': { default: { foo: { prompt: 'Choisis' } } } }
+    const resources = buildResources(coreModules, gameModules)
+    expect(resources.fr.translation).toEqual({ foo: { prompt: 'Choisis' } })
+  })
+})
+```
+
+Also add, inside the existing `describe('i18n', ...)` block:
+
+```js
+  it('exports SUPPORTED_LOCALES derived from what was actually discovered, not a hardcoded list', () => {
+    expect(SUPPORTED_LOCALES).toEqual(['en'])
+  })
+```
+
+(add `SUPPORTED_LOCALES` to the import on line 2 of the test file too.)
+
+- [ ] **Step 2: Run tests to verify they fail**
+
+Run: `npx vitest run src/i18n/__tests__/i18n.test.js`
+Expected: FAIL — `groupModulesByLocale` and `buildResources` are not exported from `../index` yet.
+
+- [ ] **Step 3: Replace `src/i18n/index.js`**
+
+Replace the whole file's content with:
+
+```js
+import i18next from 'i18next'
+import { initReactI18next } from 'react-i18next'
+
+export function mergeLocaleResources(core, gameLocaleModules, corePath = 'src/i18n/en.json') {
+  const merged = { ...core }
+  const owner = new Map(Object.keys(core).map(key => [key, corePath]))
+
+  for (const [path, mod] of Object.entries(gameLocaleModules)) {
+    const locale = mod.default ?? mod
+    for (const key of Object.keys(locale)) {
+      if (owner.has(key)) {
+        throw new Error(`i18n namespace collision: "${key}" is defined in both ${owner.get(key)} and ${path}`)
+      }
+      owner.set(key, path)
+      merged[key] = locale[key]
+    }
+  }
+
+  return merged
+}
+
+export function groupModulesByLocale(modules) {
+  const byLocale = {}
+  for (const [path, mod] of Object.entries(modules)) {
+    const locale = path.match(/([^/]+)\.json$/)[1]
+    byLocale[locale] = { ...(byLocale[locale] ?? {}), [path]: mod }
+  }
+  return byLocale
+}
+
+export function buildResources(coreModules, gameLocaleModules) {
+  const coreByLocale = groupModulesByLocale(coreModules)
+  const gameByLocale = groupModulesByLocale(gameLocaleModules)
+  const allLocaleCodes = new Set([...Object.keys(coreByLocale), ...Object.keys(gameByLocale)])
+
+  const resources = {}
+  for (const locale of allLocaleCodes) {
+    const [corePath, coreModule] = Object.entries(coreByLocale[locale] ?? {})[0] ?? []
+    const core = coreModule ? (coreModule.default ?? coreModule) : {}
+    resources[locale] = {
+      translation: mergeLocaleResources(core, gameByLocale[locale] ?? {}, corePath ?? `src/i18n/${locale}.json`),
+    }
+  }
+  return resources
+}
+
+const coreModules = import.meta.glob('./*.json', { eager: true })
+const gameLocaleModules = import.meta.glob('../games/*/i18n/*.json', { eager: true })
+const resources = buildResources(coreModules, gameLocaleModules)
+
+i18next.use(initReactI18next).init({
+  resources,
+  lng: 'en',
+  fallbackLng: 'en',
+  interpolation: { escapeValue: false },
+})
+
+function syncHtmlLang(lng) {
+  if (typeof document !== 'undefined') document.documentElement.lang = lng
+}
+i18next.on('languageChanged', syncHtmlLang)
+syncHtmlLang(i18next.language)
+
+export const SUPPORTED_LOCALES = Object.keys(resources)
+
+export default i18next
+```
+
+Note: the static `import en from './en.json'` is intentionally removed — `en.json` is now picked up dynamically by the `./*.json` glob, same as every other locale file.
+
+- [ ] **Step 4: Run tests to verify they pass**
+
+Run: `npx vitest run src/i18n/__tests__/i18n.test.js`
+Expected: PASS (all tests, including the 3 new ones and the pre-existing `mergeLocaleResources`/html-lang-sync/init tests, which must be unaffected since real behavior with only `en.json` files present is unchanged).
+
+- [ ] **Step 5: Run the full test suite**
+
+Run: `npx vitest run`
+Expected: PASS — this touches the most upstream module in the app (every component transitively imports i18n), so a full-suite run is the real safety check here, not just the i18n test file.
+
+- [ ] **Step 6: Commit**
+
+```bash
+git add src/i18n/index.js src/i18n/__tests__/i18n.test.js
+git commit -m "refactor(i18n): auto-discover locales instead of hardcoding SUPPORTED_LOCALES"
+```
