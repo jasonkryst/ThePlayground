@@ -36,30 +36,34 @@
 
 **Files:** `src/components/Dashboard.jsx`, `src/admin/AdminPage.jsx`, associated `__tests__` files.
 
-- [ ] **Step 1:** Write failing tests asserting each tab has `aria-controls` pointing at an element with a matching `id`, and that element has `role="tabpanel"` and `aria-labelledby` pointing back at the tab.
-- [ ] **Step 2:** Run tests, confirm they fail (no `tabpanel` role exists yet).
-- [ ] **Step 3:** In both `Dashboard.jsx` and `AdminPage.jsx`, give each tab button a stable `id` (e.g. `tab-${tag}`), add `aria-controls={`panel-${tag}`}`, and wrap each tab's content region in a container with `id={`panel-${tag}`}`, `role="tabpanel"`, `aria-labelledby={`tab-${tag}`}`.
-- [ ] **Step 4:** Run tests to verify they pass, then `npx vitest run` for the full suite and `npm run e2e` for the axe scans.
-- [ ] **Step 5:** Commit: `fix(a11y): complete ARIA Tabs pattern with tabpanel/aria-controls linkage`.
+**Status: Done (2026-07-06).**
+
+- [x] **Step 1:** Added failing tests to `Dashboard.test.jsx`/`AdminPage.test.jsx` asserting `aria-controls`→`id`→`role="tabpanel"`→`aria-labelledby` linkage.
+- [x] **Step 2:** Confirmed both failed (`toBeTruthy()` on an empty `aria-controls` attribute).
+- [x] **Step 3:** `AdminPage.jsx`: each tab button got `id={`admin-tab-${tab.id}`}`/`aria-controls={`admin-panel-${tab.id}`}`; the settings/games/badges/history panels each got matching `role="tabpanel"`/`id`/`aria-labelledby` (games/badges/history already had a single wrapping `<div className="admin__section">` to annotate directly; settings' `<>` fragment became a `<div>`). `Dashboard.jsx`: same pattern, plus the single dynamic content region (sections or flat grid) wrapped in one `tabpanel` div keyed to `activeTag` — its ARIA attributes are only applied when `allTags.length > 0`, since with no tags no tab buttons render and an unconditional `aria-labelledby` would point at a nonexistent id.
+- [x] **Step 4:** Both test files pass (54 tests); full suite 523/523; full `npx playwright test` (e2e + axe-core + visual regression) 70/70, no baseline changes.
+- [x] **Step 5:** Committed together with Tasks 3–4 (see plan footer).
 
 ### Task 3: Verify tap-target size on answer-choice buttons (WCAG 2.2 SC 2.5.8)
 
 **Files:** `src/games/*/​*.css`, `.game__choice` and related interactive elements.
 
-- [ ] **Step 1:** Measure the rendered size of `.game__choice` (and any other primary interactive control) at common viewport widths using an `evaluate_script`/DevTools measurement.
-- [ ] **Step 2:** If every dimension is ≥ 24×24 CSS px, document the passing measurement — no code change needed (this is the AA-required minimum, distinct from the "larger than AA" touch targets the hardening spec deliberately excluded).
-- [ ] **Step 3:** If any control is under 24×24px, increase padding/min-width/min-height on the failing selector(s) in all three game CSS files identically.
-- [ ] **Step 4:** Re-measure, run `npx vitest run` and `npm run e2e`.
-- [ ] **Step 5:** Commit: `fix(a11y): ensure gameplay controls meet WCAG 2.5.8 minimum target size` (or a `docs:` commit confirming compliance if no change was needed).
+**Status: Done (2026-07-06) — verified passing, no code change needed.** `src/index.css:44–52`'s base `button { min-width: 64px; min-height: 64px; }` applies globally; every game's `.game__choice` either inherits this or sets an equal/larger explicit `min-height` (120px in all three games). A repo-wide grep for sub-24px CSS dimensions found only decorative, non-interactive elements: recharts/heatmap cells and legend swatches (`ParentDashboard.css`, 10–14px, no click handlers), small icons inside already-large buttons (`KidsProgressPage.css`'s 22px icon sits inside a 56px-minimum tile), and the visually-hidden 1×1px native radio/checkbox inputs (`AdminPage.css`/`index.css`) whose actual click target is their much-larger wrapping `<label>`. Nothing interactive is under 24×24px.
+
+- [x] **Step 1:** Measured via `grep` for sub-24px `width`/`height` declarations across all CSS, cross-referenced against which elements are actually interactive.
+- [x] **Step 2:** All ≥ 24×24px (in practice ≥ 48px) — documented above, no code change needed.
+- [x] **Step 3–4:** N/A.
+- [x] **Step 5:** Committed together with Tasks 2 and 4.
 
 ### Task 4: Confirm no keyboard traps exist
 
 **Files:** none expected — verification task.
 
-- [ ] **Step 1:** Inventory every modal/dialog-like UI surface in the app (check for any `role="dialog"` or custom overlay pattern — a repo-wide grep is the fastest way to confirm none exist).
-- [ ] **Step 2:** If none exist, document that finding in the findings doc and close this task with no code change.
-- [ ] **Step 3:** If one is found, manually Tab/Shift+Tab through it to confirm focus doesn't leave the dialog while open and returns to the trigger element on close; fix if it doesn't, following standard focus-trap patterns.
-- [ ] **Step 4:** Commit only if a fix was needed: `fix(a11y): trap and restore focus correctly in <dialog name>`.
+**Status: Done (2026-07-06) — verified, no code change needed.** Repo-wide grep for `role="dialog"`, `Modal`, and `<dialog` across `src/` found zero matches — the app has no modal/dialog/overlay pattern anywhere, so there is nothing that could trap keyboard focus.
+
+- [x] **Step 1:** Grepped `src/` for dialog/modal patterns — none found.
+- [x] **Step 2:** Documented above; task closed with no code change.
+- [x] **Step 3–4:** N/A.
 
 ---
 

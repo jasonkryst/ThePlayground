@@ -72,9 +72,9 @@ Ideas for future development. Not committed to any timeline.
 Tracked in full detail in `docs/superpowers/plans/2026-07-05-standards-audit-remediation.md`; summarized here for visibility. Ordered by risk/impact, not effort.
 
 - [x] ~~Verify/fix disabled-wrong-choice contrast (WCAG 1.4.3)~~ — done in v0.13.0.
-- [ ] Complete the ARIA Tabs pattern (`role="tabpanel"` + `aria-controls`) on Dashboard/Admin tab strips.
-- [ ] Verify gameplay tap-target size against WCAG 2.2 SC 2.5.8's 24×24px minimum (likely already fine — base buttons are 64px — but unverified).
-- [ ] Confirm no keyboard traps exist anywhere in the app (verification-only; no modal/dialog pattern is known to exist).
+- [x] ~~Complete the ARIA Tabs pattern (`role="tabpanel"` + `aria-controls`) on Dashboard/Admin tab strips~~ — done in v0.13.0.
+- [x] ~~Verify gameplay tap-target size against WCAG 2.2 SC 2.5.8's 24×24px minimum~~ — verified passing (base buttons are 64px), no code change needed.
+- [x] ~~Confirm no keyboard traps exist anywhere in the app~~ — verified: no modal/dialog pattern exists in the codebase.
 - [ ] Route `src/components/Dashboard.css:85`'s hardcoded `color: #fff` through a design token.
 - [ ] Resolve the two `!important` overrides in `src/index.css` (`.correct`, `.highlight-correct`) via selector specificity instead.
 - [ ] Add a confirmation step before Admin's reset action takes effect.

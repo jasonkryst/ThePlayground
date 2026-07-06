@@ -74,6 +74,17 @@ describe('AdminPage', () => {
     expect(screen.getByLabelText(/child's name/i)).toBeInTheDocument()
   })
 
+  it('links each tab to its tabpanel via aria-controls/id, labeled back via aria-labelledby', () => {
+    render(<MemoryRouter><AdminPage /></MemoryRouter>)
+    const settingsTab = screen.getByRole('tab', { name: 'Settings' })
+    expect(settingsTab.id).toBeTruthy()
+    const controlsId = settingsTab.getAttribute('aria-controls')
+    expect(controlsId).toBeTruthy()
+    const panel = document.getElementById(controlsId)
+    expect(panel).toHaveAttribute('role', 'tabpanel')
+    expect(panel).toHaveAttribute('aria-labelledby', settingsTab.id)
+  })
+
   it('calls updateSetting when child name is typed', async () => {
     render(<MemoryRouter><AdminPage /></MemoryRouter>)
     const input = screen.getByLabelText(/child's name/i)

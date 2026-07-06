@@ -94,8 +94,10 @@ export default function AdminPage({ manifests = [] }) {
           {tabs.map(tab => (
             <button
               key={tab.id}
+              id={`admin-tab-${tab.id}`}
               role="tab"
               aria-selected={activeTab === tab.id}
+              aria-controls={`admin-panel-${tab.id}`}
               className={`admin__tab${activeTab === tab.id ? ' admin__tab--active' : ''}`}
               onClick={() => setActiveTab(tab.id)}
             >
@@ -105,7 +107,7 @@ export default function AdminPage({ manifests = [] }) {
         </div>
 
         {activeTab === 'settings' && (
-          <>
+          <div role="tabpanel" id="admin-panel-settings" aria-labelledby="admin-tab-settings">
             <LocaleSelector
               locales={SUPPORTED_LOCALES}
               value={settings.locale}
@@ -401,11 +403,11 @@ export default function AdminPage({ manifests = [] }) {
             <button className="admin__reset" onClick={resetSettings}>
               {t('admin.reset')}
             </button>
-          </>
+          </div>
         )}
 
         {activeTab === 'games' && (
-          <div className="admin__section">
+          <div className="admin__section" role="tabpanel" id="admin-panel-games" aria-labelledby="admin-tab-games">
             <h2>{t('admin.tagsHeading')}</h2>
             <p className="admin__hint">{t('admin.tagsHint')}</p>
             {manifests.length === 0 && (
@@ -443,14 +445,14 @@ export default function AdminPage({ manifests = [] }) {
         )}
 
         {activeTab === 'badges' && (
-          <div className="admin__section">
+          <div className="admin__section" role="tabpanel" id="admin-panel-badges" aria-labelledby="admin-tab-badges">
             <h2>{t('admin.badgesHeading')}</h2>
             <BadgeGallery manifests={manifests} badgeData={badgeData} />
           </div>
         )}
 
         {activeTab === 'history' && (
-          <div className="admin__section">
+          <div className="admin__section" role="tabpanel" id="admin-panel-history" aria-labelledby="admin-tab-history">
             <h2>{t('admin.scoreHistoryHeading')}</h2>
             <ScoreHistory scores={getAllScores()} />
           </div>
