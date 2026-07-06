@@ -151,4 +151,21 @@ describe('Dashboard', () => {
     expect(screen.getByText('Animal Sounds')).toBeInTheDocument()
     expect(screen.getByText('Color Match')).toBeInTheDocument()
   })
+
+  it('renders a translated label for a known tag instead of just capitalizing the slug', () => {
+    const testManifests = [{ id: 'a', name: 'A', description: '', icon: '🎈', color: '#fff', tags: ['sounds'] }]
+    render(<MemoryRouter><Dashboard manifests={testManifests} /></MemoryRouter>)
+    expect(screen.getByRole('tab', { name: /sounds/i })).toBeInTheDocument()
+  })
+
+  it('falls back to a capitalized slug for a tag with no translation entry', () => {
+    const testManifests = [{ id: 'a', name: 'A', description: '', icon: '🎈', color: '#fff', tags: ['xyz-custom'] }]
+    render(<MemoryRouter><Dashboard manifests={testManifests} /></MemoryRouter>)
+    expect(screen.getByRole('tab', { name: /xyz-custom/i })).toBeInTheDocument()
+  })
+
+  it('moves focus to the page title on mount', () => {
+    render(<MemoryRouter><Dashboard manifests={[]} /></MemoryRouter>)
+    expect(screen.getByRole('heading', { level: 1 })).toHaveFocus()
+  })
 })

@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import {
@@ -44,67 +44,108 @@ function formatMs(ms) {
 
 // ─── Section: Score Trend ────────────────────────────────────────────────────
 
-function ScoreTrendChart({ data, gameIds }) {
+function ChartDataTable({ caption, data, gameIds, gameNames, formatValue }) {
+  const { t } = useTranslation()
+  return (
+    <table className="sr-only">
+      <caption>{caption}</caption>
+      <thead>
+        <tr>
+          <th>{t('parent.chartDateColumn')}</th>
+          {gameIds.map(id => <th key={id}>{gameNames[id] ?? id}</th>)}
+        </tr>
+      </thead>
+      <tbody>
+        {data.map(row => (
+          <tr key={row.date}>
+            <td>{row.date}</td>
+            {gameIds.map(id => <td key={id}>{row[id] != null ? formatValue(row[id]) : '—'}</td>)}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  )
+}
+
+function ScoreTrendChart({ data, gameIds, gameNames }) {
   const { t } = useTranslation()
   if (data.length < 2) return <p className="parent__empty-chart">{t('parent.notEnoughData')}</p>
   return (
-    <ResponsiveContainer width="100%" height={220}>
-      <LineChart data={data} margin={{ top: 4, right: 8, left: 0, bottom: 4 }}>
-        <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.08)" />
-        <XAxis dataKey="date" tickFormatter={formatDate} tick={{ fontSize: 12 }} />
-        <YAxis domain={[0, 100]} tickFormatter={v => `${v}%`} tick={{ fontSize: 12 }} width={42} />
-        <Tooltip formatter={v => `${v}%`} labelFormatter={formatDate} />
-        <Legend />
-        {gameIds.map((id, i) => (
-          <Line
-            key={id}
-            type="monotone"
-            dataKey={id}
-            name={id}
-            stroke={CHART_COLORS[i % CHART_COLORS.length]}
-            dot={false}
-            strokeWidth={2}
-            connectNulls
-          />
-        ))}
-      </LineChart>
-    </ResponsiveContainer>
+    <>
+      <ChartDataTable
+        caption={t('parent.scoreTrendHeading')}
+        data={data}
+        gameIds={gameIds}
+        gameNames={gameNames}
+        formatValue={v => `${v}%`}
+      />
+      <ResponsiveContainer width="100%" height={220}>
+        <LineChart data={data} margin={{ top: 4, right: 8, left: 0, bottom: 4 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.08)" />
+          <XAxis dataKey="date" tickFormatter={formatDate} tick={{ fontSize: 12 }} />
+          <YAxis domain={[0, 100]} tickFormatter={v => `${v}%`} tick={{ fontSize: 12 }} width={42} />
+          <Tooltip formatter={v => `${v}%`} labelFormatter={formatDate} />
+          <Legend />
+          {gameIds.map((id, i) => (
+            <Line
+              key={id}
+              type="monotone"
+              dataKey={id}
+              name={gameNames[id] ?? id}
+              stroke={CHART_COLORS[i % CHART_COLORS.length]}
+              dot={false}
+              strokeWidth={2}
+              connectNulls
+            />
+          ))}
+        </LineChart>
+      </ResponsiveContainer>
+    </>
   )
 }
 
 // ─── Section: Response Time ──────────────────────────────────────────────────
 
-function ResponseTimeChart({ data, gameIds }) {
+function ResponseTimeChart({ data, gameIds, gameNames }) {
   const { t } = useTranslation()
   if (data.length < 2) return <p className="parent__empty-chart">{t('parent.notEnoughData')}</p>
   return (
-    <ResponsiveContainer width="100%" height={220}>
-      <LineChart data={data} margin={{ top: 4, right: 8, left: 0, bottom: 4 }}>
-        <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.08)" />
-        <XAxis dataKey="date" tickFormatter={formatDate} tick={{ fontSize: 12 }} />
-        <YAxis tickFormatter={formatMs} tick={{ fontSize: 12 }} width={48} />
-        <Tooltip formatter={formatMs} labelFormatter={formatDate} />
-        <Legend />
-        {gameIds.map((id, i) => (
-          <Line
-            key={id}
-            type="monotone"
-            dataKey={id}
-            name={id}
-            stroke={CHART_COLORS[i % CHART_COLORS.length]}
-            dot={false}
-            strokeWidth={2}
-            connectNulls
-          />
-        ))}
-      </LineChart>
-    </ResponsiveContainer>
+    <>
+      <ChartDataTable
+        caption={t('parent.responseTimeHeading')}
+        data={data}
+        gameIds={gameIds}
+        gameNames={gameNames}
+        formatValue={formatMs}
+      />
+      <ResponsiveContainer width="100%" height={220}>
+        <LineChart data={data} margin={{ top: 4, right: 8, left: 0, bottom: 4 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.08)" />
+          <XAxis dataKey="date" tickFormatter={formatDate} tick={{ fontSize: 12 }} />
+          <YAxis tickFormatter={formatMs} tick={{ fontSize: 12 }} width={48} />
+          <Tooltip formatter={formatMs} labelFormatter={formatDate} />
+          <Legend />
+          {gameIds.map((id, i) => (
+            <Line
+              key={id}
+              type="monotone"
+              dataKey={id}
+              name={gameNames[id] ?? id}
+              stroke={CHART_COLORS[i % CHART_COLORS.length]}
+              dot={false}
+              strokeWidth={2}
+              connectNulls
+            />
+          ))}
+        </LineChart>
+      </ResponsiveContainer>
+    </>
   )
 }
 
 // ─── Section: Streak History ─────────────────────────────────────────────────
 
-function StreakHistoryPanel({ streakHistory }) {
+function StreakHistoryPanel({ streakHistory, gameNames }) {
   const { t }  = useTranslation()
   const games  = Object.keys(streakHistory)
   if (games.length === 0) return <p className="parent__empty-chart">{t('parent.notEnoughData')}</p>
@@ -123,7 +164,7 @@ function StreakHistoryPanel({ streakHistory }) {
           const { last7, last30, allTime } = streakHistory[gameId]
           return (
             <tr key={gameId}>
-              <td>{gameId}</td>
+              <td>{gameNames[gameId] ?? gameId}</td>
               <td>{last7}</td>
               <td>{last30}</td>
               <td>{allTime}</td>
@@ -206,7 +247,7 @@ function SessionHeatmap({ heatmapData }) {
 
 // ─── Section: Missed Items ───────────────────────────────────────────────────
 
-function MissedItemsPanel({ missedItems }) {
+function MissedItemsPanel({ missedItems, gameNames }) {
   const { t }  = useTranslation()
   const games  = Object.keys(missedItems)
 
@@ -220,10 +261,11 @@ function MissedItemsPanel({ missedItems }) {
         const ns    = GAME_ITEM_NS[gameId]
         const items = missedItems[gameId]
         const max   = items[0]?.count ?? 1
+        const name  = gameNames[gameId] ?? gameId
         return (
           <div key={gameId} className="parent__missed-game">
-            <h3 className="parent__missed-title">{gameId}</h3>
-            <ul className="parent__missed-list" aria-label={`${gameId} missed items`}>
+            <h3 className="parent__missed-title">{name}</h3>
+            <ul className="parent__missed-list" aria-label={t('parent.missedItemsAriaLabel', { name })}>
               {items.map(({ itemId, count }) => {
                 const label = ns ? t(`${ns}.${itemId}.name`, { defaultValue: itemId }) : itemId
                 return (
@@ -249,12 +291,19 @@ function MissedItemsPanel({ missedItems }) {
 
 // ─── Main Page ───────────────────────────────────────────────────────────────
 
-export default function ParentDashboard() {
+export default function ParentDashboard({ manifests = [] }) {
   const { t }          = useTranslation()
   const { getAllScores } = useScores()
   const [bestStreaks, setBestStreaks] = useState({})
   const scores  = getAllScores()
   const gameIds = useMemo(() => [...new Set(scores.map(s => s.gameId))], [scores])
+  const gameNames = useMemo(
+    () => Object.fromEntries(manifests.map(m => [m.id, m.name])),
+    [manifests]
+  )
+
+  const titleRef = useRef(null)
+  useEffect(() => { titleRef.current?.focus() }, [])
 
   useEffect(() => {
     adapter.getBestStreaks().then(setBestStreaks)
@@ -277,7 +326,7 @@ export default function ParentDashboard() {
       <main>
         <div className="parent__header">
           <Link to="/" className="parent__back" aria-label={t('parent.back')}>←</Link>
-          <h1 className="parent__title">{t('parent.title')}</h1>
+          <h1 className="parent__title" tabIndex={-1} ref={titleRef}>{t('parent.title')}</h1>
           <button className="parent__export-btn" onClick={handleExport} aria-label={t('parent.exportCsv')}>
             {t('parent.exportCsv')}
           </button>
@@ -290,19 +339,19 @@ export default function ParentDashboard() {
             <section className="parent__section" aria-labelledby="score-trend-heading">
               <h2 id="score-trend-heading">{t('parent.scoreTrendHeading')}</h2>
               <p className="parent__hint">{t('parent.scoreTrendHint')}</p>
-              <ScoreTrendChart data={scoreTrend} gameIds={gameIds} />
+              <ScoreTrendChart data={scoreTrend} gameIds={gameIds} gameNames={gameNames} />
             </section>
 
             <section className="parent__section" aria-labelledby="response-time-heading">
               <h2 id="response-time-heading">{t('parent.responseTimeHeading')}</h2>
               <p className="parent__hint">{t('parent.responseTimeHint')}</p>
-              <ResponseTimeChart data={responseTimes} gameIds={gameIds} />
+              <ResponseTimeChart data={responseTimes} gameIds={gameIds} gameNames={gameNames} />
             </section>
 
             <section className="parent__section" aria-labelledby="streak-heading">
               <h2 id="streak-heading">{t('parent.streakHistoryHeading')}</h2>
               <p className="parent__hint">{t('parent.streakHistoryHint')}</p>
-              <StreakHistoryPanel streakHistory={streakHistory} />
+              <StreakHistoryPanel streakHistory={streakHistory} gameNames={gameNames} />
             </section>
 
             <section className="parent__section" aria-labelledby="heatmap-heading">
@@ -314,7 +363,7 @@ export default function ParentDashboard() {
             <section className="parent__section" aria-labelledby="missed-heading">
               <h2 id="missed-heading">{t('parent.missedHeading')}</h2>
               <p className="parent__hint">{t('parent.missedHint')}</p>
-              <MissedItemsPanel missedItems={missedItems} />
+              <MissedItemsPanel missedItems={missedItems} gameNames={gameNames} />
             </section>
           </>
         )}

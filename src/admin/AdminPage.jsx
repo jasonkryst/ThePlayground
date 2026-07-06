@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import useSettings from '../hooks/useSettings'
@@ -6,6 +6,8 @@ import useScores from '../hooks/useScores'
 import useBadges from '../hooks/useBadges'
 import ScoreHistory from '../components/ScoreHistory'
 import BadgeGallery from '../components/BadgeGallery'
+import LocaleSelector from '../components/LocaleSelector'
+import { SUPPORTED_LOCALES } from '../i18n'
 import './AdminPage.css'
 
 export default function AdminPage({ manifests = [] }) {
@@ -15,6 +17,8 @@ export default function AdminPage({ manifests = [] }) {
   const { badgeData } = useBadges()
 
   const [activeTab, setActiveTab] = useState('settings')
+  const titleRef = useRef(null)
+  useEffect(() => { titleRef.current?.focus() }, [])
 
   const [tagDraft, setTagDraft] = useState(() =>
     Object.fromEntries(
@@ -83,7 +87,7 @@ export default function AdminPage({ manifests = [] }) {
       <main>
         <div className="admin__header">
           <Link to="/" className="admin__back" aria-label={t('admin.back')}>←</Link>
-          <h1 className="admin__title">{t('admin.title')}</h1>
+          <h1 className="admin__title" tabIndex={-1} ref={titleRef}>{t('admin.title')}</h1>
         </div>
 
         <div className="admin__tabs" role="tablist" aria-label={t('admin.title')}>
@@ -102,6 +106,12 @@ export default function AdminPage({ manifests = [] }) {
 
         {activeTab === 'settings' && (
           <>
+            <LocaleSelector
+              locales={SUPPORTED_LOCALES}
+              value={settings.locale}
+              onChange={val => updateSetting('locale', val)}
+            />
+
             <div className="admin__section">
               <h2>{t('admin.childNameHeading')}</h2>
               <p className="admin__hint">{t('admin.childNameHint')}</p>
@@ -399,7 +409,7 @@ export default function AdminPage({ manifests = [] }) {
             <h2>{t('admin.tagsHeading')}</h2>
             <p className="admin__hint">{t('admin.tagsHint')}</p>
             {manifests.length === 0 && (
-              <p className="admin__hint">No games found.</p>
+              <p className="admin__hint">{t('admin.noGamesFound')}</p>
             )}
             {manifests.map(m => (
               <div key={m.id} className="admin__tag-row">

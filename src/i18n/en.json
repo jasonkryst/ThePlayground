@@ -18,7 +18,8 @@
     "timeUp": "⏰ Time's up!",
     "newAccuracyRecord": "🏆 New accuracy record! {{score}}/{{total}} (was {{prevScore}}/{{prevTotal}})",
     "newSpeedRecord": "⚡ New speed record! {{seconds}}s avg (was {{prevSeconds}}s avg)",
-    "newBadgeAnnounce": "🎉 New Badge!"
+    "newBadgeAnnounce": "🎉 New Badge!",
+    "resultsHeading": "Results"
   },
   "dashboard": {
     "titleDefault": "My Playground",
@@ -32,7 +33,15 @@
     "categoryOther": "Other",
     "tabAll": "All",
     "tabsLabel": "Filter games by category",
-    "featuredAriaLabel": "Play today's featured game: {{name}}"
+    "featuredAriaLabel": "Play today's featured game: {{name}}",
+    "tag": {
+      "sounds": "Sounds",
+      "visual": "Visual",
+      "numbers": "Numbers",
+      "animals": "Animals",
+      "colors": "Colors",
+      "characters": "Characters"
+    }
   },
   "parent": {
     "title": "📊 Progress Dashboard",
@@ -44,6 +53,7 @@
     "scoreTrendHint": "Correct-answer rate per game over time.",
     "responseTimeHeading": "Response Time",
     "responseTimeHint": "Average time to answer per game — a downward trend means getting faster.",
+    "chartDateColumn": "Date",
     "streakHistoryHeading": "Streak History",
     "streakHistoryHint": "Longest run of correct answers in a row.",
     "streakGame": "Game",
@@ -57,7 +67,8 @@
     "heatmapMore": "More",
     "missedHeading": "Missed Items",
     "missedHint": "Which animals or colors are answered incorrectly most often.",
-    "missedNoData": "No missed-item data yet — requires sessions played after v0.4.0."
+    "missedNoData": "No missed-item data yet — requires sessions played after v0.4.0.",
+    "missedItemsAriaLabel": "{{name}} missed items"
   },
   "gameCard": {
     "best": "Best: {{score}}",
@@ -68,6 +79,7 @@
     "playCount_other": "{{count}} plays"
   },
   "admin": {
+    "localeHeading": "Language",
     "back": "Back to dashboard",
     "title": "⚙️ Settings",
     "childNameHeading": "Child's Name",
@@ -121,7 +133,8 @@
     "tagsResetButton": "Reset",
     "introReplayButton": "Replay Intro",
     "tabBadges": "Badges",
-    "badgesHeading": "Badges"
+    "badgesHeading": "Badges",
+    "noGamesFound": "No games found."
   },
   "scoreHistory": {
     "empty": "No scores yet — play a game!"
@@ -134,71 +147,6 @@
     "statTotalPlayed": "Total Played",
     "badgeEarned": "{{name}} — earned",
     "badgeLocked": "{{name}} — locked"
-  },
-  "animalSounds": {
-    "prompt": "What animal makes this sound?",
-    "replay": "Replay sound",
-    "howToPlay": "Listen to the sound, then tap the matching animal!"
-  },
-  "colorMatch": {
-    "prompt": "Which one is this color?",
-    "howToPlay": "A color swatch shows — tap the matching colored object!"
-  },
-  "characterMatch": {
-    "prompt": "Which one is {{name}}?",
-    "howToPlay": "See the name, then tap the matching character!"
-  },
-  "animal": {
-    "elephant": { "name": "Elephant" },
-    "lion": { "name": "Lion" },
-    "cow": { "name": "Cow" },
-    "dog": { "name": "Dog" },
-    "cat": { "name": "Cat" },
-    "frog": { "name": "Frog" },
-    "duck": { "name": "Duck" },
-    "horse": { "name": "Horse" },
-    "pig": { "name": "Pig" },
-    "sheep": { "name": "Sheep" },
-    "rooster": { "name": "Rooster" },
-    "owl": { "name": "Owl" }
-  },
-  "color": {
-    "red": { "name": "Red" },
-    "orange": { "name": "Orange" },
-    "yellow": { "name": "Yellow" },
-    "green": { "name": "Green" },
-    "blue": { "name": "Blue" },
-    "purple": { "name": "Purple" },
-    "pink": { "name": "Pink" },
-    "brown": { "name": "Brown" },
-    "black": { "name": "Black" },
-    "white": { "name": "White" },
-    "gray": { "name": "Gray" }
-  },
-  "character": {
-    "bluey": { "name": "Bluey" },
-    "bingo": { "name": "Bingo" },
-    "bandit": { "name": "Bandit" },
-    "chilli": { "name": "Chilli" },
-    "muffin": { "name": "Muffin" },
-    "socks": { "name": "Socks" },
-    "mackenzie": { "name": "Mackenzie" },
-    "pete": { "name": "Pete" },
-    "callie": { "name": "Callie" },
-    "grumpy-toad": { "name": "Grumpy Toad" },
-    "marty": { "name": "Marty" },
-    "gus": { "name": "Gus" },
-    "neville": { "name": "Neville" },
-    "sally": { "name": "Sally" },
-    "molly": { "name": "Molly" },
-    "gil": { "name": "Gil" },
-    "deema": { "name": "Deema" },
-    "goby": { "name": "Goby" },
-    "oona": { "name": "Oona" },
-    "nonny": { "name": "Nonny" },
-    "zooli": { "name": "Zooli" },
-    "bubble-puppy": { "name": "Bubble Puppy" },
-    "mr-grouper": { "name": "Mr. Grouper" }
   },
   "badges": {
     "hotStreak": { "name": "Hot Streak", "desc": "Reach a streak of 5 correct answers in a row." },

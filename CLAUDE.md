@@ -25,7 +25,7 @@ See [`docs/TESTING.md`](docs/TESTING.md) for the full testing reference (a11y, E
 
 ## Architecture
 
-**Auto-discovery is the core mechanic.** `src/App.jsx` uses Vite's `import.meta.glob('./games/*/manifest.json', { eager: true })` and `import.meta.glob('./games/*/index.jsx')` to find games. Dropping a new folder under `src/games/<id>/` with a `manifest.json` and `index.jsx` (default export accepting `onGameEnd`) makes it appear on the dashboard and routable at `/game/<id>` — no registry or import to edit.
+**Auto-discovery is the core mechanic.** `src/App.jsx` uses Vite's `import.meta.glob('./games/*/manifest.json', { eager: true })` and `import.meta.glob('./games/*/index.jsx')` to find games. Dropping a new folder under `src/games/<id>/` with a `manifest.json` and `index.jsx` (default export accepting `onGameEnd`) makes it appear on the dashboard and routable at `/game/<id>` — no registry or import to edit. i18n strings follow the same auto-discovery principle: `src/games/<id>/i18n/en.json` is picked up automatically by `src/i18n/index.js` — no shared file to edit when adding a game.
 
 **Storage is adapter-based.** Everything persisted (scores, settings) goes through the four-method interface in `src/storage/adapter.js` (`getScores`, `addScore`, `getSettings`, `saveSettings`). `src/storage/index.js` re-exports the active implementation (`localStorageAdapter.js`) — swapping to a real backend means writing a new adapter and changing that one export, not touching game code or hooks.
 

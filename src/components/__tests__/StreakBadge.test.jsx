@@ -23,4 +23,9 @@ describe('StreakBadge', () => {
     const { container } = render(<StreakBadge streak={3} />)
     expect(await axe(container)).toHaveNoViolations()
   })
+
+  it('has aria-live="polite" so screen readers announce streak changes', () => {
+    render(<StreakBadge streak={3} />)
+    expect(screen.getByText(/3/)).toHaveAttribute('aria-live', 'polite')
+  })
 })

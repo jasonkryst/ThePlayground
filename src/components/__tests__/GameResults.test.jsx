@@ -164,4 +164,9 @@ describe('GameResults', () => {
     )
     expect(await axe(container)).toHaveNoViolations()
   })
+
+  it('moves focus to the results heading on mount', () => {
+    render(<GameResults score={3} total={5} missed={[]} onPlayAgain={vi.fn()} onHome={vi.fn()} renderMissedItem={renderMissedItem} />)
+    expect(screen.getByRole('heading', { name: /results/i })).toHaveFocus()
+  })
 })

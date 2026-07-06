@@ -60,8 +60,8 @@ function makeScore(overrides = {}) {
   }
 }
 
-function renderDashboard() {
-  return render(<MemoryRouter><ParentDashboard /></MemoryRouter>)
+function renderDashboard(manifests = []) {
+  return render(<MemoryRouter><ParentDashboard manifests={manifests} /></MemoryRouter>)
 }
 
 beforeEach(() => {
@@ -117,11 +117,13 @@ describe('ParentDashboard — with scores', () => {
 
   it('renders all five section headings', () => {
     renderDashboard()
-    expect(screen.getByText(/score trend/i)).toBeInTheDocument()
-    expect(screen.getByText(/response time/i)).toBeInTheDocument()
-    expect(screen.getByText(/streak history/i)).toBeInTheDocument()
-    expect(screen.getByText(/play calendar/i)).toBeInTheDocument()
-    expect(screen.getByText(/missed items/i)).toBeInTheDocument()
+    // Use the heading role specifically — the new hidden chart data tables
+    // also render a <caption> with the same text as the section heading.
+    expect(screen.getByRole('heading', { name: /score trend/i })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /response time/i })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /streak history/i })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /play calendar/i })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /missed items/i })).toBeInTheDocument()
   })
 
   it('renders the streak history table with correct headers', () => {
@@ -151,6 +153,13 @@ describe('ParentDashboard — with scores', () => {
   it('has no accessibility violations', async () => {
     const { container } = renderDashboard()
     expect(await axe(container)).toHaveNoViolations()
+  })
+
+  it('provides a visually-hidden data table alternative for the score trend chart', () => {
+    renderDashboard()
+    const tables = screen.getAllByRole('table')
+    // one for streak history (already visible) + one hidden table per chart
+    expect(tables.length).toBeGreaterThanOrEqual(3)
   })
 })
 
@@ -193,6 +202,27 @@ describe('ParentDashboard — CSV export', () => {
   })
 })
 
+// ─── Game display names ──────────────────────────────────────────────────────
+
+describe('ParentDashboard — game display names', () => {
+  const manifests = [{ id: 'animal-sounds', name: 'Animal Sounds' }]
+
+  it('shows the manifest name instead of the raw gameId in the missed-items heading', () => {
+    mockGetAllScores.mockReturnValue([makeScore()])
+    renderDashboard(manifests)
+    // Both the streak table and the missed-items panel render the game name,
+    // so multiple elements are expected — assert at least one and no raw id.
+    expect(screen.getAllByText('Animal Sounds').length).toBeGreaterThan(0)
+    expect(screen.queryByText('animal-sounds')).not.toBeInTheDocument()
+  })
+
+  it('falls back to the raw gameId when no manifest is found', () => {
+    mockGetAllScores.mockReturnValue([makeScore()])
+    renderDashboard([]) // no manifests passed
+    expect(screen.getAllByText('animal-sounds').length).toBeGreaterThan(0)
+  })
+})
+
 // ─── Insufficient data ───────────────────────────────────────────────────────
 
 describe('ParentDashboard — insufficient data for charts', () => {
@@ -202,5 +232,13 @@ describe('ParentDashboard — insufficient data for charts', () => {
     const hints = screen.getAllByText(/not enough data/i)
     // Score trend and response time both need >= 2 data points to render a chart
     expect(hints.length).toBeGreaterThanOrEqual(2)
+  })
+})
+
+describe('ParentDashboard — focus management', () => {
+  it('moves focus to the page title on mount', () => {
+    mockGetAllScores.mockReturnValue([])
+    renderDashboard()
+    expect(screen.getByRole('heading', { name: /progress dashboard/i })).toHaveFocus()
   })
 })

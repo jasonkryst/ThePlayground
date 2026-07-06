@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import GameCard from './GameCard'
@@ -21,6 +21,10 @@ const TAG_ICONS = {
   characters: '🎭',
 }
 
+function tagLabel(tag, t) {
+  return t(`dashboard.tag.${tag}`, { defaultValue: tag.charAt(0).toUpperCase() + tag.slice(1) })
+}
+
 function buildSections(manifests, tagMap, featuredId, allTags, t) {
   const sections = []
   for (const tag of allTags) {
@@ -29,7 +33,7 @@ function buildSections(manifests, tagMap, featuredId, allTags, t) {
     )
     if (games.length > 0) {
       const icon = TAG_ICONS[tag] ?? ''
-      const label = `${icon} ${tag.charAt(0).toUpperCase() + tag.slice(1)}`.trim()
+      const label = `${icon} ${tagLabel(tag, t)}`.trim()
       sections.push({ heading: label, games })
     }
   }
@@ -50,6 +54,8 @@ export default function Dashboard({ manifests = [] }) {
   const featured = useFeaturedGame(manifests)
   const { tagMap, allTags } = useGameTags(manifests)
   const [activeTag, setActiveTag] = useState('all')
+  const titleRef = useRef(null)
+  useEffect(() => { titleRef.current?.focus() }, [])
 
   const name = settings.childName?.trim()
   const title = name ? t('dashboard.titleNamed', { name }) : t('dashboard.titleDefault')
@@ -66,7 +72,7 @@ export default function Dashboard({ manifests = [] }) {
     <div className="dashboard">
       <main>
         <div className="dashboard__header">
-          <h1 className="dashboard__title">🌊 {title}</h1>
+          <h1 className="dashboard__title" tabIndex={-1} ref={titleRef}>🌊 {title}</h1>
           <div className="dashboard__nav">
             <Link to="/parent" className="dashboard__nav-link" aria-label={t('dashboard.parentLabel')}>📊</Link>
             <Link to="/my-progress" className="dashboard__nav-link" aria-label={t('dashboard.myProgressLabel')}>🌟</Link>
@@ -98,7 +104,7 @@ export default function Dashboard({ manifests = [] }) {
                     className={`dashboard__tab${activeTag === tag ? ' dashboard__tab--active' : ''}`}
                     onClick={() => setActiveTag(tag)}
                   >
-                    {tag.charAt(0).toUpperCase() + tag.slice(1)}
+                    {tagLabel(tag, t)}
                   </button>
                 ))}
               </div>
