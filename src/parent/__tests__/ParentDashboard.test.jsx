@@ -117,11 +117,13 @@ describe('ParentDashboard — with scores', () => {
 
   it('renders all five section headings', () => {
     renderDashboard()
-    expect(screen.getByText(/score trend/i)).toBeInTheDocument()
-    expect(screen.getByText(/response time/i)).toBeInTheDocument()
-    expect(screen.getByText(/streak history/i)).toBeInTheDocument()
-    expect(screen.getByText(/play calendar/i)).toBeInTheDocument()
-    expect(screen.getByText(/missed items/i)).toBeInTheDocument()
+    // Use the heading role specifically — the new hidden chart data tables
+    // also render a <caption> with the same text as the section heading.
+    expect(screen.getByRole('heading', { name: /score trend/i })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /response time/i })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /streak history/i })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /play calendar/i })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /missed items/i })).toBeInTheDocument()
   })
 
   it('renders the streak history table with correct headers', () => {
@@ -151,6 +153,13 @@ describe('ParentDashboard — with scores', () => {
   it('has no accessibility violations', async () => {
     const { container } = renderDashboard()
     expect(await axe(container)).toHaveNoViolations()
+  })
+
+  it('provides a visually-hidden data table alternative for the score trend chart', () => {
+    renderDashboard()
+    const tables = screen.getAllByRole('table')
+    // one for streak history (already visible) + one hidden table per chart
+    expect(tables.length).toBeGreaterThanOrEqual(3)
   })
 })
 

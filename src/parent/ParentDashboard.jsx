@@ -44,31 +44,62 @@ function formatMs(ms) {
 
 // ─── Section: Score Trend ────────────────────────────────────────────────────
 
+function ChartDataTable({ caption, data, gameIds, gameNames, formatValue }) {
+  return (
+    <table className="sr-only">
+      <caption>{caption}</caption>
+      <thead>
+        <tr>
+          <th>Date</th>
+          {gameIds.map(id => <th key={id}>{gameNames[id] ?? id}</th>)}
+        </tr>
+      </thead>
+      <tbody>
+        {data.map(row => (
+          <tr key={row.date}>
+            <td>{row.date}</td>
+            {gameIds.map(id => <td key={id}>{row[id] != null ? formatValue(row[id]) : '—'}</td>)}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  )
+}
+
 function ScoreTrendChart({ data, gameIds, gameNames }) {
   const { t } = useTranslation()
   if (data.length < 2) return <p className="parent__empty-chart">{t('parent.notEnoughData')}</p>
   return (
-    <ResponsiveContainer width="100%" height={220}>
-      <LineChart data={data} margin={{ top: 4, right: 8, left: 0, bottom: 4 }}>
-        <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.08)" />
-        <XAxis dataKey="date" tickFormatter={formatDate} tick={{ fontSize: 12 }} />
-        <YAxis domain={[0, 100]} tickFormatter={v => `${v}%`} tick={{ fontSize: 12 }} width={42} />
-        <Tooltip formatter={v => `${v}%`} labelFormatter={formatDate} />
-        <Legend />
-        {gameIds.map((id, i) => (
-          <Line
-            key={id}
-            type="monotone"
-            dataKey={id}
-            name={gameNames[id] ?? id}
-            stroke={CHART_COLORS[i % CHART_COLORS.length]}
-            dot={false}
-            strokeWidth={2}
-            connectNulls
-          />
-        ))}
-      </LineChart>
-    </ResponsiveContainer>
+    <>
+      <ChartDataTable
+        caption={t('parent.scoreTrendHeading')}
+        data={data}
+        gameIds={gameIds}
+        gameNames={gameNames}
+        formatValue={v => `${v}%`}
+      />
+      <ResponsiveContainer width="100%" height={220}>
+        <LineChart data={data} margin={{ top: 4, right: 8, left: 0, bottom: 4 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.08)" />
+          <XAxis dataKey="date" tickFormatter={formatDate} tick={{ fontSize: 12 }} />
+          <YAxis domain={[0, 100]} tickFormatter={v => `${v}%`} tick={{ fontSize: 12 }} width={42} />
+          <Tooltip formatter={v => `${v}%`} labelFormatter={formatDate} />
+          <Legend />
+          {gameIds.map((id, i) => (
+            <Line
+              key={id}
+              type="monotone"
+              dataKey={id}
+              name={gameNames[id] ?? id}
+              stroke={CHART_COLORS[i % CHART_COLORS.length]}
+              dot={false}
+              strokeWidth={2}
+              connectNulls
+            />
+          ))}
+        </LineChart>
+      </ResponsiveContainer>
+    </>
   )
 }
 
@@ -78,27 +109,36 @@ function ResponseTimeChart({ data, gameIds, gameNames }) {
   const { t } = useTranslation()
   if (data.length < 2) return <p className="parent__empty-chart">{t('parent.notEnoughData')}</p>
   return (
-    <ResponsiveContainer width="100%" height={220}>
-      <LineChart data={data} margin={{ top: 4, right: 8, left: 0, bottom: 4 }}>
-        <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.08)" />
-        <XAxis dataKey="date" tickFormatter={formatDate} tick={{ fontSize: 12 }} />
-        <YAxis tickFormatter={formatMs} tick={{ fontSize: 12 }} width={48} />
-        <Tooltip formatter={formatMs} labelFormatter={formatDate} />
-        <Legend />
-        {gameIds.map((id, i) => (
-          <Line
-            key={id}
-            type="monotone"
-            dataKey={id}
-            name={gameNames[id] ?? id}
-            stroke={CHART_COLORS[i % CHART_COLORS.length]}
-            dot={false}
-            strokeWidth={2}
-            connectNulls
-          />
-        ))}
-      </LineChart>
-    </ResponsiveContainer>
+    <>
+      <ChartDataTable
+        caption={t('parent.responseTimeHeading')}
+        data={data}
+        gameIds={gameIds}
+        gameNames={gameNames}
+        formatValue={formatMs}
+      />
+      <ResponsiveContainer width="100%" height={220}>
+        <LineChart data={data} margin={{ top: 4, right: 8, left: 0, bottom: 4 }}>
+          <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.08)" />
+          <XAxis dataKey="date" tickFormatter={formatDate} tick={{ fontSize: 12 }} />
+          <YAxis tickFormatter={formatMs} tick={{ fontSize: 12 }} width={48} />
+          <Tooltip formatter={formatMs} labelFormatter={formatDate} />
+          <Legend />
+          {gameIds.map((id, i) => (
+            <Line
+              key={id}
+              type="monotone"
+              dataKey={id}
+              name={gameNames[id] ?? id}
+              stroke={CHART_COLORS[i % CHART_COLORS.length]}
+              dot={false}
+              strokeWidth={2}
+              connectNulls
+            />
+          ))}
+        </LineChart>
+      </ResponsiveContainer>
+    </>
   )
 }
 
