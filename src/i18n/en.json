@@ -18,7 +18,8 @@
     "timeUp": "⏰ Time's up!",
     "newAccuracyRecord": "🏆 New accuracy record! {{score}}/{{total}} (was {{prevScore}}/{{prevTotal}})",
     "newSpeedRecord": "⚡ New speed record! {{seconds}}s avg (was {{prevSeconds}}s avg)",
-    "newBadgeAnnounce": "🎉 New Badge!"
+    "newBadgeAnnounce": "🎉 New Badge!",
+    "resultsHeading": "Results"
   },
   "dashboard": {
     "titleDefault": "My Playground",
