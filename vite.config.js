@@ -15,5 +15,8 @@ export default defineConfig({
     globals: true,
     setupFiles: './src/test-setup.js',
     exclude: ['node_modules/**', 'e2e/**', '.claude/**'],
+    coverage: {
+      include: ['src/**'],
+    },
   },
 })
