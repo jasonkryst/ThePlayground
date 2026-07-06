@@ -78,4 +78,4 @@ button {
 .correct { background: #a5d6a7 !important; }
 .wrong   { background: #ef9a9a; }
 .highlight-correct { background: #a5d6a7 !important; }
-.game__choice--disabled-wrong { opacity: 0.45; filter: grayscale(60%); }
+.game__choice--disabled-wrong { filter: grayscale(85%) brightness(0.88); }
