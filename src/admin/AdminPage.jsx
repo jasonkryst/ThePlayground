@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import useSettings from '../hooks/useSettings'
@@ -17,6 +17,8 @@ export default function AdminPage({ manifests = [] }) {
   const { badgeData } = useBadges()
 
   const [activeTab, setActiveTab] = useState('settings')
+  const titleRef = useRef(null)
+  useEffect(() => { titleRef.current?.focus() }, [])
 
   const [tagDraft, setTagDraft] = useState(() =>
     Object.fromEntries(
@@ -85,7 +87,7 @@ export default function AdminPage({ manifests = [] }) {
       <main>
         <div className="admin__header">
           <Link to="/" className="admin__back" aria-label={t('admin.back')}>←</Link>
-          <h1 className="admin__title">{t('admin.title')}</h1>
+          <h1 className="admin__title" tabIndex={-1} ref={titleRef}>{t('admin.title')}</h1>
         </div>
 
         <div className="admin__tabs" role="tablist" aria-label={t('admin.title')}>

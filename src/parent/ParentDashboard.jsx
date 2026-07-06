@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import {
@@ -261,6 +261,9 @@ export default function ParentDashboard({ manifests = [] }) {
     [manifests]
   )
 
+  const titleRef = useRef(null)
+  useEffect(() => { titleRef.current?.focus() }, [])
+
   useEffect(() => {
     adapter.getBestStreaks().then(setBestStreaks)
   }, [])
@@ -282,7 +285,7 @@ export default function ParentDashboard({ manifests = [] }) {
       <main>
         <div className="parent__header">
           <Link to="/" className="parent__back" aria-label={t('parent.back')}>←</Link>
-          <h1 className="parent__title">{t('parent.title')}</h1>
+          <h1 className="parent__title" tabIndex={-1} ref={titleRef}>{t('parent.title')}</h1>
           <button className="parent__export-btn" onClick={handleExport} aria-label={t('parent.exportCsv')}>
             {t('parent.exportCsv')}
           </button>

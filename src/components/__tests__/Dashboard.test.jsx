@@ -163,4 +163,9 @@ describe('Dashboard', () => {
     render(<MemoryRouter><Dashboard manifests={testManifests} /></MemoryRouter>)
     expect(screen.getByRole('tab', { name: /xyz-custom/i })).toBeInTheDocument()
   })
+
+  it('moves focus to the page title on mount', () => {
+    render(<MemoryRouter><Dashboard manifests={[]} /></MemoryRouter>)
+    expect(screen.getByRole('heading', { level: 1 })).toHaveFocus()
+  })
 })

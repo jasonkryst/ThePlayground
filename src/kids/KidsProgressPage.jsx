@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import useScores from '../hooks/useScores'
@@ -81,6 +81,8 @@ export default function KidsProgressPage({ manifests = [] }) {
   const { getAllScores } = useScores()
   const { badgeData } = useBadges()
   const [bestStreaks, setBestStreaks] = useState({})
+  const titleRef = useRef(null)
+  useEffect(() => { titleRef.current?.focus() }, [])
 
   useEffect(() => {
     adapter.getBestStreaks().then(setBestStreaks)
@@ -93,7 +95,7 @@ export default function KidsProgressPage({ manifests = [] }) {
       <main>
         <div className="kid-progress__header">
           <Link to="/" className="kid-progress__back" aria-label={t('kids.back')}>←</Link>
-          <h1 className="kid-progress__title">{t('kids.title')}</h1>
+          <h1 className="kid-progress__title" tabIndex={-1} ref={titleRef}>{t('kids.title')}</h1>
         </div>
 
         {manifests.map(m => (

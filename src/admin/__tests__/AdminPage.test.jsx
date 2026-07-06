@@ -304,4 +304,9 @@ describe('AdminPage', () => {
     expect(screen.getByText('Animal Sounds')).toBeInTheDocument()
     expect(screen.getByText('×2')).toBeInTheDocument() // hotStreak count for animal-sounds
   })
+
+  it('moves focus to the page title on mount', () => {
+    render(<MemoryRouter><AdminPage manifests={[]} /></MemoryRouter>)
+    expect(screen.getByRole('heading', { name: /settings/i })).toHaveFocus()
+  })
 })

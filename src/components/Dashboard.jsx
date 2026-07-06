@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import GameCard from './GameCard'
@@ -54,6 +54,8 @@ export default function Dashboard({ manifests = [] }) {
   const featured = useFeaturedGame(manifests)
   const { tagMap, allTags } = useGameTags(manifests)
   const [activeTag, setActiveTag] = useState('all')
+  const titleRef = useRef(null)
+  useEffect(() => { titleRef.current?.focus() }, [])
 
   const name = settings.childName?.trim()
   const title = name ? t('dashboard.titleNamed', { name }) : t('dashboard.titleDefault')
@@ -70,7 +72,7 @@ export default function Dashboard({ manifests = [] }) {
     <div className="dashboard">
       <main>
         <div className="dashboard__header">
-          <h1 className="dashboard__title">🌊 {title}</h1>
+          <h1 className="dashboard__title" tabIndex={-1} ref={titleRef}>🌊 {title}</h1>
           <div className="dashboard__nav">
             <Link to="/parent" className="dashboard__nav-link" aria-label={t('dashboard.parentLabel')}>📊</Link>
             <Link to="/my-progress" className="dashboard__nav-link" aria-label={t('dashboard.myProgressLabel')}>🌟</Link>

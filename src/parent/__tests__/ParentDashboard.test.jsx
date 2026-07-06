@@ -225,3 +225,11 @@ describe('ParentDashboard — insufficient data for charts', () => {
     expect(hints.length).toBeGreaterThanOrEqual(2)
   })
 })
+
+describe('ParentDashboard — focus management', () => {
+  it('moves focus to the page title on mount', () => {
+    mockGetAllScores.mockReturnValue([])
+    renderDashboard()
+    expect(screen.getByRole('heading', { name: /progress dashboard/i })).toHaveFocus()
+  })
+})
