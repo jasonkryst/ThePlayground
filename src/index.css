@@ -65,7 +65,17 @@ button {
   80%       { transform: translateX(8px);  background: #ef9a9a; }
 }
 
-.correct { animation: pulse-green 0.6s ease forwards; background: #a5d6a7 !important; }
-.wrong   { animation: shake-red   0.6s ease forwards; }
+/* Correct/wrong feedback is color + motion; when a user has opted out of
+   motion at the OS level, keep the color signal and drop only the animation.
+   The button is also `disabled` at this point, so the state is still
+   conveyed by more than color alone even with motion removed. */
+@media (prefers-reduced-motion: no-preference) {
+  .correct { animation: pulse-green 0.6s ease forwards; }
+  .wrong   { animation: shake-red   0.6s ease forwards; }
+  .game__choice--disabled-wrong { animation: shake-red 0.6s ease; }
+}
+
+.correct { background: #a5d6a7 !important; }
+.wrong   { background: #ef9a9a; }
 .highlight-correct { background: #a5d6a7 !important; }
-.game__choice--disabled-wrong { opacity: 0.45; filter: grayscale(60%); animation: shake-red 0.6s ease; }
+.game__choice--disabled-wrong { opacity: 0.45; filter: grayscale(60%); }
