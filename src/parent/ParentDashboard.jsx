@@ -45,12 +45,13 @@ function formatMs(ms) {
 // ─── Section: Score Trend ────────────────────────────────────────────────────
 
 function ChartDataTable({ caption, data, gameIds, gameNames, formatValue }) {
+  const { t } = useTranslation()
   return (
     <table className="sr-only">
       <caption>{caption}</caption>
       <thead>
         <tr>
-          <th>Date</th>
+          <th>{t('parent.chartDateColumn')}</th>
           {gameIds.map(id => <th key={id}>{gameNames[id] ?? id}</th>)}
         </tr>
       </thead>

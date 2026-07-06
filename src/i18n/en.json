@@ -53,6 +53,7 @@
     "scoreTrendHint": "Correct-answer rate per game over time.",
     "responseTimeHeading": "Response Time",
     "responseTimeHint": "Average time to answer per game — a downward trend means getting faster.",
+    "chartDateColumn": "Date",
     "streakHistoryHeading": "Streak History",
     "streakHistoryHint": "Longest run of correct answers in a row.",
     "streakGame": "Game",
