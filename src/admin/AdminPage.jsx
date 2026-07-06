@@ -20,6 +20,21 @@ export default function AdminPage({ manifests = [] }) {
   const titleRef = useRef(null)
   useEffect(() => { titleRef.current?.focus() }, [])
 
+  const [resetConfirming, setResetConfirming] = useState(false)
+  const resetConfirmTimeoutRef = useRef(null)
+  useEffect(() => () => clearTimeout(resetConfirmTimeoutRef.current), [])
+
+  function handleResetClick() {
+    if (resetConfirming) {
+      clearTimeout(resetConfirmTimeoutRef.current)
+      setResetConfirming(false)
+      resetSettings()
+      return
+    }
+    setResetConfirming(true)
+    resetConfirmTimeoutRef.current = setTimeout(() => setResetConfirming(false), 4000)
+  }
+
   const [tagDraft, setTagDraft] = useState(() =>
     Object.fromEntries(
       manifests.map(m => {
@@ -400,8 +415,8 @@ export default function AdminPage({ manifests = [] }) {
               </div>
             </div>
 
-            <button className="admin__reset" onClick={resetSettings}>
-              {t('admin.reset')}
+            <button className="admin__reset" onClick={handleResetClick}>
+              {resetConfirming ? t('admin.resetConfirm') : t('admin.reset')}
             </button>
           </div>
         )}

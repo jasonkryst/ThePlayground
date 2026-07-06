@@ -57,8 +57,16 @@ button {
   100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0); }
 }
 
+/* 0%/100% deliberately omit `background` (rather than setting it to `inherit`,
+   which grabs the *parent's* background, not this element's own resting
+   value): CSS animations only interpolate a property across the keyframes
+   that set it, so omitting it here lets the animation fall back to the
+   underlying (non-animated) background at rest — the button's own inline
+   swatch color or `.wrong`'s color, whichever the cascade would otherwise
+   apply — instead of going transparent once the animation's fill-forward
+   state takes over. */
 @keyframes shake-red {
-  0%, 100% { transform: translateX(0); background: inherit; }
+  0%, 100% { transform: translateX(0); }
   20%       { transform: translateX(-8px); background: #ef9a9a; }
   40%       { transform: translateX(8px);  background: #ef9a9a; }
   60%       { transform: translateX(-8px); background: #ef9a9a; }
@@ -75,8 +83,17 @@ button {
   .game__choice--disabled-wrong { animation: shake-red 0.6s ease; }
 }
 
+/* !important on these three is load-bearing, not a specificity oversight:
+   Color Match/Animal Sounds set each choice's resting background via an
+   inline `style`, which no non-important stylesheet rule — regardless of
+   selector specificity — can out-rank. `.wrong` needs it for the same
+   reason `.correct`/`.highlight-correct` already had it: without it, a
+   reduced-motion user (who never gets the shake-red animation, only this
+   static rule) sees no red at all on a wrong Color Match/Animal Sounds
+   choice, since the inline background silently wins. Verified via a real
+   browser, not assumed — see e2e/color-match.spec.js's shake-animation test. */
 .correct { background: #a5d6a7 !important; }
-.wrong   { background: #ef9a9a; }
+.wrong   { background: #ef9a9a !important; }
 .highlight-correct { background: #a5d6a7 !important; }
 /* grayscale(85%)/brightness(0.88) (this rule's pre-2026-07-06 values) dropped some
    Color Match swatches (red, blue) below WCAG 1.4.3's 4.5:1 text contrast once their

@@ -143,8 +143,9 @@ describe('KidsProgressPage — no games', () => {
 })
 
 describe('KidsProgressPage — focus management', () => {
-  it('moves focus to the page title on mount', () => {
+  it('moves focus to the page title on mount', async () => {
     render(<MemoryRouter><KidsProgressPage manifests={[]} /></MemoryRouter>)
-    expect(screen.getByRole('heading', { name: /my progress/i })).toHaveFocus()
+    const heading = await screen.findByRole('heading', { name: /my progress/i })
+    expect(heading).toHaveFocus()
   })
 })

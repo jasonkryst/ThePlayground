@@ -73,39 +73,46 @@
 
 **Files:** `src/components/Dashboard.css:85`
 
-- [ ] **Step 1:** Identify which existing `var(--color-*)` token `#fff` should map to (`--color-surface` is `#FFFFFF` in `src/index.css` — confirm it's the correct semantic fit for this rule before swapping).
-- [ ] **Step 2:** Replace `color: #fff;` with `color: var(--color-surface);` (or the correct token).
-- [ ] **Step 3:** Run `npm run e2e` (visual regression) — update the Storybook baseline if the swap shifts any pixels (`npx playwright test visual.spec.js --update-snapshots`), review the diff before committing.
-- [ ] **Step 4:** Commit: `fix: route Dashboard.css's hardcoded white through the design-token convention`.
+**Status: Done (2026-07-06).** `.dashboard__tab--active`'s `color: #fff` → `color: var(--color-surface)`. Full suite + visual regression both pass with no baseline changes (identical rendered color).
 
 ### Task 6: Resolve `!important` overrides in `src/index.css`
 
-**Files:** `src/index.css:78` (`.correct`), `:80` (`.highlight-correct`)
+**Files:** `src/index.css` (`.correct`, `.wrong`, `.highlight-correct`, `shake-red` keyframes)
 
-- [ ] **Step 1:** Find what these rules are currently overriding (a more specific selector elsewhere, or an inline style) — a repo grep for `.correct`/`.highlight-correct` usage will show the competing rule.
-- [ ] **Step 2:** Resolve at the selector level (increase specificity of `.correct`/`.highlight-correct` itself, or lower the specificity of what it's fighting) rather than keeping `!important`.
-- [ ] **Step 3:** Run `npx vitest run` and visual regression (`npm run e2e`) to confirm the correct-answer highlight still renders identically.
-- [ ] **Step 4:** Commit: `fix: resolve !important overrides on .correct/.highlight-correct via specificity`.
+**Status: Done (2026-07-06) — kept `!important`, because removing it is impossible here, and found a real bug investigating why.** Selector specificity cannot beat an inline `style` attribute (CSS fact, not a workaround) — and Color Match/Animal Sounds set each choice's resting `background` via inline `style`, so `.correct`/`.highlight-correct` need `!important` to override it regardless of selector shape. That's documented in a new comment at `src/index.css:78`.
+
+While verifying this in a real browser (not assumed), found that `.wrong` — unlike `.correct`/`.highlight-correct` — never had `!important`, so its background silently never showed for Color Match/Animal Sounds under `prefers-reduced-motion: reduce` (confirmed via Playwright: computed background stayed the original swatch color, never red). Added `!important` to `.wrong` too, for the same reason its siblings have it.
+
+Separately found the `shake-red` keyframe's `0%, 100% { background: inherit; }` resolves to the *parent's* background (not "this element's own resting value"), so after every wrong-answer shake animation in **all three games**, the choice button was left with a fully transparent background (confirmed via Playwright: `rgba(0, 0, 0, 0)` at rest) — not the swatch color, not red, just see-through. Fixed by removing `background: inherit` from that keyframe stop entirely, letting the animation fall back to the real underlying value at rest per the CSS Animations spec.
+
+- [x] **Step 1:** Confirmed via grep + reasoning that `.correct`/`.highlight-correct` are fighting inline `style.background`, not another stylesheet rule.
+- [x] **Step 2:** Verified empirically (Playwright, real Chromium, both motion-enabled and `prefers-reduced-motion: reduce`) rather than assumed. Added a new e2e test (`e2e/color-match.spec.js`: "a wrong choice keeps a real background after its shake animation ends") that failed before the keyframe fix and passes after.
+- [x] **Step 3:** `npx vitest run` (524/524) and `npx playwright test` (71/71, no visual-regression baseline changes) both pass.
+- [x] **Step 4:** Committed together with Task 5, 7, 8 (see plan footer).
 
 ### Task 7: Add a confirmation step to the admin reset action
 
 **Files:** `src/admin/AdminPage.jsx`, `src/admin/__tests__/AdminPage.test.jsx`, `src/i18n/en.json`
 
-- [ ] **Step 1:** Write a failing test asserting that clicking `.admin__reset` shows a confirmation step (e.g. a second "confirm reset" button) before `resetSettings`/equivalent is actually called.
-- [ ] **Step 2:** Implement a simple two-step confirm (toggle button label to "Confirm reset?" on first click, perform the reset and revert the label on a second click within a short window, or an inline confirm row) — follow whatever confirm pattern is simplest given the existing component structure, not a new modal system.
-- [ ] **Step 3:** Add the new copy to `src/i18n/en.json` under `admin.*`, run through `t()`.
-- [ ] **Step 4:** Run `npx vitest run src/admin/__tests__/AdminPage.test.jsx`, then the full suite.
-- [ ] **Step 5:** Commit: `fix(usability): require confirmation before Admin reset takes effect`.
+**Status: Done (2026-07-06).** First click on `.admin__reset` switches its label to `admin.resetConfirm` ("Are you sure? Tap again to reset") and starts a 4s window; a second click within that window calls `resetSettings()` and reverts the label; letting the window elapse without a second click also reverts it (no accidental reset), matching the plan's "toggle label, then confirm within a short window" option.
+
+- [x] **Step 1:** Two failing tests added (confirm-then-reset, and revert-after-timeout using fake timers per this repo's `fireEvent`-with-fake-timers convention).
+- [x] **Step 2:** Implemented via `resetConfirming` state + a cleared-on-unmount `setTimeout` — no new modal/dialog component.
+- [x] **Step 3:** `admin.resetConfirm` added to `src/i18n/en.json`, routed through `t()`.
+- [x] **Step 4:** `AdminPage.test.jsx` 34/34 pass; full suite 524/524.
+- [x] **Step 5:** Committed together with Tasks 5, 6, 8.
 
 ### Task 8: Fix `act()` warnings from the new focus-management effects
 
 **Files:** `src/parent/__tests__/ParentDashboard.test.jsx`, `src/kids/__tests__/KidsProgressPage.test.jsx`, `src/games/color-match/__tests__/ColorMatchGame.test.jsx`, `src/games/character-match/__tests__/CharacterMatchGame.test.jsx`
 
-- [ ] **Step 1:** Reproduce each warning: `npx vitest run <file>` and note the exact warning text/location for each of the four files.
-- [ ] **Step 2:** Wrap the relevant render/interaction in `await waitFor(...)` or an explicit `act(async () => ...)` around the state update the new focus-on-mount effect triggers, per each file's existing test-utility conventions (`docs/TESTING.md`'s fake-timer/`fireEvent` notes apply to the timed-feedback tests specifically — don't switch those to `userEvent`).
-- [ ] **Step 3:** Re-run each file individually to confirm the warning is gone and the assertions still pass.
-- [ ] **Step 4:** Run the full suite: `npx vitest run`.
-- [ ] **Step 5:** Commit: `fix(test): synchronize focus-management assertions with RTL async utilities`.
+**Status: Done (2026-07-06).** Root cause differed per file: `ParentDashboard`/`KidsProgressPage` fetch best-streaks asynchronously on mount (`adapter.getBestStreaks().then(setBestStreaks)`) and most tests never awaited that flush; `ColorMatchGame`/`CharacterMatchGame`'s intro-dismissal tests needed one more `act()` flush after the final click, since the transition into gameplay schedules a state update on a later microtask than the click's own `act()` wrapper covered.
+
+- [x] **Step 1:** Reproduced all four; exact warning text differed (`ParentDashboard`/`KidsProgressPage`: "was not wrapped in act(...)"; Color/Character Match: "environment is not configured to support act(...)").
+- [x] **Step 2:** `ParentDashboard.test.jsx`: `renderDashboard()` helper made `async`, flushing once via `await act(async () => {})`, all 20 call sites updated to `await` it. `KidsProgressPage.test.jsx`: the one offending test switched from a bare `render()` to `await screen.findByRole(...)` before asserting focus (matching the file's own existing `renderPage()` helper pattern). Color/Character Match: added one more `await act(async () => {})` after the last click, before the assertion.
+- [x] **Step 3:** Each file re-run individually — zero warnings, all pass.
+- [x] **Step 4:** Full suite `npx vitest run` — 524/524.
+- [x] **Step 5:** Committed together with Tasks 5–7.
 
 ---
 

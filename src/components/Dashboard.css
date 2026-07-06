@@ -82,7 +82,7 @@
 .dashboard__tab--active {
   background: var(--color-lavender-dark);
   border-color: var(--color-lavender-dark);
-  color: #fff;
+  color: var(--color-surface);
 }
 
 .dashboard__tab:focus         { outline: none; }

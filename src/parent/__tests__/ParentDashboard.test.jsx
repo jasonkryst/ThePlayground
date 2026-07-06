@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, act } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { axe } from 'jest-axe'
@@ -60,8 +60,13 @@ function makeScore(overrides = {}) {
   }
 }
 
-function renderDashboard(manifests = []) {
-  return render(<MemoryRouter><ParentDashboard manifests={manifests} /></MemoryRouter>)
+// ParentDashboard fetches best streaks asynchronously on mount
+// (adapter.getBestStreaks().then(setBestStreaks)); flushing that microtask
+// inside act() here means individual tests don't need to know it exists.
+async function renderDashboard(manifests = []) {
+  const utils = render(<MemoryRouter><ParentDashboard manifests={manifests} /></MemoryRouter>)
+  await act(async () => {})
+  return utils
 }
 
 beforeEach(() => {
@@ -76,34 +81,34 @@ afterEach(() => { vi.restoreAllMocks() })
 describe('ParentDashboard — empty state', () => {
   beforeEach(() => { mockGetAllScores.mockReturnValue([]) })
 
-  it('renders the page title', () => {
-    renderDashboard()
+  it('renders the page title', async () => {
+    await renderDashboard()
     expect(screen.getByRole('heading', { name: /progress dashboard/i })).toBeInTheDocument()
   })
 
-  it('shows an empty-state message when no scores exist', () => {
-    renderDashboard()
+  it('shows an empty-state message when no scores exist', async () => {
+    await renderDashboard()
     expect(screen.getByText(/no sessions recorded yet/i)).toBeInTheDocument()
   })
 
-  it('does not render chart sections in empty state', () => {
-    renderDashboard()
+  it('does not render chart sections in empty state', async () => {
+    await renderDashboard()
     expect(screen.queryByText(/score trend/i)).not.toBeInTheDocument()
   })
 
-  it('renders a back link pointing to /', () => {
-    renderDashboard()
+  it('renders a back link pointing to /', async () => {
+    await renderDashboard()
     const back = screen.getByRole('link', { name: /back to dashboard/i })
     expect(back).toHaveAttribute('href', '/')
   })
 
-  it('renders the Export CSV button', () => {
-    renderDashboard()
+  it('renders the Export CSV button', async () => {
+    await renderDashboard()
     expect(screen.getByRole('button', { name: /export csv/i })).toBeInTheDocument()
   })
 
   it('has no accessibility violations', async () => {
-    const { container } = renderDashboard()
+    const { container } = await renderDashboard()
     expect(await axe(container)).toHaveNoViolations()
   })
 })
@@ -115,8 +120,8 @@ describe('ParentDashboard — with scores', () => {
     mockGetAllScores.mockReturnValue([makeScore(), makeScore({ date: new Date(NOW - 2 * DAY).toISOString().split('T')[0], timestamp: NOW - 2 * DAY })])
   })
 
-  it('renders all five section headings', () => {
-    renderDashboard()
+  it('renders all five section headings', async () => {
+    await renderDashboard()
     // Use the heading role specifically — the new hidden chart data tables
     // also render a <caption> with the same text as the section heading.
     expect(screen.getByRole('heading', { name: /score trend/i })).toBeInTheDocument()
@@ -126,37 +131,37 @@ describe('ParentDashboard — with scores', () => {
     expect(screen.getByRole('heading', { name: /missed items/i })).toBeInTheDocument()
   })
 
-  it('renders the streak history table with correct headers', () => {
-    renderDashboard()
+  it('renders the streak history table with correct headers', async () => {
+    await renderDashboard()
     expect(screen.getByText(/last 7 days/i)).toBeInTheDocument()
     expect(screen.getByText(/last 30 days/i)).toBeInTheDocument()
     expect(screen.getByText(/all-time best/i)).toBeInTheDocument()
   })
 
-  it('renders chart containers', () => {
-    renderDashboard()
+  it('renders chart containers', async () => {
+    await renderDashboard()
     const charts = screen.getAllByTestId('chart-container')
     expect(charts.length).toBeGreaterThanOrEqual(2) // score trend + response time
   })
 
-  it('renders the heatmap play calendar', () => {
-    renderDashboard()
+  it('renders the heatmap play calendar', async () => {
+    await renderDashboard()
     expect(screen.getByRole('img', { name: /play activity calendar/i })).toBeInTheDocument()
   })
 
-  it('renders the missed items panel with cat as top miss', () => {
-    renderDashboard()
+  it('renders the missed items panel with cat as top miss', async () => {
+    await renderDashboard()
     // cat was missed in both sessions in makeScore()
     expect(screen.getAllByText(/cat/i).length).toBeGreaterThan(0)
   })
 
   it('has no accessibility violations', async () => {
-    const { container } = renderDashboard()
+    const { container } = await renderDashboard()
     expect(await axe(container)).toHaveNoViolations()
   })
 
-  it('provides a visually-hidden data table alternative for the score trend chart', () => {
-    renderDashboard()
+  it('provides a visually-hidden data table alternative for the score trend chart', async () => {
+    await renderDashboard()
     const tables = screen.getAllByRole('table')
     // one for streak history (already visible) + one hidden table per chart
     expect(tables.length).toBeGreaterThanOrEqual(3)
@@ -166,13 +171,13 @@ describe('ParentDashboard — with scores', () => {
 // ─── Export CSV ──────────────────────────────────────────────────────────────
 
 describe('ParentDashboard — CSV export', () => {
-  it('triggers a download when Export CSV is clicked', () => {
+  it('triggers a download when Export CSV is clicked', async () => {
     mockGetAllScores.mockReturnValue([makeScore()])
     URL.createObjectURL = vi.fn().mockReturnValue('blob:mock')
     URL.revokeObjectURL = vi.fn()
 
     // Render first — spy on createElement afterwards so React's DOM init is unaffected
-    renderDashboard()
+    await renderDashboard()
 
     const clickSpy            = vi.fn()
     const originalCreateEl    = document.createElement.bind(document)
@@ -185,12 +190,12 @@ describe('ParentDashboard — CSV export', () => {
     expect(clickSpy).toHaveBeenCalledTimes(1)
   })
 
-  it('does not throw when no scores exist and Export CSV is clicked', () => {
+  it('does not throw when no scores exist and Export CSV is clicked', async () => {
     mockGetAllScores.mockReturnValue([])
     URL.createObjectURL = vi.fn().mockReturnValue('blob:mock')
     URL.revokeObjectURL = vi.fn()
 
-    renderDashboard()
+    await renderDashboard()
 
     const originalCreateEl = document.createElement.bind(document)
     vi.spyOn(document, 'createElement').mockImplementation((tag) => {
@@ -207,18 +212,18 @@ describe('ParentDashboard — CSV export', () => {
 describe('ParentDashboard — game display names', () => {
   const manifests = [{ id: 'animal-sounds', name: 'Animal Sounds' }]
 
-  it('shows the manifest name instead of the raw gameId in the missed-items heading', () => {
+  it('shows the manifest name instead of the raw gameId in the missed-items heading', async () => {
     mockGetAllScores.mockReturnValue([makeScore()])
-    renderDashboard(manifests)
+    await renderDashboard(manifests)
     // Both the streak table and the missed-items panel render the game name,
     // so multiple elements are expected — assert at least one and no raw id.
     expect(screen.getAllByText('Animal Sounds').length).toBeGreaterThan(0)
     expect(screen.queryByText('animal-sounds')).not.toBeInTheDocument()
   })
 
-  it('falls back to the raw gameId when no manifest is found', () => {
+  it('falls back to the raw gameId when no manifest is found', async () => {
     mockGetAllScores.mockReturnValue([makeScore()])
-    renderDashboard([]) // no manifests passed
+    await renderDashboard([]) // no manifests passed
     expect(screen.getAllByText('animal-sounds').length).toBeGreaterThan(0)
   })
 })
@@ -226,9 +231,9 @@ describe('ParentDashboard — game display names', () => {
 // ─── Insufficient data ───────────────────────────────────────────────────────
 
 describe('ParentDashboard — insufficient data for charts', () => {
-  it('shows "not enough data" hints when only one session exists', () => {
+  it('shows "not enough data" hints when only one session exists', async () => {
     mockGetAllScores.mockReturnValue([makeScore()])
-    renderDashboard()
+    await renderDashboard()
     const hints = screen.getAllByText(/not enough data/i)
     // Score trend and response time both need >= 2 data points to render a chart
     expect(hints.length).toBeGreaterThanOrEqual(2)
@@ -236,9 +241,9 @@ describe('ParentDashboard — insufficient data for charts', () => {
 })
 
 describe('ParentDashboard — focus management', () => {
-  it('moves focus to the page title on mount', () => {
+  it('moves focus to the page title on mount', async () => {
     mockGetAllScores.mockReturnValue([])
-    renderDashboard()
+    await renderDashboard()
     expect(screen.getByRole('heading', { name: /progress dashboard/i })).toHaveFocus()
   })
 })

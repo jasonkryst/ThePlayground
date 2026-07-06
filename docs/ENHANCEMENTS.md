@@ -6,6 +6,12 @@ Ideas for future development. Not committed to any timeline.
 
 ## Recently Completed
 
+### v0.14.0 — ARIA Tabs, Admin Reset Confirm, and Two Real Bugs Found Along the Way (2026-07-06)
+- **Completed the ARIA Tabs pattern** on Dashboard/Admin — `aria-controls`/`role="tabpanel"`/`aria-labelledby` linkage, so a screen reader knows what region a tab governs.
+- **Admin reset confirmation** — "Reset to Defaults" now requires a second tap within 4 seconds.
+- **Two real bugs found and fixed** while resolving `!important` CSS smells: `.wrong` was inconsistently missing the `!important` its siblings had, silently dropping red wrong-answer feedback under `prefers-reduced-motion: reduce`; and a `shake-red` keyframe bug (`background: inherit` resolving to the *parent's* background) left every wrong-answer choice transparent after its animation, in all three games. Both verified via a real browser, not assumed, with a new e2e regression test.
+- Routed `Dashboard.css`'s one remaining hardcoded color through a design token; cleaned up `act()` warnings across 4 test files.
+
 ### v0.13.0 — Standards Audit & Contrast Fix (2026-07-06)
 - **Combined standards audit** — W3C HTML5/CSS3 validity, WCAG 2.2 AA, i18n, usability, and code-quality tooling, run against the `accessibility` branch. See `docs/superpowers/specs/2026-07-05-standards-audit-findings.md` for findings and `docs/superpowers/plans/2026-07-05-standards-audit-remediation.md` for the prioritized remediation plan — the "Standards & Accessibility Backlog" section below tracks what's left.
 - **Fixed a real WCAG 1.4.3 gap** — the disabled-wrong-choice filter introduced in v0.12.0 actually failed AA contrast (< 4.5:1) for Color Match's red and blue swatches; retuned and pinned with a regression test (`src/__tests__/disabledWrongChoiceContrast.test.js`) covering every choice color in all three games.
@@ -75,10 +81,10 @@ Tracked in full detail in `docs/superpowers/plans/2026-07-05-standards-audit-rem
 - [x] ~~Complete the ARIA Tabs pattern (`role="tabpanel"` + `aria-controls`) on Dashboard/Admin tab strips~~ — done in v0.13.0.
 - [x] ~~Verify gameplay tap-target size against WCAG 2.2 SC 2.5.8's 24×24px minimum~~ — verified passing (base buttons are 64px), no code change needed.
 - [x] ~~Confirm no keyboard traps exist anywhere in the app~~ — verified: no modal/dialog pattern exists in the codebase.
-- [ ] Route `src/components/Dashboard.css:85`'s hardcoded `color: #fff` through a design token.
-- [ ] Resolve the two `!important` overrides in `src/index.css` (`.correct`, `.highlight-correct`) via selector specificity instead.
-- [ ] Add a confirmation step before Admin's reset action takes effect.
-- [ ] Clean up `act()` warnings from the focus-management effects in 4 test files.
+- [x] ~~Route `src/components/Dashboard.css:85`'s hardcoded `color: #fff` through a design token~~ — done in v0.14.0.
+- [x] ~~Resolve the two `!important` overrides in `src/index.css`~~ — kept (removing them is impossible: they override an inline `style`, which no selector can out-rank). Investigating this surfaced two real bugs, both fixed in v0.14.0: `.wrong` was missing the same `!important`, silently showing no red feedback under `prefers-reduced-motion: reduce`; and the `shake-red` keyframe's `background: inherit` left every wrong-answer choice transparent after its animation, in all three games.
+- [x] ~~Add a confirmation step before Admin's reset action takes effect~~ — done in v0.14.0 (two-click confirm with a 4s window).
+- [x] ~~Clean up `act()` warnings from the focus-management effects in 4 test files~~ — done in v0.14.0.
 - [ ] Add `eslint-plugin-jsx-a11y` for edit-time accessibility linting (currently a11y is only checked at test time).
 - [ ] Add Stylelint + `.editorconfig`.
 - [ ] Fix `vite.config.js`'s coverage scoping so the "All files" rollup reflects `src/` instead of printing `0 | 0 | 0 | 0`.

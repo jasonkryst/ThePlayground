@@ -121,6 +121,7 @@
     "difficultyAutoProgressionOn": "On",
     "difficultyAutoProgressionOff": "Off",
     "reset": "Reset to Defaults",
+    "resetConfirm": "Are you sure? Tap again to reset",
     "scoreHistoryHeading": "Score History",
     "tabSettings": "Settings",
     "tabGames": "Games",

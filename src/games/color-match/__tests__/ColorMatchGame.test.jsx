@@ -237,6 +237,10 @@ describe('ColorMatchGame — how-to-play intro', () => {
     await act(async () => { render(<ColorMatchGame onGameEnd={onGameEnd} />) })
     await act(async () => { await userEvent.click(screen.getByTestId('game-intro-dont-show-again')) })
     await act(async () => { await userEvent.click(screen.getByTestId('game-intro-start')) })
+    // Flush any state update the transition into gameplay schedules on a
+    // later microtask than the click's own act() wrapper already awaited
+    // (otherwise it lands outside any act() scope and React warns).
+    await act(async () => {})
     expect(mockUpdateSetting).toHaveBeenCalledWith('introDismissed', { 'color-match': true })
   })
 
