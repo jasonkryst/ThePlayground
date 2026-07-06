@@ -19,7 +19,7 @@
   color: inherit;
 }
 
-.kid-progress__back:hover         { background: rgba(0,0,0,0.06); }
+.kid-progress__back:hover         { background: rgb(0 0 0 / 6%); }
 .kid-progress__back:focus         { outline: none; }
 .kid-progress__back:focus-visible { outline: 3px solid var(--color-lavender); outline-offset: 3px; }
 
@@ -77,10 +77,10 @@ img.kid-progress__game-icon { width: 22px; height: 22px; object-fit: contain; ve
 
 .kid-progress__badge--locked {
   border-color: var(--color-text-muted);
-  background: rgba(91, 107, 112, 0.08);
+  background: rgb(91 107 112 / 8%);
 }
 
+.kid-progress__badge-icon { font-size: 32px; }
 .kid-progress__badge--locked .kid-progress__badge-icon { opacity: 0.45; filter: grayscale(100%); }
 
-.kid-progress__badge-icon { font-size: 32px; }
 .kid-progress__badge-name { font-size: 13px; font-weight: 700; }

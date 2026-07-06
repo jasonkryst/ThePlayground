@@ -25,12 +25,12 @@
      conveyed via the muted border/background tint plus reduced opacity on
      the decorative icon only (see .badge-gallery__badge--locked .badge-gallery__icon). */
   border-color: var(--color-text-muted);
-  background: rgba(91, 107, 112, 0.08);
+  background: rgb(91 107 112 / 8%);
 }
 
+.badge-gallery__icon { font-size: 28px; }
 .badge-gallery__badge--locked .badge-gallery__icon { opacity: 0.45; }
 
-.badge-gallery__icon { font-size: 28px; }
 .badge-gallery__name { font-size: 13px; font-weight: 700; }
 .badge-gallery__count { font-size: 12px; font-weight: 700; color: var(--color-teal-dark); }
 .badge-gallery__locked-label { font-size: 11px; color: var(--color-text-muted); }

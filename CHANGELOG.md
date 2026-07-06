@@ -3,6 +3,20 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.15.0] - 2026-07-06
+
+### Added
+- `eslint-plugin-jsx-a11y`, wired into `eslint.config.js` — a11y issues are now caught at edit time in code paths no test currently exercises, not only at test time via `jest-axe`/`@axe-core/playwright`. Lint came back clean, 0 new findings.
+- Stylelint (`stylelint-config-standard`) + `.editorconfig`, via `npm run lint:css`.
+- `e2e/html-validity.spec.js` — an offline HTML5 validator (`html-validate`) checking the rendered DOM (not the near-empty `index.html` shell) on every major route, running automatically under `npm run e2e`. The live W3C Nu Checker wasn't reachable from the audit's sandbox; this doesn't depend on network access.
+
+### Fixed
+- `vite.config.js`'s coverage now scopes to `src/**`, so the "All files" rollup reports a real aggregate (88.78%) instead of `0 | 0 | 0 | 0`.
+- `eslint.config.js` no longer lints the generated `coverage/` folder.
+- Six real `no-descending-specificity` CSS cases found by Stylelint (badge-lock icon dimming, and all three games' `.game__choice` disabled/focus/focus-visible states) — reordered so specificity reads ascending top-to-bottom; no visual change, since the higher-specificity rule already won regardless of position.
+- `.sr-only`'s deprecated `clip: rect(...)` — added `clip-path: inset(50%)` as the modern rule, kept `clip` as an explicit, commented legacy fallback.
+- `Timer.jsx`'s `aria-label` had no supporting ARIA role, found by the new HTML5 validator — added `role="timer"` (doesn't change its deliberate no-`aria-live` behavior).
+
 ## [0.14.0] - 2026-07-06
 
 ### Added

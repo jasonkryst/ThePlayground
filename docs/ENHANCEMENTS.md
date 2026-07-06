@@ -6,6 +6,13 @@ Ideas for future development. Not committed to any timeline.
 
 ## Recently Completed
 
+### v0.15.0 — Standards Audit Remediation Complete: Tooling & Process (2026-07-06)
+- **`eslint-plugin-jsx-a11y`** wired in for edit-time accessibility linting — came back clean, 0 new findings.
+- **Stylelint + `.editorconfig`** added. Found and fixed 6 real CSS specificity-ordering issues and a deprecated `clip` property; tuned off two rules that fight this codebase's own established BEM/single-line conventions rather than mass-reformatting for a cosmetic preference.
+- **Coverage rollup fixed** — `vite.config.js` now scopes to `src/**`, so the "All files" number is real (88.78%) instead of `0 | 0 | 0 | 0`.
+- **Offline HTML5 validator** (`e2e/html-validity.spec.js`) added, running under `npm run e2e` — no network dependency, unlike the live W3C Nu Checker. Found and fixed one real issue: `Timer.jsx`'s `aria-label` had no supporting ARIA role.
+- This closes every item from the 2026-07-05 standards audit — see the Standards & Accessibility Backlog section above.
+
 ### v0.14.0 — ARIA Tabs, Admin Reset Confirm, and Two Real Bugs Found Along the Way (2026-07-06)
 - **Completed the ARIA Tabs pattern** on Dashboard/Admin — `aria-controls`/`role="tabpanel"`/`aria-labelledby` linkage, so a screen reader knows what region a tab governs.
 - **Admin reset confirmation** — "Reset to Defaults" now requires a second tap within 4 seconds.
@@ -85,11 +92,13 @@ Tracked in full detail in `docs/superpowers/plans/2026-07-05-standards-audit-rem
 - [x] ~~Resolve the two `!important` overrides in `src/index.css`~~ — kept (removing them is impossible: they override an inline `style`, which no selector can out-rank). Investigating this surfaced two real bugs, both fixed in v0.14.0: `.wrong` was missing the same `!important`, silently showing no red feedback under `prefers-reduced-motion: reduce`; and the `shake-red` keyframe's `background: inherit` left every wrong-answer choice transparent after its animation, in all three games.
 - [x] ~~Add a confirmation step before Admin's reset action takes effect~~ — done in v0.14.0 (two-click confirm with a 4s window).
 - [x] ~~Clean up `act()` warnings from the focus-management effects in 4 test files~~ — done in v0.14.0.
-- [ ] Add `eslint-plugin-jsx-a11y` for edit-time accessibility linting (currently a11y is only checked at test time).
-- [ ] Add Stylelint + `.editorconfig`.
-- [ ] Fix `vite.config.js`'s coverage scoping so the "All files" rollup reflects `src/` instead of printing `0 | 0 | 0 | 0`.
-- [ ] Stop linting the generated `coverage/` folder (add it to `eslint.config.js`'s `ignores`).
-- [ ] Wire an offline HTML5 validator (`html-validate`) against rendered routes — the live audit couldn't reach the W3C Nu Checker from its sandbox.
+- [x] ~~Add `eslint-plugin-jsx-a11y` for edit-time accessibility linting~~ — done in v0.15.0. Lint came back clean, 0 new findings.
+- [x] ~~Add Stylelint + `.editorconfig`~~ — done in v0.15.0. Found and fixed 6 real `no-descending-specificity` cases and one deprecated `clip` property (added `clip-path` alongside it); tuned off two rules that conflict with this codebase's own established BEM/single-line conventions rather than mass-reformatting for a cosmetic preference.
+- [x] ~~Fix `vite.config.js`'s coverage scoping~~ — done in v0.15.0. "All files" rollup now reports 88.78% instead of `0 | 0 | 0 | 0`.
+- [x] ~~Stop linting the generated `coverage/` folder~~ — done in v0.15.0.
+- [x] ~~Wire an offline HTML5 validator (`html-validate`) against rendered routes~~ — done in v0.15.0 (`e2e/html-validity.spec.js`, runs under `npm run e2e`). Found and fixed one real issue: `Timer.jsx`'s `aria-label` had no supporting ARIA role — added `role="timer"`.
+
+**All items from the 2026-07-05 standards audit are now resolved, tracked-as-deferred, or informational-only** — see `docs/superpowers/plans/2026-07-05-standards-audit-remediation.md` for the full record.
 
 **Deferred by design, not scheduled:** RTL logical CSS properties (`ParentDashboard.css`), an i18next plural form for `common.difficultyOfferHeading` — both revisit only when a second/RTL locale is actually planned.
 
