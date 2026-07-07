@@ -94,9 +94,11 @@ One component, three route-driven states:
 - The dashboard keeps its personalized greeting (`titleNamed`/`titleDefault`) as page
   content; the shell brand is the static app identity. Focus management currently on
   the dashboard title (`tabIndex={-1}` + focus on mount) is preserved.
-- All header labels come from i18n keys (existing `dashboard.*`/`admin.back`/
-  `parent.back` keys are consolidated or superseded by new `shell.*` keys, with all
-  locales updated).
+- All header labels come from i18n keys: new `shell.*` keys own the shell chrome
+  (brand label, nav labels, back, home, exit-guard buttons). Existing keys they
+  replace (`dashboard.parentLabel`, `dashboard.myProgressLabel`,
+  `dashboard.settingsLabel`, `admin.back`, `parent.back`) are removed from every
+  locale.
 
 ## Kid-safe exit guard
 
