@@ -1,7 +1,7 @@
 {
   "name": "the-playground",
   "private": true,
-  "version": "0.16.0",
+  "version": "0.17.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -13,6 +13,7 @@
     "coverage": "vitest run --coverage",
     "e2e": "playwright test",
     "validate:html": "playwright test html-validity.spec.js",
+    "validate:css": "playwright test css-validity.spec.js",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build"
   },

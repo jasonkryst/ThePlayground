@@ -6,6 +6,10 @@ Ideas for future development. Not committed to any timeline.
 
 ## Recently Completed
 
+### v0.17.0 — CSS Validation for Dynamic Inline Styles (2026-07-06)
+- **`e2e/css-validity.spec.js`** — the standards audit's HTML5-validator addition (v0.15.0) had a CSS-side gap: Stylelint's existing conformance checking only scans `.css` files, never the per-item inline `style={{...}}` colors Color Match/Animal Sounds/GameCard set at runtime. This spec renders each affected route, extracts the live DOM's actual `style` attributes, and validates them against Stylelint's CSS3 conformance rules — `npm run validate:css`, or automatically under `npm run e2e`.
+- Documented explicitly in README/`docs/TESTING.md` that Stylelint already performs real CSS3 conformance checking (unknown properties/values/at-rules/selectors — the same class of check a W3C validator performs), not just style preferences — closing an awareness gap from the original audit report's phrasing.
+
 ### v0.16.0 — Deferred i18n/RTL Items Implemented (2026-07-06)
 - **RTL logical CSS properties** — `ParentDashboard.css`'s two `text-align: left`/`right` instances now use logical `start`/`end`. A repo-wide grep confirmed no other physical-direction CSS exists anywhere in the app.
 - **i18n plural form** — `common.difficultyOfferHeading` split into `_one`/`_other` per i18next's CLDR convention, verified with a new test.

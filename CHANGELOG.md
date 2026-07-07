@@ -3,6 +3,12 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.17.0] - 2026-07-06
+
+### Added
+- `e2e/css-validity.spec.js` — validates dynamic inline `style={{...}}` values (per-item colors in Color Match/Animal Sounds, tag accents on GameCard) against Stylelint's CSS3 conformance rules. This is the one CSS surface `npm run lint:css` can't reach, since it only scans `.css` files, not JS-generated style objects. Runs under `npm run e2e` or standalone via `npm run validate:css`.
+- Documented explicitly (README, `docs/TESTING.md`) that Stylelint's existing `stylelint-config-standard`/`-recommended` rules already provide real CSS3 conformance checking — unknown properties/values/at-rules/selectors, the same class of check a W3C CSS validator performs — not just style preferences.
+
 ## [0.16.0] - 2026-07-06
 
 ### Added
