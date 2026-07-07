@@ -82,31 +82,35 @@ src/
 ├── index.css                  # Design system (CSS custom properties)
 ├── main.jsx                   # React entry point
 │
-├── components/                # Shared UI
-│   ├── Dashboard.jsx          # Game card grid + admin link
-│   ├── GameCard.jsx           # Individual game card
-│   └── ScoreHistory.jsx       # Score list, used by AdminPage
-│
+├── components/                # Shared UI: Dashboard, GameCard, GameIntro/GameResults,
+│                               # GameChoiceGrid, BadgeGallery, Timer, StreakBadge, ...
 ├── admin/
-│   └── AdminPage.jsx          # Settings page
+│   └── AdminPage.jsx          # Settings, game tags, badges, score history (tabbed)
+├── parent/
+│   └── ParentDashboard.jsx    # Score/response-time charts, streak history, missed items
+├── kids/
+│   └── KidsProgressPage.jsx   # Kid-facing per-game stats + badges (/my-progress)
 │
-├── hooks/
-│   ├── useSettings.js         # Read/write settings via storage adapter
-│   └── useScores.js           # Read/write scores via storage adapter
+├── hooks/                     # useSettings, useScores, useBadges, useGameSession, ...
+├── lib/                       # badges.js, confetti.js
+├── utils/                     # buildQueue, computeBadgeAwards, dashboardUtils, ...
 │
 ├── storage/
 │   ├── adapter.js             # Interface definition + DEFAULT_SETTINGS
 │   ├── localStorageAdapter.js # localStorage implementation
 │   └── index.js               # Active adapter export (swap here for a backend)
 │
-└── games/
-    └── animal-sounds/         # One folder per game
-        ├── manifest.json      # Game metadata
+├── i18n/
+│   ├── en.json                # Core cross-cutting strings (common, dashboard, admin, ...)
+│   └── index.js                # Merges en.json + every game's i18n/en.json at startup
+│
+└── games/                     # One folder per game — animal-sounds, color-match,
+    └── character-match/        # character-match today; drop a new folder to add one
+        ├── manifest.json      # Game metadata (id, name, tags, version)
         ├── index.jsx          # Game component
-        ├── data/
-        │   ├── animals.js     # Animal definitions
-        │   └── sounds.js      # Vite asset glob for .mp3 URLs
-        └── sounds/            # Audio files (.mp3)
+        ├── data/               # Item catalog (e.g. characters.js)
+        ├── i18n/en.json        # This game's own strings — auto-merged, no shared file to edit
+        └── <assets>/           # Images/audio, game-specific
 ```
 
 ### Auto-Discovery
@@ -138,11 +142,15 @@ The active adapter is exported from `src/storage/index.js`. To swap `localStorag
 All colors and radii are CSS custom properties defined in `src/index.css`:
 
 ```css
---color-aqua:     #80DEEA
---color-teal:     #80CBC4
---color-lavender: #B39DDB
---color-lilac:    #CE93D8
---color-bg:       #F0FDFF
+--color-aqua:       #80DEEA   /* each hue has a -dark variant for higher-contrast pairings */
+--color-teal:       #80CBC4   /* (--color-aqua-dark, --color-teal-dark, etc.) */
+--color-lavender:   #B39DDB
+--color-lilac:      #CE93D8
+--color-error:      #c62828
+--color-bg:         #F0FDFF
+--color-surface:    #FFFFFF
+--color-text:       #37474F
+--color-text-muted: #5B6B70
 ```
 
 ---
