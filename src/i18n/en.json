@@ -22,6 +22,19 @@
     "newBadgeAnnounce": "🎉 New Badge!",
     "resultsHeading": "Results"
   },
+  "shell": {
+    "brand": "The Playground",
+    "back": "Back to home",
+    "home": "Go to home",
+    "navLabel": "Main navigation",
+    "navParent": "📊 Progress Dashboard",
+    "navProgress": "🌟 My Progress",
+    "navSettings": "⚙️ Settings",
+    "footerName": "The Playground",
+    "exitConfirmTitle": "Leave the game?",
+    "keepPlaying": "Keep playing! ▶️",
+    "leaveGame": "Leave game 🏠"
+  },
   "dashboard": {
     "titleDefault": "My Playground",
     "titleNamed": "{{name}}'s Playground",
