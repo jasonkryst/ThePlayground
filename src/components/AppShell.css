@@ -1,0 +1,118 @@
+.shell { display: flex; flex-direction: column; min-height: 100vh; }
+
+.shell__header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 16px;
+  background: var(--color-surface);
+  border-bottom: 1px solid rgb(0 0 0 / 8%);
+}
+
+.shell__side { display: flex; flex: 1; gap: 4px; align-items: center; }
+.shell__side--end { justify-content: flex-end; }
+
+.shell__brand {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  min-height: 48px;
+  padding: 0 8px;
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--color-lavender-dark);
+  text-decoration: none;
+  border-radius: var(--radius-button);
+}
+
+.shell__back,
+.shell__nav-link {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 48px;
+  min-height: 48px;
+  font-size: 24px;
+  color: var(--color-text);
+  text-decoration: none;
+  border-radius: var(--radius-button);
+  transition: background 0.15s;
+}
+
+.shell__home {
+  min-width: 48px;
+  min-height: 48px;
+  font-size: 24px;
+  background: transparent;
+}
+
+.shell__brand:hover,
+.shell__back:hover,
+.shell__nav-link:hover,
+.shell__home:hover { background: rgb(0 0 0 / 6%); }
+
+.shell__brand:focus,
+.shell__back:focus,
+.shell__nav-link:focus,
+.shell__home:focus { outline: none; }
+
+.shell__brand:focus-visible,
+.shell__back:focus-visible,
+.shell__nav-link:focus-visible,
+.shell__home:focus-visible {
+  outline: 3px solid var(--color-lavender);
+  outline-offset: 3px;
+}
+
+.shell__nav-link[aria-current='page'] { background: rgb(0 0 0 / 8%); }
+
+.shell__center {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  min-width: 0;
+}
+
+.shell__title {
+  overflow: hidden;
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--color-lavender-dark);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* The route-focused h1 gets a real focus target (tabIndex={-1}) but no visible
+   ring: it's programmatically focused for a11y on every route change, not
+   tabbed to by a keyboard user, so a focus-visible-style outline would be
+   confusing chrome that flashes on every navigation. */
+.shell__title:focus { outline: none; }
+
+.shell__content { display: flex; flex: 1; flex-direction: column; }
+
+/* Route cross-fade: ~200ms fade-in on the remounted content container.
+   Gated on reduced-motion like every other animation in this app. */
+@media (prefers-reduced-motion: no-preference) {
+  .shell__content { animation: shell-fade-in 0.2s ease; }
+}
+
+@keyframes shell-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.shell__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  font-size: 13px;
+  color: var(--color-text-muted);
+  border-top: 1px solid rgb(0 0 0 / 8%);
+}
+
+.shell__version { font-variant-numeric: tabular-nums; }
