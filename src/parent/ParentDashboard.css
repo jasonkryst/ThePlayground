@@ -103,7 +103,7 @@
   text-transform: uppercase;
   letter-spacing: 0.04em;
 }
-.parent__streak-table td:first-child { text-align: left; }
+.parent__streak-table td:first-child { text-align: start; }
 
 /* ── Heatmap ── */
 .heatmap { user-select: none; }
@@ -211,7 +211,7 @@
 }
 
 .parent__missed-count {
-  text-align: right;
+  text-align: end;
   color: var(--color-text-muted);
   font-variant-numeric: tabular-nums;
 }

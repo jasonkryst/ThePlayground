@@ -6,6 +6,11 @@ Ideas for future development. Not committed to any timeline.
 
 ## Recently Completed
 
+### v0.16.0 — Deferred i18n/RTL Items Implemented (2026-07-06)
+- **RTL logical CSS properties** — `ParentDashboard.css`'s two `text-align: left`/`right` instances now use logical `start`/`end`. A repo-wide grep confirmed no other physical-direction CSS exists anywhere in the app.
+- **i18n plural form** — `common.difficultyOfferHeading` split into `_one`/`_other` per i18next's CLDR convention, verified with a new test.
+- Both were originally deferred as out-of-scope for the 2026-07-05 audit's hardening phase, then implemented on request since neither required a second/RTL locale to actually exist in order to verify correctness.
+
 ### v0.15.0 — Standards Audit Remediation Complete: Tooling & Process (2026-07-06)
 - **`eslint-plugin-jsx-a11y`** wired in for edit-time accessibility linting — came back clean, 0 new findings.
 - **Stylelint + `.editorconfig`** added. Found and fixed 6 real CSS specificity-ordering issues and a deprecated `clip` property; tuned off two rules that fight this codebase's own established BEM/single-line conventions rather than mass-reformatting for a cosmetic preference.
@@ -98,9 +103,10 @@ Tracked in full detail in `docs/superpowers/plans/2026-07-05-standards-audit-rem
 - [x] ~~Stop linting the generated `coverage/` folder~~ — done in v0.15.0.
 - [x] ~~Wire an offline HTML5 validator (`html-validate`) against rendered routes~~ — done in v0.15.0 (`e2e/html-validity.spec.js`, runs under `npm run e2e`). Found and fixed one real issue: `Timer.jsx`'s `aria-label` had no supporting ARIA role — added `role="timer"`.
 
-**All items from the 2026-07-05 standards audit are now resolved, tracked-as-deferred, or informational-only** — see `docs/superpowers/plans/2026-07-05-standards-audit-remediation.md` for the full record.
+- [x] ~~RTL logical CSS properties in `ParentDashboard.css`~~ — done in v0.16.0. The two flagged `text-align: left`/`right` instances now use logical `start`/`end`; a repo-wide grep confirmed no other physical-direction properties exist anywhere in the app's CSS.
+- [x] ~~i18n plural form for `common.difficultyOfferHeading`~~ — done in v0.16.0. Split into i18next's `_one`/`_other` CLDR suffix pair, verified with a new test asserting both singular ("1 choice") and plural ("3 choices") resolve correctly.
 
-**Deferred by design, not scheduled:** RTL logical CSS properties (`ParentDashboard.css`), an i18next plural form for `common.difficultyOfferHeading` — both revisit only when a second/RTL locale is actually planned.
+**All items from the 2026-07-05 standards audit are now resolved** — see `docs/superpowers/plans/2026-07-05-standards-audit-remediation.md` for the full record. The two items above were revisited and implemented despite being originally deferred as out-of-scope-for-now; the remaining half of full RTL support (`dir` attribute sync) still requires an actual RTL locale to exist before it can be meaningfully verified.
 
 **Informational, no action:** the app's opt-in Google Analytics integration has no COPPA exposure while self-hosted and GA-off-by-default; revisit only if this is ever distributed to other families with GA switched on.
 

@@ -174,12 +174,14 @@ Everything else `html-validate:recommended` flagged was tuned off with a documen
 
 ---
 
-## Deferred (tracked, not scheduled)
+## Deferred items — now implemented (2026-07-06)
 
-These were already explicitly deferred by the 2026-07-05 accessibility/i18n hardening design spec's own scope decisions — re-flagged here for completeness, not newly discovered:
+Both items below were originally deferred per the 2026-07-05 accessibility/i18n hardening design spec's own scope decisions (RTL support and translating a second locale were both explicitly out of scope for that phase). Implemented anyway, on request, since both were small, self-contained, and didn't require a second locale to exist in order to verify correctness:
 
-- **RTL logical CSS properties** (`src/parent/ParentDashboard.css:104, :211` — `text-align: left`/`right` instead of `start`/`end`). Revisit when an RTL locale is actually planned.
-- **i18n plural form for `common.difficultyOfferHeading`** (`src/i18n/en.json:11`). Revisit when a second locale with real plural rules is added — Task 10's Stylelint pass won't catch this (it's an i18n concern, not CSS), so track it here explicitly instead.
+- **RTL logical CSS properties.** A repo-wide grep for `text-align: left/right`, `margin-left/right`, `padding-left/right`, `border-left/right`, and `float: left/right` across every `.css` file found exactly the two instances the audit flagged and nothing else — `src/parent/ParentDashboard.css:106` (`.parent__streak-table td:first-child`) and `:214` (`.parent__missed-count`). Both switched from physical (`left`/`right`) to logical (`start`/`end`) values. No visual change in LTR (English); this is what makes the layout correctly mirror once an RTL locale is eventually added. **Not done:** `dir` attribute sync (the other half of "RTL support" per the original design spec's scope note) — that genuinely can't be verified without a real RTL locale registered to test direction-switching against, so it remains deferred until one exists.
+- **i18n plural form for `common.difficultyOfferHeading`.** Split the single key into i18next's CLDR-based `_one`/`_other` suffix pair (`src/i18n/en.json`): `difficultyOfferHeading_one` ("Try 1 choice...") and `difficultyOfferHeading_other` ("Try {{count}} choices..."). A new test in `src/i18n/__tests__/i18n.test.js` asserts both resolve correctly via `i18n.t(key, { count })` — added as a failing test first (confirmed it failed: `count: 1` incorrectly returned "1 choice**s**" before the fix), then implemented. The existing `GameResults.test.jsx` assertion (`count: 3` → "3 choices") continues to pass unchanged, confirming i18next's plural-suffix resolution is transparent to existing callers.
+
+Verified: `npx vitest run` (525/525, +1 new test), `npm run lint`/`lint:css` (both clean), full `npx playwright test` (76/76 incl. visual regression, no baseline changes — the RTL CSS fix produces identical rendering in the app's only current locale, English/LTR).
 
 ## Informational (no action required)
 

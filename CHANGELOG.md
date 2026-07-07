@@ -3,6 +3,14 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.16.0] - 2026-07-06
+
+### Added
+- Pluralized `common.difficultyOfferHeading` via i18next's `_one`/`_other` CLDR suffix pair, so "Try 1 choice next time?" reads correctly instead of "1 choices" once a count of 1 is ever possible (today `numChoices` is always 2-4, so this was previously invisible in English).
+
+### Fixed
+- `ParentDashboard.css`'s two remaining physical-direction CSS properties (`text-align: left`/`right`) now use logical `start`/`end`, so the streak table and missed-items panel will correctly mirror once an RTL locale is added. A repo-wide grep confirmed these were the only two physical-direction declarations left in the app.
+
 ## [0.15.0] - 2026-07-06
 
 ### Added
