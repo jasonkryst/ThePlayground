@@ -6,7 +6,7 @@
   padding: 28px 24px;
   border-radius: var(--radius-card);
   background: var(--color-surface);
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 4px 24px rgb(0 0 0 / 12%);
   text-decoration: none;
   color: var(--color-text);
   border: 3px solid transparent;
@@ -17,7 +17,7 @@
 .featured-card:hover,
 .featured-card:focus-visible {
   transform: translateY(-4px);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+  box-shadow: 0 8px 32px rgb(0 0 0 / 18%);
 }
 
 .featured-card:focus         { outline: none; }

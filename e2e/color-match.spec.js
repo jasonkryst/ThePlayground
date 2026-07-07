@@ -101,3 +101,18 @@ test('color match: a wrong tap with retries enabled does not lock the question',
   const correctChoice = page.locator(`[data-color-id="${correctId}"]`)
   await expect(correctChoice).toBeEnabled()
 })
+
+test('color match: a wrong choice keeps a real background after its shake animation ends', async ({ page }) => {
+  await page.goto('/game/color-match')
+  await page.getByTestId('game-intro-start').click()
+
+  const correctId = await page.getByTestId('correct-color-id').textContent()
+  const wrongChoice = page.locator(`[data-color-id]:not([data-color-id="${correctId}"])`).first()
+  await wrongChoice.click()
+
+  // shake-red's animation is 0.6s; wait past it so the element is holding its
+  // resting (fill-forward) state, not mid-animation.
+  await page.waitForTimeout(900)
+  const bg = await wrongChoice.evaluate(el => getComputedStyle(el).backgroundColor)
+  expect(bg).not.toBe('rgba(0, 0, 0, 0)')
+})

@@ -9,7 +9,7 @@ export default function Timer({ elapsedMs, mode = 'countUp', limitMs }) {
   const ariaLabelKey = mode === 'countdown' ? 'common.timerCountdownAriaLabel' : 'common.timerAriaLabel'
 
   return (
-    <div className={`timer${isTimeUp ? ' timer--up' : ''}`} aria-label={t(ariaLabelKey, { seconds })}>
+    <div className={`timer${isTimeUp ? ' timer--up' : ''}`} role="timer" aria-label={t(ariaLabelKey, { seconds })}>
       <span className="timer__icon" aria-hidden="true">⏱️</span>
       <span className="timer__value">{seconds}s</span>
     </div>

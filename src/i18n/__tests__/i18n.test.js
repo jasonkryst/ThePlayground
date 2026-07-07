@@ -14,6 +14,15 @@ describe('i18n', () => {
   it('exports SUPPORTED_LOCALES derived from what was actually discovered, not a hardcoded list', () => {
     expect(SUPPORTED_LOCALES).toEqual(['en'])
   })
+
+  it('pluralizes common.difficultyOfferHeading correctly for singular and plural counts', () => {
+    expect(i18n.t('common.difficultyOfferHeading', { count: 1 })).toBe(
+      'Perfect session! Try 1 choice next time?'
+    )
+    expect(i18n.t('common.difficultyOfferHeading', { count: 3 })).toBe(
+      'Perfect session! Try 3 choices next time?'
+    )
+  })
 })
 
 describe('html lang sync', () => {

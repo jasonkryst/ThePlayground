@@ -11,7 +11,7 @@
   --color-lilac-dark:  #8E24AA;
   --color-error:       #c62828;
   --color-bg:          #F0FDFF;
-  --color-surface:     #FFFFFF;
+  --color-surface:     #FFF;
   --color-text:        #37474F;
   --color-text-muted:  #5B6B70;
   --radius-card:    20px;
@@ -28,7 +28,11 @@
   padding: 0;
   margin: -1px;
   overflow: hidden;
+  /* stylelint-disable-next-line property-no-deprecated -- kept as a fallback
+     for assistive tech/browsers that don't support clip-path; clip-path
+     below is the real (non-deprecated) rule for everything else. */
   clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
   white-space: nowrap;
   border: 0;
 }
@@ -52,13 +56,21 @@ button {
 }
 
 @keyframes pulse-green {
-  0%   { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0.7); }
-  70%  { box-shadow: 0 0 0 16px rgba(76, 175, 80, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(76, 175, 80, 0); }
+  0%   { box-shadow: 0 0 0 0 rgb(76 175 80 / 70%); }
+  70%  { box-shadow: 0 0 0 16px rgb(76 175 80 / 0%); }
+  100% { box-shadow: 0 0 0 0 rgb(76 175 80 / 0%); }
 }
 
+/* 0%/100% deliberately omit `background` (rather than setting it to `inherit`,
+   which grabs the *parent's* background, not this element's own resting
+   value): CSS animations only interpolate a property across the keyframes
+   that set it, so omitting it here lets the animation fall back to the
+   underlying (non-animated) background at rest — the button's own inline
+   swatch color or `.wrong`'s color, whichever the cascade would otherwise
+   apply — instead of going transparent once the animation's fill-forward
+   state takes over. */
 @keyframes shake-red {
-  0%, 100% { transform: translateX(0); background: inherit; }
+  0%, 100% { transform: translateX(0); }
   20%       { transform: translateX(-8px); background: #ef9a9a; }
   40%       { transform: translateX(8px);  background: #ef9a9a; }
   60%       { transform: translateX(-8px); background: #ef9a9a; }
@@ -75,7 +87,22 @@ button {
   .game__choice--disabled-wrong { animation: shake-red 0.6s ease; }
 }
 
+/* !important on these three is load-bearing, not a specificity oversight:
+   Color Match/Animal Sounds set each choice's resting background via an
+   inline `style`, which no non-important stylesheet rule — regardless of
+   selector specificity — can out-rank. `.wrong` needs it for the same
+   reason `.correct`/`.highlight-correct` already had it: without it, a
+   reduced-motion user (who never gets the shake-red animation, only this
+   static rule) sees no red at all on a wrong Color Match/Animal Sounds
+   choice, since the inline background silently wins. Verified via a real
+   browser, not assumed — see e2e/color-match.spec.js's shake-animation test. */
 .correct { background: #a5d6a7 !important; }
-.wrong   { background: #ef9a9a; }
+.wrong   { background: #ef9a9a !important; }
 .highlight-correct { background: #a5d6a7 !important; }
-.game__choice--disabled-wrong { filter: grayscale(85%) brightness(0.88); }
+
+/* grayscale(85%)/brightness(0.88) (this rule's pre-2026-07-06 values) dropped some
+   Color Match swatches (red, blue) below WCAG 1.4.3's 4.5:1 text contrast once their
+   black/white textColor was filtered along with the background. These values are
+   verified >=4.5:1 across every choice color in use by src/__tests__/disabledWrongChoiceContrast.test.js —
+   re-run that test before changing either these numbers or the color palettes it checks. */
+.game__choice--disabled-wrong { filter: grayscale(40%) brightness(1.2); }

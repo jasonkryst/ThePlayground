@@ -6,6 +6,32 @@ Ideas for future development. Not committed to any timeline.
 
 ## Recently Completed
 
+### v0.17.0 — CSS Validation for Dynamic Inline Styles (2026-07-06)
+- **`e2e/css-validity.spec.js`** — the standards audit's HTML5-validator addition (v0.15.0) had a CSS-side gap: Stylelint's existing conformance checking only scans `.css` files, never the per-item inline `style={{...}}` colors Color Match/Animal Sounds/GameCard set at runtime. This spec renders each affected route, extracts the live DOM's actual `style` attributes, and validates them against Stylelint's CSS3 conformance rules — `npm run validate:css`, or automatically under `npm run e2e`.
+- Documented explicitly in README/`docs/TESTING.md` that Stylelint already performs real CSS3 conformance checking (unknown properties/values/at-rules/selectors — the same class of check a W3C validator performs), not just style preferences — closing an awareness gap from the original audit report's phrasing.
+
+### v0.16.0 — Deferred i18n/RTL Items Implemented (2026-07-06)
+- **RTL logical CSS properties** — `ParentDashboard.css`'s two `text-align: left`/`right` instances now use logical `start`/`end`. A repo-wide grep confirmed no other physical-direction CSS exists anywhere in the app.
+- **i18n plural form** — `common.difficultyOfferHeading` split into `_one`/`_other` per i18next's CLDR convention, verified with a new test.
+- Both were originally deferred as out-of-scope for the 2026-07-05 audit's hardening phase, then implemented on request since neither required a second/RTL locale to actually exist in order to verify correctness.
+
+### v0.15.0 — Standards Audit Remediation Complete: Tooling & Process (2026-07-06)
+- **`eslint-plugin-jsx-a11y`** wired in for edit-time accessibility linting — came back clean, 0 new findings.
+- **Stylelint + `.editorconfig`** added. Found and fixed 6 real CSS specificity-ordering issues and a deprecated `clip` property; tuned off two rules that fight this codebase's own established BEM/single-line conventions rather than mass-reformatting for a cosmetic preference.
+- **Coverage rollup fixed** — `vite.config.js` now scopes to `src/**`, so the "All files" number is real (88.78%) instead of `0 | 0 | 0 | 0`.
+- **Offline HTML5 validator** (`e2e/html-validity.spec.js`) added, running under `npm run e2e` — no network dependency, unlike the live W3C Nu Checker. Found and fixed one real issue: `Timer.jsx`'s `aria-label` had no supporting ARIA role.
+- This closes every item from the 2026-07-05 standards audit — see the Standards & Accessibility Backlog section above.
+
+### v0.14.0 — ARIA Tabs, Admin Reset Confirm, and Two Real Bugs Found Along the Way (2026-07-06)
+- **Completed the ARIA Tabs pattern** on Dashboard/Admin — `aria-controls`/`role="tabpanel"`/`aria-labelledby` linkage, so a screen reader knows what region a tab governs.
+- **Admin reset confirmation** — "Reset to Defaults" now requires a second tap within 4 seconds.
+- **Two real bugs found and fixed** while resolving `!important` CSS smells: `.wrong` was inconsistently missing the `!important` its siblings had, silently dropping red wrong-answer feedback under `prefers-reduced-motion: reduce`; and a `shake-red` keyframe bug (`background: inherit` resolving to the *parent's* background) left every wrong-answer choice transparent after its animation, in all three games. Both verified via a real browser, not assumed, with a new e2e regression test.
+- Routed `Dashboard.css`'s one remaining hardcoded color through a design token; cleaned up `act()` warnings across 4 test files.
+
+### v0.13.0 — Standards Audit & Contrast Fix (2026-07-06)
+- **Combined standards audit** — W3C HTML5/CSS3 validity, WCAG 2.2 AA, i18n, usability, and code-quality tooling, run against the `accessibility` branch. See `docs/superpowers/specs/2026-07-05-standards-audit-findings.md` for findings and `docs/superpowers/plans/2026-07-05-standards-audit-remediation.md` for the prioritized remediation plan — the "Standards & Accessibility Backlog" section below tracks what's left.
+- **Fixed a real WCAG 1.4.3 gap** — the disabled-wrong-choice filter introduced in v0.12.0 actually failed AA contrast (< 4.5:1) for Color Match's red and blue swatches; retuned and pinned with a regression test (`src/__tests__/disabledWrongChoiceContrast.test.js`) covering every choice color in all three games.
+
 ### v0.9.0 — Kids' "My Progress" Page (2026-07-04)
 - **`/my-progress` route** — a kid-facing progress page, linked via a new 🌟 button on the main dashboard, separate from the existing admin Badge Gallery (`/admin`) and parent analytics dashboard (`/parent`), both of which are unchanged
 - **Per-game stat tiles** — best accuracy %, best streak, and lifetime questions answered, shown with icons rather than text-heavy tables
@@ -60,6 +86,33 @@ Ideas for future development. Not committed to any timeline.
 
 ### v0.1.0 — Initial Platform
 - Auto-discovery plugin system, Ocean & Dream theme, Animal Sounds and Color Match games, admin settings, localStorage adapter, score history, i18n
+
+---
+
+## Standards & Accessibility Backlog
+
+Tracked in full detail in `docs/superpowers/plans/2026-07-05-standards-audit-remediation.md`; summarized here for visibility. Ordered by risk/impact, not effort.
+
+- [x] ~~Verify/fix disabled-wrong-choice contrast (WCAG 1.4.3)~~ — done in v0.13.0.
+- [x] ~~Complete the ARIA Tabs pattern (`role="tabpanel"` + `aria-controls`) on Dashboard/Admin tab strips~~ — done in v0.13.0.
+- [x] ~~Verify gameplay tap-target size against WCAG 2.2 SC 2.5.8's 24×24px minimum~~ — verified passing (base buttons are 64px), no code change needed.
+- [x] ~~Confirm no keyboard traps exist anywhere in the app~~ — verified: no modal/dialog pattern exists in the codebase.
+- [x] ~~Route `src/components/Dashboard.css:85`'s hardcoded `color: #fff` through a design token~~ — done in v0.14.0.
+- [x] ~~Resolve the two `!important` overrides in `src/index.css`~~ — kept (removing them is impossible: they override an inline `style`, which no selector can out-rank). Investigating this surfaced two real bugs, both fixed in v0.14.0: `.wrong` was missing the same `!important`, silently showing no red feedback under `prefers-reduced-motion: reduce`; and the `shake-red` keyframe's `background: inherit` left every wrong-answer choice transparent after its animation, in all three games.
+- [x] ~~Add a confirmation step before Admin's reset action takes effect~~ — done in v0.14.0 (two-click confirm with a 4s window).
+- [x] ~~Clean up `act()` warnings from the focus-management effects in 4 test files~~ — done in v0.14.0.
+- [x] ~~Add `eslint-plugin-jsx-a11y` for edit-time accessibility linting~~ — done in v0.15.0. Lint came back clean, 0 new findings.
+- [x] ~~Add Stylelint + `.editorconfig`~~ — done in v0.15.0. Found and fixed 6 real `no-descending-specificity` cases and one deprecated `clip` property (added `clip-path` alongside it); tuned off two rules that conflict with this codebase's own established BEM/single-line conventions rather than mass-reformatting for a cosmetic preference.
+- [x] ~~Fix `vite.config.js`'s coverage scoping~~ — done in v0.15.0. "All files" rollup now reports 88.78% instead of `0 | 0 | 0 | 0`.
+- [x] ~~Stop linting the generated `coverage/` folder~~ — done in v0.15.0.
+- [x] ~~Wire an offline HTML5 validator (`html-validate`) against rendered routes~~ — done in v0.15.0 (`e2e/html-validity.spec.js`, runs under `npm run e2e`). Found and fixed one real issue: `Timer.jsx`'s `aria-label` had no supporting ARIA role — added `role="timer"`.
+
+- [x] ~~RTL logical CSS properties in `ParentDashboard.css`~~ — done in v0.16.0. The two flagged `text-align: left`/`right` instances now use logical `start`/`end`; a repo-wide grep confirmed no other physical-direction properties exist anywhere in the app's CSS.
+- [x] ~~i18n plural form for `common.difficultyOfferHeading`~~ — done in v0.16.0. Split into i18next's `_one`/`_other` CLDR suffix pair, verified with a new test asserting both singular ("1 choice") and plural ("3 choices") resolve correctly.
+
+**All items from the 2026-07-05 standards audit are now resolved** — see `docs/superpowers/plans/2026-07-05-standards-audit-remediation.md` for the full record. The two items above were revisited and implemented despite being originally deferred as out-of-scope-for-now; the remaining half of full RTL support (`dir` attribute sync) still requires an actual RTL locale to exist before it can be meaningfully verified.
+
+**Informational, no action:** the app's opt-in Google Analytics integration has no COPPA exposure while self-hosted and GA-off-by-default; revisit only if this is ever distributed to other families with GA switched on.
 
 ---
 

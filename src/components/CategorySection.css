@@ -8,7 +8,7 @@
   color: var(--color-lavender-dark);
   margin: 0 0 12px;
   padding-bottom: 8px;
-  border-bottom: 2px solid rgba(0, 0, 0, 0.06);
+  border-bottom: 2px solid rgb(0 0 0 / 6%);
 }
 
 .category-section__grid {

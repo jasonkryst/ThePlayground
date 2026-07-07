@@ -98,6 +98,17 @@ describe('Dashboard', () => {
     expect(screen.getByText(/Today's Game/i)).toBeInTheDocument()
   })
 
+  it('links each tab to its tabpanel via aria-controls/id, labeled back via aria-labelledby', () => {
+    render(<MemoryRouter><Dashboard manifests={manifests} /></MemoryRouter>)
+    const allTab = screen.getByRole('tab', { name: 'All' })
+    expect(allTab.id).toBeTruthy()
+    const controlsId = allTab.getAttribute('aria-controls')
+    expect(controlsId).toBeTruthy()
+    const panel = document.getElementById(controlsId)
+    expect(panel).toHaveAttribute('role', 'tabpanel')
+    expect(panel).toHaveAttribute('aria-labelledby', allTab.id)
+  })
+
   it('featured game also appears in filtered view', async () => {
     const user = userEvent.setup()
     render(<MemoryRouter><Dashboard manifests={manifests} /></MemoryRouter>)

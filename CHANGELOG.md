@@ -3,6 +3,55 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.17.0] - 2026-07-06
+
+### Added
+- `e2e/css-validity.spec.js` — validates dynamic inline `style={{...}}` values (per-item colors in Color Match/Animal Sounds, tag accents on GameCard) against Stylelint's CSS3 conformance rules. This is the one CSS surface `npm run lint:css` can't reach, since it only scans `.css` files, not JS-generated style objects. Runs under `npm run e2e` or standalone via `npm run validate:css`.
+- Documented explicitly (README, `docs/TESTING.md`) that Stylelint's existing `stylelint-config-standard`/`-recommended` rules already provide real CSS3 conformance checking — unknown properties/values/at-rules/selectors, the same class of check a W3C CSS validator performs — not just style preferences.
+
+## [0.16.0] - 2026-07-06
+
+### Added
+- Pluralized `common.difficultyOfferHeading` via i18next's `_one`/`_other` CLDR suffix pair, so "Try 1 choice next time?" reads correctly instead of "1 choices" once a count of 1 is ever possible (today `numChoices` is always 2-4, so this was previously invisible in English).
+
+### Fixed
+- `ParentDashboard.css`'s two remaining physical-direction CSS properties (`text-align: left`/`right`) now use logical `start`/`end`, so the streak table and missed-items panel will correctly mirror once an RTL locale is added. A repo-wide grep confirmed these were the only two physical-direction declarations left in the app.
+
+## [0.15.0] - 2026-07-06
+
+### Added
+- `eslint-plugin-jsx-a11y`, wired into `eslint.config.js` — a11y issues are now caught at edit time in code paths no test currently exercises, not only at test time via `jest-axe`/`@axe-core/playwright`. Lint came back clean, 0 new findings.
+- Stylelint (`stylelint-config-standard`) + `.editorconfig`, via `npm run lint:css`.
+- `e2e/html-validity.spec.js` — an offline HTML5 validator (`html-validate`) checking the rendered DOM (not the near-empty `index.html` shell) on every major route, running automatically under `npm run e2e`. The live W3C Nu Checker wasn't reachable from the audit's sandbox; this doesn't depend on network access.
+
+### Fixed
+- `vite.config.js`'s coverage now scopes to `src/**`, so the "All files" rollup reports a real aggregate (88.78%) instead of `0 | 0 | 0 | 0`.
+- `eslint.config.js` no longer lints the generated `coverage/` folder.
+- Six real `no-descending-specificity` CSS cases found by Stylelint (badge-lock icon dimming, and all three games' `.game__choice` disabled/focus/focus-visible states) — reordered so specificity reads ascending top-to-bottom; no visual change, since the higher-specificity rule already won regardless of position.
+- `.sr-only`'s deprecated `clip: rect(...)` — added `clip-path: inset(50%)` as the modern rule, kept `clip` as an explicit, commented legacy fallback.
+- `Timer.jsx`'s `aria-label` had no supporting ARIA role, found by the new HTML5 validator — added `role="timer"` (doesn't change its deliberate no-`aria-live` behavior).
+
+## [0.14.0] - 2026-07-06
+
+### Added
+- ARIA Tabs pattern completed on Dashboard's category tabs and Admin's page tabs: each tab now has `aria-controls` linking to a matching `role="tabpanel"`/`aria-labelledby` content region, so screen readers announce what a tab governs, not just that it's selected.
+- A confirmation step before Admin's "Reset to Defaults" takes effect — first tap prompts "Are you sure?", a second tap within 4 seconds confirms; letting the window elapse cancels.
+
+### Fixed
+- `Dashboard.css`'s hardcoded `color: #fff` now routes through `var(--color-surface)`.
+- Found and fixed two real bugs while investigating the `!important` overrides on `.correct`/`.wrong`/`.highlight-correct`: `.wrong` was missing the same `!important` its siblings had, so wrong-answer feedback silently showed no red at all for Color Match/Animal Sounds under `prefers-reduced-motion: reduce`; and the `shake-red` keyframe's `background: inherit` at rest resolved to the *parent's* background rather than the button's own, leaving every wrong-answer choice fully transparent after its shake animation, in all three games. Verified via a real browser (Playwright), not assumed, with a new e2e regression test.
+- Cleaned up React `act()` warnings in `ParentDashboard`, `KidsProgressPage`, `ColorMatchGame`, and `CharacterMatchGame` tests — the underlying async state updates (best-streak fetch, intro-dismissal transition) were real, just not fully awaited by the tests.
+- Verified (no code change needed): every interactive control already meets WCAG 2.2 SC 2.5.8's 24×24px minimum target size, and the app has no modal/dialog pattern to trap keyboard focus.
+
+## [0.13.0] - 2026-07-06
+
+### Added
+- `docs/superpowers/specs/2026-07-05-standards-audit-findings.md` — a combined audit of W3C HTML5/CSS3 validity, WCAG 2.2 AA accessibility, internationalization, usability, and code-quality tooling, plus a companion prioritized remediation plan (`docs/superpowers/plans/2026-07-05-standards-audit-remediation.md`).
+- `src/__tests__/disabledWrongChoiceContrast.test.js` — a regression test that recomputes WCAG 1.4.3 contrast for every choice color/text pairing across all three games after the `.game__choice--disabled-wrong` CSS filter is applied, so a future palette change can't silently drop back below AA.
+
+### Fixed
+- Corrected the 0.12.0 disabled-wrong-choice contrast fix: `grayscale(85%) brightness(0.88)` looked fine on its own but actually failed WCAG 1.4.3 (< 4.5:1) for two Color Match swatches (red, blue) once their black/white choice text was filtered along with the background. Retuned to `grayscale(40%) brightness(1.2)`, verified >= 4.5:1 across every choice color used by any of the three games.
+
 ## [0.12.0] - 2026-07-05
 
 ### Added

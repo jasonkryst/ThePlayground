@@ -1,6 +1,19 @@
 # Testing
 
-The Playground has four layers of automated testing, all runnable locally with no external accounts or services.
+The Playground has five layers of automated testing, plus static linting that catches issues at edit time before any of them run — all runnable locally with no external accounts or services.
+
+## Static linting (ESLint + Stylelint)
+
+```bash
+npm run lint      # ESLint, incl. eslint-plugin-jsx-a11y
+npm run lint:css  # Stylelint
+```
+
+`eslint-plugin-jsx-a11y`'s recommended rules catch accessibility issues (missing `alt`, invalid `role`, non-focusable interactive elements) statically, in any code path — including ones no test currently exercises. This complements rather than replaces `jest-axe`/`@axe-core/playwright` below, which only catch issues in rendered output a test or story actually reaches.
+
+**Stylelint is real CSS3 conformance checking, not just style preferences.** `stylelint-config-standard` (configured in `.stylelintrc.json`) extends `stylelint-config-recommended`, which enables `property-no-unknown`, `declaration-property-value-no-unknown`, `at-rule-no-unknown`, `selector-pseudo-class-no-unknown`, `selector-type-no-unknown`, and `media-query-no-invalid` — these validate every declaration against the actual CSS3 spec (an unknown property, or a value the spec doesn't allow for that property, is a lint error), the same class of check a W3C CSS validator performs. `-standard` layers additional style-preference rules on top (modern color-function notation, cascade ordering via `no-descending-specificity`, deprecated-property warnings) — two of those preference rules are intentionally disabled (`selector-class-pattern`, `declaration-block-single-line-max-declarations`) because they conflict with this codebase's own established conventions (BEM class names, compact single-line rules), not because they're wrong in general.
+
+**Dynamic inline styles are validated separately** (`e2e/css-validity.spec.js`, runs under `npm run e2e` or standalone via `npm run validate:css`). Stylelint's file scan only reads `.css` files — it never sees the inline `style={{...}}` objects Color Match/Animal Sounds/GameCard set per item (colors, swatches, tag accents), since those are JS values assembled at runtime. This spec renders each affected route, extracts every element's actual `style` attribute from the live DOM, and runs each one through Stylelint's Node API — scoped to `stylelint-config-recommended` only (pure conformance), not `-standard`'s style-preference layer, since reading an inline style back via `getAttribute('style')` returns the browser's own CSSOM serialization (always legacy `rgb(r, g, b)` comma syntax, regardless of how the source authored the color), which would fail `-standard`'s modernization rules unconditionally and prove nothing.
 
 ## Unit & component tests (Vitest + React Testing Library)
 
@@ -25,6 +38,8 @@ Two layers:
 - **Page level:** every E2E spec (below) includes an `@axe-core/playwright` scan of its main screen, catching layout/contrast issues a jsdom-based check can't see.
 
 If either layer reports a violation, the failure message names the specific rule and element — fix the underlying component (usually a missing `aria-label`, invalid role, or heading order issue), don't suppress the check.
+
+**CSS-filter contrast checks:** jsdom doesn't compute rendered CSS filter effects (e.g. `grayscale()`/`brightness()`), so `jest-axe` can't catch a filter that visually drops a color combination below WCAG contrast thresholds — it only sees the unfiltered DOM. `src/__tests__/disabledWrongChoiceContrast.test.js` is the pattern for this: it reimplements the relevant CSS Filter Effects math in plain JS and checks the WCAG contrast formula directly against every real color/text pairing in the data (not just one example), so a future palette addition that breaks contrast fails a fast unit test instead of shipping unnoticed. Reuse this pattern for any other CSS-filter-dependent contrast state.
 
 ## End-to-end tests (Playwright)
 
@@ -53,6 +68,16 @@ Review the diff, then commit the updated PNGs alongside the UI change.
 
 No Chromatic account is used — this is fully local. The setup is structured so Chromatic could be added later as an additional check without restructuring the stories.
 
+## HTML5 validation (html-validate)
+
+```bash
+npm run validate:html
+```
+
+This app is a client-rendered SPA — the served `index.html` is a near-empty shell (`<div id="root">`), so validating that file proves nothing. `e2e/html-validity.spec.js` instead renders each major route (dashboard, admin, parent, kids-progress, and a game's gameplay screen) and validates the resulting DOM with `html-validate`, an offline validator (no dependency on the live W3C Nu Checker, which isn't reachable from every environment this suite runs in). It runs automatically as part of `npm run e2e`.
+
+A handful of `html-validate:recommended` rules are tuned off in the spec's config, each with a comment explaining why (e.g. `no-inline-style` — this app's per-item dynamic colors are legitimately inline-styled; `no-implicit-button-type` — only consequential inside a `<form>`, and this app has none).
+
 ## i18n string convention
 
 All user-facing UI strings live in `src/i18n/en.json`, organized by feature namespace (`dashboard.*`, `admin.*`, `animalSounds.*`, etc.). When adding a new game:
@@ -64,3 +89,5 @@ All user-facing UI strings live in `src/i18n/en.json`, organized by feature name
 **File layout:** core cross-cutting strings (`common`, `dashboard`, `admin`, `parent`, `kids`, `scoreHistory`, `badges`) live in `src/i18n/en.json`. Each game's own strings (its `prompt`/`howToPlay` and its item-name catalog) live in `src/games/<id>/i18n/en.json` and are auto-merged at startup via `import.meta.glob`, mirroring the manifest/component auto-discovery pattern — no registry to edit when adding a game's strings. `mergeLocaleResources()` (`src/i18n/index.js`) throws if two files define the same top-level key.
 
 Manifest fields (`name`, `description` in `manifest.json`) are NOT translated — they're game-author metadata, not core-engine UI strings.
+
+**Pluralization:** a string that interpolates a `{{count}}` and needs correct singular/plural wording uses i18next's CLDR-based `_one`/`_other` key suffixes (e.g. `difficultyOfferHeading_one`/`difficultyOfferHeading_other` in `src/i18n/en.json`) rather than a single key with plural-only wording — `i18n.t(key, { count })` picks the right form automatically. Do this for any new interpolated string where the count could plausibly be 1, even if today's call sites never actually pass 1 — English's plural rule already treats "1" specially, and it's a much larger change to retrofit once real content depends on the wrong-shaped key.

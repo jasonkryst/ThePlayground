@@ -21,12 +21,12 @@
   flex-direction: column;
   align-items: center;
   gap: 16px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 16px rgb(0 0 0 / 10%);
 }
 
 .game__prompt { color: white; font-size: 20px; font-weight: 700; text-align: center; }
 
-.game__progress { font-size: 15px; color: rgba(255,255,255,0.85); font-weight: 600; }
+.game__progress { font-size: 15px; color: rgb(255 255 255 / 85%); font-weight: 600; }
 
 .game__choices {
   display: grid;
@@ -45,17 +45,17 @@
   padding: 20px 12px;
   border-radius: var(--radius-card);
   border: none;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 16px rgb(0 0 0 / 10%);
   background: var(--color-surface);
   cursor: pointer;
   min-height: 120px;
   transition: transform 0.1s ease;
 }
 
-.game__choice:hover:not(:disabled) { transform: scale(1.04); }
 .game__choice:disabled { cursor: default; }
 .game__choice:focus         { outline: none; }
 .game__choice:focus-visible { outline: 3px solid var(--color-lavender); outline-offset: 3px; }
+.game__choice:hover:not(:disabled) { transform: scale(1.04); }
 
 .game__choice-image { width: 64px; height: 64px; object-fit: contain; border-radius: 8px; }
 .game__choice-name  { font-size: 18px; font-weight: 700; color: var(--color-text); }

@@ -89,8 +89,10 @@ export default function Dashboard({ manifests = [] }) {
             {allTags.length > 0 && (
               <div className="dashboard__tabs" role="tablist" aria-label={t('dashboard.tabsLabel')}>
                 <button
+                  id="dashboard-tab-all"
                   role="tab"
                   aria-selected={activeTag === 'all'}
+                  aria-controls="dashboard-panel-all"
                   className={`dashboard__tab${activeTag === 'all' ? ' dashboard__tab--active' : ''}`}
                   onClick={() => setActiveTag('all')}
                 >
@@ -99,8 +101,10 @@ export default function Dashboard({ manifests = [] }) {
                 {allTags.map(tag => (
                   <button
                     key={tag}
+                    id={`dashboard-tab-${tag}`}
                     role="tab"
                     aria-selected={activeTag === tag}
+                    aria-controls={`dashboard-panel-${tag}`}
                     className={`dashboard__tab${activeTag === tag ? ' dashboard__tab--active' : ''}`}
                     onClick={() => setActiveTag(tag)}
                   >
@@ -110,33 +114,43 @@ export default function Dashboard({ manifests = [] }) {
               </div>
             )}
 
-            {sections ? (
-              <div className="dashboard__sections">
-                {sections.map(({ heading, games }) => (
-                  <CategorySection key={heading} heading={heading}>
-                    {games.map(m => (
-                      <GameCard
-                        key={m.id}
-                        manifest={m}
-                        bestScore={getBestScore(m.id)}
-                        recentInfo={recentlyPlayed.get(m.id) ?? null}
-                      />
-                    ))}
-                  </CategorySection>
-                ))}
-              </div>
-            ) : (
-              <div className="dashboard__grid">
-                {filteredManifests.map(m => (
-                  <GameCard
-                    key={m.id}
-                    manifest={m}
-                    bestScore={getBestScore(m.id)}
-                    recentInfo={recentlyPlayed.get(m.id) ?? null}
-                  />
-                ))}
-              </div>
-            )}
+            <div
+              {...(allTags.length > 0
+                ? {
+                    role: 'tabpanel',
+                    id: `dashboard-panel-${activeTag}`,
+                    'aria-labelledby': `dashboard-tab-${activeTag}`,
+                  }
+                : {})}
+            >
+              {sections ? (
+                <div className="dashboard__sections">
+                  {sections.map(({ heading, games }) => (
+                    <CategorySection key={heading} heading={heading}>
+                      {games.map(m => (
+                        <GameCard
+                          key={m.id}
+                          manifest={m}
+                          bestScore={getBestScore(m.id)}
+                          recentInfo={recentlyPlayed.get(m.id) ?? null}
+                        />
+                      ))}
+                    </CategorySection>
+                  ))}
+                </div>
+              ) : (
+                <div className="dashboard__grid">
+                  {filteredManifests.map(m => (
+                    <GameCard
+                      key={m.id}
+                      manifest={m}
+                      bestScore={getBestScore(m.id)}
+                      recentInfo={recentlyPlayed.get(m.id) ?? null}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
           </>
         )}
       </main>

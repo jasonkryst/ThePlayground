@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react'
+import { render, screen, within, fireEvent, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
@@ -74,6 +74,17 @@ describe('AdminPage', () => {
     expect(screen.getByLabelText(/child's name/i)).toBeInTheDocument()
   })
 
+  it('links each tab to its tabpanel via aria-controls/id, labeled back via aria-labelledby', () => {
+    render(<MemoryRouter><AdminPage /></MemoryRouter>)
+    const settingsTab = screen.getByRole('tab', { name: 'Settings' })
+    expect(settingsTab.id).toBeTruthy()
+    const controlsId = settingsTab.getAttribute('aria-controls')
+    expect(controlsId).toBeTruthy()
+    const panel = document.getElementById(controlsId)
+    expect(panel).toHaveAttribute('role', 'tabpanel')
+    expect(panel).toHaveAttribute('aria-labelledby', settingsTab.id)
+  })
+
   it('calls updateSetting when child name is typed', async () => {
     render(<MemoryRouter><AdminPage /></MemoryRouter>)
     const input = screen.getByLabelText(/child's name/i)
@@ -90,10 +101,30 @@ describe('AdminPage', () => {
     expect(mockUpdateSetting).toHaveBeenCalledWith('numChoices', 4)
   })
 
-  it('calls resetSettings when reset button clicked', async () => {
+  it('requires a second click within a confirm window before calling resetSettings', async () => {
     render(<MemoryRouter><AdminPage /></MemoryRouter>)
-    await userEvent.click(screen.getByRole('button', { name: /reset/i }))
+    await userEvent.click(screen.getByRole('button', { name: 'Reset to Defaults' }))
+    expect(mockResetSettings).not.toHaveBeenCalled()
+
+    const confirmBtn = screen.getByRole('button', { name: /are you sure/i })
+    await userEvent.click(confirmBtn)
     expect(mockResetSettings).toHaveBeenCalled()
+    expect(screen.getByRole('button', { name: 'Reset to Defaults' })).toBeInTheDocument()
+  })
+
+  it('reverts the reset button to its normal label after the confirm window elapses without a second click', async () => {
+    vi.useFakeTimers()
+    try {
+      render(<MemoryRouter><AdminPage /></MemoryRouter>)
+      fireEvent.click(screen.getByRole('button', { name: 'Reset to Defaults' }))
+      expect(screen.getByRole('button', { name: /are you sure/i })).toBeInTheDocument()
+
+      await act(async () => { vi.advanceTimersByTime(4001) })
+      expect(screen.getByRole('button', { name: 'Reset to Defaults' })).toBeInTheDocument()
+      expect(mockResetSettings).not.toHaveBeenCalled()
+    } finally {
+      vi.useRealTimers()
+    }
   })
 
   it('renders score history section', async () => {
