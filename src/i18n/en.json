@@ -90,7 +90,6 @@
   },
   "admin": {
     "localeHeading": "Language",
-    "back": "Back to dashboard",
     "title": "⚙️ Settings",
     "childNameHeading": "Child's Name",
     "childNameHint": "Personalize the home page title.",

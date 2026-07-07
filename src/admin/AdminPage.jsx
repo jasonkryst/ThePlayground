@@ -1,5 +1,4 @@
 import { useState, useEffect, useRef } from 'react'
-import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import useSettings from '../hooks/useSettings'
 import useScores from '../hooks/useScores'
@@ -17,8 +16,6 @@ export default function AdminPage({ manifests = [] }) {
   const { badgeData } = useBadges()
 
   const [activeTab, setActiveTab] = useState('settings')
-  const titleRef = useRef(null)
-  useEffect(() => { titleRef.current?.focus() }, [])
 
   const [resetConfirming, setResetConfirming] = useState(false)
   const resetConfirmTimeoutRef = useRef(null)
@@ -99,13 +96,7 @@ export default function AdminPage({ manifests = [] }) {
 
   return (
     <div className="admin">
-      <main>
-        <div className="admin__header">
-          <Link to="/" className="admin__back" aria-label={t('admin.back')}>←</Link>
-          <h1 className="admin__title" tabIndex={-1} ref={titleRef}>{t('admin.title')}</h1>
-        </div>
-
-        <div className="admin__tabs" role="tablist" aria-label={t('admin.title')}>
+      <div className="admin__tabs" role="tablist" aria-label={t('admin.title')}>
           {tabs.map(tab => (
             <button
               key={tab.id}
@@ -472,7 +463,6 @@ export default function AdminPage({ manifests = [] }) {
             <ScoreHistory scores={getAllScores()} />
           </div>
         )}
-      </main>
     </div>
   )
 }
