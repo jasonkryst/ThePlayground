@@ -211,11 +211,13 @@ The production image is a two-stage build: a Node LTS container compiles `dist/`
 
 ## Testing
 
-The Playground has four layers of automated testing — unit/component (Vitest + RTL), accessibility audits (jest-axe + axe-core/playwright), end-to-end (Playwright), and visual regression (Storybook + Playwright screenshots) — all runnable locally with no external accounts. See [`docs/TESTING.md`](docs/TESTING.md) for the full reference, including how to run each layer and update visual baselines.
+The Playground has five layers of automated testing — unit/component (Vitest + RTL), accessibility audits (jest-axe + axe-core/playwright), end-to-end (Playwright), visual regression (Storybook + Playwright screenshots), and HTML5 validation against the rendered DOM (html-validate) — all runnable locally with no external accounts. Static linting (ESLint with `eslint-plugin-jsx-a11y`, Stylelint) catches issues at edit time, before any of the above run. See [`docs/TESTING.md`](docs/TESTING.md) for the full reference, including how to run each layer and update visual baselines.
 
 ```bash
 npm test          # unit/component tests, watch mode
-npm run e2e        # end-to-end + accessibility + visual regression
+npm run lint       # ESLint (incl. jsx-a11y)
+npm run lint:css   # Stylelint
+npm run e2e        # end-to-end + accessibility + visual regression + HTML5 validation
 npm run storybook  # browse component/game stories locally
 ```
 
