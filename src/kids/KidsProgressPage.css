@@ -1,29 +1,4 @@
-.kid-progress { min-height: 100vh; padding: 24px 16px; }
-
-.kid-progress__header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 24px;
-}
-
-.kid-progress__back {
-  font-size: 28px;
-  text-decoration: none;
-  min-width: 56px;
-  min-height: 56px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--radius-button);
-  color: inherit;
-}
-
-.kid-progress__back:hover         { background: rgb(0 0 0 / 6%); }
-.kid-progress__back:focus         { outline: none; }
-.kid-progress__back:focus-visible { outline: 3px solid var(--color-lavender); outline-offset: 3px; }
-
-.kid-progress__title { font-size: 28px; font-weight: 800; color: var(--color-lavender-dark); }
+.kid-progress { padding: 24px 16px; }
 
 .kid-progress__game {
   background: var(--color-surface);

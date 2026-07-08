@@ -22,14 +22,24 @@
     "newBadgeAnnounce": "🎉 New Badge!",
     "resultsHeading": "Results"
   },
+  "shell": {
+    "brand": "The Playground",
+    "back": "Back to home",
+    "home": "Go to home",
+    "navLabel": "Main navigation",
+    "navParent": "📊 Progress Dashboard",
+    "navProgress": "🌟 My Progress",
+    "navSettings": "⚙️ Settings",
+    "footerName": "The Playground",
+    "copyright": "© {{year}} The Playground",
+    "exitConfirmTitle": "Leave the game?",
+    "keepPlaying": "Keep playing! ▶️",
+    "leaveGame": "Leave game 🏠"
+  },
   "dashboard": {
     "titleDefault": "My Playground",
     "titleNamed": "{{name}}'s Playground",
-    "settingsLabel": "⚙️ Settings",
-    "parentLabel": "📊 Progress Dashboard",
-    "myProgressLabel": "🌟 My Progress",
     "empty": "No games found. Drop a game folder into src/games/.",
-    "footerName": "The Playground",
     "todaysGame": "Today's Game",
     "categoryOther": "Other",
     "tabAll": "All",
@@ -46,7 +56,6 @@
   },
   "parent": {
     "title": "📊 Progress Dashboard",
-    "back": "Back to dashboard",
     "empty": "No sessions recorded yet — play some games first!",
     "exportCsv": "Export CSV",
     "notEnoughData": "Not enough data yet — play a few more sessions to see trends.",
@@ -81,7 +90,6 @@
   },
   "admin": {
     "localeHeading": "Language",
-    "back": "Back to dashboard",
     "title": "⚙️ Settings",
     "childNameHeading": "Child's Name",
     "childNameHint": "Personalize the home page title.",
@@ -143,7 +151,6 @@
   },
   "kids": {
     "title": "🌟 My Progress",
-    "back": "Back to dashboard",
     "statBestScore": "Best Score",
     "statBestStreak": "Best Streak",
     "statTotalPlayed": "Total Played",

@@ -1,20 +1,14 @@
-import { useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import ManifestIcon from './ManifestIcon'
 import './GameIntro.css'
 
 export default function GameIntro({ icon, name, instructions, dontShowAgain, onDontShowAgainChange, onStart }) {
   const { t } = useTranslation()
-  const headingRef = useRef(null)
-
-  useEffect(() => {
-    headingRef.current?.focus()
-  }, [])
 
   return (
-    <main className="game-intro">
+    <div className="game-intro">
       <ManifestIcon icon={icon} as="div" className="game-intro__icon" ariaHidden />
-      <h1 className="game-intro__name" tabIndex={-1} ref={headingRef}>{name}</h1>
+      <h2 className="game-intro__name">{name}</h2>
       <p className="game-intro__instructions">{instructions}</p>
 
       <label className="game-intro__checkbox-label">
@@ -30,6 +24,6 @@ export default function GameIntro({ icon, name, instructions, dontShowAgain, onD
       <button className="game-intro__start" data-testid="game-intro-start" onClick={onStart}>
         {t('common.gameIntroStart')}
       </button>
-    </main>
+    </div>
   )
 }

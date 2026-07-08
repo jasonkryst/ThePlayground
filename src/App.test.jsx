@@ -1,4 +1,4 @@
-import { render, waitFor } from '@testing-library/react'
+import { render, waitFor, screen } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import i18n from './i18n'
 import App from './App'
@@ -29,5 +29,14 @@ describe('App — locale sync', () => {
     const spy = vi.spyOn(i18n, 'changeLanguage')
     render(<App />)
     await waitFor(() => expect(spy).toHaveBeenCalledWith('en'))
+  })
+})
+
+describe('App — shell chrome', () => {
+  it('renders the shared shell header and footer around the home page', async () => {
+    render(<App />)
+    expect(await screen.findByRole('link', { name: /the playground/i })).toBeInTheDocument()
+    expect(screen.getByRole('banner')).toBeInTheDocument()
+    expect(screen.getByRole('contentinfo')).toBeInTheDocument()
   })
 })

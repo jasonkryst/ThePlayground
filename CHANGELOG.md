@@ -3,6 +3,34 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.20.0] - 2026-07-08
+
+### Added
+- Footer now shows a copyright line (`© {year} The Playground`) and, on game routes, the current game's own version alongside the engine version — previously the game version wasn't displayed anywhere after the per-game mini headers were removed.
+- `src/hooks/useFocusOnMount.js` — a shared hook for the route/mount-entry focus pattern (`ref` + `tabIndex={-1}` + focus-on-change `useEffect`) that had been independently duplicated in `AppShell`, `Dashboard`, `GameResults`, and `ExitConfirmDialog`.
+
+### Fixed
+- The kid-safe exit guard didn't cover the browser/OS back button (or a swipe-back gesture) — only brand-link/home-button clicks were intercepted, so a `popstate` navigation left mid-game without ever showing the confirm dialog. Added a standard SPA "history sentinel" trap: a guarded session pushes an extra history entry, and any back-press while still guarded re-arms the trap and shows the same confirm dialog, rather than actually navigating away.
+- The exit-confirm dialog trapped Tab-key focus between its two buttons, but never marked the header/game content behind it as unreachable — a screen reader's swipe/virtual-cursor navigation (which walks DOM order, not Tab order) could still reach and activate the shell's home button or brand link right through the backdrop. The shell now marks everything behind the dialog `inert` (plus `aria-hidden` as a fallback for engines with incomplete `inert` support) while it's open.
+- `AppShell`'s title-row visibility check mixed two differently-shaped lookups (a manifest search for games, a hardcoded pathname map for pages); resolved to one `title` value up front instead.
+- Documented the 480px brand-label breakpoint's actual justification (row 1's own fixed-content width, not the title row, which no longer shares space with it) instead of leaving it as an unexplained number.
+- A stale comment and loose assertion in `App.test.jsx` left over from the (now-finished) transitional period when duplicate footers were expected.
+
+## [0.19.0] - 2026-07-08
+
+### Fixed
+- `AppShell`'s header: `.shell__nav` was missing `display: flex`, so the three nav icons (each individually a `display: flex` block box) stacked vertically instead of sitting in a row — visible at any viewport width, not just narrow ones. Also fixed the brand wordmark wrapping onto two lines under a squeezed page title by collapsing it to icon-only below 480px and giving the page title (not the fixed nav/back/brand icons) all the flexible space, so long titles truncate gracefully on one line instead of forcing everything to wrap.
+- The header now consistently splits into two rows wherever there's a page title: row 1 is always app-level chrome (brand, back link, nav icons or the in-game home button); row 2 (separated by a hairline border) is the route's own content — the page title on `/admin`/`/parent`/`/my-progress`, or the game title plus streak badge on `/game/:id` — which now gets the full header width instead of splitting it with row 1's icons. This also fixes the streak badge wrapping its own text ("2" / "in a row!") on narrow phones, since it no longer shares a row with anything else that was squeezing it.
+
+## [0.18.0] - 2026-07-08
+
+### Added
+- `AppShell`, a React Router layout route providing one persistent header/footer shared by every page (home, settings, parent dashboard, my-progress, games), replacing per-page chrome (nav links, back links, page titles, footers, per-game mini headers).
+- Kid-safe exit guard: leaving a game mid-session (home button or brand link) opens an `ExitConfirmDialog` requiring a deliberate second tap, so a stray toddler tap can't kill a session. Fail-open — a game that never reports status can always be exited immediately. Full jest-axe coverage, plus `e2e/app-shell.spec.js`.
+- `ShellContext` / `useShellGameStatus({ streak, sessionActive })` — the interface games use to publish live status to the shell.
+- Shared `GameLayout.css` for the game content region, replacing each game's own header/layout CSS.
+- Color Match, Animal Sounds, Character Match (1.5.0/1.5.0/1.3.0 → 1.6.0/1.6.0/1.4.0): dropped their own mini headers (name, streak badge, version) in favor of reporting status to the shared shell via `useShellGameStatus`.
+
 ## [0.17.0] - 2026-07-06
 
 ### Added

@@ -9,6 +9,13 @@ test('dashboard shows both game cards and the settings link', async ({ page }) =
 })
 
 test('dashboard has no accessibility violations', async ({ page }) => {
+  // Settle the shell's route-entry fade-in (opacity 0→1 over ~200ms) before
+  // scanning: mid-fade, .game-card__desc's own resting opacity (0.75)
+  // compounds with the animation's transient opacity, so an axe scan taken
+  // immediately after goto() can catch a real-but-momentary sub-4.5:1 frame
+  // that isn't present once the page settles. Disabling reduced motion here
+  // uses the same prefers-reduced-motion gate the animation itself respects.
+  await page.emulateMedia({ reducedMotion: 'reduce' })
   await page.goto('/')
   const results = await new AxeBuilder({ page }).analyze()
   expect(results.violations).toEqual([])
@@ -71,6 +78,9 @@ test('recently-played badge appears for a game with seeded scores', async ({ pag
 })
 
 test('dashboard has no accessibility violations after enhancements', async ({ page }) => {
+  // See the comment on the other a11y test above: settle the shell's
+  // route-entry fade before scanning.
+  await page.emulateMedia({ reducedMotion: 'reduce' })
   await page.goto('/')
   const results = await new AxeBuilder({ page }).analyze()
   expect(results.violations).toEqual([])

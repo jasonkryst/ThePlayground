@@ -19,6 +19,12 @@ test('direct navigation to /my-progress works (SPA fallback)', async ({ page }) 
 })
 
 test('my progress page has no accessibility violations', async ({ page }) => {
+  // Settle the shell's route-entry fade before scanning: locked-badge icons
+  // have their own resting opacity (0.45), which can compound with the
+  // shell's transient fade-in opacity and cause an axe scan taken
+  // immediately after goto() to catch a momentary sub-threshold frame.
+  // See e2e/dashboard.spec.js for the same issue with more detail.
+  await page.emulateMedia({ reducedMotion: 'reduce' })
   await page.goto('/my-progress')
   const results = await new AxeBuilder({ page }).analyze()
   expect(results.violations).toEqual([])

@@ -53,21 +53,6 @@ describe('Dashboard', () => {
     expect(colorMatchCards.length).toBeGreaterThan(0)
   })
 
-  it('renders the admin gear link', () => {
-    render(<MemoryRouter><Dashboard manifests={manifests} /></MemoryRouter>)
-    expect(screen.getByRole('link', { name: /⚙️/i })).toHaveAttribute('href', '/admin')
-  })
-
-  it('renders the parent dashboard link', () => {
-    render(<MemoryRouter><Dashboard manifests={manifests} /></MemoryRouter>)
-    expect(screen.getByRole('link', { name: /📊/i })).toHaveAttribute('href', '/parent')
-  })
-
-  it('renders the my progress link', () => {
-    render(<MemoryRouter><Dashboard manifests={manifests} /></MemoryRouter>)
-    expect(screen.getByRole('link', { name: /🌟/i })).toHaveAttribute('href', '/my-progress')
-  })
-
   it('renders empty state when no manifests', () => {
     render(<MemoryRouter><Dashboard manifests={[]} /></MemoryRouter>)
     expect(screen.getByText(/no games/i)).toBeInTheDocument()

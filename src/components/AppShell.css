@@ -1,0 +1,173 @@
+.shell { display: flex; flex-direction: column; min-height: 100vh; }
+
+/* Layout-invisible: exists only as an inert/aria-hidden host for header +
+   main + footer while the exit-confirm dialog is open (see AppShell.jsx). */
+.shell__body { display: contents; }
+
+.shell__header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px 16px;
+  background: var(--color-surface);
+  border-bottom: 1px solid rgb(0 0 0 / 8%);
+}
+
+.shell__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+/* Fixed to its content (never grows or shrinks) so the icons it holds
+   (back link, brand, nav) always render at full size. */
+.shell__side { display: flex; flex: 0 0 auto; gap: 4px; align-items: center; }
+.shell__side--end { justify-content: flex-end; }
+
+.shell__brand {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  min-width: 0;
+  min-height: 48px;
+  padding: 0 8px;
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--color-lavender-dark);
+  text-decoration: none;
+  border-radius: var(--radius-button);
+}
+
+/* Ellipsis as a defensive fallback in case row 1 is ever tight for some
+   other reason; in practice the media query below is what actually prevents
+   this from being needed on any viewport width in real use. */
+.shell__brand-label {
+  overflow: hidden;
+  min-width: 0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* 480px isn't an arbitrary phone-class guess: row 1 (back link + brand +
+   the 3-icon nav row, since row 2's title doesn't share this row — see
+   AppShell.jsx) is a fixed-size, non-shrinking layout (.shell__side is
+   `flex: 0 0 auto`). Measured directly with the wordmark forced visible,
+   its worst case — a subpage with a back link — needs back(48) + gap(4) +
+   brand(~203) + header-gap(12) + nav(152) + padding(32) = ~451px. Below
+   480px, hiding the wordmark to icon-only keeps row 1 itself from
+   overflowing on any common phone width (most are 360–430px), independent
+   of whatever the title row is doing. */
+@media (width <= 480px) {
+  .shell__brand-label { display: none; }
+}
+
+.shell__back,
+.shell__nav-link {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  min-width: 48px;
+  min-height: 48px;
+  font-size: 24px;
+  color: var(--color-text);
+  text-decoration: none;
+  border-radius: var(--radius-button);
+  transition: background 0.15s;
+}
+
+.shell__home {
+  min-width: 48px;
+  min-height: 48px;
+  font-size: 24px;
+  background: transparent;
+}
+
+.shell__brand:hover,
+.shell__back:hover,
+.shell__nav-link:hover,
+.shell__home:hover { background: rgb(0 0 0 / 6%); }
+
+.shell__brand:focus,
+.shell__back:focus,
+.shell__nav-link:focus,
+.shell__home:focus { outline: none; }
+
+.shell__brand:focus-visible,
+.shell__back:focus-visible,
+.shell__nav-link:focus-visible,
+.shell__home:focus-visible {
+  outline: 3px solid var(--color-lavender);
+  outline-offset: 3px;
+}
+
+.shell__nav-link[aria-current='page'] { background: rgb(0 0 0 / 8%); }
+
+/* Without this, .shell__nav-link's own `display: flex` (needed for its
+   icon centering) makes each link a block-level box, so the three links
+   stack vertically instead of sitting in a row — this is the fix for that. */
+.shell__nav { display: flex; flex-shrink: 0; align-items: center; gap: 4px; }
+
+/* Row 2: the route's actual content (title, plus the streak badge on game
+   routes) gets the full header width instead of splitting it with row 1's
+   brand/nav icons. The border is the "visual separation" between the
+   app-level chrome above and the route-specific content below. */
+.shell__title-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-top: 6px;
+  border-top: 1px solid rgb(0 0 0 / 8%);
+}
+
+.shell__title {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--color-lavender-dark);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.shell__title-icon { font-size: 20px; line-height: 1; }
+img.shell__title-icon { width: 20px; height: 20px; object-fit: contain; }
+
+/* The route-focused h1 gets a real focus target (tabIndex={-1}) but no visible
+   ring: it's programmatically focused for a11y on every route change, not
+   tabbed to by a keyboard user, so a focus-visible-style outline would be
+   confusing chrome that flashes on every navigation. */
+.shell__title:focus { outline: none; }
+
+.shell__content { display: flex; flex: 1; flex-direction: column; }
+
+/* Route cross-fade: ~200ms fade-in on the remounted content container.
+   Gated on reduced-motion like every other animation in this app. */
+@media (prefers-reduced-motion: no-preference) {
+  .shell__content { animation: shell-fade-in 0.2s ease; }
+}
+
+@keyframes shell-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.shell__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  font-size: 13px;
+  color: var(--color-text-muted);
+  border-top: 1px solid rgb(0 0 0 / 8%);
+}
+
+.shell__footer-versions { display: flex; gap: 12px; }
+
+.shell__game-version,
+.shell__version { font-variant-numeric: tabular-nums; }

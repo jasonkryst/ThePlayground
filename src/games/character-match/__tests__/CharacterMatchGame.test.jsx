@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { axe } from 'jest-axe'
 import CharacterMatchGame from '../index'
+import { ShellContext } from '../../../components/ShellContext'
 
 vi.mock('../../../lib/confetti', () => ({ fireConfetti: vi.fn() }))
 
@@ -129,9 +130,16 @@ describe('CharacterMatchGame', () => {
     expect(await axe(container)).toHaveNoViolations()
   })
 
-  it('shows the streak badge after 2 correct answers in a row', async () => {
+  it('reports the streak to the shell after 2 correct answers in a row', async () => {
     vi.useFakeTimers()
-    await act(async () => { render(<CharacterMatchGame onGameEnd={onGameEnd} />) })
+    const setGameStatus = vi.fn()
+    await act(async () => {
+      render(
+        <ShellContext.Provider value={{ setGameStatus }}>
+          <CharacterMatchGame onGameEnd={onGameEnd} />
+        </ShellContext.Provider>
+      )
+    })
 
     for (let i = 0; i < 2; i++) {
       const buttons = screen.getAllByRole('button').filter(b => b.dataset.characterId)
@@ -143,7 +151,7 @@ describe('CharacterMatchGame', () => {
     }
 
     vi.useRealTimers()
-    expect(screen.getByText(/2 in a row/i)).toBeInTheDocument()
+    expect(setGameStatus).toHaveBeenLastCalledWith({ streak: 2, sessionActive: true })
   })
 
   it('shows missed characters in the results screen when an answer is wrong', async () => {

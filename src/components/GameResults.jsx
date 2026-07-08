@@ -1,5 +1,5 @@
-import { useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
+import useFocusOnMount from '../hooks/useFocusOnMount'
 import './GameResults.css'
 
 export default function GameResults({
@@ -8,15 +8,11 @@ export default function GameResults({
   personalBestResult = null, newBadges = [],
 }) {
   const { t } = useTranslation()
-  const headingRef = useRef(null)
-
-  useEffect(() => {
-    headingRef.current?.focus()
-  }, [])
+  const headingRef = useFocusOnMount()
 
   return (
     <div className="results">
-      <h1 className="sr-only" tabIndex={-1} ref={headingRef}>{t('common.resultsHeading')}</h1>
+      <h2 className="sr-only" tabIndex={-1} ref={headingRef}>{t('common.resultsHeading')}</h2>
       <div className="results__emoji">{missed.length === 0 ? '🎉' : '⭐'}</div>
       <div className="results__score">{score} / {total}</div>
       <div className="results__label">{t('common.scoreLabel', { score, total })}</div>

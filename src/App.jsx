@@ -4,8 +4,10 @@ import Dashboard from './components/Dashboard'
 import AdminPage from './admin/AdminPage'
 import ParentDashboard from './parent/ParentDashboard'
 import KidsProgressPage from './kids/KidsProgressPage'
+import AppShell from './components/AppShell'
 import useSettings from './hooks/useSettings'
 import i18n from './i18n'
+import './components/GameLayout.css'
 
 const manifestModules = import.meta.glob('./games/*/manifest.json', { eager: true })
 const gameModules     = import.meta.glob('./games/*/index.jsx')
@@ -85,11 +87,13 @@ export default function App() {
       <GoogleAnalytics />
       <LocaleSync />
       <Routes>
-        <Route path="/"             element={<Dashboard manifests={manifests} />} />
-        <Route path="/admin"        element={<AdminPage manifests={manifests} />} />
-        <Route path="/parent"       element={<ParentDashboard manifests={manifests} />} />
-        <Route path="/my-progress" element={<KidsProgressPage manifests={manifests} />} />
-        <Route path="/game/:gameId" element={<GameRoute />} />
+        <Route element={<AppShell manifests={manifests} />}>
+          <Route path="/"             element={<Dashboard manifests={manifests} />} />
+          <Route path="/admin"        element={<AdminPage manifests={manifests} />} />
+          <Route path="/parent"       element={<ParentDashboard manifests={manifests} />} />
+          <Route path="/my-progress" element={<KidsProgressPage manifests={manifests} />} />
+          <Route path="/game/:gameId" element={<GameRoute />} />
+        </Route>
       </Routes>
     </BrowserRouter>
   )
