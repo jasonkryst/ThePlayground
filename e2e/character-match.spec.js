@@ -50,7 +50,7 @@ test('character match: full play-through reaches results and returns home', asyn
 
   await expect(page.getByText(/you scored/i)).toBeVisible()
 
-  await page.getByRole('button', { name: 'Home' }).click()
+  await page.getByRole('button', { name: 'Home', exact: true }).click()
   await expect(page).toHaveURL('/')
 })
 
