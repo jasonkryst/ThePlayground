@@ -16,7 +16,7 @@ export default function GameResults({
 
   return (
     <div className="results">
-      <h1 className="sr-only" tabIndex={-1} ref={headingRef}>{t('common.resultsHeading')}</h1>
+      <h2 className="sr-only" tabIndex={-1} ref={headingRef}>{t('common.resultsHeading')}</h2>
       <div className="results__emoji">{missed.length === 0 ? '🎉' : '⭐'}</div>
       <div className="results__score">{score} / {total}</div>
       <div className="results__label">{t('common.scoreLabel', { score, total })}</div>

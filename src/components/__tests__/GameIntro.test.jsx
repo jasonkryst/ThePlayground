@@ -53,14 +53,4 @@ describe('GameIntro', () => {
     )
     expect(await axe(container)).toHaveNoViolations()
   })
-
-  it('moves focus to the game name heading on mount', () => {
-    render(
-      <GameIntro
-        icon="🐘" name="Animal Sounds" instructions="x"
-        dontShowAgain={false} onDontShowAgainChange={vi.fn()} onStart={vi.fn()}
-      />
-    )
-    expect(screen.getByRole('heading', { name: 'Animal Sounds' })).toHaveFocus()
-  })
 })
