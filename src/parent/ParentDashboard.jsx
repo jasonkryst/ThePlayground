@@ -1,5 +1,4 @@
-import { useState, useEffect, useMemo, useRef } from 'react'
-import { Link } from 'react-router-dom'
+import { useState, useEffect, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
   ResponsiveContainer,
@@ -302,9 +301,6 @@ export default function ParentDashboard({ manifests = [] }) {
     [manifests]
   )
 
-  const titleRef = useRef(null)
-  useEffect(() => { titleRef.current?.focus() }, [])
-
   useEffect(() => {
     adapter.getBestStreaks().then(setBestStreaks)
   }, [])
@@ -323,51 +319,47 @@ export default function ParentDashboard({ manifests = [] }) {
 
   return (
     <div className="parent">
-      <main>
-        <div className="parent__header">
-          <Link to="/" className="parent__back" aria-label={t('parent.back')}>←</Link>
-          <h1 className="parent__title" tabIndex={-1} ref={titleRef}>{t('parent.title')}</h1>
-          <button className="parent__export-btn" onClick={handleExport} aria-label={t('parent.exportCsv')}>
-            {t('parent.exportCsv')}
-          </button>
-        </div>
+      <div className="parent__toolbar">
+        <button className="parent__export-btn" onClick={handleExport} aria-label={t('parent.exportCsv')}>
+          {t('parent.exportCsv')}
+        </button>
+      </div>
 
-        {scores.length === 0 ? (
-          <p className="parent__empty">{t('parent.empty')}</p>
-        ) : (
-          <>
-            <section className="parent__section" aria-labelledby="score-trend-heading">
-              <h2 id="score-trend-heading">{t('parent.scoreTrendHeading')}</h2>
-              <p className="parent__hint">{t('parent.scoreTrendHint')}</p>
-              <ScoreTrendChart data={scoreTrend} gameIds={gameIds} gameNames={gameNames} />
-            </section>
+      {scores.length === 0 ? (
+        <p className="parent__empty">{t('parent.empty')}</p>
+      ) : (
+        <>
+          <section className="parent__section" aria-labelledby="score-trend-heading">
+            <h2 id="score-trend-heading">{t('parent.scoreTrendHeading')}</h2>
+            <p className="parent__hint">{t('parent.scoreTrendHint')}</p>
+            <ScoreTrendChart data={scoreTrend} gameIds={gameIds} gameNames={gameNames} />
+          </section>
 
-            <section className="parent__section" aria-labelledby="response-time-heading">
-              <h2 id="response-time-heading">{t('parent.responseTimeHeading')}</h2>
-              <p className="parent__hint">{t('parent.responseTimeHint')}</p>
-              <ResponseTimeChart data={responseTimes} gameIds={gameIds} gameNames={gameNames} />
-            </section>
+          <section className="parent__section" aria-labelledby="response-time-heading">
+            <h2 id="response-time-heading">{t('parent.responseTimeHeading')}</h2>
+            <p className="parent__hint">{t('parent.responseTimeHint')}</p>
+            <ResponseTimeChart data={responseTimes} gameIds={gameIds} gameNames={gameNames} />
+          </section>
 
-            <section className="parent__section" aria-labelledby="streak-heading">
-              <h2 id="streak-heading">{t('parent.streakHistoryHeading')}</h2>
-              <p className="parent__hint">{t('parent.streakHistoryHint')}</p>
-              <StreakHistoryPanel streakHistory={streakHistory} gameNames={gameNames} />
-            </section>
+          <section className="parent__section" aria-labelledby="streak-heading">
+            <h2 id="streak-heading">{t('parent.streakHistoryHeading')}</h2>
+            <p className="parent__hint">{t('parent.streakHistoryHint')}</p>
+            <StreakHistoryPanel streakHistory={streakHistory} gameNames={gameNames} />
+          </section>
 
-            <section className="parent__section" aria-labelledby="heatmap-heading">
-              <h2 id="heatmap-heading">{t('parent.heatmapHeading')}</h2>
-              <p className="parent__hint">{t('parent.heatmapHint')}</p>
-              <SessionHeatmap heatmapData={heatmapData} />
-            </section>
+          <section className="parent__section" aria-labelledby="heatmap-heading">
+            <h2 id="heatmap-heading">{t('parent.heatmapHeading')}</h2>
+            <p className="parent__hint">{t('parent.heatmapHint')}</p>
+            <SessionHeatmap heatmapData={heatmapData} />
+          </section>
 
-            <section className="parent__section" aria-labelledby="missed-heading">
-              <h2 id="missed-heading">{t('parent.missedHeading')}</h2>
-              <p className="parent__hint">{t('parent.missedHint')}</p>
-              <MissedItemsPanel missedItems={missedItems} gameNames={gameNames} />
-            </section>
-          </>
-        )}
-      </main>
+          <section className="parent__section" aria-labelledby="missed-heading">
+            <h2 id="missed-heading">{t('parent.missedHeading')}</h2>
+            <p className="parent__hint">{t('parent.missedHint')}</p>
+            <MissedItemsPanel missedItems={missedItems} gameNames={gameNames} />
+          </section>
+        </>
+      )}
     </div>
   )
 }

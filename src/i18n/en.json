@@ -55,7 +55,6 @@
   },
   "parent": {
     "title": "📊 Progress Dashboard",
-    "back": "Back to dashboard",
     "empty": "No sessions recorded yet — play some games first!",
     "exportCsv": "Export CSV",
     "notEnoughData": "Not enough data yet — play a few more sessions to see trends.",

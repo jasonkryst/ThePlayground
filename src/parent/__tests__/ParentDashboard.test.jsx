@@ -81,11 +81,6 @@ afterEach(() => { vi.restoreAllMocks() })
 describe('ParentDashboard — empty state', () => {
   beforeEach(() => { mockGetAllScores.mockReturnValue([]) })
 
-  it('renders the page title', async () => {
-    await renderDashboard()
-    expect(screen.getByRole('heading', { name: /progress dashboard/i })).toBeInTheDocument()
-  })
-
   it('shows an empty-state message when no scores exist', async () => {
     await renderDashboard()
     expect(screen.getByText(/no sessions recorded yet/i)).toBeInTheDocument()
@@ -94,12 +89,6 @@ describe('ParentDashboard — empty state', () => {
   it('does not render chart sections in empty state', async () => {
     await renderDashboard()
     expect(screen.queryByText(/score trend/i)).not.toBeInTheDocument()
-  })
-
-  it('renders a back link pointing to /', async () => {
-    await renderDashboard()
-    const back = screen.getByRole('link', { name: /back to dashboard/i })
-    expect(back).toHaveAttribute('href', '/')
   })
 
   it('renders the Export CSV button', async () => {
@@ -237,13 +226,5 @@ describe('ParentDashboard — insufficient data for charts', () => {
     const hints = screen.getAllByText(/not enough data/i)
     // Score trend and response time both need >= 2 data points to render a chart
     expect(hints.length).toBeGreaterThanOrEqual(2)
-  })
-})
-
-describe('ParentDashboard — focus management', () => {
-  it('moves focus to the page title on mount', async () => {
-    mockGetAllScores.mockReturnValue([])
-    await renderDashboard()
-    expect(screen.getByRole('heading', { name: /progress dashboard/i })).toHaveFocus()
   })
 })
