@@ -72,8 +72,14 @@ export default function AppShell({ manifests = [] }) {
             {!isGameRoute && !isHome && (
               <Link to="/" className="shell__back" aria-label={t('shell.back')}>←</Link>
             )}
-            <Link to="/" className="shell__brand" onClick={handleGuardedNavClick}>
-              <span aria-hidden="true">🌊</span> {t('shell.brand')}
+            <Link
+              to="/"
+              className="shell__brand"
+              aria-label={t('shell.brand')}
+              onClick={handleGuardedNavClick}
+            >
+              <span aria-hidden="true">🌊</span>
+              <span className="shell__brand-label">{t('shell.brand')}</span>
             </Link>
           </div>
 

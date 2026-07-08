@@ -13,13 +13,17 @@
   border-bottom: 1px solid rgb(0 0 0 / 8%);
 }
 
-.shell__side { display: flex; flex: 1; gap: 4px; align-items: center; }
+/* Fixed to its content (never grows or shrinks) so the icons it holds
+   (back link, brand, nav) always render at full size — .shell__center is
+   the only region that flexes, absorbing all the squeeze via its ellipsis. */
+.shell__side { display: flex; flex: 0 0 auto; gap: 4px; align-items: center; }
 .shell__side--end { justify-content: flex-end; }
 
 .shell__brand {
   display: flex;
   gap: 8px;
   align-items: center;
+  min-width: 0;
   min-height: 48px;
   padding: 0 8px;
   font-size: 20px;
@@ -29,9 +33,24 @@
   border-radius: var(--radius-button);
 }
 
+/* Truncates instead of wrapping to a second line when the header is tight
+   (e.g. a long page title on a narrow phone). Hidden below 480px entirely —
+   see the media query below — since the back link already gets you home. */
+.shell__brand-label {
+  overflow: hidden;
+  min-width: 0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (width <= 480px) {
+  .shell__brand-label { display: none; }
+}
+
 .shell__back,
 .shell__nav-link {
   display: flex;
+  flex-shrink: 0;
   align-items: center;
   justify-content: center;
   min-width: 48px;
@@ -70,8 +89,14 @@
 
 .shell__nav-link[aria-current='page'] { background: rgb(0 0 0 / 8%); }
 
+/* Without this, .shell__nav-link's own `display: flex` (needed for its
+   icon centering) makes each link a block-level box, so the three links
+   stack vertically instead of sitting in a row — this is the fix for that. */
+.shell__nav { display: flex; flex-shrink: 0; align-items: center; gap: 4px; }
+
 .shell__center {
   display: flex;
+  flex: 1 1 0;
   gap: 12px;
   align-items: center;
   min-width: 0;
