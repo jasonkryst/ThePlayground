@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import GameCard from './GameCard'
 import FeaturedGameCard from './FeaturedGameCard'
@@ -8,6 +8,7 @@ import useSettings from '../hooks/useSettings'
 import useRecentlyPlayed from '../hooks/useRecentlyPlayed'
 import useFeaturedGame from '../hooks/useFeaturedGame'
 import useGameTags from '../hooks/useGameTags'
+import useFocusOnMount from '../hooks/useFocusOnMount'
 import './Dashboard.css'
 
 const TAG_ICONS = {
@@ -52,8 +53,7 @@ export default function Dashboard({ manifests = [] }) {
   const featured = useFeaturedGame(manifests)
   const { tagMap, allTags } = useGameTags(manifests)
   const [activeTag, setActiveTag] = useState('all')
-  const titleRef = useRef(null)
-  useEffect(() => { titleRef.current?.focus() }, [])
+  const titleRef = useFocusOnMount()
 
   const name = settings.childName?.trim()
   const title = name ? t('dashboard.titleNamed', { name }) : t('dashboard.titleDefault')

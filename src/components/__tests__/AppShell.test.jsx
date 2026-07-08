@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { describe, it, expect } from 'vitest'
 import userEvent from '@testing-library/user-event'
@@ -7,7 +7,7 @@ import AppShell from '../AppShell'
 import { useShellGameStatus } from '../ShellContext'
 
 const manifests = [
-  { id: 'color-match', name: 'Color Match', description: 'Colors!', icon: '🎨', color: '#CE93D8' },
+  { id: 'color-match', name: 'Color Match', description: 'Colors!', icon: '🎨', color: '#CE93D8', version: '1.6.0' },
 ]
 
 function FakeGame({ streak = 0, sessionActive = false }) {
@@ -65,19 +65,25 @@ describe('AppShell — subpages', () => {
     expect(screen.getByRole('contentinfo')).toBeInTheDocument()
   })
 
-  it('shows the right titles for parent and my-progress', () => {
+  it('shows and focuses the right title for parent', () => {
     renderShell('/parent')
-    expect(screen.getByRole('heading', { level: 1, name: /progress dashboard/i })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 1, name: /progress dashboard/i })).toHaveFocus()
+  })
+
+  it('shows and focuses the right title for my-progress', () => {
+    renderShell('/my-progress')
+    expect(screen.getByRole('heading', { level: 1, name: /my progress/i })).toHaveFocus()
   })
 })
 
 describe('AppShell — game route', () => {
-  it('shows the game name as h1, a home button, no nav links, no footer', () => {
+  it('shows the game name as h1, a home button, no nav links, and the footer with the game version', () => {
     renderShell('/game/color-match')
     expect(screen.getByRole('heading', { level: 1, name: /color match/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /go to home/i })).toBeInTheDocument()
     expect(screen.queryByRole('link', { name: /progress dashboard/i })).not.toBeInTheDocument()
-    expect(screen.queryByRole('contentinfo')).not.toBeInTheDocument()
+    expect(screen.getByRole('contentinfo')).toBeInTheDocument()
+    expect(screen.getByText('Color Match v1.6.0')).toBeInTheDocument()
   })
 
   it('renders the streak badge while a session is active', () => {
@@ -85,11 +91,24 @@ describe('AppShell — game route', () => {
     expect(screen.getByText('🔥 4 in a row!')).toBeInTheDocument()
   })
 
-  it('survives an unknown game id (no title, working home button)', async () => {
+  it('survives an unknown game id (no title, working home button, no game version in the footer)', async () => {
     renderShell('/game/nope', <div>NotFoundBody</div>)
     expect(screen.queryByRole('heading', { level: 1 })).not.toBeInTheDocument()
+    expect(screen.queryByText(/v1\.6\.0/)).not.toBeInTheDocument()
     await userEvent.click(screen.getByRole('button', { name: /go to home/i }))
     expect(screen.getByText('HomeBody')).toBeInTheDocument()
+  })
+})
+
+describe('AppShell — footer', () => {
+  it('shows the copyright line and engine version on every route', () => {
+    renderShell('/')
+    expect(screen.getByText(new RegExp(`© ${new Date().getFullYear()} The Playground`))).toBeInTheDocument()
+  })
+
+  it('does not show a game version on non-game routes', () => {
+    renderShell('/admin')
+    expect(screen.queryByText(/v1\.6\.0/)).not.toBeInTheDocument()
   })
 })
 
@@ -136,5 +155,37 @@ describe('AppShell — exit guard', () => {
     renderShell('/admin')
     await userEvent.click(screen.getByRole('link', { name: /the playground/i }))
     expect(screen.getByText('HomeBody')).toBeInTheDocument()
+  })
+})
+
+describe('AppShell — back-button guard (popstate)', () => {
+  it('opens the confirm dialog on a back-navigation popstate while a session is active', () => {
+    renderShell('/game/color-match', <FakeGame sessionActive={true} />)
+    fireEvent(window, new PopStateEvent('popstate'))
+    expect(screen.getByRole('dialog')).toBeInTheDocument()
+    expect(screen.getByText('FakeGameBody')).toBeInTheDocument()
+  })
+
+  it('does not open the dialog on popstate when no session is active', () => {
+    renderShell('/game/color-match', <FakeGame sessionActive={false} />)
+    fireEvent(window, new PopStateEvent('popstate'))
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+  })
+})
+
+describe('AppShell — background inertness while the exit dialog is open', () => {
+  it('makes the shell body inert and aria-hidden while open, and clears both on resume', async () => {
+    const { container } = renderShell('/game/color-match', <FakeGame sessionActive={true} />)
+    const body = container.querySelector('.shell__body')
+    expect(body).not.toHaveAttribute('inert')
+    expect(body).not.toHaveAttribute('aria-hidden')
+
+    await userEvent.click(screen.getByRole('button', { name: /go to home/i }))
+    expect(body).toHaveAttribute('inert')
+    expect(body).toHaveAttribute('aria-hidden', 'true')
+
+    await userEvent.click(screen.getByRole('button', { name: /keep playing/i }))
+    expect(body).not.toHaveAttribute('inert')
+    expect(body).not.toHaveAttribute('aria-hidden')
   })
 })

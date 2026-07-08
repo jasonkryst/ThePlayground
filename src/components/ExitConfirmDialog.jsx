@@ -1,5 +1,6 @@
-import { useEffect, useRef } from 'react'
+import { useRef } from 'react'
 import { useTranslation } from 'react-i18next'
+import useFocusOnMount from '../hooks/useFocusOnMount'
 import './ExitConfirmDialog.css'
 
 // Kid-safe exit guard: leaving a game mid-session takes two deliberate taps
@@ -7,10 +8,8 @@ import './ExitConfirmDialog.css'
 // switch-access users get the same protection (see design spec).
 export default function ExitConfirmDialog({ onResume, onLeave }) {
   const { t } = useTranslation()
-  const keepRef = useRef(null)
+  const keepRef = useFocusOnMount()
   const leaveRef = useRef(null)
-
-  useEffect(() => { keepRef.current?.focus() }, [])
 
   function handleKeyDown(e) {
     if (e.key === 'Escape') {

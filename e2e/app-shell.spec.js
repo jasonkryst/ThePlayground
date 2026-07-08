@@ -33,3 +33,24 @@ test('intro screen exits immediately without a confirm overlay', async ({ page }
   await expect(page).toHaveURL(/\/$/)
   await expect(page.getByRole('dialog')).toBeHidden()
 })
+
+test('the browser back button shows the confirm overlay instead of leaving mid-game, and re-arms after Keep Playing', async ({ page }) => {
+  await page.goto('/game/color-match')
+  await page.getByTestId('game-intro-start').click()
+
+  await page.goBack()
+  const dialog = page.getByRole('dialog')
+  await expect(dialog).toBeVisible()
+  await expect(page).toHaveURL(/\/game\/color-match$/)
+
+  await dialog.getByRole('button', { name: /keep playing/i }).click()
+  await expect(dialog).toBeHidden()
+  await expect(page).toHaveURL(/\/game\/color-match$/)
+
+  // A second back-press must be caught too — the guard has to re-arm itself,
+  // not just fire once.
+  await page.goBack()
+  await expect(dialog).toBeVisible()
+  await dialog.getByRole('button', { name: /leave game/i }).click()
+  await expect(page).toHaveURL(/\/$/)
+})

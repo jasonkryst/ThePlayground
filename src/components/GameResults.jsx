@@ -1,5 +1,5 @@
-import { useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
+import useFocusOnMount from '../hooks/useFocusOnMount'
 import './GameResults.css'
 
 export default function GameResults({
@@ -8,11 +8,7 @@ export default function GameResults({
   personalBestResult = null, newBadges = [],
 }) {
   const { t } = useTranslation()
-  const headingRef = useRef(null)
-
-  useEffect(() => {
-    headingRef.current?.focus()
-  }, [])
+  const headingRef = useFocusOnMount()
 
   return (
     <div className="results">

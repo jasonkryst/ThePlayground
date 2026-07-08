@@ -1,5 +1,9 @@
 .shell { display: flex; flex-direction: column; min-height: 100vh; }
 
+/* Layout-invisible: exists only as an inert/aria-hidden host for header +
+   main + footer while the exit-confirm dialog is open (see AppShell.jsx). */
+.shell__body { display: contents; }
+
 .shell__header {
   position: sticky;
   top: 0;
@@ -38,9 +42,9 @@
   border-radius: var(--radius-button);
 }
 
-/* Truncates instead of wrapping to a second line when the header is tight
-   (e.g. a long page title on a narrow phone). Hidden below 480px entirely —
-   see the media query below — since the back link already gets you home. */
+/* Ellipsis as a defensive fallback in case row 1 is ever tight for some
+   other reason; in practice the media query below is what actually prevents
+   this from being needed on any viewport width in real use. */
 .shell__brand-label {
   overflow: hidden;
   min-width: 0;
@@ -48,6 +52,15 @@
   white-space: nowrap;
 }
 
+/* 480px isn't an arbitrary phone-class guess: row 1 (back link + brand +
+   the 3-icon nav row, since row 2's title doesn't share this row — see
+   AppShell.jsx) is a fixed-size, non-shrinking layout (.shell__side is
+   `flex: 0 0 auto`). Measured directly with the wordmark forced visible,
+   its worst case — a subpage with a back link — needs back(48) + gap(4) +
+   brand(~203) + header-gap(12) + nav(152) + padding(32) = ~451px. Below
+   480px, hiding the wordmark to icon-only keeps row 1 itself from
+   overflowing on any common phone width (most are 360–430px), independent
+   of whatever the title row is doing. */
 @media (width <= 480px) {
   .shell__brand-label { display: none; }
 }
@@ -154,4 +167,7 @@ img.shell__title-icon { width: 20px; height: 20px; object-fit: contain; }
   border-top: 1px solid rgb(0 0 0 / 8%);
 }
 
+.shell__footer-versions { display: flex; gap: 12px; }
+
+.shell__game-version,
 .shell__version { font-variant-numeric: tabular-nums; }

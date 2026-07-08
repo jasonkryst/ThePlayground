@@ -31,6 +31,7 @@
     "navProgress": "🌟 My Progress",
     "navSettings": "⚙️ Settings",
     "footerName": "The Playground",
+    "copyright": "© {{year}} The Playground",
     "exitConfirmTitle": "Leave the game?",
     "keepPlaying": "Keep playing! ▶️",
     "leaveGame": "Leave game 🏠"

@@ -37,7 +37,6 @@ describe('App — shell chrome', () => {
     render(<App />)
     expect(await screen.findByRole('link', { name: /the playground/i })).toBeInTheDocument()
     expect(screen.getByRole('banner')).toBeInTheDocument()
-    // Multiple contentinfo elements expected: shell footer + page footer (duplication is expected at this stage)
-    expect(screen.getAllByRole('contentinfo').length).toBeGreaterThan(0)
+    expect(screen.getByRole('contentinfo')).toBeInTheDocument()
   })
 })
