@@ -68,60 +68,68 @@ export default function AppShell({ manifests = [] }) {
     <ShellContext.Provider value={contextValue}>
       <div className="shell">
         <header className="shell__header">
-          <div className="shell__side">
-            {!isGameRoute && !isHome && (
-              <Link to="/" className="shell__back" aria-label={t('shell.back')}>←</Link>
-            )}
-            <Link
-              to="/"
-              className="shell__brand"
-              aria-label={t('shell.brand')}
-              onClick={handleGuardedNavClick}
-            >
-              <span aria-hidden="true">🌊</span>
-              <span className="shell__brand-label">{t('shell.brand')}</span>
-            </Link>
-          </div>
+          <div className="shell__row">
+            <div className="shell__side">
+              {!isGameRoute && !isHome && (
+                <Link to="/" className="shell__back" aria-label={t('shell.back')}>←</Link>
+              )}
+              <Link
+                to="/"
+                className="shell__brand"
+                aria-label={t('shell.brand')}
+                onClick={handleGuardedNavClick}
+              >
+                <span aria-hidden="true">🌊</span>
+                <span className="shell__brand-label">{t('shell.brand')}</span>
+              </Link>
+            </div>
 
-          {(isGameRoute ? gameManifest != null : pageTitleKey != null) && (
-            <div className="shell__center">
-              <h1 className="shell__title" tabIndex={-1} ref={titleRef}>
-                {isGameRoute ? (
-                  <>
-                    <ManifestIcon icon={gameManifest.icon} className="shell__title-icon" ariaHidden />
-                    {' '}{gameManifest.name}
-                  </>
-                ) : (
-                  t(pageTitleKey)
-                )}
-              </h1>
-              {isGameRoute && gameStatus.sessionActive && (
-                <StreakBadge streak={gameStatus.streak} />
+            {(isGameRoute ? gameManifest != null : pageTitleKey != null) && (
+              <div className="shell__center">
+                <h1 className="shell__title" tabIndex={-1} ref={titleRef}>
+                  {isGameRoute ? (
+                    <>
+                      <ManifestIcon icon={gameManifest.icon} className="shell__title-icon" ariaHidden />
+                      {' '}{gameManifest.name}
+                    </>
+                  ) : (
+                    t(pageTitleKey)
+                  )}
+                </h1>
+              </div>
+            )}
+
+            <div className="shell__side shell__side--end">
+              {isGameRoute ? (
+                <button className="shell__home" aria-label={t('shell.home')} onClick={handleHomeButtonClick}>
+                  🏠
+                </button>
+              ) : (
+                <nav className="shell__nav" aria-label={t('shell.navLabel')}>
+                  {NAV_ITEMS.map(item => (
+                    <Link
+                      key={item.to}
+                      to={item.to}
+                      className="shell__nav-link"
+                      aria-label={t(item.labelKey)}
+                      aria-current={location.pathname === item.to ? 'page' : undefined}
+                    >
+                      {item.icon}
+                    </Link>
+                  ))}
+                </nav>
               )}
             </div>
-          )}
-
-          <div className="shell__side shell__side--end">
-            {isGameRoute ? (
-              <button className="shell__home" aria-label={t('shell.home')} onClick={handleHomeButtonClick}>
-                🏠
-              </button>
-            ) : (
-              <nav className="shell__nav" aria-label={t('shell.navLabel')}>
-                {NAV_ITEMS.map(item => (
-                  <Link
-                    key={item.to}
-                    to={item.to}
-                    className="shell__nav-link"
-                    aria-label={t(item.labelKey)}
-                    aria-current={location.pathname === item.to ? 'page' : undefined}
-                  >
-                    {item.icon}
-                  </Link>
-                ))}
-              </nav>
-            )}
           </div>
+
+          {/* Its own centered row rather than sharing the main row with the
+              title: on a narrow phone the two were competing for the same
+              shrinking space, wrapping the badge's text mid-word. */}
+          {isGameRoute && gameStatus.sessionActive && (
+            <div className="shell__status-row">
+              <StreakBadge streak={gameStatus.streak} />
+            </div>
+          )}
         </header>
 
         {/* key remounts the content on navigation so the fade-in replays */}
