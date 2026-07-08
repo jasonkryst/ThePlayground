@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import useGameSession from '../../hooks/useGameSession'
-import StreakBadge from '../../components/StreakBadge'
+import { useShellGameStatus } from '../../components/ShellContext'
 import GameResults from '../../components/GameResults'
 import GameChoiceGrid from '../../components/GameChoiceGrid'
 import Timer from '../../components/Timer'
@@ -20,6 +20,8 @@ export default function CharacterMatchGame({ onGameEnd }) {
     acceptDifficultyBump, dismissDifficultyBump,
     showIntro, introResolved, settingsLoaded, dontShowAgain, setDontShowAgain, dismissIntro,
   } = useGameSession({ gameId: 'character-match', items: characters })
+
+  useShellGameStatus({ streak, sessionActive: introResolved && !showIntro && !done })
 
   if (!settingsLoaded || !introResolved) return null
 
@@ -67,15 +69,9 @@ export default function CharacterMatchGame({ onGameEnd }) {
   if (!current) return null
 
   return (
-    <main className="game">
+    <div className="game">
       {/* Hidden testid so tests can find the correct answer id */}
       <span data-testid="correct-character-id" style={{ display: 'none' }}>{current.correct.id}</span>
-
-      <div className="game__header">
-        <h1 className="game__name">{manifest.name}</h1>
-        <StreakBadge streak={streak} />
-        <span className="game__version">v{manifest.version}</span>
-      </div>
 
       <div className="game__question">
         <div className="game__progress">{t('common.progress', { current: index + 1, total })}</div>
@@ -109,6 +105,6 @@ export default function CharacterMatchGame({ onGameEnd }) {
       {locked && feedbackMode === 'parent-tap' && !timedOut && (
         <button className="game__next" onClick={advance}>{t('common.next')}</button>
       )}
-    </main>
+    </div>
   )
 }

@@ -7,6 +7,7 @@ import KidsProgressPage from './kids/KidsProgressPage'
 import AppShell from './components/AppShell'
 import useSettings from './hooks/useSettings'
 import i18n from './i18n'
+import './components/GameLayout.css'
 
 const manifestModules = import.meta.glob('./games/*/manifest.json', { eager: true })
 const gameModules     = import.meta.glob('./games/*/index.jsx')

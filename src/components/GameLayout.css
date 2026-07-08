@@ -1,0 +1,11 @@
+/* Shared page layout for every game screen. Games must not render their own
+   header/main/footer — AppShell owns page chrome (see design spec). */
+.game {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 24px;
+  align-items: center;
+  width: 100%;
+  padding: 24px 16px;
+}
