@@ -19,14 +19,8 @@
   gap: 12px;
 }
 
-/* Its own row, centered, so the streak badge never competes with the
-   title for space (see AppShell.jsx). Only rendered while a game
-   session is active. */
-.shell__status-row { display: flex; justify-content: center; }
-
 /* Fixed to its content (never grows or shrinks) so the icons it holds
-   (back link, brand, nav) always render at full size — .shell__center is
-   the only region that flexes, absorbing all the squeeze via its ellipsis. */
+   (back link, brand, nav) always render at full size. */
 .shell__side { display: flex; flex: 0 0 auto; gap: 4px; align-items: center; }
 .shell__side--end { justify-content: flex-end; }
 
@@ -105,15 +99,21 @@
    stack vertically instead of sitting in a row — this is the fix for that. */
 .shell__nav { display: flex; flex-shrink: 0; align-items: center; gap: 4px; }
 
-.shell__center {
+/* Row 2: the route's actual content (title, plus the streak badge on game
+   routes) gets the full header width instead of splitting it with row 1's
+   brand/nav icons. The border is the "visual separation" between the
+   app-level chrome above and the route-specific content below. */
+.shell__title-row {
   display: flex;
-  flex: 1 1 0;
-  gap: 12px;
   align-items: center;
-  min-width: 0;
+  gap: 12px;
+  padding-top: 6px;
+  border-top: 1px solid rgb(0 0 0 / 8%);
 }
 
 .shell__title {
+  flex: 1 1 auto;
+  min-width: 0;
   overflow: hidden;
   font-size: 18px;
   font-weight: 800;

@@ -68,6 +68,10 @@ export default function AppShell({ manifests = [] }) {
     <ShellContext.Provider value={contextValue}>
       <div className="shell">
         <header className="shell__header">
+          {/* Row 1: app-level chrome (brand, back, nav/home) — identical
+              shape on every route. Row 2 (below): route content — the page
+              title, plus the streak badge on game routes — gets the full
+              row width instead of splitting it with row 1's icons. */}
           <div className="shell__row">
             <div className="shell__side">
               {!isGameRoute && !isHome && (
@@ -83,21 +87,6 @@ export default function AppShell({ manifests = [] }) {
                 <span className="shell__brand-label">{t('shell.brand')}</span>
               </Link>
             </div>
-
-            {(isGameRoute ? gameManifest != null : pageTitleKey != null) && (
-              <div className="shell__center">
-                <h1 className="shell__title" tabIndex={-1} ref={titleRef}>
-                  {isGameRoute ? (
-                    <>
-                      <ManifestIcon icon={gameManifest.icon} className="shell__title-icon" ariaHidden />
-                      {' '}{gameManifest.name}
-                    </>
-                  ) : (
-                    t(pageTitleKey)
-                  )}
-                </h1>
-              </div>
-            )}
 
             <div className="shell__side shell__side--end">
               {isGameRoute ? (
@@ -122,12 +111,21 @@ export default function AppShell({ manifests = [] }) {
             </div>
           </div>
 
-          {/* Its own centered row rather than sharing the main row with the
-              title: on a narrow phone the two were competing for the same
-              shrinking space, wrapping the badge's text mid-word. */}
-          {isGameRoute && gameStatus.sessionActive && (
-            <div className="shell__status-row">
-              <StreakBadge streak={gameStatus.streak} />
+          {(isGameRoute ? gameManifest != null : pageTitleKey != null) && (
+            <div className="shell__title-row">
+              <h1 className="shell__title" tabIndex={-1} ref={titleRef}>
+                {isGameRoute ? (
+                  <>
+                    <ManifestIcon icon={gameManifest.icon} className="shell__title-icon" ariaHidden />
+                    {' '}{gameManifest.name}
+                  </>
+                ) : (
+                  t(pageTitleKey)
+                )}
+              </h1>
+              {isGameRoute && gameStatus.sessionActive && (
+                <StreakBadge streak={gameStatus.streak} />
+              )}
             </div>
           )}
         </header>
