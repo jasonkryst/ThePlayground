@@ -31,7 +31,7 @@ const manifestsFixture = [
 
 async function renderPage() {
   const utils = render(<MemoryRouter><KidsProgressPage manifests={manifestsFixture} /></MemoryRouter>)
-  await screen.findByRole('heading', { name: /my progress/i })
+  await screen.findByRole('heading', { name: /animal sounds/i })
   return utils
 }
 
@@ -55,16 +55,6 @@ describe('KidsProgressPage — with progress data', () => {
       awards: { 'animal-sounds': { hotStreak: 3 } },
       lifetimeQuestions: { 'animal-sounds': 62 },
     }
-  })
-
-  it('renders the page title', async () => {
-    await renderPage()
-    expect(screen.getByRole('heading', { name: /my progress/i })).toBeInTheDocument()
-  })
-
-  it('renders a back link pointing to /', async () => {
-    await renderPage()
-    expect(screen.getByRole('link', { name: /back/i })).toHaveAttribute('href', '/')
   })
 
   it('renders one section per manifest', async () => {
@@ -132,20 +122,3 @@ describe('KidsProgressPage — no data yet', () => {
   })
 })
 
-// ─── Empty manifests ─────────────────────────────────────────────────────────
-
-describe('KidsProgressPage — no games', () => {
-  it('renders the title without crashing when manifests is empty', async () => {
-    render(<MemoryRouter><KidsProgressPage manifests={[]} /></MemoryRouter>)
-    await screen.findByRole('heading', { name: /my progress/i })
-    expect(screen.getByRole('heading', { name: /my progress/i })).toBeInTheDocument()
-  })
-})
-
-describe('KidsProgressPage — focus management', () => {
-  it('moves focus to the page title on mount', async () => {
-    render(<MemoryRouter><KidsProgressPage manifests={[]} /></MemoryRouter>)
-    const heading = await screen.findByRole('heading', { name: /my progress/i })
-    expect(heading).toHaveFocus()
-  })
-})

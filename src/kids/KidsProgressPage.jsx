@@ -1,5 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
-import { Link } from 'react-router-dom'
+import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import useScores from '../hooks/useScores'
 import useBadges from '../hooks/useBadges'
@@ -81,8 +80,6 @@ export default function KidsProgressPage({ manifests = [] }) {
   const { getAllScores } = useScores()
   const { badgeData } = useBadges()
   const [bestStreaks, setBestStreaks] = useState({})
-  const titleRef = useRef(null)
-  useEffect(() => { titleRef.current?.focus() }, [])
 
   useEffect(() => {
     adapter.getBestStreaks().then(setBestStreaks)
@@ -92,23 +89,16 @@ export default function KidsProgressPage({ manifests = [] }) {
 
   return (
     <div className="kid-progress">
-      <main>
-        <div className="kid-progress__header">
-          <Link to="/" className="kid-progress__back" aria-label={t('kids.back')}>←</Link>
-          <h1 className="kid-progress__title" tabIndex={-1} ref={titleRef}>{t('kids.title')}</h1>
-        </div>
-
-        {manifests.map(m => (
-          <GameProgressSection
-            key={m.id}
-            manifest={m}
-            scores={scores}
-            badgeData={badgeData}
-            bestStreak={bestStreaks[m.id]}
-            t={t}
-          />
-        ))}
-      </main>
+      {manifests.map(m => (
+        <GameProgressSection
+          key={m.id}
+          manifest={m}
+          scores={scores}
+          badgeData={badgeData}
+          bestStreak={bestStreaks[m.id]}
+          t={t}
+        />
+      ))}
     </div>
   )
 }
