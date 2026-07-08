@@ -86,6 +86,9 @@
   white-space: nowrap;
 }
 
+.shell__title-icon { font-size: 20px; line-height: 1; }
+img.shell__title-icon { width: 20px; height: 20px; object-fit: contain; }
+
 /* The route-focused h1 gets a real focus target (tabIndex={-1}) but no visible
    ring: it's programmatically focused for a11y on every route change, not
    tabbed to by a keyboard user, so a focus-visible-style outline would be
