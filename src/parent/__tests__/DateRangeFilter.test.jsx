@@ -56,6 +56,24 @@ describe('DateRangeFilter — custom range', () => {
     fireEvent.change(screen.getByLabelText('From'), { target: { value: '2026-07-01' } })
     expect(onChange).not.toHaveBeenCalled()
   })
+
+  it('associates the validation error with both date inputs via aria-describedby', () => {
+    render(<DateRangeFilter range={ALL_RANGE} onChange={vi.fn()} />)
+    fireEvent.change(screen.getByLabelText('From'), { target: { value: '2026-07-10' } })
+    fireEvent.change(screen.getByLabelText('To'), { target: { value: '2026-07-01' } })
+    const errorId = screen.getByRole('alert').id
+    expect(screen.getByLabelText('From')).toHaveAttribute('aria-describedby', errorId)
+    expect(screen.getByLabelText('To')).toHaveAttribute('aria-describedby', errorId)
+  })
+
+  it('removes aria-describedby once the error clears', () => {
+    render(<DateRangeFilter range={ALL_RANGE} onChange={vi.fn()} />)
+    fireEvent.change(screen.getByLabelText('From'), { target: { value: '2026-07-10' } })
+    fireEvent.change(screen.getByLabelText('To'), { target: { value: '2026-07-01' } })
+    fireEvent.change(screen.getByLabelText('To'), { target: { value: '2026-07-20' } })
+    expect(screen.getByLabelText('From')).not.toHaveAttribute('aria-describedby')
+    expect(screen.getByLabelText('To')).not.toHaveAttribute('aria-describedby')
+  })
 })
 
 describe('DateRangeFilter — accessibility', () => {

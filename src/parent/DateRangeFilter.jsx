@@ -68,6 +68,7 @@ export default function DateRangeFilter({ range, onChange }) {
           type="date"
           value={draftStart}
           onChange={e => handleDraftChange('start', e.target.value)}
+          aria-describedby={invalid ? 'date-range-filter-error' : undefined}
         />
         <label className="date-range-filter__label" htmlFor="date-range-to">
           {t('parent.dateRangeTo')}
@@ -77,11 +78,12 @@ export default function DateRangeFilter({ range, onChange }) {
           type="date"
           value={draftEnd}
           onChange={e => handleDraftChange('end', e.target.value)}
+          aria-describedby={invalid ? 'date-range-filter-error' : undefined}
         />
       </div>
 
       {invalid && (
-        <p className="date-range-filter__error" role="alert">
+        <p id="date-range-filter-error" className="date-range-filter__error" role="alert">
           {t('parent.dateRangeInvalid')}
         </p>
       )}
