@@ -96,7 +96,7 @@ export default function AdminPage({ manifests = [] }) {
 
   return (
     <div className="admin">
-    <div className="admin__tabs" role="tablist" aria-label={t('admin.title')}>
+      <div className="admin__tabs" role="tablist" aria-label={t('admin.title')}>
         {tabs.map(tab => (
           <button
             key={tab.id}
