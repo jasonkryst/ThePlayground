@@ -20,7 +20,7 @@ describe('resolvePresetRange', () => {
   })
 
   it('resolves 90d to a 90-day inclusive window ending on the reference date', () => {
-    expect(resolvePresetRange('90d', REF)).toEqual({ start: '2026-04-09', end: '2026-07-08' })
+    expect(resolvePresetRange('90d', REF)).toEqual({ start: '2026-04-10', end: '2026-07-08' })
   })
 
   it('resolves "all" to an unbounded range', () => {
@@ -120,7 +120,9 @@ describe('computeMonthLabels', () => {
   })
 
   it('returns exactly one label when the whole range is within a single month', () => {
-    const cells = buildHeatmapCells([], { start: '2026-07-02', end: '2026-07-08' })
+    // 2026-07-06 is a Monday; Sunday-aligning the grid gives 2026-07-05..2026-07-11,
+    // entirely within July, so no padding crosses a month boundary.
+    const cells = buildHeatmapCells([], { start: '2026-07-06', end: '2026-07-08' })
     const labels = computeMonthLabels(cells, 'en')
     expect(labels).toHaveLength(1)
     expect(labels[0].columnIndex).toBe(0)

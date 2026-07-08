@@ -1,5 +1,3 @@
-const MS_PER_DAY = 86_400_000
-
 function toDateStr(date) {
   return date.toISOString().split('T')[0]
 }
@@ -22,7 +20,7 @@ function endOfWeek(dateStr) {
   return toDateStr(d)
 }
 
-const PRESET_DAYS_BACK = { '7d': 6, '30d': 29, '90d': 90 }
+const PRESET_DAYS_BACK = { '7d': 6, '30d': 29, '90d': 89 }
 
 /**
  * Resolves a preset key to a concrete { start, end } inclusive date-string range.
@@ -72,7 +70,6 @@ export function buildHeatmapCells(heatmapData, { start, end } = {}) {
     cells.push({ date: cur, ...(dataMap[cur] ?? { questions: 0, estimatedMs: null }) })
     cur = addDays(cur, 1)
   }
-  cells._dateRange = { start: resolvedStart, end: resolvedEnd }
   return cells
 }
 
@@ -90,33 +87,9 @@ function monthFormatter(locale) {
  * always labeled. `label` is the locale-aware short month name.
  */
 export function computeMonthLabels(cells, locale = 'en') {
-  if (cells.length === 0) return []
-
   const formatter = monthFormatter(locale)
   const labels = []
   let prevMonth = null
-  const dateRange = cells._dateRange
-
-  // If the entire date range is within a single month, only show one label
-  if (dateRange) {
-    const startMonth = dateRange.start.slice(0, 7)
-    const endMonth = dateRange.end.slice(0, 7)
-    if (startMonth === endMonth) {
-      // Find the first column that intersects with the date range
-      for (let col = 0; col * 7 < cells.length; col++) {
-        const cell = cells[col * 7]
-        const colStart = cell.date
-        const colEnd = cells[Math.min(col * 7 + 6, cells.length - 1)].date
-        if (colEnd >= dateRange.start && colStart <= dateRange.end) {
-          labels.push({ columnIndex: col, label: formatter.format(new Date(`${dateRange.start}T00:00:00Z`)) })
-          return labels
-        }
-      }
-      return labels
-    }
-  }
-
-  // Otherwise, label columns where month changes
   for (let col = 0; col * 7 < cells.length; col++) {
     const cell  = cells[col * 7]
     const month = cell.date.slice(0, 7) // 'YYYY-MM'
