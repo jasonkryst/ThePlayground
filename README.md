@@ -82,7 +82,8 @@ src/
 ├── index.css                  # Design system (CSS custom properties)
 ├── main.jsx                   # React entry point
 │
-├── components/                # Shared UI: Dashboard, GameCard, GameIntro/GameResults,
+├── components/                # Shared UI: AppShell (persistent header/footer + exit guard),
+│                               # ShellContext, GameCard, GameIntro/GameResults,
 │                               # GameChoiceGrid, BadgeGallery, Timer, StreakBadge, ...
 ├── admin/
 │   └── AdminPage.jsx          # Settings, game tags, badges, score history (tabbed)
@@ -123,6 +124,23 @@ const gameModules     = import.meta.glob('./games/*/index.jsx')
 ```
 
 Every `manifest.json` becomes a dashboard card. Every `index.jsx` becomes a lazy-loaded route at `/game/<id>`. No imports, no registries — just files.
+
+### Wrapper UI (AppShell)
+
+Every route renders inside `AppShell`, a React Router layout route that owns the
+page chrome: brand/home link, contextual nav, back links, page titles, footer,
+and the kid-safe exit guard on game routes. Games must NOT render their own
+`header`/`main`/`footer` — they render a `<div className="game">` (layout in
+`src/components/GameLayout.css`) and report live status to the shell with:
+
+```jsx
+useShellGameStatus({ streak, sessionActive: introResolved && !showIntro && !done })
+```
+
+While `sessionActive` is true, leaving the game (home button or brand link)
+opens a confirm overlay instead of navigating, so a stray toddler tap can't
+kill a session. The guard is fail-open: a game that never reports status can
+always be exited immediately.
 
 ### Storage Adapter
 
