@@ -82,7 +82,7 @@ src/
 ├── index.css                  # Design system (CSS custom properties)
 ├── main.jsx                   # React entry point
 │
-├── components/                # Shared UI: AppShell (persistent header/footer + exit guard),
+├── components/                # Shared UI: AppShell (persistent header, route-aware footer + exit guard),
 │                               # ShellContext, GameCard, GameIntro/GameResults,
 │                               # GameChoiceGrid, BadgeGallery, Timer, StreakBadge, ...
 ├── admin/

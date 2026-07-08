@@ -29,7 +29,7 @@ Tests live in `__tests__/` folders next to the code under test. A few patterns u
 - **`data-testid` for game internals:** each game exposes a hidden `data-testid="correct-<thing>-id"` element so tests can assert the correct answer without depending on choice display order.
 - **Mocking `canvas-confetti`:** any test exercising `useGameSession` or a game component mocks `src/lib/confetti.js` (`vi.mock('.../lib/confetti', () => ({ fireConfetti: vi.fn() }))`) rather than the `canvas-confetti` package directly — it's the one module in the codebase that imports the library, keeping the mock seam in one place.
 - **Choice-rendering games:** new games should render their answer choices via `src/components/GameChoiceGrid.jsx` rather than duplicating the correct/wrong/hint/disabled class logic — see `AnimalSoundsGame`/`ColorMatchGame` for the render-prop pattern (`getChoiceProps`, `renderChoiceContent`).
-- **`AppShell`:** `src/components/__tests__/AppShell.test.jsx` covers route-driven chrome states (home, subpages, game routes), footer visibility, route-entry focus, and the exit-guard dialog end to end (open on a guarded nav/home click, resume, leave, Escape, and focus restoring to the trigger element). `ExitConfirmDialog` has its own dedicated a11y test (`jest-axe`, no violations) alongside its interaction tests.
+- **`AppShell`:** `src/components/__tests__/AppShell.test.jsx` covers route-driven chrome states (home, subpages, game routes), footer visibility, route-entry focus, and the exit-guard dialog end to end (open on a guarded nav/home click, resume, leave, and focus restoring to the trigger element). `ExitConfirmDialog` has its own dedicated a11y test (`jest-axe`, no violations) alongside its interaction tests, including Escape-key dismissal.
 
 ## Accessibility audits (jest-axe + axe-core/playwright)
 
@@ -48,7 +48,7 @@ If either layer reports a violation, the failure message names the specific rule
 npm run e2e
 ```
 
-Specs live in `e2e/`, covering: the dashboard, both games' full play-through (launch → answer all questions → results → home), admin settings persistence, and — in `e2e/app-shell.spec.js` — the wrapper UI itself (chrome across routes, the exit-confirm dialog's guarded navigation, and a real browser-level Escape/resume/leave pass). Playwright starts both `npm run dev` (port 5173) and `npm run storybook -- --ci` (port 6006) automatically via the `webServer` array in `playwright.config.js`.
+Specs live in `e2e/`, covering: the dashboard, both games' full play-through (launch → answer all questions → results → home), admin settings persistence, and — in `e2e/app-shell.spec.js` — the wrapper UI itself (chrome persisting across routes, and the exit-confirm dialog's guarded navigation via a real browser-level resume/leave pass). Playwright starts both `npm run dev` (port 5173) and `npm run storybook -- --ci` (port 6006) automatically via the `webServer` array in `playwright.config.js`.
 
 ## Visual regression (Storybook + Playwright screenshots)
 
