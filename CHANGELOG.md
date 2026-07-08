@@ -3,15 +3,17 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.19.0] - 2026-07-08
+
+### Fixed
+- `AppShell`'s header: `.shell__nav` was missing `display: flex`, so the three nav icons (each individually a `display: flex` block box) stacked vertically instead of sitting in a row — visible at any viewport width, not just narrow ones. Also fixed the brand wordmark wrapping onto two lines under a squeezed page title by collapsing it to icon-only below 480px and giving the page title (not the fixed nav/back/brand icons) all the flexible space, so long titles truncate gracefully on one line instead of forcing everything to wrap.
+- The header now consistently splits into two rows wherever there's a page title: row 1 is always app-level chrome (brand, back link, nav icons or the in-game home button); row 2 (separated by a hairline border) is the route's own content — the page title on `/admin`/`/parent`/`/my-progress`, or the game title plus streak badge on `/game/:id` — which now gets the full header width instead of splitting it with row 1's icons. This also fixes the streak badge wrapping its own text ("2" / "in a row!") on narrow phones, since it no longer shares a row with anything else that was squeezing it.
+
 ## [0.18.0] - 2026-07-08
 
 ### Added
 - `AppShell`, a React Router layout route providing one persistent header/footer shared by every page (home, settings, parent dashboard, my-progress, games), replacing per-page chrome (nav links, back links, page titles, footers, per-game mini headers).
 - Kid-safe exit guard: leaving a game mid-session (home button or brand link) opens an `ExitConfirmDialog` requiring a deliberate second tap, so a stray toddler tap can't kill a session. Fail-open — a game that never reports status can always be exited immediately. Full jest-axe coverage, plus `e2e/app-shell.spec.js`.
-
-### Fixed
-- `AppShell`'s header: `.shell__nav` was missing `display: flex`, so the three nav icons (each individually a `display: flex` block box) stacked vertically instead of sitting in a row — visible at any viewport width, not just narrow ones. Also fixed the brand wordmark wrapping onto two lines under a squeezed page title by collapsing it to icon-only below 480px and giving the page title (not the fixed nav/back/brand icons) all the flexible space, so long titles truncate gracefully on one line instead of forcing everything to wrap.
-- The header now consistently splits into two rows wherever there's a page title: row 1 is always app-level chrome (brand, back link, nav icons or the in-game home button); row 2 (separated by a hairline border) is the route's own content — the page title on `/admin`/`/parent`/`/my-progress`, or the game title plus streak badge on `/game/:id` — which now gets the full header width instead of splitting it with row 1's icons. This also fixes the streak badge wrapping its own text ("2" / "in a row!") on narrow phones, since it no longer shares a row with anything else that was squeezing it.
 - `ShellContext` / `useShellGameStatus({ streak, sessionActive })` — the interface games use to publish live status to the shell.
 - Shared `GameLayout.css` for the game content region, replacing each game's own header/layout CSS.
 - Color Match, Animal Sounds, Character Match (1.5.0/1.5.0/1.3.0 → 1.6.0/1.6.0/1.4.0): dropped their own mini headers (name, streak badge, version) in favor of reporting status to the shared shell via `useShellGameStatus`.
