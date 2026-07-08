@@ -122,3 +122,15 @@ describe('KidsProgressPage — no data yet', () => {
   })
 })
 
+// ─── No games ───────────────────────────────────────────────────────────────
+
+describe('KidsProgressPage — no games', () => {
+  it('renders without crashing when manifests is empty', () => {
+    const { container } = render(<MemoryRouter><KidsProgressPage manifests={[]} /></MemoryRouter>)
+    // The component should render its container div (proves no crash)
+    expect(container.querySelector('.kid-progress')).toBeInTheDocument()
+    // No game sections should be rendered (manifests.map() over empty array produces nothing)
+    expect(screen.queryAllByRole('heading')).toHaveLength(0)
+  })
+})
+
