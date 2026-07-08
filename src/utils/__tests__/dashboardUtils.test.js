@@ -199,6 +199,28 @@ describe('computeStreakHistory', () => {
     const result = computeStreakHistory(scores)
     expect(result['animal-sounds'].last7).toBe(9)
   })
+
+  it('computes windows relative to a past anchor instead of Date.now()', () => {
+    const anchor = new Date(NOW - 20 * DAY)
+    // 22 days before "now", but only 2 days before the anchor — falls inside last7
+    const score  = makeScore({ peakStreak: 9, timestamp: NOW - 22 * DAY, date: fortyDaysAgo })
+    const result = computeStreakHistory([score], {}, anchor)
+    expect(result['animal-sounds'].last7).toBe(9)
+  })
+
+  it('excludes sessions after the anchor even if they are before real "now"', () => {
+    const anchor = new Date(NOW - 20 * DAY)
+    const score  = makeScore({ peakStreak: 9, timestamp: NOW - DAY }) // after the anchor
+    const result = computeStreakHistory([score], {}, anchor)
+    expect(result['animal-sounds'].last7).toBe(0)
+    expect(result['animal-sounds'].last30).toBe(0)
+  })
+
+  it('defaults to now when anchor is omitted (regression guard for existing callers)', () => {
+    const score  = makeScore({ peakStreak: 9, timestamp: NOW - DAY })
+    const result = computeStreakHistory([score])
+    expect(result['animal-sounds'].last7).toBe(9)
+  })
 })
 
 // ─── computeSessionHeatmap ───────────────────────────────────────────────────
