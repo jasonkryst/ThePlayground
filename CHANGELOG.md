@@ -3,6 +3,19 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.20.0] - 2026-07-08
+
+### Added
+- Footer now shows a copyright line (`© {year} The Playground`) and, on game routes, the current game's own version alongside the engine version — previously the game version wasn't displayed anywhere after the per-game mini headers were removed.
+- `src/hooks/useFocusOnMount.js` — a shared hook for the route/mount-entry focus pattern (`ref` + `tabIndex={-1}` + focus-on-change `useEffect`) that had been independently duplicated in `AppShell`, `Dashboard`, `GameResults`, and `ExitConfirmDialog`.
+
+### Fixed
+- The kid-safe exit guard didn't cover the browser/OS back button (or a swipe-back gesture) — only brand-link/home-button clicks were intercepted, so a `popstate` navigation left mid-game without ever showing the confirm dialog. Added a standard SPA "history sentinel" trap: a guarded session pushes an extra history entry, and any back-press while still guarded re-arms the trap and shows the same confirm dialog, rather than actually navigating away.
+- The exit-confirm dialog trapped Tab-key focus between its two buttons, but never marked the header/game content behind it as unreachable — a screen reader's swipe/virtual-cursor navigation (which walks DOM order, not Tab order) could still reach and activate the shell's home button or brand link right through the backdrop. The shell now marks everything behind the dialog `inert` (plus `aria-hidden` as a fallback for engines with incomplete `inert` support) while it's open.
+- `AppShell`'s title-row visibility check mixed two differently-shaped lookups (a manifest search for games, a hardcoded pathname map for pages); resolved to one `title` value up front instead.
+- Documented the 480px brand-label breakpoint's actual justification (row 1's own fixed-content width, not the title row, which no longer shares space with it) instead of leaving it as an unexplained number.
+- A stale comment and loose assertion in `App.test.jsx` left over from the (now-finished) transitional period when duplicate footers were expected.
+
 ## [0.19.0] - 2026-07-08
 
 ### Fixed
