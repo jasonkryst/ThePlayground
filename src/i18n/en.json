@@ -78,7 +78,16 @@
     "missedHeading": "Missed Items",
     "missedHint": "Which animals or colors are answered incorrectly most often.",
     "missedNoData": "No missed-item data yet — requires sessions played after v0.4.0.",
-    "missedItemsAriaLabel": "{{name}} missed items"
+    "missedItemsAriaLabel": "{{name}} missed items",
+    "dateRangeHeading": "Date Range",
+    "dateRange7d": "7 days",
+    "dateRange30d": "30 days",
+    "dateRange90d": "90 days",
+    "dateRangeAll": "All time",
+    "dateRangeFrom": "From",
+    "dateRangeTo": "To",
+    "dateRangeInvalid": "End date must be on or after the start date.",
+    "dateRangeAriaLabel": "Filter dashboard by date range"
   },
   "gameCard": {
     "best": "Best: {{score}}",

@@ -3,6 +3,15 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.21.0] - 2026-07-08
+
+### Added
+- Parent Dashboard: interactive date-range filter (7/30/90-day presets plus a custom from–to range) applying to every section — Score Trend, Response Time, Streak History, Play Calendar, and Missed Items — as well as CSV export. The selection persists across visits.
+- Parent Dashboard: the Play Calendar heatmap now shows month labels above the week columns and resizes to span exactly the selected date range instead of always showing a fixed trailing 13 weeks.
+
+### Fixed
+- Streak History's "Last 7 days"/"Last 30 days" columns now re-anchor to the end of the selected date range instead of always being relative to the current moment, so a past custom range shows meaningful streak data instead of zeros.
+
 ## [0.20.0] - 2026-07-08
 
 ### Added

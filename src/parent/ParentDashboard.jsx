@@ -11,6 +11,7 @@ import {
   Legend,
 } from 'recharts'
 import useScores from '../hooks/useScores'
+import useSettings from '../hooks/useSettings'
 import adapter from '../storage/index'
 import {
   computeScoreTrend,
@@ -21,6 +22,13 @@ import {
   buildCsvContent,
   downloadCsv,
 } from '../utils/dashboardUtils'
+import {
+  resolvePresetRange,
+  filterScoresByRange,
+  buildHeatmapCells,
+  computeMonthLabels,
+} from '../utils/dateRangeUtils'
+import DateRangeFilter from './DateRangeFilter'
 import './ParentDashboard.css'
 
 // One distinct stroke color per game line in charts
@@ -177,8 +185,7 @@ function StreakHistoryPanel({ streakHistory, gameNames }) {
 
 // ─── Section: Session Heatmap ────────────────────────────────────────────────
 
-const HEATMAP_WEEKS = 13
-const DAY_LABELS    = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
+const DAY_LABELS = ['S', 'M', 'T', 'W', 'T', 'F', 'S']
 
 function intensityLevel(questions) {
   if (questions === 0) return 0
@@ -187,52 +194,46 @@ function intensityLevel(questions) {
   return 3
 }
 
-function buildHeatmapCells(heatmapData) {
-  const today = new Date()
-  // Align start to the most recent Sunday that is at least WEEKS*7 days back
-  const start = new Date(today)
-  start.setDate(start.getDate() - HEATMAP_WEEKS * 7)
-  start.setDate(start.getDate() - start.getDay()) // back to Sunday
-
-  const dataMap = Object.fromEntries(heatmapData.map(d => [d.date, d]))
-  const cells   = []
-  const cur     = new Date(start)
-
-  while (cur <= today) {
-    const dateStr = cur.toISOString().split('T')[0]
-    cells.push({ date: dateStr, ...(dataMap[dateStr] ?? { questions: 0, estimatedMs: null }) })
-    cur.setDate(cur.getDate() + 1)
-  }
-  return cells
-}
-
-function SessionHeatmap({ heatmapData }) {
-  const { t }   = useTranslation()
-  const cells   = useMemo(() => buildHeatmapCells(heatmapData), [heatmapData])
+function SessionHeatmap({ cells }) {
+  const { t, i18n } = useTranslation()
+  const monthLabels  = useMemo(() => computeMonthLabels(cells, i18n.language), [cells, i18n.language])
+  const labelByColumn = useMemo(
+    () => Object.fromEntries(monthLabels.map(m => [m.columnIndex, m.label])),
+    [monthLabels]
+  )
+  const columnCount = cells.length / 7
 
   return (
     <div className="heatmap" role="img" aria-label={t('parent.heatmapLabel')}>
       <div className="heatmap__inner">
-        <div className="heatmap__days" aria-hidden="true">
-          {DAY_LABELS.map((d, i) => <span key={i} className="heatmap__day-label">{d}</span>)}
+        <div className="heatmap__days-col">
+          <div className="heatmap__months-spacer" aria-hidden="true" />
+          <div className="heatmap__days" aria-hidden="true">
+            {DAY_LABELS.map((d, i) => <span key={i} className="heatmap__day-label">{d}</span>)}
+          </div>
         </div>
         <div className="heatmap__scroll">
-        <div className="heatmap__grid">
-          {cells.map(cell => {
-            const level   = intensityLevel(cell.questions)
-            const minutes = cell.estimatedMs ? Math.round(cell.estimatedMs / 60000) : null
-            const tip     = cell.questions > 0
-              ? `${cell.date}: ${cell.questions} questions${minutes ? ` (~${minutes} min)` : ''}`
-              : cell.date
-            return (
-              <div
-                key={cell.date}
-                className={`heatmap__cell heatmap__cell--${level}`}
-                title={tip}
-              />
-            )
-          })}
-        </div>
+          <div className="heatmap__months" aria-hidden="true">
+            {Array.from({ length: columnCount }, (_, col) => (
+              <span key={col} className="heatmap__month-label">{labelByColumn[col] ?? ''}</span>
+            ))}
+          </div>
+          <div className="heatmap__grid">
+            {cells.map(cell => {
+              const level   = intensityLevel(cell.questions)
+              const minutes = cell.estimatedMs ? Math.round(cell.estimatedMs / 60000) : null
+              const tip     = cell.questions > 0
+                ? `${cell.date}: ${cell.questions} questions${minutes ? ` (~${minutes} min)` : ''}`
+                : cell.date
+              return (
+                <div
+                  key={cell.date}
+                  className={`heatmap__cell heatmap__cell--${level}`}
+                  title={tip}
+                />
+              )
+            })}
+          </div>
         </div>
       </div>
       <div className="heatmap__legend" aria-hidden="true">
@@ -291,11 +292,21 @@ function MissedItemsPanel({ missedItems, gameNames }) {
 // ─── Main Page ───────────────────────────────────────────────────────────────
 
 export default function ParentDashboard({ manifests = [] }) {
-  const { t }          = useTranslation()
-  const { getAllScores } = useScores()
+  const { t }             = useTranslation()
+  const { getAllScores }  = useScores()
+  const { settings, updateSetting } = useSettings()
   const [bestStreaks, setBestStreaks] = useState({})
   const scores  = getAllScores()
-  const gameIds = useMemo(() => [...new Set(scores.map(s => s.gameId))], [scores])
+  const range   = settings.parentDateRange
+
+  const resolvedRange = useMemo(() => (
+    range.preset === 'custom'
+      ? { start: range.start, end: range.end }
+      : resolvePresetRange(range.preset)
+  ), [range.preset, range.start, range.end])
+
+  const filteredScores = useMemo(() => filterScoresByRange(scores, resolvedRange), [scores, resolvedRange])
+  const gameIds = useMemo(() => [...new Set(filteredScores.map(s => s.gameId))], [filteredScores])
   const gameNames = useMemo(
     () => Object.fromEntries(manifests.map(m => [m.id, m.name])),
     [manifests]
@@ -305,21 +316,37 @@ export default function ParentDashboard({ manifests = [] }) {
     adapter.getBestStreaks().then(setBestStreaks)
   }, [])
 
-  const scoreTrend    = useMemo(() => computeScoreTrend(scores),                [scores])
-  const responseTimes = useMemo(() => computeResponseTimes(scores),              [scores])
-  const streakHistory = useMemo(() => computeStreakHistory(scores, bestStreaks),  [scores, bestStreaks])
-  const heatmapData   = useMemo(() => computeSessionHeatmap(scores),             [scores])
-  const missedItems   = useMemo(() => computeMissedItems(scores),                [scores])
+  const streakAnchor = useMemo(
+    () => (resolvedRange.end ? new Date(`${resolvedRange.end}T23:59:59.999Z`) : new Date()),
+    [resolvedRange.end]
+  )
+
+  const scoreTrend    = useMemo(() => computeScoreTrend(filteredScores),    [filteredScores])
+  const responseTimes = useMemo(() => computeResponseTimes(filteredScores), [filteredScores])
+  const streakHistory = useMemo(
+    () => computeStreakHistory(filteredScores, bestStreaks, streakAnchor),
+    [filteredScores, bestStreaks, streakAnchor]
+  )
+  const heatmapCells = useMemo(
+    () => buildHeatmapCells(computeSessionHeatmap(filteredScores), resolvedRange),
+    [filteredScores, resolvedRange]
+  )
+  const missedItems = useMemo(() => computeMissedItems(filteredScores), [filteredScores])
 
   function handleExport() {
-    const csv      = buildCsvContent(scores)
-    const today    = new Date().toISOString().split('T')[0]
+    const csv   = buildCsvContent(filteredScores)
+    const today = new Date().toISOString().split('T')[0]
     downloadCsv(`playground-scores-${today}.csv`, csv)
+  }
+
+  function handleRangeChange(next) {
+    updateSetting('parentDateRange', next)
   }
 
   return (
     <div className="parent">
       <div className="parent__toolbar">
+        <DateRangeFilter range={range} onChange={handleRangeChange} />
         <button className="parent__export-btn" onClick={handleExport} aria-label={t('parent.exportCsv')}>
           {t('parent.exportCsv')}
         </button>
@@ -350,7 +377,7 @@ export default function ParentDashboard({ manifests = [] }) {
           <section className="parent__section" aria-labelledby="heatmap-heading">
             <h2 id="heatmap-heading">{t('parent.heatmapHeading')}</h2>
             <p className="parent__hint">{t('parent.heatmapHint')}</p>
-            <SessionHeatmap heatmapData={heatmapData} />
+            <SessionHeatmap cells={heatmapCells} />
           </section>
 
           <section className="parent__section" aria-labelledby="missed-heading">

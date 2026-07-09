@@ -52,13 +52,14 @@ export function computeResponseTimes(scores) {
 }
 
 /**
- * Peak streak per game for last-7-day, last-30-day, and all-time windows.
- * For scores that predate the peakStreak field, falls back to using score (correct count) as a proxy.
+ * Peak streak per game for last-7-day, last-30-day, and all-time windows,
+ * measured relative to `anchor` (defaults to now). For scores that predate
+ * the peakStreak field, falls back to using score (correct count) as a proxy.
  */
-export function computeStreakHistory(scores, bestStreaks = {}) {
-  const now     = Date.now()
-  const cutoff7  = now - 7  * MS_PER_DAY
-  const cutoff30 = now - 30 * MS_PER_DAY
+export function computeStreakHistory(scores, bestStreaks = {}, anchor = new Date()) {
+  const anchorMs = anchor.getTime()
+  const cutoff7  = anchorMs - 7  * MS_PER_DAY
+  const cutoff30 = anchorMs - 30 * MS_PER_DAY
   const gameIds  = [...new Set(scores.map(s => s.gameId))]
   const result   = {}
 
@@ -66,7 +67,7 @@ export function computeStreakHistory(scores, bestStreaks = {}) {
     const sessions = scores.filter(s => s.gameId === gameId)
     const peakInWindow = (cutoff) =>
       sessions
-        .filter(s => (s.timestamp ?? 0) >= cutoff)
+        .filter(s => (s.timestamp ?? 0) >= cutoff && (s.timestamp ?? 0) <= anchorMs)
         .reduce((max, s) => Math.max(max, s.peakStreak ?? s.score ?? 0), 0)
 
     result[gameId] = {
