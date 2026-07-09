@@ -276,6 +276,8 @@ Accessible from the dashboard via the gear icon (⚙).
 | Difficulty auto-progression | Off | On, Off |
 | Google Analytics ID | *(empty)* | Any valid GA4 Measurement ID (e.g. `G-XXXXXXXXXX`) |
 
+**Questions per session** — if a game's item set is smaller than the selected count (for example, a 12-item game with "20" selected), items repeat to fill the session. Repeats are distributed evenly across the pool and the same item is never asked twice in a row.
+
 **Immediate** — correct/wrong feedback shown instantly; next question advances automatically after 1.5 s.
 
 **Parent tap** — feedback shown after a parent taps "Next", giving time to discuss the answer.
