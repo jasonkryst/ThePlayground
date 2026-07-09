@@ -315,9 +315,7 @@ describe('ParentDashboard — date range filter', () => {
     mockGetAllScores.mockReturnValue([makeScore({ date: oldDate, timestamp: NOW - 60 * DAY })])
     await renderDashboard()
     fireEvent.click(screen.getByRole('tab', { name: '7 days' }))
-    // matches both the "Missed Items" section heading (always present) and the
-    // "No missed-item data yet" empty-state paragraph (only once filtered to empty)
-    expect(screen.getAllByText(/no missed-item data yet|missed items/i).length).toBeGreaterThan(0)
+    expect(screen.getByText(/no missed-item data yet/i)).toBeInTheDocument()
   })
 
   it('CSV export reflects the active filter', async () => {
