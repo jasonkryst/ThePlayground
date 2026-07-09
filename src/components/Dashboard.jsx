@@ -24,21 +24,17 @@ function tagLabel(tag, t) {
   return t(`dashboard.tag.${tag}`, { defaultValue: tag.charAt(0).toUpperCase() + tag.slice(1) })
 }
 
-function buildSections(manifests, tagMap, featuredId, allTags, t) {
+function buildSections(manifests, tagMap, allTags, t) {
   const sections = []
   for (const tag of allTags) {
-    const games = manifests.filter(
-      m => m.id !== featuredId && (tagMap.get(m.id) ?? []).includes(tag)
-    )
+    const games = manifests.filter(m => (tagMap.get(m.id) ?? []).includes(tag))
     if (games.length > 0) {
       const icon = TAG_ICONS[tag] ?? ''
       const label = `${icon} ${tagLabel(tag, t)}`.trim()
       sections.push({ heading: label, games })
     }
   }
-  const untagged = manifests.filter(
-    m => m.id !== featuredId && (tagMap.get(m.id) ?? []).length === 0
-  )
+  const untagged = manifests.filter(m => (tagMap.get(m.id) ?? []).length === 0)
   if (untagged.length > 0) {
     sections.push({ heading: t('dashboard.categoryOther'), games: untagged })
   }
@@ -63,7 +59,7 @@ export default function Dashboard({ manifests = [] }) {
     : manifests.filter(m => (tagMap.get(m.id) ?? []).includes(activeTag))
 
   const sections = activeTag === 'all'
-    ? buildSections(manifests, tagMap, featured?.id, allTags, t)
+    ? buildSections(manifests, tagMap, allTags, t)
     : null
 
   return (
@@ -72,7 +68,7 @@ export default function Dashboard({ manifests = [] }) {
         <h1 className="dashboard__title" tabIndex={-1} ref={titleRef}>🌊 {title}</h1>
       </div>
 
-      {activeTag === 'all' && <FeaturedGameCard manifest={featured} />}
+      <FeaturedGameCard manifest={featured} />
 
       {manifests.length === 0 ? (
         <p className="dashboard__empty">{t('dashboard.empty')}</p>
