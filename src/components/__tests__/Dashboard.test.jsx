@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, it, expect, vi } from 'vitest'
 import { axe } from 'jest-axe'
@@ -94,13 +94,13 @@ describe('Dashboard', () => {
     expect(panel).toHaveAttribute('aria-labelledby', allTab.id)
   })
 
-  it('featured game also appears in filtered view', async () => {
+  it('featured game appears both in the banner and in the filtered grid', async () => {
     const user = userEvent.setup()
     render(<MemoryRouter><Dashboard manifests={manifests} /></MemoryRouter>)
-    // click the 'Sounds' tab — animal-sounds should appear in the filtered flat grid
+    // useFeaturedGame is mocked to return manifests[0] (animal-sounds)
     await user.click(screen.getByRole('tab', { name: 'Sounds' }))
     const links = screen.getAllByRole('link', { name: /animal sounds/i })
-    expect(links.length).toBeGreaterThanOrEqual(1) // grid card only (featured card hidden when filtering)
+    expect(links.length).toBe(2) // banner card + grid card, no dedupe
   })
 
   it('does not render FeaturedGameCard when manifests is empty', () => {
@@ -135,7 +135,7 @@ describe('Dashboard', () => {
     render(<MemoryRouter><Dashboard manifests={manifests} /></MemoryRouter>)
     await user.click(screen.getByRole('tab', { name: 'Sounds' }))
     expect(screen.getByRole('tab', { name: 'Sounds' })).toHaveAttribute('aria-selected', 'true')
-    expect(screen.getAllByText('Animal Sounds')).toHaveLength(1) // grid card only (featured card hidden when filtering)
+    expect(screen.getAllByText('Animal Sounds')).toHaveLength(2) // banner + grid card, no dedupe
     expect(screen.queryByText('Color Match')).not.toBeInTheDocument()
   })
 
@@ -144,8 +144,38 @@ describe('Dashboard', () => {
     render(<MemoryRouter><Dashboard manifests={manifests} /></MemoryRouter>)
     await user.click(screen.getByRole('tab', { name: 'Sounds' }))
     await user.click(screen.getByRole('tab', { name: 'All' }))
-    expect(screen.getByText('Animal Sounds')).toBeInTheDocument()
+    expect(screen.getAllByText('Animal Sounds').length).toBeGreaterThan(0)
     expect(screen.getByText('Color Match')).toBeInTheDocument()
+  })
+
+  it('keeps the featured banner visible on a filtered tab', async () => {
+    const user = userEvent.setup()
+    render(<MemoryRouter><Dashboard manifests={manifests} /></MemoryRouter>)
+    await user.click(screen.getByRole('tab', { name: 'Sounds' }))
+    expect(screen.getByText(/Today's Game/i)).toBeInTheDocument()
+  })
+
+  it('keeps the featured banner visible even on a tab that does not match the featured game', async () => {
+    const user = userEvent.setup()
+    render(<MemoryRouter><Dashboard manifests={manifests} /></MemoryRouter>)
+    // useFeaturedGame mock returns manifests[0] (animal-sounds, tag 'sounds') — filter to 'Visual' instead
+    await user.click(screen.getByRole('tab', { name: 'Visual' }))
+    expect(screen.getByText(/Today's Game/i)).toBeInTheDocument()
+    // "Animal Sounds" still appears once, from the banner's own name text — just not duplicated into the (non-matching) grid
+    expect(screen.getAllByText('Animal Sounds')).toHaveLength(1)
+  })
+
+  it('does not render the featured banner on any tab when manifests is empty', () => {
+    render(<MemoryRouter><Dashboard manifests={[]} /></MemoryRouter>)
+    expect(screen.queryByText(/Today's Game/i)).not.toBeInTheDocument()
+  })
+
+  it('includes the featured game inside its own category section in the All view (no longer excluded)', () => {
+    // useFeaturedGame mock returns manifests[0] (animal-sounds, tag 'sounds')
+    render(<MemoryRouter><Dashboard manifests={manifests} /></MemoryRouter>)
+    const soundsSection = screen.getByRole('heading', { name: /sounds/i }).closest('section')
+    expect(soundsSection).not.toBeNull()
+    expect(within(soundsSection).getByText('Animal Sounds')).toBeInTheDocument()
   })
 
   it('renders a translated label for a known tag instead of just capitalizing the slug', () => {

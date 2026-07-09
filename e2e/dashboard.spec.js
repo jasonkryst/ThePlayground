@@ -40,8 +40,11 @@ test('category tabs appear and filter the grid', async ({ page }) => {
   // Click "Sounds" tab
   await page.getByRole('tab', { name: 'Sounds' }).click()
   await expect(page.getByRole('tab', { name: 'Sounds' })).toHaveAttribute('aria-selected', 'true')
-  await expect(page.getByText('Animal Sounds')).toBeVisible()
-  await expect(page.getByText('Color Match')).not.toBeVisible()
+  // Scope to the grid (not the always-visible featured banner, which may show
+  // either game regardless of the active tag) to check what the filter actually did.
+  const grid = page.locator('.dashboard__grid')
+  await expect(grid.getByText('Animal Sounds')).toBeVisible()
+  await expect(grid.getByText('Color Match')).not.toBeVisible()
 })
 
 test('clicking All tab restores full grid', async ({ page }) => {
@@ -59,12 +62,11 @@ test('recently-played badge appears for a game with seeded scores', async ({ pag
   await page.goto('/')
   await page.evaluate(() => {
     // Seed scores for both games rather than a single hardcoded gameId: the
-    // dashboard's "Today's Game" feature deterministically hides whichever game
-    // is featured today from the "All" tab's category sections (it's already
-    // shown as the hero card above, which does not render a recently-played
-    // badge). Seeding only one game's score would make this test's outcome
-    // depend on the current date. Seeding both guarantees the non-featured
-    // game's card — and its badge — is visible regardless of the date.
+    // dashboard's "Today's Game" banner always shows the featured game (see
+    // Dashboard.jsx), but that banner card itself never renders a
+    // recently-played badge — only the matching GameCard in the grid/section
+    // does. Seeding both games guarantees at least one badge-bearing grid
+    // card is visible regardless of which game is featured today.
     const today = new Date().toISOString().split('T')[0]
     const scores = [
       { gameId: 'animal-sounds', score: 8, total: 10, date: today, timestamp: Date.now() },

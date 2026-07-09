@@ -3,6 +3,11 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.22.1] - 2026-07-09
+
+### Fixed
+- The "Today's Game" featured banner disappeared whenever a category tab other than "All" was selected, instead of staying visible while browsing a filtered category. The banner now always renders regardless of the active tab, and the featured game is no longer excluded from its own category section/grid underneath it.
+
 ## [0.22.0] - 2026-07-09
 
 ### Fixed

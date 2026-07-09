@@ -22,7 +22,7 @@ A browser-based game dashboard designed for infants and toddlers. Games are disp
 
 ### Daily Challenge
 
-Each day, one game is automatically selected as "Today's Game" and displayed as a featured hero card above the game grid. The selection is deterministic (based on a date-seeded hash), so all users see the same featured game each day. This encourages daily return visits and variety in play.
+Each day, one game is automatically selected as "Today's Game" and displayed as a featured hero card above the game grid. The selection is deterministic (based on a date-seeded hash), so all users see the same featured game each day. This encourages daily return visits and variety in play. The banner stays visible no matter which category tab is selected, and the featured game also appears in its normal category section or grid position — it is not hidden or removed from the list underneath.
 
 ### Recently Played Badges
 
@@ -35,7 +35,7 @@ This visual indicator comes from your existing score history with no additional 
 
 ### Game Categories & Tags
 
-Games are now organized under category headings ("Sounds 🔊", "Visual 👁️", etc.) on the dashboard. A tab strip at the top of the dashboard lets parents filter by category to see only games in a particular group.
+Games are now organized under category headings ("Sounds 🔊", "Visual 👁️", etc.) on the dashboard. A tab strip at the top of the dashboard lets parents filter by category to see only games in a particular group. The "Today's Game" featured banner is unaffected by this filter and always stays at the top.
 
 Each game's category is defined by a `"tags"` array in its `manifest.json` (required field, minimum one tag). Tags can be customized per-game in the admin panel under the **Games** tab, allowing you to reorganize games without modifying code.
 
