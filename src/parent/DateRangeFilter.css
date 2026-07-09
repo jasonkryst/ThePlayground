@@ -27,6 +27,19 @@
   color: var(--color-surface);
 }
 
+/* `.date-range-filter__tab:hover` (a class + a pseudo-class) has higher specificity
+   than the single-class `.date-range-filter__tab--active`, so without this rule,
+   hovering the active tab silently strips its solid background back to a faint
+   rgba(0,0,0,0.05) tint while its white text color is untouched -- a real WCAG 2 AA
+   color-contrast failure. Same pattern as `.admin__tab--active:hover` in
+   src/admin/AdminPage.css; re-assert the active styling at equal specificity so it
+   wins the cascade on hover too. */
+.date-range-filter__tab--active:hover {
+  background: var(--color-lavender-dark);
+  border-color: var(--color-lavender-dark);
+  color: var(--color-surface);
+}
+
 .date-range-filter__tab:focus         { outline: none; }
 .date-range-filter__tab:focus-visible { outline: 3px solid var(--color-lavender); outline-offset: 3px; }
 
