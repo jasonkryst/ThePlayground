@@ -80,6 +80,18 @@ describe('useGameSession — existing behavior', () => {
     await waitFor(() => expect(result.current.total).toBe(3))
   })
 
+  it('fills the queue to questionsPerSession even when the item pool is smaller', async () => {
+    setSettings({ questionsPerSession: 10 })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.total).toBe(10))
+  })
+
+  it('caps at questionsPerSession without repeats when the pool is at least as large', async () => {
+    setSettings({ questionsPerSession: 4 })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.total).toBe(4))
+  })
+
   it('correct answer increments score and streak, fires confetti, records streak', async () => {
     const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
     await waitFor(() => expect(result.current.current).toBeDefined())

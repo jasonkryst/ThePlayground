@@ -6,14 +6,58 @@ const items = [
 ]
 
 describe('buildQueue', () => {
-  it('builds one queue entry per requested question', () => {
+  it('builds one queue entry per requested question when enough items exist', () => {
     const queue = buildQueue(items, 2, 3)
     expect(queue).toHaveLength(3)
   })
 
-  it('caps queue length at the number of available items', () => {
+  it('fills the queue to the requested count by repeating items when the pool is smaller', () => {
     const queue = buildQueue(items, 2, 10)
-    expect(queue).toHaveLength(items.length)
+    expect(queue).toHaveLength(10)
+  })
+
+  it('distributes repeats evenly across full passes of the pool', () => {
+    const queue = buildQueue(items, 2, 8) // 8 = 2 full passes of 4 items
+    const counts = {}
+    for (const entry of queue) {
+      counts[entry.correct.id] = (counts[entry.correct.id] || 0) + 1
+    }
+    expect(Object.values(counts)).toEqual([2, 2, 2, 2])
+  })
+
+  it('never repeats the same item on two consecutive questions when the pool has more than one item', () => {
+    const queue = buildQueue(items, 2, 40)
+    for (let i = 1; i < queue.length; i++) {
+      expect(queue[i].correct.id).not.toBe(queue[i - 1].correct.id)
+    }
+  })
+
+  it('does not repeat items when the requested count is within the pool size', () => {
+    const queue = buildQueue(items, 2, 4)
+    const ids = queue.map(entry => entry.correct.id)
+    expect(new Set(ids).size).toBe(ids.length)
+  })
+
+  it('returns an empty queue when there are no items', () => {
+    const queue = buildQueue([], 2, 10)
+    expect(queue).toEqual([])
+  })
+
+  it('returns an empty queue when questionsPerSession is zero', () => {
+    const queue = buildQueue(items, 2, 0)
+    expect(queue).toEqual([])
+  })
+
+  it('returns an empty queue when questionsPerSession is negative', () => {
+    const queue = buildQueue(items, 2, -5)
+    expect(queue).toEqual([])
+  })
+
+  it('repeats the single item without throwing when the pool has exactly one item', () => {
+    const singleItem = [{ id: 'only' }]
+    const queue = buildQueue(singleItem, 2, 3)
+    expect(queue).toHaveLength(3)
+    expect(queue.every(entry => entry.correct.id === 'only')).toBe(true)
   })
 
   it('each entry includes the correct item exactly once in choices', () => {
