@@ -92,7 +92,8 @@ Add after `'clicking All tab restores full view'` (after line 149):
     // useFeaturedGame mock returns manifests[0] (animal-sounds, tag 'sounds') — filter to 'Visual' instead
     await user.click(screen.getByRole('tab', { name: 'Visual' }))
     expect(screen.getByText(/Today's Game/i)).toBeInTheDocument()
-    expect(screen.queryByText('Animal Sounds')).not.toBeInTheDocument() // not in the filtered grid, banner is separate
+    // "Animal Sounds" still appears once, from the banner's own name text — just not duplicated into the (non-matching) grid
+    expect(screen.getAllByText('Animal Sounds')).toHaveLength(1)
   })
 
   it('does not render the featured banner on any tab when manifests is empty', () => {
