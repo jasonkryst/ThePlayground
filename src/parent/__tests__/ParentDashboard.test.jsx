@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { render, screen, fireEvent, act } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
@@ -38,11 +39,49 @@ vi.mock('../../hooks/useScores', () => ({
   default: () => ({ getAllScores: mockGetAllScores }),
 }))
 
+const { mockSettings, mockUpdateSetting } = vi.hoisted(() => ({
+  mockSettings: { childName: '', parentDateRange: { preset: 'all', start: null, end: null } },
+  mockUpdateSetting: vi.fn(),
+}))
+
+// The real useSettings() re-renders consumers when updateSetting() is called
+// (it holds React state). A bare `settings: mockSettings, updateSetting: vi.fn()`
+// mock can't reproduce that: mutating mockSettings in place wouldn't trigger a
+// re-render, so clicking a DateRangeFilter tab would never actually narrow the
+// dashboard. Seed local state from mockSettings on mount (so tests that set
+// mockSettings.parentDateRange before renderDashboard() still work) and route
+// every update through both the spy (for assertions) and local setState (so the
+// component tree actually reflects the change).
+function useMockSettings() {
+  const [settings, setSettings] = useState(mockSettings)
+  return {
+    settings,
+    updateSetting: (key, value) => {
+      mockUpdateSetting(key, value)
+      const next = { ...settings, [key]: value }
+      mockSettings[key] = value
+      setSettings(next)
+    },
+  }
+}
+
 vi.mock('../../hooks/useSettings', () => ({
-  default: () => ({ settings: { childName: '' } }),
+  default: useMockSettings,
 }))
 
 // ─── Fixtures ────────────────────────────────────────────────────────────────
+
+// jsdom's Blob polyfill doesn't implement the standard `.text()`/`.arrayBuffer()`
+// methods (only `.slice()`/`.size`/`.type`), so CSV-content assertions read the
+// blob back out via FileReader instead, which jsdom does support end-to-end.
+function readBlobText(blob) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader()
+    reader.onload  = () => resolve(reader.result)
+    reader.onerror = reject
+    reader.readAsText(blob)
+  })
+}
 
 function makeScore(overrides = {}) {
   return {
@@ -72,6 +111,7 @@ async function renderDashboard(manifests = []) {
 beforeEach(() => {
   vi.clearAllMocks()
   mockGetBestStreaks.mockResolvedValue({ 'animal-sounds': 5 })
+  mockSettings.parentDateRange = { preset: 'all', start: null, end: null }
 })
 
 afterEach(() => { vi.restoreAllMocks() })
@@ -226,5 +266,93 @@ describe('ParentDashboard — insufficient data for charts', () => {
     const hints = screen.getAllByText(/not enough data/i)
     // Score trend and response time both need >= 2 data points to render a chart
     expect(hints.length).toBeGreaterThanOrEqual(2)
+  })
+})
+
+// ─── Date range filter ────────────────────────────────────────────────────────
+
+describe('ParentDashboard — date range filter', () => {
+  const NOW = Date.now()
+  const DAY = 86_400_000
+  const recentDate = new Date(NOW - DAY).toISOString().split('T')[0]
+  const oldDate     = new Date(NOW - 60 * DAY).toISOString().split('T')[0]
+
+  beforeEach(() => {
+    mockGetAllScores.mockReturnValue([
+      makeScore({ date: recentDate, timestamp: NOW - DAY }),
+      makeScore({ date: oldDate,    timestamp: NOW - 60 * DAY, gameId: 'color-match' }),
+    ])
+  })
+
+  it('narrows the missed-items panel to sessions in the selected range', async () => {
+    await renderDashboard()
+    // both games' missed items are visible under the default "All time" range.
+    // No manifests are passed to renderDashboard() here, so panels fall back to
+    // the raw gameId ("color-match", hyphenated — not "Color Match") as their heading.
+    // "color-match" also legitimately appears more than once (streak table +
+    // missed-items heading + hidden chart data tables), so use the *AllBy* variant.
+    expect(screen.getAllByText(/cat/i).length).toBeGreaterThan(0)
+    expect(screen.getAllByText('color-match').length).toBeGreaterThan(0)
+
+    fireEvent.click(screen.getByRole('tab', { name: '7 days' }))
+    // color-match's session is 60 days old — excluded once the range narrows to 7 days
+    expect(screen.queryAllByText('color-match').length).toBe(0)
+  })
+
+  it('persists the selected range via updateSetting', async () => {
+    await renderDashboard()
+    fireEvent.click(screen.getByRole('tab', { name: '30 days' }))
+    expect(mockUpdateSetting).toHaveBeenCalledWith('parentDateRange', { preset: '30d', start: null, end: null })
+  })
+
+  it('restores a persisted range on mount', async () => {
+    mockSettings.parentDateRange = { preset: '30d', start: null, end: null }
+    await renderDashboard()
+    expect(screen.getByRole('tab', { name: '30 days' })).toHaveAttribute('aria-selected', 'true')
+  })
+
+  it('shows each section\'s existing empty-state messaging when the range matches nothing, without crashing', async () => {
+    mockGetAllScores.mockReturnValue([makeScore({ date: oldDate, timestamp: NOW - 60 * DAY })])
+    await renderDashboard()
+    fireEvent.click(screen.getByRole('tab', { name: '7 days' }))
+    // matches both the "Missed Items" section heading (always present) and the
+    // "No missed-item data yet" empty-state paragraph (only once filtered to empty)
+    expect(screen.getAllByText(/no missed-item data yet|missed items/i).length).toBeGreaterThan(0)
+  })
+
+  it('CSV export reflects the active filter', async () => {
+    URL.createObjectURL = vi.fn().mockReturnValue('blob:mock')
+    URL.revokeObjectURL  = vi.fn()
+    await renderDashboard()
+    fireEvent.click(screen.getByRole('tab', { name: '7 days' }))
+
+    let capturedBlob
+    const originalCreateEl = document.createElement.bind(document)
+    vi.spyOn(document, 'createElement').mockImplementation((tag) => {
+      if (tag === 'a') return { click: vi.fn(), href: '', download: '' }
+      return originalCreateEl(tag)
+    })
+    vi.spyOn(URL, 'createObjectURL').mockImplementation((blob) => { capturedBlob = blob; return 'blob:mock' })
+
+    fireEvent.click(screen.getByRole('button', { name: /export csv/i }))
+    const text = await readBlobText(capturedBlob)
+    expect(text).toContain('animal-sounds')
+    expect(text).not.toContain('color-match')
+  })
+
+  it('has no accessibility violations with a non-default filter applied', async () => {
+    const { container } = await renderDashboard()
+    fireEvent.click(screen.getByRole('tab', { name: '30 days' }))
+    expect(await axe(container)).toHaveNoViolations()
+  })
+})
+
+// ─── Heatmap month labels ─────────────────────────────────────────────────────
+
+describe('ParentDashboard — heatmap month labels', () => {
+  it('renders at least one month label above the heatmap grid', async () => {
+    mockGetAllScores.mockReturnValue([makeScore(), makeScore({ date: new Date(NOW - 2 * DAY).toISOString().split('T')[0], timestamp: NOW - 2 * DAY })])
+    const { container } = await renderDashboard()
+    expect(container.querySelectorAll('.heatmap__month-label').length).toBeGreaterThan(0)
   })
 })
