@@ -3,6 +3,11 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.22.0] - 2026-07-09
+
+### Fixed
+- Games whose item pool is smaller than the selected "Questions per session" setting (e.g. Animal Sounds' 12 items, Color Match's 11) previously truncated the session to the pool size instead of honoring the configured count. `buildQueue` now cycles through evenly-shuffled full passes of the pool to fill the session exactly, with no item repeated on two consecutive questions.
+
 ## [0.21.0] - 2026-07-08
 
 ### Added
