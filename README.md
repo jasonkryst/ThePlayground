@@ -47,6 +47,12 @@ The first time a game is opened, it shows a full-screen intro with the game's ic
 
 A dedicated `/my-progress` page, linked via the 🌟 button on the main dashboard, shows kids their own progress: for each game, a best-score percentage, best streak, and lifetime questions answered, plus every milestone badge earned so far. Locked badges are shown as dimmed icons with no text label (rather than the admin page's "Locked" text), since the intended audience can't read yet — earned/locked state is still conveyed to assistive tech via each badge's `aria-label`.
 
+### Parent Analytics Dashboard
+
+A dedicated `/parent` page shows five sections built from score history: **Score Trend** (accuracy % per game over time), **Response Time** (average answer speed per game), **Streak History** (longest correct-answer run in the last 7 days, last 30 days, and all-time), **Play Calendar** (a GitHub-style heatmap of daily activity, with month labels above the week columns), and **Missed Items** (which items are answered incorrectly most often, per game).
+
+Every section reacts to the **date-range filter** at the top of the page: quick presets (7 days / 30 days / 90 days / All time) or a custom from–to range. The heatmap resizes to span exactly the selected range instead of always showing a fixed window, and Streak History's "last 7/30 days" columns re-anchor to the end of the selected range rather than always meaning "as of right now" — so a past custom range still shows meaningful streak data. The selected range is remembered across visits (stored alongside the other settings). CSV export via the toolbar button reflects whatever range is currently active.
+
 ---
 
 ## Getting Started
