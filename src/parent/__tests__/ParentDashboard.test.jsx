@@ -349,8 +349,14 @@ describe('ParentDashboard — date range filter', () => {
 
 describe('ParentDashboard — heatmap month labels', () => {
   it('renders at least one month label above the heatmap grid', async () => {
+    // SessionHeatmap renders one .heatmap__month-label span per column unconditionally
+    // (empty string when a column has no label), so asserting on element *count* alone
+    // would pass even if computeMonthLabels silently stopped producing any real labels.
+    // Assert on actual label text to keep this a meaningful regression check.
     mockGetAllScores.mockReturnValue([makeScore(), makeScore({ date: new Date(NOW - 2 * DAY).toISOString().split('T')[0], timestamp: NOW - 2 * DAY })])
     const { container } = await renderDashboard()
-    expect(container.querySelectorAll('.heatmap__month-label').length).toBeGreaterThan(0)
+    const labels = [...container.querySelectorAll('.heatmap__month-label')]
+    expect(labels.length).toBeGreaterThan(0)
+    expect(labels.some(el => el.textContent.trim() !== '')).toBe(true)
   })
 })
