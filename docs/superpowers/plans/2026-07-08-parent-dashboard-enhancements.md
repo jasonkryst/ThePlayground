@@ -776,12 +776,15 @@ describe('ParentDashboard — date range filter', () => {
 
   it('narrows the missed-items panel to sessions in the selected range', async () => {
     await renderDashboard()
-    // both games' missed items are visible under the default "All time" range
+    // both games' missed items are visible under the default "All time" range.
+    // No manifests are passed to renderDashboard() here, so panels fall back to
+    // the raw gameId ("color-match", hyphenated — not "Color Match") as their heading.
     expect(screen.getAllByText(/cat/i).length).toBeGreaterThan(0)
+    expect(screen.getByText('color-match')).toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('tab', { name: '7 days' }))
     // color-match's session is 60 days old — excluded once the range narrows to 7 days
-    expect(screen.queryByText(/color match/i)).not.toBeInTheDocument()
+    expect(screen.queryByText('color-match')).not.toBeInTheDocument()
   })
 
   it('persists the selected range via updateSetting', async () => {
