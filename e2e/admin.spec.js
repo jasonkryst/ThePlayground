@@ -32,9 +32,9 @@ test('admin tag override persists across page reload', async ({ page }) => {
   await input.clear()
   await input.fill('numbers, math')
 
-  // Click the Save Tags button in the same row
-  const saveButton = page.getByRole('button', { name: 'Save Tags' }).first()
-  await saveButton.click()
+  // Click the Save Tags button in the same row (scoped — the memory game sorts first)
+  const row = page.locator('.admin__tag-row', { has: page.getByLabel('Tags for Animal Sounds') })
+  await row.getByRole('button', { name: 'Save Tags' }).click()
 
   // Verify localStorage was updated before reloading (guards against reload race)
   await expect.poll(async () => {
@@ -105,7 +105,8 @@ test('replay intro brings back a dismissed game intro', async ({ page }) => {
 
   await page.goto('/admin')
   await page.getByRole('tab', { name: /games/i }).click()
-  await page.getByRole('button', { name: 'Replay Intro' }).first().click()
+  const soundsRow = page.locator('.admin__tag-row', { has: page.getByLabel('Tags for Animal Sounds') })
+  await soundsRow.getByRole('button', { name: 'Replay Intro' }).click()
 
   await page.goto('/game/animal-sounds')
   await expect(page.getByTestId('game-intro-start')).toBeVisible()
