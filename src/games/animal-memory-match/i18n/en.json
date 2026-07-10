@@ -1,0 +1,26 @@
+{
+  "animalMemoryMatch": {
+    "prompt": "Find the matching pairs!",
+    "progress": "{{found}} of {{total}} pairs found",
+    "howToPlay": "Flip two tiles at a time and find all the matching animal pairs!",
+    "matchAnnounce": "It's a match! {{name}}!",
+    "noMatchAnnounce": "Not a match — try again!",
+    "completeAnnounce": "You found all the pairs!",
+    "animals": {
+      "dog":  { "name": "Dog" },
+      "cat":  { "name": "Cat" },
+      "cow":  { "name": "Cow" },
+      "duck": { "name": "Duck" },
+      "frog": { "name": "Frog" },
+      "lion": { "name": "Lion" }
+    },
+    "badges": {
+      "sharpMind":    { "name": "Sharp Mind",    "desc": "Finish a board with almost no wasted flips." },
+      "matchStreak":  { "name": "Match Streak",  "desc": "Match 3 pairs in a row without a miss." },
+      "bigBoard":     { "name": "Big Board",     "desc": "Complete a 6-pair board." },
+      "pairSpotter":  { "name": "Pair Spotter",  "desc": "Match 25 pairs in total." },
+      "pairPro":      { "name": "Pair Pro",      "desc": "Match 100 pairs in total." },
+      "pairChampion": { "name": "Pair Champion", "desc": "Match 500 pairs in total." }
+    }
+  }
+}
