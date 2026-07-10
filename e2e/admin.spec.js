@@ -161,6 +161,7 @@ test('an inactive admin tab still shows the light hover tint, not the active col
 })
 
 test('active admin tab has no accessibility violations while hovered', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
   await page.goto('/admin')
   const settingsTab = page.getByRole('tab', { name: 'Settings' })
   await settingsTab.hover()
