@@ -3,6 +3,18 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.23.0] - 2026-07-10
+
+### Added
+- **Animal Memory Match** (issue #37) — new game and new *memory* game type: 10 face-down tiles (5 animal pairs, parent-configurable 3–6 via the new "Pairs Per Board" setting); flip two at a time, confetti + the animal's sound on a match, red highlight + flip-back on a mismatch, full fireworks on completing the board. Fully keyboard-playable with screen-reader announcements.
+- Engine additions reusable by future matching games: `useMemorySession` hook, `MemoryBoard` component, `buildDeck` util, `fireFireworks()` in the confetti lib, and a shared sound library (`src/assets/sounds`).
+- Per-game badge catalogs, auto-discovered from `src/games/<id>/badges.js` (full replacement of the global quiz catalog for that game). Memory match ships six badges: Sharp Mind, Match Streak, Big Board, and Pair Spotter/Pro/Champion lifetime tiers.
+- New settings: `memoryPairs` (3–6, default 5) and `soundEffectsEnabled` (default on).
+
+### Changed
+- Admin Settings tab reorganized into headed groups — General, Quiz Games, Memory Games — instead of one flat list.
+- Animal-sounds mp3 files moved to the shared `src/assets/sounds/` (no behavior change).
+
 ## [0.22.2] - 2026-07-09
 
 ### Fixed

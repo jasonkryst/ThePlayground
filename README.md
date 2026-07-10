@@ -274,6 +274,8 @@ Accessible from the dashboard via the gear icon (⚙).
 | Retry counts toward streak | On | On, Off |
 | Spaced repetition | Off | On, Off |
 | Difficulty auto-progression | Off | On, Off |
+| Pairs per board | 5 | 3, 4, 5, 6 |
+| Sound effects | On | On, Off |
 | Google Analytics ID | *(empty)* | Any valid GA4 Measurement ID (e.g. `G-XXXXXXXXXX`) |
 
 **Questions per session** — if a game's item set is smaller than the selected count (for example, a 12-item game with "20" selected), items repeat to fill the session. Repeats are distributed evenly across the pool and the same item is never asked twice in a row.
@@ -301,6 +303,10 @@ Accessible from the dashboard via the gear icon (⚙).
 **Spaced repetition** — when on, a missed item reappears a few questions later in the same session (replacing one of the not-yet-asked items, so the session length stays the same).
 
 **Difficulty auto-progression** — when on, finishing a session with a perfect score offers to raise Answer Choices by 1 (up to the maximum of 4) on the results screen.
+
+**Pairs per board** — pairs per board for the memory game type, 3–6.
+
+**Sound effects** — plays the matched animal's sound in memory games.
 
 ---
 

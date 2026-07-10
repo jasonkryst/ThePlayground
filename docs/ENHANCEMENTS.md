@@ -119,7 +119,7 @@ Tracked in full detail in `docs/superpowers/plans/2026-07-05-standards-audit-rem
 ## Games
 
 ### New Game Types
-- **Animal Memory Match** — 10 face-down tiles (5 animal pairs); child flips two at a time. Matching pair: brief confetti burst and tiles stay revealed. Non-matching pair: tiles highlight red then flip back over. Reveal all 5 pairs: full fireworks animation.
+- ~~**Animal Memory Match** — 10 face-down tiles (5 animal pairs); child flips two at a time. Matching pair: brief confetti burst and tiles stay revealed. Non-matching pair: tiles highlight red then flip back over. Reveal all 5 pairs: full fireworks animation.~~ — done in v0.23.0 (issue #37).
 - **Shape Sort** — present a shape name/picture, child picks the correct shape
 - **Number Tap** — display a number (1–5), child taps that many objects on screen; builds early counting
 - **Alphabet Sounds** — play a letter sound (phonics), child picks the correct letter card
