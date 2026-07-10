@@ -36,7 +36,7 @@ export default function useBadges() {
       }
     } else {
       const prevLifetimeTotal = dataRef.current.lifetimeQuestions[gameId] ?? 0
-      const newLifetimeTotal = prevLifetimeTotal + questionsAnswered
+      const newLifetimeTotal = prevLifetimeTotal + (questionsAnswered ?? 0)
       earnedIds = computeBadgeAwards({ peakStreak, isPerfect, prevLifetimeTotal, newLifetimeTotal })
       nextData = {
         ...dataRef.current,

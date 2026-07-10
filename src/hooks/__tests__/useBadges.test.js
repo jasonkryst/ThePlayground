@@ -78,6 +78,19 @@ describe('useBadges', () => {
     expect(result.current.badgeData.awards['animal-sounds'].hotStreak).toBe(2)
   })
 
+  it('awardSession guards against a missing questionsAnswered instead of persisting NaN', async () => {
+    const { result } = renderHook(() => useBadges())
+    await waitFor(() => expect(result.current.badgeData.lifetimeQuestions['animal-sounds']).toBe(45))
+
+    let earned
+    await act(async () => {
+      earned = await result.current.awardSession('animal-sounds', {})
+    })
+
+    expect(result.current.badgeData.lifetimeQuestions['animal-sounds']).toBe(45)
+    expect(earned).toEqual([])
+  })
+
   it('awardSession tracks lifetimeQuestions and awards independently per gameId', async () => {
     const { result } = renderHook(() => useBadges())
     await waitFor(() => expect(result.current.badgeData.lifetimeQuestions['animal-sounds']).toBe(45))
