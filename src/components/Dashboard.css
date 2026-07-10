@@ -50,6 +50,23 @@
   color: var(--color-surface);
 }
 
+/* `.dashboard__tab:hover` (a class + a pseudo-class) has higher specificity
+   than the single-class `.dashboard__tab--active`, so without this rule,
+   hovering the active tab silently strips its solid background back to a
+   faint rgba(0,0,0,0.05) tint while its white text color is untouched -- a
+   real WCAG 2 AA color-contrast failure (white text on a near-transparent
+   background) that occurs whenever a pointer rests on the active tab, or on
+   mobile where a tap leaves a tab in a sticky `:hover` state. Same pattern as
+   `.admin__tab--active:hover` in src/admin/AdminPage.css and
+   `.date-range-filter__tab--active:hover` in src/parent/DateRangeFilter.css;
+   re-assert the active styling at equal specificity so it wins the cascade
+   on hover too. */
+.dashboard__tab--active:hover {
+  background: var(--color-lavender-dark);
+  border-color: var(--color-lavender-dark);
+  color: var(--color-surface);
+}
+
 .dashboard__tab:focus         { outline: none; }
 .dashboard__tab:focus-visible { outline: 3px solid var(--color-lavender); outline-offset: 3px; }
 
