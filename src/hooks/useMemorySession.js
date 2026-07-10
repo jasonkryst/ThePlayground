@@ -42,6 +42,8 @@ export default function useMemorySession({ gameId, items }) {
   const startRef           = useRef(Date.now())
   const seqRef             = useRef(0)
   const introInitializedRef = useRef(false)
+  const mismatchTimeoutRef  = useRef(null)
+  const completeTimeoutRef  = useRef(null)
 
   // Same intro-initialization contract as useGameSession (see its comment).
   useEffect(() => {
@@ -112,10 +114,11 @@ export default function useMemorySession({ gameId, items }) {
       lockedRef.current = true
       setLocked(true)
       emit('mismatch')
-      setTimeout(() => {
+      mismatchTimeoutRef.current = setTimeout(() => {
         setTileStates([aId, bId], 'down')
         lockedRef.current = false
         setLocked(false)
+        mismatchTimeoutRef.current = null
       }, MISMATCH_DELAY_MS)
     }
   }
@@ -149,10 +152,17 @@ export default function useMemorySession({ gameId, items }) {
     })
     setNewBadges(earned)
 
-    setTimeout(() => setDone(true), COMPLETE_DELAY_MS)
+    completeTimeoutRef.current = setTimeout(() => {
+      setDone(true)
+      completeTimeoutRef.current = null
+    }, COMPLETE_DELAY_MS)
   }
 
   function restart() {
+    clearTimeout(mismatchTimeoutRef.current)
+    clearTimeout(completeTimeoutRef.current)
+    mismatchTimeoutRef.current = null
+    completeTimeoutRef.current = null
     flippedRef.current = []
     lockedRef.current = false
     doneRef.current = false
@@ -175,6 +185,11 @@ export default function useMemorySession({ gameId, items }) {
     setCurrentElapsedMs(0)
     setNewBadges([])
   }
+
+  useEffect(() => () => {
+    clearTimeout(mismatchTimeoutRef.current)
+    clearTimeout(completeTimeoutRef.current)
+  }, [])
 
   function dismissIntro(dontShowAgainFlag) {
     setShowIntro(false)

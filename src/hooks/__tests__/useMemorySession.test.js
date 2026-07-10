@@ -1,9 +1,10 @@
 import { renderHook, act, waitFor } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 
-const { mockAddScore, mockGetSettings } = vi.hoisted(() => ({
+const { mockAddScore, mockGetSettings, mockSaveBadgeData } = vi.hoisted(() => ({
   mockAddScore: vi.fn().mockResolvedValue(undefined),
   mockGetSettings: vi.fn(),
+  mockSaveBadgeData: vi.fn().mockResolvedValue(undefined),
 }))
 
 vi.mock('../../storage/index', () => ({
@@ -16,9 +17,21 @@ vi.mock('../../storage/index', () => ({
     getScores: vi.fn().mockResolvedValue([]),
     addScore: mockAddScore,
     getBadgeData: vi.fn().mockResolvedValue({ awards: {}, lifetimeQuestions: {}, lifetimeCounters: {} }),
-    saveBadgeData: vi.fn().mockResolvedValue(undefined),
+    saveBadgeData: mockSaveBadgeData,
   },
 }))
+
+// useBadges only takes the lifetime-counters branch for a gameId that has a
+// registered game badge catalog (src/games/<id>/badges.js, auto-discovered
+// via import.meta.glob). No such folder exists for the 'test-memory' fixture
+// id, so give it an (empty, harmless) catalog here to exercise that branch.
+vi.mock('../../lib/badges', async importOriginal => {
+  const actual = await importOriginal()
+  return {
+    ...actual,
+    GAME_BADGE_CATALOGS: { ...actual.GAME_BADGE_CATALOGS, 'test-memory': [] },
+  }
+})
 
 const { mockFireConfetti, mockFireFireworks } = vi.hoisted(() => ({
   mockFireConfetti: vi.fn(),
@@ -194,5 +207,66 @@ describe('useMemorySession', () => {
     expect(result.current.showIntro).toBe(true)
     act(() => result.current.dismissIntro(false))
     expect(result.current.showIntro).toBe(false)
+  })
+
+  it('restart during a pending mismatch does not disturb the new board', async () => {
+    const { result } = await renderSession()
+    vi.useFakeTimers()
+    const [a, b] = findNonPair(result.current.tiles)
+    act(() => result.current.flipTile(a))
+    act(() => result.current.flipTile(b))
+    expect(result.current.locked).toBe(true)
+
+    act(() => result.current.restart())
+
+    const [c] = findPair(result.current.tiles)
+    act(() => result.current.flipTile(c))
+    expect(result.current.tiles.find(t => t.tileId === c).state).toBe('up')
+
+    act(() => { vi.advanceTimersByTime(MISMATCH_DELAY_MS) })
+
+    // A stale mismatch timeout from the pre-restart board would have flipped
+    // this tile back down and cleared the lock — assert neither happened.
+    expect(result.current.tiles.find(t => t.tileId === c).state).toBe('up')
+    expect(result.current.locked).toBe(false)
+    expect(result.current.mismatches).toBe(0)
+  })
+
+  it('restart within the completion window does not mark the new game done', async () => {
+    const { result } = await renderSession()
+    vi.useFakeTimers()
+    for (let i = 0; i < 3; i++) {
+      const pair = findPair(result.current.tiles)
+      act(() => result.current.flipTile(pair[0]))
+      act(() => result.current.flipTile(pair[1]))
+      await act(async () => {})
+    }
+
+    act(() => result.current.restart())
+
+    act(() => { vi.advanceTimersByTime(COMPLETE_DELAY_MS) })
+
+    // A stale completion timeout from the finished pre-restart game would
+    // have marked the freshly restarted game done.
+    expect(result.current.done).toBe(false)
+    expect(result.current.pairsFound).toBe(0)
+  })
+
+  it('completion persists pairsMatched lifetime counter via awardSession', async () => {
+    const { result } = await renderSession()
+    vi.useFakeTimers()
+    for (let i = 0; i < 3; i++) {
+      const pair = findPair(result.current.tiles)
+      act(() => result.current.flipTile(pair[0]))
+      act(() => result.current.flipTile(pair[1]))
+      await act(async () => {})
+    }
+    await act(async () => {})
+
+    expect(mockSaveBadgeData).toHaveBeenCalledWith(expect.objectContaining({
+      lifetimeCounters: expect.objectContaining({
+        'test-memory': expect.objectContaining({ pairsMatched: 3 }),
+      }),
+    }))
   })
 })
