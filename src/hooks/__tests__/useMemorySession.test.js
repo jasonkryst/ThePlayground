@@ -166,7 +166,7 @@ describe('useMemorySession', () => {
     expect(result.current.done).toBe(true)
     expect(mockAddScore).toHaveBeenCalledWith(expect.objectContaining({
       gameId: 'test-memory', score: 3, total: 3,
-      flipAttempts: 3, mismatches: 0, peakMatchStreak: 3,
+      flipAttempts: 3, mismatches: 0, peakStreak: 3, peakMatchStreak: 3,
       durationMs: expect.any(Number),
     }))
   })

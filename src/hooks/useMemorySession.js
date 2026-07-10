@@ -137,6 +137,7 @@ export default function useMemorySession({ gameId, items }) {
       timestamp:  Date.now(),
       flipAttempts:    flipAttemptsRef.current,
       mismatches:      mismatchesRef.current,
+      peakStreak:      peakMatchStreakRef.current,
       peakMatchStreak: peakMatchStreakRef.current,
       durationMs:      Date.now() - startRef.current,
     })
