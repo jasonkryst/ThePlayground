@@ -2065,7 +2065,9 @@ git add src/admin src/i18n/en.json
 git commit -m "feat: group admin settings (General/Quiz/Memory) + memoryPairs and soundEffectsEnabled controls"
 ```
 
----### Task 11: E2E spec + visual regression + full-suite verification
+---
+
+### Task 11: E2E spec + visual regression + full-suite verification
 
 **Files:**
 - Create: `e2e/animal-memory-match.spec.js`
