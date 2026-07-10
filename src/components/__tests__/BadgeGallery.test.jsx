@@ -55,4 +55,19 @@ describe('BadgeGallery', () => {
     const { container } = render(<BadgeGallery manifests={manifests} badgeData={{ awards: { 'animal-sounds': { hotStreak: 2 } }, lifetimeQuestions: {} }} />)
     expect(await axe(container)).toHaveNoViolations()
   })
+
+  it('shows a game-specific catalog for games that ship badges.js and the global catalog otherwise', () => {
+    render(
+      <BadgeGallery
+        manifests={[
+          { id: 'animal-sounds', name: 'Animal Sounds' },
+          { id: 'animal-memory-match', name: 'Animal Memory Match' },
+        ]}
+        badgeData={{ awards: {}, lifetimeQuestions: {}, lifetimeCounters: {} }}
+      />
+    )
+    expect(screen.getByText('Sharp Mind')).toBeInTheDocument()      // memory badge shown
+    expect(screen.getAllByText('Hot Streak')).toHaveLength(1)       // global badge listed once (quiz game only)
+    expect(screen.queryAllByText('Sharp Mind')).toHaveLength(1)     // memory badge not under quiz game
+  })
 })

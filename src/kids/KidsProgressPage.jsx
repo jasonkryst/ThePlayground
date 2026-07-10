@@ -4,7 +4,7 @@ import useScores from '../hooks/useScores'
 import useBadges from '../hooks/useBadges'
 import adapter from '../storage/index'
 import { computeBestAccuracy } from '../utils/kidStats'
-import { BADGE_CATALOG } from '../lib/badges'
+import { getBadgesForGame } from '../lib/badges'
 import ManifestIcon from '../components/ManifestIcon'
 import './KidsProgressPage.css'
 
@@ -67,7 +67,7 @@ function GameProgressSection({ manifest, scores, badgeData, bestStreak, t }) {
       </div>
 
       <div className="kid-progress__badges">
-        {BADGE_CATALOG.map(badge => (
+        {getBadgesForGame(manifest.id).map(badge => (
           <BadgeChip key={badge.id} badge={badge} count={awards[badge.id] ?? 0} t={t} />
         ))}
       </div>

@@ -134,3 +134,24 @@ describe('KidsProgressPage — no games', () => {
   })
 })
 
+// ─── Per-game badge catalogs ────────────────────────────────────────────────
+
+describe('KidsProgressPage — per-game badge catalogs', () => {
+  const manifestsWithMemoryGame = [
+    { id: 'animal-sounds', name: 'Animal Sounds', icon: '🐘', color: '#B39DDB' },
+    { id: 'animal-memory-match', name: 'Animal Memory Match', icon: '🧠', color: '#90CAF9' },
+  ]
+
+  it('shows a game-specific catalog for games that ship badges.js and the global catalog otherwise', async () => {
+    render(<MemoryRouter><KidsProgressPage manifests={manifestsWithMemoryGame} /></MemoryRouter>)
+    await screen.findByRole('heading', { name: /animal sounds/i })
+
+    const memorySection = screen.getByRole('heading', { name: /animal memory match/i }).closest('section')
+    expect(within(memorySection).getByRole('group', { name: /sharp mind/i })).toBeInTheDocument()
+    expect(within(memorySection).getAllByRole('group')).toHaveLength(6)
+
+    const quizSection = screen.getByRole('heading', { name: /animal sounds/i }).closest('section')
+    expect(within(quizSection).getAllByRole('group')).toHaveLength(8)
+  })
+})
+
