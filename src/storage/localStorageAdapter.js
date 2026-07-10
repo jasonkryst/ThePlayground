@@ -73,9 +73,10 @@ const localStorageAdapter = {
       return {
         awards: valid && parsed.awards && typeof parsed.awards === 'object' ? parsed.awards : {},
         lifetimeQuestions: valid && parsed.lifetimeQuestions && typeof parsed.lifetimeQuestions === 'object' ? parsed.lifetimeQuestions : {},
+        lifetimeCounters: valid && parsed.lifetimeCounters && typeof parsed.lifetimeCounters === 'object' ? parsed.lifetimeCounters : {},
       }
     } catch {
-      return { awards: {}, lifetimeQuestions: {} }
+      return { awards: {}, lifetimeQuestions: {}, lifetimeCounters: {} }
     }
   },
 

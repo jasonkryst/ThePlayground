@@ -57,6 +57,7 @@ export const DEFAULT_SETTINGS = {
  * savePersonalBests(bestsMap)  → Promise<void>
  *
  * Badge adapter methods (added v0.8.0):
- * getBadgeData()  → Promise<{ awards: { [gameId: string]: { [badgeId: string]: number } }, lifetimeQuestions: { [gameId: string]: number } }>
+ * getBadgeData()  → Promise<{ awards: { [gameId]: { [badgeId]: number } }, lifetimeQuestions: { [gameId]: number }, lifetimeCounters: { [gameId]: { [counter: string]: number } } }>
+ *   lifetimeCounters added v0.23.0 for per-game badge catalogs (e.g. pairsMatched for memory games)
  * saveBadgeData(data) → Promise<void>
  */
