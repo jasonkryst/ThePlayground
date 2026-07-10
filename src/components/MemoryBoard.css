@@ -45,7 +45,7 @@
 
 .memory-board__tile-back {
   background: var(--color-lavender-dark);
-  color: #fff;
+  color: var(--color-surface);
 }
 
 .memory-board__tile-face {

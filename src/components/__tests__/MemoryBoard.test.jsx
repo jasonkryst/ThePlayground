@@ -49,6 +49,8 @@ describe('MemoryBoard', () => {
     expect(matched).toBeDisabled()
     fireEvent.click(matched)
     expect(onFlip).not.toHaveBeenCalled()
+    expect(screen.getByRole('button', { name: 'Hidden tile 1 of 4' })).not.toBeDisabled()
+    expect(screen.getByRole('button', { name: 'Dog' })).not.toBeDisabled()
   })
 
   it('mismatch tiles show a decorative cross marker', () => {
@@ -56,6 +58,7 @@ describe('MemoryBoard', () => {
     const cross = container.querySelector('.memory-board__cross')
     expect(cross).toBeInTheDocument()
     expect(cross.getAttribute('aria-hidden')).toBe('true')
+    expect(container.querySelectorAll('.memory-board__cross')).toHaveLength(1)
   })
 
   it('renders the live region with the given message', () => {
@@ -66,6 +69,8 @@ describe('MemoryBoard', () => {
   it('applies the no-animation modifier when animations are disabled', () => {
     const { container } = renderBoard({ animationsEnabled: false })
     expect(container.querySelector('.memory-board__grid--no-anim')).toBeInTheDocument()
+    const { container: defaultContainer } = renderBoard()
+    expect(defaultContainer.querySelector('.memory-board__grid--no-anim')).not.toBeInTheDocument()
   })
 
   it('has no accessibility violations', async () => {
