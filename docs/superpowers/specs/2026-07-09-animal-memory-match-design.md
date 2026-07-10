@@ -26,6 +26,7 @@ color pairs, …) can reuse without engine edits — the same relationship `useG
 | Badges | Game-specific catalog: Sharp Mind, Match Streak, Big Board, and 3 lifetime pair tiers |
 | Extras | Animal sound on match, celebratory wiggle on matched pair, count-up timer display — each gated by a setting |
 | Architecture | Engine hook (`useMemorySession`) **and** engine board UI (`MemoryBoard`); game folder stays thin |
+| Settings page | Reorganize the flat Settings tab into headed groups: General / Quiz Games / Memory Games |
 | Badge display | Full replacement: a game shipping `badges.js` shows/earns only its own catalog |
 | A11y + i18n | First-class requirements (see sections below) |
 
@@ -135,6 +136,27 @@ Existing settings reused: `animationsEnabled` gates flip/wiggle animation, confe
 fireworks; `timerMode !== 'off'` shows the count-up timer (memory has no per-question
 countdown; `countdown` mode displays as count-up here); `introDismissed` for the intro.
 
+### Settings page reorganization
+
+The admin Settings tab is currently a flat scroll of ~14 ungrouped sections mixing
+app-level and quiz-specific controls; the two new keys would make 16, with "answer
+choices" and "pairs per board" sitting side by side with no context. Approved fix:
+keep the four top-level tabs and organize the Settings panel into **headed groups**
+(single scroll, no nested tabs):
+
+| Group | Sections |
+|---|---|
+| General | Language, child name, animations, **sound effects (new)**, Google Analytics |
+| Quiz Games | Answer choices, questions/session, feedback mode, timer, speed-record threshold, max tries, hints, retry streak, spaced repetition, difficulty auto-progression |
+| Memory Games | **Pairs per board (new)** |
+
+Implementation: group headings become `h2` (i18n keys `admin.groupGeneral`,
+`admin.groupQuizGames`, `admin.groupMemoryGames`); existing section headings drop to
+`h3` to keep the heading hierarchy valid for the axe scan. Purely structural — no
+setting keys or behaviors change for existing controls. Each future game type adds one
+group. (Collapsible groups are deliberately omitted for now — a single labeled scroll
+is simpler and screen-reader-friendly.)
+
 ## The game folder: `src/games/animal-memory-match/`
 
 - `manifest.json` — id `animal-memory-match`, icon 🧠, version `1.0.0`, tags
@@ -197,6 +219,7 @@ gets positive **and** negative cases.
 | `useMemorySession` | match stays revealed + confetti; mismatch flips back after delay; completion saves full score record, fires fireworks, awards badges; restart resets | tap during mismatch lock ignored; same tile tapped twice ignored; matched tile tap ignored; Sharp Mind not awarded on inefficient session |
 | `MemoryBoard` | grid renders, flip states, a11y labels, live region text | matched/disabled tiles not clickable; reduced-motion path applied |
 | Game `index.jsx` | intro shows first run; match plays sound; timer visible; results show badges | no sound when `soundEffectsEnabled: false`; no timer when `timerMode: 'off'`; intro skipped when previously dismissed |
+| Admin settings | group headings render; pairs control updates `memoryPairs`; sound toggle updates `soundEffectsEnabled`; heading hierarchy valid (h2 groups → h3 sections) | out-of-range pair value not selectable; existing controls still update their keys after regrouping |
 | E2E / a11y / visual | full play-through using `data-item-id`; axe scan; screenshot story | — |
 
 ## Versioning & docs
