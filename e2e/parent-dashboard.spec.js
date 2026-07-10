@@ -78,3 +78,40 @@ test('parent dashboard has no accessibility violations with a filter applied', a
   const results = await new AxeBuilder({ page }).analyze()
   expect(results.violations).toEqual([])
 })
+
+test('active date-range tab keeps its solid background when hovered', async ({ page }) => {
+  await page.goto('/parent')
+  const allTimeTab = page.getByRole('tab', { name: 'All time' })
+  await allTimeTab.hover()
+  await page.waitForTimeout(200)
+  await expect(allTimeTab).toHaveCSS('background-color', 'rgb(106, 79, 163)')
+  await expect(allTimeTab).toHaveCSS('color', 'rgb(255, 255, 255)')
+})
+
+test('a date-range tab keeps its solid background when hovered right after being clicked active', async ({ page }) => {
+  await page.goto('/parent')
+  const sevenDaysTab = page.getByRole('tab', { name: '7 days' })
+  await sevenDaysTab.click()
+  await sevenDaysTab.hover()
+  await page.waitForTimeout(200)
+  await expect(sevenDaysTab).toHaveCSS('background-color', 'rgb(106, 79, 163)')
+  await expect(sevenDaysTab).toHaveCSS('color', 'rgb(255, 255, 255)')
+})
+
+test('an inactive date-range tab still shows the light hover tint, not the active color', async ({ page }) => {
+  await page.goto('/parent')
+  const thirtyDaysTab = page.getByRole('tab', { name: '30 days' })
+  await thirtyDaysTab.hover()
+  await page.waitForTimeout(200)
+  await expect(thirtyDaysTab).toHaveCSS('background-color', 'rgba(0, 0, 0, 0.05)')
+})
+
+test('active date-range tab has no accessibility violations while hovered', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.goto('/parent')
+  const allTimeTab = page.getByRole('tab', { name: 'All time' })
+  await allTimeTab.hover()
+  await page.waitForTimeout(200)
+  const results = await new AxeBuilder({ page }).analyze()
+  expect(results.violations).toEqual([])
+})

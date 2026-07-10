@@ -87,3 +87,40 @@ test('dashboard has no accessibility violations after enhancements', async ({ pa
   const results = await new AxeBuilder({ page }).analyze()
   expect(results.violations).toEqual([])
 })
+
+test('active tab keeps its solid background when hovered', async ({ page }) => {
+  await page.goto('/')
+  const allTab = page.getByRole('tab', { name: 'All' })
+  await allTab.hover()
+  await page.waitForTimeout(200)
+  await expect(allTab).toHaveCSS('background-color', 'rgb(106, 79, 163)')
+  await expect(allTab).toHaveCSS('color', 'rgb(255, 255, 255)')
+})
+
+test('a tab keeps its solid background when hovered right after being clicked active', async ({ page }) => {
+  await page.goto('/')
+  const soundsTab = page.getByRole('tab', { name: 'Sounds' })
+  await soundsTab.click()
+  await soundsTab.hover()
+  await page.waitForTimeout(200)
+  await expect(soundsTab).toHaveCSS('background-color', 'rgb(106, 79, 163)')
+  await expect(soundsTab).toHaveCSS('color', 'rgb(255, 255, 255)')
+})
+
+test('an inactive tab still shows the light hover tint, not the active color', async ({ page }) => {
+  await page.goto('/')
+  const animalsTab = page.getByRole('tab', { name: 'Animals' })
+  await animalsTab.hover()
+  await page.waitForTimeout(200)
+  await expect(animalsTab).toHaveCSS('background-color', 'rgba(0, 0, 0, 0.05)')
+})
+
+test('active tab has no accessibility violations while hovered', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.goto('/')
+  const allTab = page.getByRole('tab', { name: 'All' })
+  await allTab.hover()
+  await page.waitForTimeout(200)
+  const results = await new AxeBuilder({ page }).analyze()
+  expect(results.violations).toEqual([])
+})

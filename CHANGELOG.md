@@ -3,6 +3,11 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.22.2] - 2026-07-09
+
+### Fixed
+- The active category filter tab on the home dashboard became unreadable (white text on a near-white background) whenever it was hovered on desktop or tapped on mobile (where a tap leaves a tab in a sticky hovered state) — `.dashboard__tab:hover`'s higher CSS specificity was silently overriding the active tab's solid background while leaving its white text untouched. Added the same `--active:hover` cascade fix already used in the Admin and Parent Dashboard tab bars. Also added the equivalent hover-contrast regression test to those two, which had the fix but no test guarding it.
+
 ## [0.22.1] - 2026-07-09
 
 ### Fixed

@@ -132,3 +132,40 @@ test('badges tab has no accessibility violations', async ({ page }) => {
   const results = await new AxeBuilder({ page }).analyze()
   expect(results.violations).toEqual([])
 })
+
+test('active admin tab keeps its solid background when hovered', async ({ page }) => {
+  await page.goto('/admin')
+  const settingsTab = page.getByRole('tab', { name: 'Settings' })
+  await settingsTab.hover()
+  await page.waitForTimeout(200)
+  await expect(settingsTab).toHaveCSS('background-color', 'rgb(106, 79, 163)')
+  await expect(settingsTab).toHaveCSS('color', 'rgb(255, 255, 255)')
+})
+
+test('an admin tab keeps its solid background when hovered right after being clicked active', async ({ page }) => {
+  await page.goto('/admin')
+  const badgesTab = page.getByRole('tab', { name: 'Badges' })
+  await badgesTab.click()
+  await badgesTab.hover()
+  await page.waitForTimeout(200)
+  await expect(badgesTab).toHaveCSS('background-color', 'rgb(106, 79, 163)')
+  await expect(badgesTab).toHaveCSS('color', 'rgb(255, 255, 255)')
+})
+
+test('an inactive admin tab still shows the light hover tint, not the active color', async ({ page }) => {
+  await page.goto('/admin')
+  const gamesTab = page.getByRole('tab', { name: /games/i })
+  await gamesTab.hover()
+  await page.waitForTimeout(200)
+  await expect(gamesTab).toHaveCSS('background-color', 'rgba(0, 0, 0, 0.05)')
+})
+
+test('active admin tab has no accessibility violations while hovered', async ({ page }) => {
+  await page.emulateMedia({ reducedMotion: 'reduce' })
+  await page.goto('/admin')
+  const settingsTab = page.getByRole('tab', { name: 'Settings' })
+  await settingsTab.hover()
+  await page.waitForTimeout(200)
+  const results = await new AxeBuilder({ page }).analyze()
+  expect(results.violations).toEqual([])
+})
