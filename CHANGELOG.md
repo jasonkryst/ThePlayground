@@ -10,8 +10,11 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 - Engine additions reusable by future matching games: `useMemorySession` hook, `MemoryBoard` component, `buildDeck` util, `fireFireworks()` in the confetti lib, and a shared sound library (`src/assets/sounds`).
 - Per-game badge catalogs, auto-discovered from `src/games/<id>/badges.js` (full replacement of the global quiz catalog for that game). Memory match ships six badges: Sharp Mind, Match Streak, Big Board, and Pair Spotter/Pro/Champion lifetime tiers.
 - New settings: `memoryPairs` (3–6, default 5) and `soundEffectsEnabled` (default on).
+- Fewest-flips personal best for memory games, tracked separately per board size, announced with a "🃏 New record!" banner on the results screen.
+- Memory-appropriate stat tiles on the My Progress page (via a new `gameType: "memory"` manifest field): Fewest Flips and lifetime Pairs Matched replace Best Score / Total Played, and Best Streak now reflects the real peak match streak.
 
 ### Changed
+- Matched memory tiles use `aria-disabled` instead of `disabled`, so keyboard focus is no longer dropped mid-game when a pair is found.
 - Admin Settings tab reorganized into headed groups — General, Quiz Games, Memory Games — instead of one flat list.
 - Animal-sounds mp3 files moved to the shared `src/assets/sounds/` (no behavior change).
 
