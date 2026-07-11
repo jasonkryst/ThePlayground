@@ -134,3 +134,87 @@ describe('KidsProgressPage — no games', () => {
   })
 })
 
+// ─── Memory-game stat tiles ─────────────────────────────────────────────────
+
+describe('KidsProgressPage — memory-game stat tiles', () => {
+  const manifests = [
+    { id: 'animal-sounds', name: 'Animal Sounds', icon: '🐘', color: '#B39DDB' },
+    { id: 'animal-memory-match', name: 'Animal Memory Match', icon: '🧠', color: '#90CAF9', gameType: 'memory' },
+  ]
+
+  async function renderWithMemoryGame() {
+    render(<MemoryRouter><KidsProgressPage manifests={manifests} /></MemoryRouter>)
+    await screen.findByRole('heading', { name: /animal sounds/i })
+    return {
+      memorySection: screen.getByRole('heading', { name: /animal memory match/i }).closest('section'),
+      quizSection: screen.getByRole('heading', { name: /animal sounds/i }).closest('section'),
+    }
+  }
+
+  beforeEach(() => {
+    mockGetAllScores.mockReturnValue([
+      { gameId: 'animal-sounds', score: 9, total: 10, date: '2026-07-01', timestamp: 1 },
+      { gameId: 'animal-memory-match', score: 5, total: 5, flipAttempts: 11, date: '2026-07-02', timestamp: 2 },
+      { gameId: 'animal-memory-match', score: 5, total: 5, flipAttempts: 8, date: '2026-07-03', timestamp: 3 },
+    ])
+    mockBadgeData = {
+      awards: {},
+      lifetimeQuestions: { 'animal-sounds': 62 },
+      lifetimeCounters: { 'animal-memory-match': { pairsMatched: 40 } },
+    }
+  })
+
+  it('shows fewest flips instead of best accuracy for memory games', async () => {
+    const { memorySection } = await renderWithMemoryGame()
+    expect(within(memorySection).getByText('Fewest Flips')).toBeInTheDocument()
+    expect(within(memorySection).getByText('8')).toBeInTheDocument()
+    expect(within(memorySection).queryByText('Best Score')).not.toBeInTheDocument()
+    expect(within(memorySection).queryByText('100%')).not.toBeInTheDocument()
+  })
+
+  it('shows lifetime pairs matched instead of total questions for memory games', async () => {
+    const { memorySection } = await renderWithMemoryGame()
+    expect(within(memorySection).getByText('Pairs Matched')).toBeInTheDocument()
+    expect(within(memorySection).getByText('40')).toBeInTheDocument()
+    expect(within(memorySection).queryByText('Total Played')).not.toBeInTheDocument()
+  })
+
+  it('keeps the quiz tiles unchanged on non-memory games', async () => {
+    const { quizSection } = await renderWithMemoryGame()
+    expect(within(quizSection).getByText('Best Score')).toBeInTheDocument()
+    expect(within(quizSection).getByText('90%')).toBeInTheDocument()
+    expect(within(quizSection).getByText('Total Played')).toBeInTheDocument()
+    expect(within(quizSection).queryByText('Fewest Flips')).not.toBeInTheDocument()
+  })
+
+  it('shows a dash and zero for an unplayed memory game', async () => {
+    mockGetAllScores.mockReturnValue([])
+    mockBadgeData = { awards: {}, lifetimeQuestions: {}, lifetimeCounters: {} }
+    const { memorySection } = await renderWithMemoryGame()
+    expect(within(memorySection).getByText('—')).toBeInTheDocument()
+    expect(within(memorySection).getByText('Pairs Matched')).toBeInTheDocument()
+    expect(within(memorySection).getAllByText('0').length).toBeGreaterThanOrEqual(2)
+  })
+})
+
+// ─── Per-game badge catalogs ────────────────────────────────────────────────
+
+describe('KidsProgressPage — per-game badge catalogs', () => {
+  const manifestsWithMemoryGame = [
+    { id: 'animal-sounds', name: 'Animal Sounds', icon: '🐘', color: '#B39DDB' },
+    { id: 'animal-memory-match', name: 'Animal Memory Match', icon: '🧠', color: '#90CAF9' },
+  ]
+
+  it('shows a game-specific catalog for games that ship badges.js and the global catalog otherwise', async () => {
+    render(<MemoryRouter><KidsProgressPage manifests={manifestsWithMemoryGame} /></MemoryRouter>)
+    await screen.findByRole('heading', { name: /animal sounds/i })
+
+    const memorySection = screen.getByRole('heading', { name: /animal memory match/i }).closest('section')
+    expect(within(memorySection).getByRole('group', { name: /sharp mind/i })).toBeInTheDocument()
+    expect(within(memorySection).getAllByRole('group')).toHaveLength(6)
+
+    const quizSection = screen.getByRole('heading', { name: /animal sounds/i }).closest('section')
+    expect(within(quizSection).getAllByRole('group')).toHaveLength(8)
+  })
+})
+

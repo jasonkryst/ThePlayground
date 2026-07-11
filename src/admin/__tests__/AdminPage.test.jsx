@@ -10,6 +10,7 @@ const mockSettingsDefaults = {
   timerMode: 'countUp', timeLimitSeconds: 10, speedRecordMinAccuracy: 70,
   maxTries: 'none', hintsEnabled: false, hintAfterWrongTaps: 2,
   retryCountsAsStreak: true, spacedRepetitionEnabled: false, difficultyAutoProgressionEnabled: false,
+  memoryPairs: 5, soundEffectsEnabled: true,
 }
 const mockUpdateSetting = vi.fn()
 const mockResetSettings = vi.fn()
@@ -334,5 +335,48 @@ describe('AdminPage', () => {
     await userEvent.click(screen.getByRole('tab', { name: 'Badges' }))
     expect(screen.getByText('Animal Sounds')).toBeInTheDocument()
     expect(screen.getByText('×2')).toBeInTheDocument() // hotStreak count for animal-sounds
+  })
+})
+
+describe('settings groups', () => {
+  it('renders the three group headings as h2 landmarks', () => {
+    renderAdmin()
+    for (const name of ['General', 'Quiz Games', 'Memory Games']) {
+      expect(screen.getByRole('heading', { level: 2, name })).toBeInTheDocument()
+    }
+  })
+
+  it('demotes section headings to h3 (no section remains an h2)', () => {
+    renderAdmin()
+    expect(screen.getByRole('heading', { level: 3, name: 'Answer Choices' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 3, name: 'Pairs Per Board' })).toBeInTheDocument()
+    expect(screen.queryByRole('heading', { level: 2, name: 'Answer Choices' })).not.toBeInTheDocument()
+  })
+
+  it('selecting a pair count updates memoryPairs', () => {
+    renderAdmin()
+    const group = screen.getByRole('heading', { level: 3, name: 'Pairs Per Board' }).closest('.admin__section')
+    fireEvent.click(within(group).getByLabelText('3'))
+    expect(mockUpdateSetting).toHaveBeenCalledWith('memoryPairs', 3)
+  })
+
+  it('only offers pair counts 3 through 6', () => {
+    renderAdmin()
+    const group = screen.getByRole('heading', { level: 3, name: 'Pairs Per Board' }).closest('.admin__section')
+    expect(within(group).getAllByRole('radio')).toHaveLength(4)
+    expect(within(group).queryByLabelText('2')).not.toBeInTheDocument()
+    expect(within(group).queryByLabelText('7')).not.toBeInTheDocument()
+  })
+
+  it('toggling sound effects updates soundEffectsEnabled', () => {
+    renderAdmin()
+    fireEvent.click(screen.getByRole('button', { name: /🔊 On/ }))
+    expect(mockUpdateSetting).toHaveBeenCalledWith('soundEffectsEnabled', true)
+  })
+
+  it('existing controls still update their keys after regrouping', () => {
+    renderAdmin()
+    fireEvent.click(screen.getByLabelText('4', { selector: 'input[name="numChoices"]' }))
+    expect(mockUpdateSetting).toHaveBeenCalledWith('numChoices', 4)
   })
 })

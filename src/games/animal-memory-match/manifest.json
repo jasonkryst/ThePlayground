@@ -1,0 +1,10 @@
+{
+  "id": "animal-memory-match",
+  "name": "Animal Memory Match",
+  "description": "Flip the tiles and find the matching animal pairs!",
+  "icon": "🧠",
+  "gameType": "memory",
+  "color": "#4DB6AC",
+  "version": "1.0.0",
+  "tags": ["memory", "animals"]
+}

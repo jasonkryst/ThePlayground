@@ -19,6 +19,7 @@
     "timeUp": "⏰ Time's up!",
     "newAccuracyRecord": "🏆 New accuracy record! {{score}}/{{total}} (was {{prevScore}}/{{prevTotal}})",
     "newSpeedRecord": "⚡ New speed record! {{seconds}}s avg (was {{prevSeconds}}s avg)",
+    "newFewestFlipsRecord": "🃏 New record! Solved in {{flips}} flips (was {{prevFlips}})",
     "newBadgeAnnounce": "🎉 New Badge!",
     "resultsHeading": "Results"
   },
@@ -138,6 +139,14 @@
     "difficultyAutoProgressionHeading": "Difficulty Auto-Progression",
     "difficultyAutoProgressionOn": "On",
     "difficultyAutoProgressionOff": "Off",
+    "groupGeneral": "General",
+    "groupQuizGames": "Quiz Games",
+    "groupMemoryGames": "Memory Games",
+    "memoryPairsHeading": "Pairs Per Board",
+    "memoryPairsHint": "How many animal pairs are hidden on the memory board.",
+    "soundEffectsHeading": "Sound Effects",
+    "soundEffectsOn": "🔊 On",
+    "soundEffectsOff": "Off",
     "reset": "Reset to Defaults",
     "resetConfirm": "Are you sure? Tap again to reset",
     "scoreHistoryHeading": "Score History",
@@ -163,6 +172,8 @@
     "statBestScore": "Best Score",
     "statBestStreak": "Best Streak",
     "statTotalPlayed": "Total Played",
+    "statFewestFlips": "Fewest Flips",
+    "statPairsMatched": "Pairs Matched",
     "badgeEarned": "{{name}} — earned",
     "badgeLocked": "{{name}} — locked"
   },
@@ -176,5 +187,9 @@
     "dedicatedPlayer": { "name": "Dedicated Player", "desc": "Answer 500 questions in this game." },
     "grandMaster": { "name": "Grand Master", "desc": "Answer 1000 questions in this game." },
     "locked": "Locked"
+  },
+  "memoryBoard": {
+    "hiddenTile": "Hidden tile {{position}} of {{total}}",
+    "matchedLabel": "{{name}} — matched"
   }
 }

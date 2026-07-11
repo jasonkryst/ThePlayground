@@ -20,29 +20,34 @@ beforeEach(() => {
 
 describe('localStorageAdapter — badge data', () => {
   describe('getBadgeData', () => {
-    it('returns empty awards/lifetimeQuestions when localStorage is empty', async () => {
-      expect(await localStorageAdapter.getBadgeData()).toEqual({ awards: {}, lifetimeQuestions: {} })
+    it('returns empty awards/lifetimeQuestions/lifetimeCounters when localStorage is empty', async () => {
+      expect(await localStorageAdapter.getBadgeData()).toEqual({ awards: {}, lifetimeQuestions: {}, lifetimeCounters: {} })
     })
 
     it('returns stored data when valid', async () => {
-      const stored = { awards: { 'animal-sounds': { hotStreak: 2 } }, lifetimeQuestions: { 'animal-sounds': 120 } }
+      const stored = { awards: { 'animal-sounds': { hotStreak: 2 } }, lifetimeQuestions: { 'animal-sounds': 120 }, lifetimeCounters: { 'memory-match': { pairsMatched: 8 } } }
       localStorage.setItem(BADGES_KEY, JSON.stringify(stored))
       expect(await localStorageAdapter.getBadgeData()).toEqual(stored)
     })
 
     it('returns empty shape when the stored value is invalid JSON', async () => {
       localStorage.setItem(BADGES_KEY, 'not{valid}json')
-      expect(await localStorageAdapter.getBadgeData()).toEqual({ awards: {}, lifetimeQuestions: {} })
+      expect(await localStorageAdapter.getBadgeData()).toEqual({ awards: {}, lifetimeQuestions: {}, lifetimeCounters: {} })
     })
 
     it('returns empty shape when the stored value is a JSON array', async () => {
       localStorage.setItem(BADGES_KEY, JSON.stringify([1, 2, 3]))
-      expect(await localStorageAdapter.getBadgeData()).toEqual({ awards: {}, lifetimeQuestions: {} })
+      expect(await localStorageAdapter.getBadgeData()).toEqual({ awards: {}, lifetimeQuestions: {}, lifetimeCounters: {} })
     })
 
     it('fills in an empty awards object when only lifetimeQuestions is present', async () => {
       localStorage.setItem(BADGES_KEY, JSON.stringify({ lifetimeQuestions: { 'color-match': 10 } }))
-      expect(await localStorageAdapter.getBadgeData()).toEqual({ awards: {}, lifetimeQuestions: { 'color-match': 10 } })
+      expect(await localStorageAdapter.getBadgeData()).toEqual({ awards: {}, lifetimeQuestions: { 'color-match': 10 }, lifetimeCounters: {} })
+    })
+
+    it('fills in an empty lifetimeCounters object for pre-existing installs without the key', async () => {
+      localStorage.setItem(BADGES_KEY, JSON.stringify({ awards: {}, lifetimeQuestions: { 'animal-sounds': 30 } }))
+      expect(await localStorageAdapter.getBadgeData()).toEqual({ awards: {}, lifetimeQuestions: { 'animal-sounds': 30 }, lifetimeCounters: {} })
     })
   })
 

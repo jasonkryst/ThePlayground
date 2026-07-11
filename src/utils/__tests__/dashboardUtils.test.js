@@ -221,6 +221,18 @@ describe('computeStreakHistory', () => {
     const result = computeStreakHistory([score])
     expect(result['animal-sounds'].last7).toBe(9)
   })
+
+  it('uses the memory game peakStreak (peak match streak), not its score (board size)', () => {
+    // Memory score records: score/total is board size (e.g. 5), unrelated to streak.
+    // peakStreak (mirrors peakMatchStreak) is the real streak value to surface here.
+    const anchor = new Date(2)
+    const score  = {
+      gameId: 'animal-memory-match', score: 5, total: 5, date: '2026-07-10', timestamp: 1,
+      flipAttempts: 8, mismatches: 3, peakStreak: 2, peakMatchStreak: 2,
+    }
+    const result = computeStreakHistory([score], {}, anchor)
+    expect(result['animal-memory-match'].last7).toBe(2)
+  })
 })
 
 // ─── computeSessionHeatmap ───────────────────────────────────────────────────

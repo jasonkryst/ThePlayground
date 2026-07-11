@@ -10,7 +10,7 @@ A browser-based game dashboard designed for infants and toddlers. Games are disp
 - **Color Match** — a color swatch is shown; the child picks the matching colored object from picture buttons
 - **Character Match** — a character's name is shown; the child picks the matching character from picture buttons
 - **Admin / Settings** — tabbed settings page (Settings · Games · History); configure child's name, answer choices (2–4), feedback mode, questions per session, Google Analytics ID, and per-game tag overrides
-- **My Progress page** — a kid-facing `/my-progress` page (🌟 link on the dashboard) showing each game's best score, best streak, total questions answered, and earned badges, with locked badges shown dimmed rather than as unreadable text; separate from the parent-facing `/parent` analytics dashboard and the admin `/admin` settings page
+- **My Progress page** — a kid-facing `/my-progress` page (🌟 link on the dashboard) showing each game's best score, best streak, total questions answered, and earned badges (memory games show fewest flips and pairs matched instead of score/questions), with locked badges shown dimmed rather than as unreadable text; separate from the parent-facing `/parent` analytics dashboard and the admin `/admin` settings page
 - **How-to-play intro screens** — each game shows a brief instructional screen before its first question; parents can permanently dismiss it per game, or bring it back from the admin Games tab
 - **Persistent scoring** — game history stored in `localStorage`; swappable for a backend without touching game code
 - **Version display** — app version shown in the dashboard footer; game version shown in the game header
@@ -274,6 +274,8 @@ Accessible from the dashboard via the gear icon (⚙).
 | Retry counts toward streak | On | On, Off |
 | Spaced repetition | Off | On, Off |
 | Difficulty auto-progression | Off | On, Off |
+| Pairs per board | 5 | 3, 4, 5, 6 |
+| Sound effects | On | On, Off |
 | Google Analytics ID | *(empty)* | Any valid GA4 Measurement ID (e.g. `G-XXXXXXXXXX`) |
 
 **Questions per session** — if a game's item set is smaller than the selected count (for example, a 12-item game with "20" selected), items repeat to fill the session. Repeats are distributed evenly across the pool and the same item is never asked twice in a row.
@@ -301,6 +303,10 @@ Accessible from the dashboard via the gear icon (⚙).
 **Spaced repetition** — when on, a missed item reappears a few questions later in the same session (replacing one of the not-yet-asked items, so the session length stays the same).
 
 **Difficulty auto-progression** — when on, finishing a session with a perfect score offers to raise Answer Choices by 1 (up to the maximum of 4) on the results screen.
+
+**Pairs per board** — pairs per board for the memory game type, 3–6.
+
+**Sound effects** — plays the matched animal's sound in memory games.
 
 ---
 

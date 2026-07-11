@@ -8,3 +8,22 @@ export const BADGE_CATALOG = [
   { id: 'dedicatedPlayer', category: 'totalQuestions',  tier: 500,  icon: '🏆', nameKey: 'badges.dedicatedPlayer.name', descKey: 'badges.dedicatedPlayer.desc' },
   { id: 'grandMaster',     category: 'totalQuestions',  tier: 1000, icon: '👑', nameKey: 'badges.grandMaster.name',    descKey: 'badges.grandMaster.desc' },
 ]
+
+export function buildGameBadgeCatalogs(modules) {
+  const catalogs = {}
+  for (const [path, mod] of Object.entries(modules)) {
+    const gameId = path.match(/games\/([^/]+)\//)[1]
+    catalogs[gameId] = mod.default ?? mod
+  }
+  return catalogs
+}
+
+// Auto-discovered, like game i18n files: a game ships src/games/<id>/badges.js
+// and its catalog fully replaces the global quiz catalog for that game.
+export const GAME_BADGE_CATALOGS = buildGameBadgeCatalogs(
+  import.meta.glob('../games/*/badges.js', { eager: true })
+)
+
+export function getBadgesForGame(gameId) {
+  return GAME_BADGE_CATALOGS[gameId] ?? BADGE_CATALOG
+}

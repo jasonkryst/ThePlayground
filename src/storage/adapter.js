@@ -18,6 +18,8 @@ export const DEFAULT_SETTINGS = {
   speedRecordMinAccuracy: 70,
   locale: 'en',
   parentDateRange: { preset: 'all', start: null, end: null },
+  memoryPairs: 5,
+  soundEffectsEnabled: true,
 }
 
 /**
@@ -37,7 +39,7 @@ export const DEFAULT_SETTINGS = {
  * Settings shape: { numChoices, feedbackMode, questionsPerSession, gaId, childName, animationsEnabled, tagOverrides,
  *                    timerMode, timeLimitSeconds, maxTries, hintsEnabled, hintAfterWrongTaps, retryCountsAsStreak,
  *                    spacedRepetitionEnabled, difficultyAutoProgressionEnabled, introDismissed, speedRecordMinAccuracy, locale,
- *                    parentDateRange }
+ *                    parentDateRange, memoryPairs, soundEffectsEnabled }
  *   maxTries: 'none' | 1 | 2 | 3 | 4 | 5 | 'unlimited' — 'none' reproduces pre-v0.6.0 behavior (locks on first wrong tap)
  *   introDismissed: { [gameId: string]: true } — gameIds present here permanently suppress that game's how-to-play intro
  *   timerMode: 'off' | 'countUp' | 'countdown' — replaces the v0.6.0 boolean `timerDisplayEnabled` (added v0.8.0)
@@ -47,6 +49,8 @@ export const DEFAULT_SETTINGS = {
  *   parentDateRange: { preset, start, end } — Parent Dashboard's active date filter.
  *     preset: '7d' | '30d' | '90d' | 'all' | 'custom'; start/end are 'YYYY-MM-DD'
  *     strings, only meaningful when preset === 'custom'. Added v0.21.0.
+ *   memoryPairs: 3 | 4 | 5 | 6 — pairs per board for memory-type games (added v0.23.0)
+ *   soundEffectsEnabled: boolean — gates celebratory sound effects (e.g. memory match sound); added v0.23.0
  *
  * Best-streak adapter methods (added for per-game streak tracking):
  * getBestStreaks()            → Promise<{ [gameId: string]: number }>
@@ -57,6 +61,7 @@ export const DEFAULT_SETTINGS = {
  * savePersonalBests(bestsMap)  → Promise<void>
  *
  * Badge adapter methods (added v0.8.0):
- * getBadgeData()  → Promise<{ awards: { [gameId: string]: { [badgeId: string]: number } }, lifetimeQuestions: { [gameId: string]: number } }>
+ * getBadgeData()  → Promise<{ awards: { [gameId]: { [badgeId]: number } }, lifetimeQuestions: { [gameId]: number }, lifetimeCounters: { [gameId]: { [counter: string]: number } } }>
+ *   lifetimeCounters added v0.23.0 for per-game badge catalogs (e.g. pairsMatched for memory games)
  * saveBadgeData(data) → Promise<void>
  */

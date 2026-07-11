@@ -114,297 +114,348 @@ export default function AdminPage({ manifests = [] }) {
 
       {activeTab === 'settings' && (
         <div role="tabpanel" id="admin-panel-settings" aria-labelledby="admin-tab-settings">
-          <LocaleSelector
-            locales={SUPPORTED_LOCALES}
-            value={settings.locale}
-            onChange={val => updateSetting('locale', val)}
-          />
+          <section className="admin__group">
+            <h2 className="admin__group-heading">{t('admin.groupGeneral')}</h2>
 
-          <div className="admin__section">
-            <h2>{t('admin.childNameHeading')}</h2>
-            <p className="admin__hint">{t('admin.childNameHint')}</p>
-            <input
-              className="admin__text-input"
-              type="text"
-              placeholder={t('admin.childNamePlaceholder')}
-              value={settings.childName || ''}
-              onChange={e => updateSetting('childName', e.target.value)}
-              aria-label={t('admin.childNameLabel')}
-              spellCheck={false}
+            <LocaleSelector
+              locales={SUPPORTED_LOCALES}
+              value={settings.locale}
+              onChange={val => updateSetting('locale', val)}
             />
-          </div>
 
-          <div className="admin__section">
-            <h2>{t('admin.answerChoicesHeading')}</h2>
-            <div className="admin__radios">
-              {[2, 3, 4].map(n => (
-                <label
-                  key={n}
-                  className={`admin__radio-label${settings.numChoices === n ? ' selected' : ''}`}
-                >
-                  <input
-                    type="radio"
-                    name="numChoices"
-                    checked={settings.numChoices === n}
-                    onChange={() => updateSetting('numChoices', n)}
-                    aria-label={String(n)}
-                  />
-                  {n}
-                </label>
-              ))}
+            <div className="admin__section">
+              <h3>{t('admin.childNameHeading')}</h3>
+              <p className="admin__hint">{t('admin.childNameHint')}</p>
+              <input
+                className="admin__text-input"
+                type="text"
+                placeholder={t('admin.childNamePlaceholder')}
+                value={settings.childName || ''}
+                onChange={e => updateSetting('childName', e.target.value)}
+                aria-label={t('admin.childNameLabel')}
+                spellCheck={false}
+              />
             </div>
-          </div>
 
-          <div className="admin__section">
-            <h2>{t('admin.feedbackModeHeading')}</h2>
-            <div className="admin__toggle">
-              {[
-                { value: 'immediate', label: t('admin.feedbackImmediate') },
-                { value: 'parent-tap', label: t('admin.feedbackParentTap') },
-              ].map(opt => (
+            <div className="admin__section">
+              <h3>{t('admin.animationsHeading')}</h3>
+              <div className="admin__toggle">
                 <button
-                  key={opt.value}
-                  className={`admin__toggle-btn${settings.feedbackMode === opt.value ? ' active' : ''}`}
-                  onClick={() => updateSetting('feedbackMode', opt.value)}
+                  className={`admin__toggle-btn${settings.animationsEnabled ? ' active' : ''}`}
+                  onClick={() => updateSetting('animationsEnabled', true)}
                 >
-                  {opt.label}
+                  {t('admin.animationsOn')}
                 </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="admin__section">
-            <h2>{t('admin.animationsHeading')}</h2>
-            <div className="admin__toggle">
-              <button
-                className={`admin__toggle-btn${settings.animationsEnabled ? ' active' : ''}`}
-                onClick={() => updateSetting('animationsEnabled', true)}
-              >
-                {t('admin.animationsOn')}
-              </button>
-              <button
-                className={`admin__toggle-btn${!settings.animationsEnabled ? ' active' : ''}`}
-                onClick={() => updateSetting('animationsEnabled', false)}
-              >
-                {t('admin.animationsOff')}
-              </button>
-            </div>
-          </div>
-
-          <div className="admin__section">
-            <h2>{t('admin.questionsPerSessionHeading')}</h2>
-            <div className="admin__radios">
-              {[5, 10, 15, 20].map(n => (
-                <label
-                  key={n}
-                  className={`admin__radio-label${settings.questionsPerSession === n ? ' selected' : ''}`}
+                <button
+                  className={`admin__toggle-btn${!settings.animationsEnabled ? ' active' : ''}`}
+                  onClick={() => updateSetting('animationsEnabled', false)}
                 >
-                  <input
-                    type="radio"
-                    name="questionsPerSession"
-                    checked={settings.questionsPerSession === n}
-                    onChange={() => updateSetting('questionsPerSession', n)}
-                    aria-label={String(n)}
-                  />
-                  {n}
-                </label>
-              ))}
+                  {t('admin.animationsOff')}
+                </button>
+              </div>
             </div>
-          </div>
 
-          <div className="admin__section">
-            <h2>{t('admin.gaHeading')}</h2>
-            <p className="admin__hint">{t('admin.gaHint')}</p>
-            <input
-              className="admin__text-input"
-              type="text"
-              placeholder="G-XXXXXXXXXX"
-              value={settings.gaId || ''}
-              onChange={e => updateSetting('gaId', e.target.value)}
-              aria-label={t('admin.gaLabel')}
-              spellCheck={false}
-            />
-          </div>
-
-          <div className="admin__section">
-            <h2>{t('admin.timerHeading')}</h2>
-            <div className="admin__radios">
-              <label className={`admin__radio-label${settings.timerMode === 'off' ? ' selected' : ''}`}>
-                <input
-                  type="radio"
-                  name="timerMode"
-                  checked={settings.timerMode === 'off'}
-                  onChange={() => updateSetting('timerMode', 'off')}
-                  aria-label={t('admin.timerOff')}
-                />
-                {t('admin.timerOff')}
-              </label>
-              <label className={`admin__radio-label${settings.timerMode === 'countUp' ? ' selected' : ''}`}>
-                <input
-                  type="radio"
-                  name="timerMode"
-                  checked={settings.timerMode === 'countUp'}
-                  onChange={() => updateSetting('timerMode', 'countUp')}
-                  aria-label={t('admin.timerCountUp')}
-                />
-                {t('admin.timerCountUp')}
-              </label>
-              {[5, 10, 15, 20].map(n => (
-                <label
-                  key={n}
-                  className={`admin__radio-label${settings.timerMode === 'countdown' && settings.timeLimitSeconds === n ? ' selected' : ''}`}
+            <div className="admin__section">
+              <h3>{t('admin.soundEffectsHeading')}</h3>
+              <div className="admin__toggle">
+                <button
+                  className={`admin__toggle-btn${settings.soundEffectsEnabled ? ' active' : ''}`}
+                  onClick={() => updateSetting('soundEffectsEnabled', true)}
                 >
-                  <input
-                    type="radio"
-                    name="timerMode"
-                    checked={settings.timerMode === 'countdown' && settings.timeLimitSeconds === n}
-                    onChange={() => {
-                      updateSetting('timerMode', 'countdown')
-                      updateSetting('timeLimitSeconds', n)
-                    }}
-                    aria-label={t('admin.timerCountdown', { seconds: n })}
-                  />
-                  {t('admin.timerCountdown', { seconds: n })}
-                </label>
-              ))}
-            </div>
-          </div>
-
-          <div className="admin__section">
-            <h2>{t('admin.speedRecordThresholdHeading')}</h2>
-            <p className="admin__hint">{t('admin.speedRecordThresholdHint')}</p>
-            <div className="admin__radios">
-              {[70, 75, 80, 85, 90, 95, 100].map(pct => (
-                <label
-                  key={pct}
-                  className={`admin__radio-label${settings.speedRecordMinAccuracy === pct ? ' selected' : ''}`}
+                  {t('admin.soundEffectsOn')}
+                </button>
+                <button
+                  className={`admin__toggle-btn${!settings.soundEffectsEnabled ? ' active' : ''}`}
+                  onClick={() => updateSetting('soundEffectsEnabled', false)}
                 >
-                  <input
-                    type="radio"
-                    name="speedRecordMinAccuracy"
-                    checked={settings.speedRecordMinAccuracy === pct}
-                    onChange={() => updateSetting('speedRecordMinAccuracy', pct)}
-                    aria-label={`${pct}%`}
-                  />
-                  {pct}%
-                </label>
-              ))}
+                  {t('admin.soundEffectsOff')}
+                </button>
+              </div>
             </div>
-          </div>
 
-          <div className="admin__section">
-            <h2>{t('admin.maxTriesHeading')}</h2>
-            <p className="admin__hint">{t('admin.maxTriesHint')}</p>
-            <div className="admin__radios">
-              {['none', 1, 2, 3, 4, 5, 'unlimited'].map(value => (
-                <label
-                  key={value}
-                  className={`admin__radio-label${settings.maxTries === value ? ' selected' : ''}`}
-                >
-                  <input
-                    type="radio"
-                    name="maxTries"
-                    checked={settings.maxTries === value}
-                    onChange={() => updateSetting('maxTries', value)}
-                    aria-label={value === 'none' ? t('admin.maxTriesNone') : value === 'unlimited' ? t('admin.maxTriesUnlimited') : String(value)}
-                  />
-                  {value === 'none' ? t('admin.maxTriesNone') : value === 'unlimited' ? t('admin.maxTriesUnlimited') : value}
-                </label>
-              ))}
+            <div className="admin__section">
+              <h3>{t('admin.gaHeading')}</h3>
+              <p className="admin__hint">{t('admin.gaHint')}</p>
+              <input
+                className="admin__text-input"
+                type="text"
+                placeholder="G-XXXXXXXXXX"
+                value={settings.gaId || ''}
+                onChange={e => updateSetting('gaId', e.target.value)}
+                aria-label={t('admin.gaLabel')}
+                spellCheck={false}
+              />
             </div>
-          </div>
+          </section>
 
-          <div className="admin__section">
-            <h2>{t('admin.hintsHeading')}</h2>
-            <div className="admin__toggle">
-              <button
-                className={`admin__toggle-btn${settings.hintsEnabled ? ' active' : ''}`}
-                onClick={() => updateSetting('hintsEnabled', true)}
-              >
-                {t('admin.hintsOn')}
-              </button>
-              <button
-                className={`admin__toggle-btn${!settings.hintsEnabled ? ' active' : ''}`}
-                onClick={() => updateSetting('hintsEnabled', false)}
-              >
-                {t('admin.hintsOff')}
-              </button>
-            </div>
-            {settings.hintsEnabled && (
+          <section className="admin__group">
+            <h2 className="admin__group-heading">{t('admin.groupQuizGames')}</h2>
+
+            <div className="admin__section">
+              <h3>{t('admin.answerChoicesHeading')}</h3>
               <div className="admin__radios">
-                <h3>{t('admin.hintAfterWrongTapsHeading')}</h3>
-                {[1, 2, 3, 4, 5].map(n => (
+                {[2, 3, 4].map(n => (
                   <label
                     key={n}
-                    className={`admin__radio-label${settings.hintAfterWrongTaps === n ? ' selected' : ''}`}
+                    className={`admin__radio-label${settings.numChoices === n ? ' selected' : ''}`}
                   >
                     <input
                       type="radio"
-                      name="hintAfterWrongTaps"
-                      checked={settings.hintAfterWrongTaps === n}
-                      onChange={() => updateSetting('hintAfterWrongTaps', n)}
+                      name="numChoices"
+                      checked={settings.numChoices === n}
+                      onChange={() => updateSetting('numChoices', n)}
                       aria-label={String(n)}
                     />
                     {n}
                   </label>
                 ))}
               </div>
-            )}
-          </div>
-
-          <div className="admin__section">
-            <h2>{t('admin.retryStreakHeading')}</h2>
-            <div className="admin__toggle">
-              <button
-                className={`admin__toggle-btn${settings.retryCountsAsStreak ? ' active' : ''}`}
-                onClick={() => updateSetting('retryCountsAsStreak', true)}
-              >
-                {t('admin.retryStreakOn')}
-              </button>
-              <button
-                className={`admin__toggle-btn${!settings.retryCountsAsStreak ? ' active' : ''}`}
-                onClick={() => updateSetting('retryCountsAsStreak', false)}
-              >
-                {t('admin.retryStreakOff')}
-              </button>
             </div>
-          </div>
 
-          <div className="admin__section">
-            <h2>{t('admin.spacedRepetitionHeading')}</h2>
-            <div className="admin__toggle">
-              <button
-                className={`admin__toggle-btn${settings.spacedRepetitionEnabled ? ' active' : ''}`}
-                onClick={() => updateSetting('spacedRepetitionEnabled', true)}
-              >
-                {t('admin.spacedRepetitionOn')}
-              </button>
-              <button
-                className={`admin__toggle-btn${!settings.spacedRepetitionEnabled ? ' active' : ''}`}
-                onClick={() => updateSetting('spacedRepetitionEnabled', false)}
-              >
-                {t('admin.spacedRepetitionOff')}
-              </button>
+            <div className="admin__section">
+              <h3>{t('admin.feedbackModeHeading')}</h3>
+              <div className="admin__toggle">
+                {[
+                  { value: 'immediate', label: t('admin.feedbackImmediate') },
+                  { value: 'parent-tap', label: t('admin.feedbackParentTap') },
+                ].map(opt => (
+                  <button
+                    key={opt.value}
+                    className={`admin__toggle-btn${settings.feedbackMode === opt.value ? ' active' : ''}`}
+                    onClick={() => updateSetting('feedbackMode', opt.value)}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
             </div>
-          </div>
 
-          <div className="admin__section">
-            <h2>{t('admin.difficultyAutoProgressionHeading')}</h2>
-            <div className="admin__toggle">
-              <button
-                className={`admin__toggle-btn${settings.difficultyAutoProgressionEnabled ? ' active' : ''}`}
-                onClick={() => updateSetting('difficultyAutoProgressionEnabled', true)}
-              >
-                {t('admin.difficultyAutoProgressionOn')}
-              </button>
-              <button
-                className={`admin__toggle-btn${!settings.difficultyAutoProgressionEnabled ? ' active' : ''}`}
-                onClick={() => updateSetting('difficultyAutoProgressionEnabled', false)}
-              >
-                {t('admin.difficultyAutoProgressionOff')}
-              </button>
+            <div className="admin__section">
+              <h3>{t('admin.questionsPerSessionHeading')}</h3>
+              <div className="admin__radios">
+                {[5, 10, 15, 20].map(n => (
+                  <label
+                    key={n}
+                    className={`admin__radio-label${settings.questionsPerSession === n ? ' selected' : ''}`}
+                  >
+                    <input
+                      type="radio"
+                      name="questionsPerSession"
+                      checked={settings.questionsPerSession === n}
+                      onChange={() => updateSetting('questionsPerSession', n)}
+                      aria-label={String(n)}
+                    />
+                    {n}
+                  </label>
+                ))}
+              </div>
             </div>
-          </div>
+
+            <div className="admin__section">
+              <h3>{t('admin.timerHeading')}</h3>
+              <div className="admin__radios">
+                <label className={`admin__radio-label${settings.timerMode === 'off' ? ' selected' : ''}`}>
+                  <input
+                    type="radio"
+                    name="timerMode"
+                    checked={settings.timerMode === 'off'}
+                    onChange={() => updateSetting('timerMode', 'off')}
+                    aria-label={t('admin.timerOff')}
+                  />
+                  {t('admin.timerOff')}
+                </label>
+                <label className={`admin__radio-label${settings.timerMode === 'countUp' ? ' selected' : ''}`}>
+                  <input
+                    type="radio"
+                    name="timerMode"
+                    checked={settings.timerMode === 'countUp'}
+                    onChange={() => updateSetting('timerMode', 'countUp')}
+                    aria-label={t('admin.timerCountUp')}
+                  />
+                  {t('admin.timerCountUp')}
+                </label>
+                {[5, 10, 15, 20].map(n => (
+                  <label
+                    key={n}
+                    className={`admin__radio-label${settings.timerMode === 'countdown' && settings.timeLimitSeconds === n ? ' selected' : ''}`}
+                  >
+                    <input
+                      type="radio"
+                      name="timerMode"
+                      checked={settings.timerMode === 'countdown' && settings.timeLimitSeconds === n}
+                      onChange={() => {
+                        updateSetting('timerMode', 'countdown')
+                        updateSetting('timeLimitSeconds', n)
+                      }}
+                      aria-label={t('admin.timerCountdown', { seconds: n })}
+                    />
+                    {t('admin.timerCountdown', { seconds: n })}
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div className="admin__section">
+              <h3>{t('admin.speedRecordThresholdHeading')}</h3>
+              <p className="admin__hint">{t('admin.speedRecordThresholdHint')}</p>
+              <div className="admin__radios">
+                {[70, 75, 80, 85, 90, 95, 100].map(pct => (
+                  <label
+                    key={pct}
+                    className={`admin__radio-label${settings.speedRecordMinAccuracy === pct ? ' selected' : ''}`}
+                  >
+                    <input
+                      type="radio"
+                      name="speedRecordMinAccuracy"
+                      checked={settings.speedRecordMinAccuracy === pct}
+                      onChange={() => updateSetting('speedRecordMinAccuracy', pct)}
+                      aria-label={`${pct}%`}
+                    />
+                    {pct}%
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div className="admin__section">
+              <h3>{t('admin.maxTriesHeading')}</h3>
+              <p className="admin__hint">{t('admin.maxTriesHint')}</p>
+              <div className="admin__radios">
+                {['none', 1, 2, 3, 4, 5, 'unlimited'].map(value => (
+                  <label
+                    key={value}
+                    className={`admin__radio-label${settings.maxTries === value ? ' selected' : ''}`}
+                  >
+                    <input
+                      type="radio"
+                      name="maxTries"
+                      checked={settings.maxTries === value}
+                      onChange={() => updateSetting('maxTries', value)}
+                      aria-label={value === 'none' ? t('admin.maxTriesNone') : value === 'unlimited' ? t('admin.maxTriesUnlimited') : String(value)}
+                    />
+                    {value === 'none' ? t('admin.maxTriesNone') : value === 'unlimited' ? t('admin.maxTriesUnlimited') : value}
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            <div className="admin__section">
+              <h3>{t('admin.hintsHeading')}</h3>
+              <div className="admin__toggle">
+                <button
+                  className={`admin__toggle-btn${settings.hintsEnabled ? ' active' : ''}`}
+                  onClick={() => updateSetting('hintsEnabled', true)}
+                >
+                  {t('admin.hintsOn')}
+                </button>
+                <button
+                  className={`admin__toggle-btn${!settings.hintsEnabled ? ' active' : ''}`}
+                  onClick={() => updateSetting('hintsEnabled', false)}
+                >
+                  {t('admin.hintsOff')}
+                </button>
+              </div>
+              {settings.hintsEnabled && (
+                <div className="admin__radios">
+                  <h3>{t('admin.hintAfterWrongTapsHeading')}</h3>
+                  {[1, 2, 3, 4, 5].map(n => (
+                    <label
+                      key={n}
+                      className={`admin__radio-label${settings.hintAfterWrongTaps === n ? ' selected' : ''}`}
+                    >
+                      <input
+                        type="radio"
+                        name="hintAfterWrongTaps"
+                        checked={settings.hintAfterWrongTaps === n}
+                        onChange={() => updateSetting('hintAfterWrongTaps', n)}
+                        aria-label={String(n)}
+                      />
+                      {n}
+                    </label>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <div className="admin__section">
+              <h3>{t('admin.retryStreakHeading')}</h3>
+              <div className="admin__toggle">
+                <button
+                  className={`admin__toggle-btn${settings.retryCountsAsStreak ? ' active' : ''}`}
+                  onClick={() => updateSetting('retryCountsAsStreak', true)}
+                >
+                  {t('admin.retryStreakOn')}
+                </button>
+                <button
+                  className={`admin__toggle-btn${!settings.retryCountsAsStreak ? ' active' : ''}`}
+                  onClick={() => updateSetting('retryCountsAsStreak', false)}
+                >
+                  {t('admin.retryStreakOff')}
+                </button>
+              </div>
+            </div>
+
+            <div className="admin__section">
+              <h3>{t('admin.spacedRepetitionHeading')}</h3>
+              <div className="admin__toggle">
+                <button
+                  className={`admin__toggle-btn${settings.spacedRepetitionEnabled ? ' active' : ''}`}
+                  onClick={() => updateSetting('spacedRepetitionEnabled', true)}
+                >
+                  {t('admin.spacedRepetitionOn')}
+                </button>
+                <button
+                  className={`admin__toggle-btn${!settings.spacedRepetitionEnabled ? ' active' : ''}`}
+                  onClick={() => updateSetting('spacedRepetitionEnabled', false)}
+                >
+                  {t('admin.spacedRepetitionOff')}
+                </button>
+              </div>
+            </div>
+
+            <div className="admin__section">
+              <h3>{t('admin.difficultyAutoProgressionHeading')}</h3>
+              <div className="admin__toggle">
+                <button
+                  className={`admin__toggle-btn${settings.difficultyAutoProgressionEnabled ? ' active' : ''}`}
+                  onClick={() => updateSetting('difficultyAutoProgressionEnabled', true)}
+                >
+                  {t('admin.difficultyAutoProgressionOn')}
+                </button>
+                <button
+                  className={`admin__toggle-btn${!settings.difficultyAutoProgressionEnabled ? ' active' : ''}`}
+                  onClick={() => updateSetting('difficultyAutoProgressionEnabled', false)}
+                >
+                  {t('admin.difficultyAutoProgressionOff')}
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <section className="admin__group">
+            <h2 className="admin__group-heading">{t('admin.groupMemoryGames')}</h2>
+            <div className="admin__section">
+              <h3>{t('admin.memoryPairsHeading')}</h3>
+              <p className="admin__hint">{t('admin.memoryPairsHint')}</p>
+              <div className="admin__radios">
+                {[3, 4, 5, 6].map(n => (
+                  <label
+                    key={n}
+                    className={`admin__radio-label${settings.memoryPairs === n ? ' selected' : ''}`}
+                  >
+                    <input
+                      type="radio"
+                      name="memoryPairs"
+                      checked={settings.memoryPairs === n}
+                      onChange={() => updateSetting('memoryPairs', n)}
+                      aria-label={String(n)}
+                    />
+                    {n}
+                  </label>
+                ))}
+              </div>
+            </div>
+          </section>
 
           <button className="admin__reset" onClick={handleResetClick}>
             {resetConfirming ? t('admin.resetConfirm') : t('admin.reset')}

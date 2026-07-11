@@ -43,9 +43,24 @@
   color: #fff;
 }
 
+.admin__group {
+  margin-bottom: 2rem;
+}
+
+.admin__group-heading {
+  font-size: 1.1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-text-muted);
+  border-bottom: 2px solid var(--color-lavender);
+  padding-bottom: 0.35rem;
+  margin: 0 0 1rem;
+}
+
 .admin__section { margin-bottom: 28px; }
 
-.admin__section h2 { font-size: 18px; font-weight: 700; margin-bottom: 12px; }
+.admin__section h2,
+.admin__section h3 { font-size: 18px; font-weight: 700; margin-bottom: 12px; }
 
 .admin__radios  { display: flex; gap: 12px; flex-wrap: wrap; }
 
