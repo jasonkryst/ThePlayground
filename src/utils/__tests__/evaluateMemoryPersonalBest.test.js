@@ -101,6 +101,16 @@ describe('evaluateMemoryPersonalBest', () => {
       expect(updatedBests.fastestMs[5]).toEqual({ ms: 40000, timestamp: 1 })
     })
 
+    it('treats a pre-fastestMs stored record (legacy shape) as a first time-session while flips still evaluate', () => {
+      const previous = { fewestFlips: { 5: { flips: 9, timestamp: 1 } } }
+      const { fewestFlips, fastestMs, updatedBests } = evaluateMemoryPersonalBest({ flipAttempts: 7, durationMs: 35000, pairs: 5, previous })
+      expect(fastestMs.isNewRecord).toBe(false)
+      expect(fastestMs.previous).toBe(null)
+      expect(updatedBests.fastestMs[5]).toEqual({ ms: 35000, timestamp: expect.any(Number) })
+      expect(fewestFlips.isNewRecord).toBe(true)
+      expect(updatedBests.fewestFlips[5].flips).toBe(7)
+    })
+
     it('skips the time record entirely when durationMs is not provided', () => {
       const { fastestMs, updatedBests } = evaluateMemoryPersonalBest({ flipAttempts: 9, pairs: 5, previous: null })
       expect(fastestMs.isNewRecord).toBe(false)

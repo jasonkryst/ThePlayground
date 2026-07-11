@@ -57,7 +57,9 @@ export const DEFAULT_SETTINGS = {
  * saveBestStreaks(streaksMap) → Promise<void>
  *
  * Personal-best adapter methods (added v0.8.0):
- * getPersonalBests()           → Promise<{ [gameId: string]: { accuracy?: {...}, speedMs?: {...} } }>
+ * getPersonalBests()           → Promise<{ [gameId: string]: { accuracy?: {...}, speedMs?: {...}, fewestFlips?: {...}, fastestMs?: {...} } }>
+ *   fewestFlips?: { [pairs]: { flips, timestamp } } — per-board-size personal best for memory games (added v0.23.0)
+ *   fastestMs?: { [pairs]: { ms, timestamp } } — per-board-size fastest-time personal best for memory games (added v0.24.0)
  * savePersonalBests(bestsMap)  → Promise<void>
  *
  * Badge adapter methods (added v0.8.0):

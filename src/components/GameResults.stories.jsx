@@ -37,6 +37,16 @@ export const WithPersonalBestRecords = {
   },
 }
 
+export const WithMemoryRecords = {
+  args: {
+    score: 10, total: 10, missed: [], onPlayAgain: () => {}, onHome: () => {}, renderMissedItem,
+    personalBestResult: {
+      fewestFlips: { isNewRecord: true, value: 7, previous: { flips: 9, timestamp: 1 } },
+      fastestMs:   { isNewRecord: true, value: 42300, previous: { ms: 51800, timestamp: 1 } },
+    },
+  },
+}
+
 export const WithNewBadges = {
   args: {
     score: 5, total: 5, missed: [], onPlayAgain: () => {}, onHome: () => {}, renderMissedItem,
