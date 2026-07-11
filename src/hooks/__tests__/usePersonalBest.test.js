@@ -106,6 +106,44 @@ describe('usePersonalBest', () => {
     expect(result.current.personalBest.fewestFlips[5].flips).toBe(7)
   })
 
+  it('recordMemorySession persists an improved fastest-board record and returns it', async () => {
+    mockGetPersonalBests.mockResolvedValue({
+      'animal-memory-match': { fastestMs: { 5: { ms: 42000, timestamp: 1 } } },
+    })
+    const { result } = renderHook(() => usePersonalBest('animal-memory-match'))
+    await waitFor(() => expect(result.current.personalBest).not.toBe(null))
+
+    let outcome
+    await act(async () => {
+      outcome = await result.current.recordMemorySession({ flipAttempts: 9, pairs: 5, durationMs: 38500 })
+    })
+
+    expect(outcome.fastestMs.isNewRecord).toBe(true)
+    expect(outcome.fastestMs.previous).toEqual({ ms: 42000, timestamp: 1 })
+    expect(mockSavePersonalBests).toHaveBeenCalledWith(
+      expect.objectContaining({
+        'animal-memory-match': expect.objectContaining({ fastestMs: expect.objectContaining({ 5: expect.objectContaining({ ms: 38500 }) }) }),
+      })
+    )
+    expect(result.current.personalBest.fastestMs[5].ms).toBe(38500)
+  })
+
+  it('recordMemorySession does not report a time record when the session is slower', async () => {
+    mockGetPersonalBests.mockResolvedValue({
+      'animal-memory-match': { fastestMs: { 5: { ms: 38500, timestamp: 1 } } },
+    })
+    const { result } = renderHook(() => usePersonalBest('animal-memory-match'))
+    await waitFor(() => expect(result.current.personalBest).not.toBe(null))
+
+    let outcome
+    await act(async () => {
+      outcome = await result.current.recordMemorySession({ flipAttempts: 9, pairs: 5, durationMs: 60000 })
+    })
+
+    expect(outcome.fastestMs.isNewRecord).toBe(false)
+    expect(result.current.personalBest.fastestMs[5].ms).toBe(38500)
+  })
+
   it('keeps separate bests per gameId', async () => {
     const { result: animalResult } = renderHook(() => usePersonalBest('animal-sounds'))
     const { result: colorResult } = renderHook(() => usePersonalBest('color-match'))

@@ -28,11 +28,11 @@ export default function usePersonalBest(gameId) {
     return { accuracy, speed }
   }
 
-  async function recordMemorySession({ flipAttempts, pairs }) {
+  async function recordMemorySession({ flipAttempts, pairs, durationMs }) {
     const previous = bestsRef.current[gameId] ?? null
-    const { fewestFlips, updatedBests } = evaluateMemoryPersonalBest({ flipAttempts, pairs, previous })
+    const { fewestFlips, fastestMs, updatedBests } = evaluateMemoryPersonalBest({ flipAttempts, pairs, durationMs, previous })
     await persist(updatedBests)
-    return { fewestFlips }
+    return { fewestFlips, fastestMs }
   }
 
   return { personalBest, recordSession, recordMemorySession }
