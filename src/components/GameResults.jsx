@@ -27,6 +27,15 @@ export default function GameResults({
         </div>
       )}
 
+      {personalBestResult?.fewestFlips?.isNewRecord && (
+        <div className="results__record">
+          {t('common.newFewestFlipsRecord', {
+            flips: personalBestResult.fewestFlips.value,
+            prevFlips: personalBestResult.fewestFlips.previous.flips,
+          })}
+        </div>
+      )}
+
       {personalBestResult?.speed?.isNewRecord && (
         <div className="results__record">
           {t('common.newSpeedRecord', {

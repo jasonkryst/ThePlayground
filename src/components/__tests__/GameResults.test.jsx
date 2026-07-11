@@ -132,6 +132,30 @@ describe('GameResults', () => {
     expect(screen.getByText(/new speed record/i)).toBeInTheDocument()
   })
 
+  it('shows the fewest-flips banner with previous flips when isNewRecord is true', () => {
+    render(
+      <GameResults
+        score={5} total={5} missed={[]} onPlayAgain={vi.fn()} onHome={vi.fn()} renderMissedItem={renderMissedItem}
+        personalBestResult={{
+          fewestFlips: { isNewRecord: true, value: 7, previous: { flips: 9, timestamp: 1 } },
+        }}
+      />
+    )
+    expect(screen.getByText('🃏 New record! Solved in 7 flips (was 9)')).toBeInTheDocument()
+  })
+
+  it('does not show a fewest-flips banner when the record was not broken', () => {
+    render(
+      <GameResults
+        score={5} total={5} missed={[]} onPlayAgain={vi.fn()} onHome={vi.fn()} renderMissedItem={renderMissedItem}
+        personalBestResult={{
+          fewestFlips: { isNewRecord: false, value: 12, previous: { flips: 9, timestamp: 1 } },
+        }}
+      />
+    )
+    expect(screen.queryByText(/new record/i)).not.toBeInTheDocument()
+  })
+
   it('does not show any badge announcement by default', () => {
     render(<GameResults score={3} total={5} missed={[]} onPlayAgain={vi.fn()} onHome={vi.fn()} renderMissedItem={renderMissedItem} />)
     expect(screen.queryByText(/new badge/i)).not.toBeInTheDocument()

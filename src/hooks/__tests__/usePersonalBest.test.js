@@ -68,6 +68,44 @@ describe('usePersonalBest', () => {
     expect(outcome.accuracy.isNewRecord).toBe(false)
   })
 
+  it('recordMemorySession persists an improved fewest-flips record and updates personalBest', async () => {
+    mockGetPersonalBests.mockResolvedValue({
+      'animal-memory-match': { fewestFlips: { 5: { flips: 9, timestamp: 1 } } },
+    })
+    const { result } = renderHook(() => usePersonalBest('animal-memory-match'))
+    await waitFor(() => expect(result.current.personalBest).not.toBe(null))
+
+    let outcome
+    await act(async () => {
+      outcome = await result.current.recordMemorySession({ flipAttempts: 7, pairs: 5 })
+    })
+
+    expect(outcome.fewestFlips.isNewRecord).toBe(true)
+    expect(outcome.fewestFlips.previous).toEqual({ flips: 9, timestamp: 1 })
+    expect(mockSavePersonalBests).toHaveBeenCalledWith(
+      expect.objectContaining({
+        'animal-memory-match': expect.objectContaining({ fewestFlips: expect.objectContaining({ 5: expect.objectContaining({ flips: 7 }) }) }),
+      })
+    )
+    expect(result.current.personalBest.fewestFlips[5].flips).toBe(7)
+  })
+
+  it('recordMemorySession does not report a record when the session does not improve the stored best', async () => {
+    mockGetPersonalBests.mockResolvedValue({
+      'animal-memory-match': { fewestFlips: { 5: { flips: 7, timestamp: 1 } } },
+    })
+    const { result } = renderHook(() => usePersonalBest('animal-memory-match'))
+    await waitFor(() => expect(result.current.personalBest).not.toBe(null))
+
+    let outcome
+    await act(async () => {
+      outcome = await result.current.recordMemorySession({ flipAttempts: 12, pairs: 5 })
+    })
+
+    expect(outcome.fewestFlips.isNewRecord).toBe(false)
+    expect(result.current.personalBest.fewestFlips[5].flips).toBe(7)
+  })
+
   it('keeps separate bests per gameId', async () => {
     const { result: animalResult } = renderHook(() => usePersonalBest('animal-sounds'))
     const { result: colorResult } = renderHook(() => usePersonalBest('color-match'))

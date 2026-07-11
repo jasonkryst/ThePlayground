@@ -22,6 +22,14 @@ vi.mock('../../../hooks/useScores', () => ({
 vi.mock('../../../hooks/useBestStreak', () => ({
   default: () => ({ bestStreak: 0, recordStreak: vi.fn().mockResolvedValue(undefined) }),
 }))
+let mockMemoryBestOutcome
+vi.mock('../../../hooks/usePersonalBest', () => ({
+  default: () => ({
+    personalBest: null,
+    recordSession: vi.fn().mockResolvedValue({}),
+    recordMemorySession: vi.fn().mockImplementation(async () => mockMemoryBestOutcome),
+  }),
+}))
 vi.mock('../../../hooks/useBadges', () => ({
   default: () => ({ badgeData: { awards: {}, lifetimeQuestions: {}, lifetimeCounters: {} }, awardSession: vi.fn().mockResolvedValue([]) }),
 }))
@@ -30,6 +38,7 @@ const onGameEnd = vi.fn()
 
 beforeEach(() => {
   vi.clearAllMocks()
+  mockMemoryBestOutcome = { fewestFlips: { isNewRecord: false, value: 3, previous: null } }
   mockSettings = {
     memoryPairs: 3, animationsEnabled: true, soundEffectsEnabled: true,
     timerMode: 'countUp', introDismissed: { 'animal-memory-match': true },
@@ -120,6 +129,26 @@ describe('AnimalMemoryMatchGame', () => {
     act(() => { vi.advanceTimersByTime(2100) })
     await act(async () => {})
     expect(screen.getByText(/you scored/i)).toBeInTheDocument()
+  })
+
+  it('shows the fewest-flips record banner on the results screen', async () => {
+    mockMemoryBestOutcome = { fewestFlips: { isNewRecord: true, value: 3, previous: { flips: 5, timestamp: 1 } } }
+    vi.useFakeTimers()
+    await act(async () => { render(<AnimalMemoryMatchGame onGameEnd={onGameEnd} />) })
+    await playFullBoard()
+    act(() => { vi.advanceTimersByTime(2100) })
+    await act(async () => {})
+    expect(screen.getByText(/new record/i)).toBeInTheDocument()
+  })
+
+  it('shows no record banner when the session did not break the record', async () => {
+    vi.useFakeTimers()
+    await act(async () => { render(<AnimalMemoryMatchGame onGameEnd={onGameEnd} />) })
+    await playFullBoard()
+    act(() => { vi.advanceTimersByTime(2100) })
+    await act(async () => {})
+    expect(screen.getByText(/you scored/i)).toBeInTheDocument()
+    expect(screen.queryByText(/new record/i)).not.toBeInTheDocument()
   })
 
   it('Home button on results calls onGameEnd with pairs/pairs', async () => {

@@ -14,7 +14,7 @@ import './AnimalMemoryMatchGame.css'
 export default function AnimalMemoryMatchGame({ onGameEnd }) {
   const { t } = useTranslation()
   const {
-    tiles, locked, matchStreak, pairsFound, totalPairs, done, lastEvent, newBadges,
+    tiles, locked, matchStreak, pairsFound, totalPairs, done, lastEvent, newBadges, personalBestResult,
     currentElapsedMs, timerMode, animationsEnabled, soundEffectsEnabled,
     showIntro, introResolved, settingsLoaded, dontShowAgain, setDontShowAgain,
     flipTile, restart, dismissIntro,
@@ -54,6 +54,7 @@ export default function AnimalMemoryMatchGame({ onGameEnd }) {
         renderMissedItem={() => null}
         onPlayAgain={restart}
         onHome={() => onGameEnd(pairsFound, totalPairs)}
+        personalBestResult={personalBestResult}
         newBadges={newBadges}
       />
     )

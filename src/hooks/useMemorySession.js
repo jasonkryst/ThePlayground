@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import useSettings from './useSettings'
 import useScores from './useScores'
 import useBestStreak from './useBestStreak'
+import usePersonalBest from './usePersonalBest'
 import useBadges from './useBadges'
 import { fireConfetti, fireFireworks } from '../lib/confetti'
 import buildDeck from '../utils/buildDeck'
@@ -13,6 +14,7 @@ export default function useMemorySession({ gameId, items }) {
   const { settings, loaded, updateSetting } = useSettings()
   const { addScore } = useScores()
   const { recordStreak } = useBestStreak(gameId)
+  const { recordMemorySession } = usePersonalBest(gameId)
   const { awardSession } = useBadges()
 
   const { memoryPairs, animationsEnabled, soundEffectsEnabled, timerMode } = settings
@@ -27,6 +29,7 @@ export default function useMemorySession({ gameId, items }) {
   const [lastEvent,        setLastEvent]        = useState(null)
   const [currentElapsedMs, setCurrentElapsedMs] = useState(0)
   const [newBadges,        setNewBadges]        = useState([])
+  const [personalBestResult, setPersonalBestResult] = useState(null)
   const [showIntro,        setShowIntro]        = useState(false)
   const [introResolved,    setIntroResolved]    = useState(false)
   const [dontShowAgain,    setDontShowAgain]    = useState(false)
@@ -146,6 +149,9 @@ export default function useMemorySession({ gameId, items }) {
 
     await recordStreak(peakMatchStreakRef.current)
 
+    const bestResult = await recordMemorySession({ flipAttempts: flipAttemptsRef.current, pairs })
+    setPersonalBestResult(bestResult)
+
     const earned = await awardSession(gameId, {
       sessionStats: {
         pairs,
@@ -189,6 +195,7 @@ export default function useMemorySession({ gameId, items }) {
     setLastEvent(null)
     setCurrentElapsedMs(0)
     setNewBadges([])
+    setPersonalBestResult(null)
   }
 
   useEffect(() => () => {
@@ -206,7 +213,7 @@ export default function useMemorySession({ gameId, items }) {
 
   return {
     tiles, locked, flipAttempts, mismatches, matchStreak, pairsFound,
-    totalPairs: tiles.length / 2, done, lastEvent, newBadges,
+    totalPairs: tiles.length / 2, done, lastEvent, newBadges, personalBestResult,
     currentElapsedMs, timerMode, animationsEnabled, soundEffectsEnabled,
     showIntro, introResolved, settingsLoaded: loaded, dontShowAgain, setDontShowAgain,
     flipTile, restart, dismissIntro,

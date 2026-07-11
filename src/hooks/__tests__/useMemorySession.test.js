@@ -1,12 +1,14 @@
 import { renderHook, act, waitFor } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 
-const { mockAddScore, mockGetSettings, mockSaveBadgeData, mockGetBestStreaks, mockSaveBestStreaks } = vi.hoisted(() => ({
+const { mockAddScore, mockGetSettings, mockSaveBadgeData, mockGetBestStreaks, mockSaveBestStreaks, mockGetPersonalBests, mockSavePersonalBests } = vi.hoisted(() => ({
   mockAddScore: vi.fn().mockResolvedValue(undefined),
   mockGetSettings: vi.fn(),
   mockSaveBadgeData: vi.fn().mockResolvedValue(undefined),
   mockGetBestStreaks: vi.fn().mockResolvedValue({}),
   mockSaveBestStreaks: vi.fn().mockResolvedValue(undefined),
+  mockGetPersonalBests: vi.fn().mockResolvedValue({}),
+  mockSavePersonalBests: vi.fn().mockResolvedValue(undefined),
 }))
 
 vi.mock('../../storage/index', () => ({
@@ -22,6 +24,8 @@ vi.mock('../../storage/index', () => ({
     saveBadgeData: mockSaveBadgeData,
     getBestStreaks: mockGetBestStreaks,
     saveBestStreaks: mockSaveBestStreaks,
+    getPersonalBests: mockGetPersonalBests,
+    savePersonalBests: mockSavePersonalBests,
   },
 }))
 
@@ -86,6 +90,7 @@ beforeEach(() => {
   vi.clearAllMocks()
   mockGetSettings.mockResolvedValue(SETTINGS)
   mockGetBestStreaks.mockResolvedValue({})
+  mockGetPersonalBests.mockResolvedValue({})
 })
 afterEach(() => vi.useRealTimers())
 
@@ -284,6 +289,45 @@ describe('useMemorySession', () => {
     await act(async () => {})
 
     expect(mockSaveBestStreaks).not.toHaveBeenCalled()
+  })
+
+  it('completion records a fewest-flips personal best and exposes the outcome', async () => {
+    mockGetPersonalBests.mockResolvedValue({
+      'test-memory': { fewestFlips: { 3: { flips: 8, timestamp: 1 } } },
+    })
+    const { result } = await renderSession()
+    vi.useFakeTimers()
+    for (let i = 0; i < 3; i++) {
+      const pair = findPair(result.current.tiles)
+      act(() => result.current.flipTile(pair[0]))
+      act(() => result.current.flipTile(pair[1]))
+      await act(async () => {})
+    }
+    await act(async () => {})
+
+    expect(mockSavePersonalBests).toHaveBeenCalledWith(expect.objectContaining({
+      'test-memory': expect.objectContaining({
+        fewestFlips: expect.objectContaining({ 3: expect.objectContaining({ flips: 3 }) }),
+      }),
+    }))
+    expect(result.current.personalBestResult.fewestFlips.isNewRecord).toBe(true)
+    expect(result.current.personalBestResult.fewestFlips.previous).toEqual({ flips: 8, timestamp: 1 })
+  })
+
+  it('restart clears the personal-best outcome of the finished game', async () => {
+    const { result } = await renderSession()
+    vi.useFakeTimers()
+    for (let i = 0; i < 3; i++) {
+      const pair = findPair(result.current.tiles)
+      act(() => result.current.flipTile(pair[0]))
+      act(() => result.current.flipTile(pair[1]))
+      await act(async () => {})
+    }
+    await act(async () => {})
+    expect(result.current.personalBestResult).not.toBe(null)
+
+    act(() => result.current.restart())
+    expect(result.current.personalBestResult).toBe(null)
   })
 
   it('completion persists pairsMatched lifetime counter via awardSession', async () => {
