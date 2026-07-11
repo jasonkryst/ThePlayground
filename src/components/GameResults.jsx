@@ -36,6 +36,15 @@ export default function GameResults({
         </div>
       )}
 
+      {personalBestResult?.fastestMs?.isNewRecord && (
+        <div className="results__record">
+          {t('common.newFastestBoardRecord', {
+            seconds: (personalBestResult.fastestMs.value / 1000).toFixed(1),
+            prevSeconds: (personalBestResult.fastestMs.previous.ms / 1000).toFixed(1),
+          })}
+        </div>
+      )}
+
       {personalBestResult?.speed?.isNewRecord && (
         <div className="results__record">
           {t('common.newSpeedRecord', {

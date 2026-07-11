@@ -20,6 +20,7 @@
     "newAccuracyRecord": "🏆 New accuracy record! {{score}}/{{total}} (was {{prevScore}}/{{prevTotal}})",
     "newSpeedRecord": "⚡ New speed record! {{seconds}}s avg (was {{prevSeconds}}s avg)",
     "newFewestFlipsRecord": "🃏 New record! Solved in {{flips}} flips (was {{prevFlips}})",
+    "newFastestBoardRecord": "⏱️ New record! Finished in {{seconds}}s (was {{prevSeconds}}s)",
     "newBadgeAnnounce": "🎉 New Badge!",
     "resultsHeading": "Results"
   },
