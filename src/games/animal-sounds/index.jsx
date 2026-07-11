@@ -1,6 +1,7 @@
-import { useCallback, useEffect, useRef } from 'react'
+import { useCallback, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import useGameSession from '../../hooks/useGameSession'
+import useSoundPlayer from '../../hooks/useSoundPlayer'
 import { useShellGameStatus } from '../../components/ShellContext'
 import GameResults from '../../components/GameResults'
 import GameChoiceGrid from '../../components/GameChoiceGrid'
@@ -31,24 +32,12 @@ export default function AnimalSoundsGame({ onGameEnd }) {
 
   useShellGameStatus({ streak, sessionActive: introResolved && !showIntro && !done })
 
-  const audioRef = useRef(null)
-
-  const stopSound = useCallback(() => {
-    if (!audioRef.current) return
-    audioRef.current.pause()
-    audioRef.current.currentTime = 0
-    audioRef.current = null
-  }, [])
+  const { play, stop: stopSound } = useSoundPlayer()
 
   const playSound = useCallback(() => {
     if (!current) return
-    const url = getSoundUrl(current.correct.sound)
-    if (!url) return
-    stopSound()
-    const audio = new Audio(url)
-    audioRef.current = audio
-    audio.play().catch(() => {})
-  }, [current, stopSound])
+    play(getSoundUrl(current.correct.sound))
+  }, [current, play])
 
   useEffect(() => {
     if (!current) return
@@ -58,12 +47,6 @@ export default function AnimalSoundsGame({ onGameEnd }) {
       stopSound()
     }
   }, [current, stopSound])
-
-  useEffect(() => {
-    return () => {
-      stopSound()
-    }
-  }, [stopSound])
 
   useEffect(() => {
     if (!current || showIntro || !introResolved) return
