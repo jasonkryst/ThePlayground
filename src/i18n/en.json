@@ -172,6 +172,8 @@
     "statBestScore": "Best Score",
     "statBestStreak": "Best Streak",
     "statTotalPlayed": "Total Played",
+    "statFewestFlips": "Fewest Flips",
+    "statPairsMatched": "Pairs Matched",
     "badgeEarned": "{{name}} — earned",
     "badgeLocked": "{{name}} — locked"
   },

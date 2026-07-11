@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { computeBestAccuracy } from '../kidStats'
+import { computeBestAccuracy, computeFewestFlips } from '../kidStats'
 
 describe('computeBestAccuracy', () => {
   it('returns the highest rounded accuracy percentage across a game\'s sessions', () => {
@@ -36,5 +36,37 @@ describe('computeBestAccuracy', () => {
   it('returns null when every matching session has total 0', () => {
     const scores = [{ gameId: 'animal-sounds', score: 0, total: 0 }]
     expect(computeBestAccuracy(scores, 'animal-sounds')).toBeNull()
+  })
+})
+
+describe('computeFewestFlips', () => {
+  it('returns the lowest flip count across a game\'s sessions', () => {
+    const scores = [
+      { gameId: 'animal-memory-match', score: 5, total: 5, flipAttempts: 12 },
+      { gameId: 'animal-memory-match', score: 5, total: 5, flipAttempts: 8 },
+    ]
+    expect(computeFewestFlips(scores, 'animal-memory-match')).toBe(8)
+  })
+
+  it('ignores sessions from other games', () => {
+    const scores = [
+      { gameId: 'other-memory', score: 3, total: 3, flipAttempts: 3 },
+      { gameId: 'animal-memory-match', score: 5, total: 5, flipAttempts: 9 },
+    ]
+    expect(computeFewestFlips(scores, 'animal-memory-match')).toBe(9)
+  })
+
+  it('ignores records without a usable flipAttempts value', () => {
+    const scores = [
+      { gameId: 'animal-memory-match', score: 9, total: 10 },
+      { gameId: 'animal-memory-match', score: 5, total: 5, flipAttempts: 0 },
+      { gameId: 'animal-memory-match', score: 5, total: 5, flipAttempts: 11 },
+    ]
+    expect(computeFewestFlips(scores, 'animal-memory-match')).toBe(11)
+  })
+
+  it('returns null when the game has no sessions with flip counts', () => {
+    expect(computeFewestFlips([], 'animal-memory-match')).toBeNull()
+    expect(computeFewestFlips([{ gameId: 'animal-memory-match', score: 9, total: 10 }], 'animal-memory-match')).toBeNull()
   })
 })

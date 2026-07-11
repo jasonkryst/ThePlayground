@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import useScores from '../hooks/useScores'
 import useBadges from '../hooks/useBadges'
 import adapter from '../storage/index'
-import { computeBestAccuracy } from '../utils/kidStats'
+import { computeBestAccuracy, computeFewestFlips } from '../utils/kidStats'
 import { getBadgesForGame } from '../lib/badges'
 import ManifestIcon from '../components/ManifestIcon'
 import './KidsProgressPage.css'
@@ -42,8 +42,14 @@ function BadgeChip({ badge, count, t }) {
 }
 
 function GameProgressSection({ manifest, scores, badgeData, bestStreak, t }) {
+  // Memory games always end at score === total and count pairs, not questions,
+  // so accuracy and lifetime questions would read 100% / 0 forever — show
+  // fewest flips and lifetime pairs matched instead.
+  const isMemory     = manifest.gameType === 'memory'
   const bestAccuracy = computeBestAccuracy(scores, manifest.id)
+  const fewestFlips  = computeFewestFlips(scores, manifest.id)
   const totalPlayed  = badgeData.lifetimeQuestions[manifest.id] ?? 0
+  const pairsMatched = badgeData.lifetimeCounters?.[manifest.id]?.pairsMatched ?? 0
   const awards       = badgeData.awards[manifest.id] ?? {}
 
   return (
@@ -57,13 +63,21 @@ function GameProgressSection({ manifest, scores, badgeData, bestStreak, t }) {
       </h2>
 
       <div className="kid-progress__stats">
-        <StatTile
-          icon="🎯"
-          value={bestAccuracy != null ? `${bestAccuracy}%` : '—'}
-          label={t('kids.statBestScore')}
-        />
+        {isMemory ? (
+          <StatTile icon="🃏" value={fewestFlips ?? '—'} label={t('kids.statFewestFlips')} />
+        ) : (
+          <StatTile
+            icon="🎯"
+            value={bestAccuracy != null ? `${bestAccuracy}%` : '—'}
+            label={t('kids.statBestScore')}
+          />
+        )}
         <StatTile icon="🔥" value={bestStreak ?? 0} label={t('kids.statBestStreak')} />
-        <StatTile icon="🔢" value={totalPlayed} label={t('kids.statTotalPlayed')} />
+        {isMemory ? (
+          <StatTile icon="🔢" value={pairsMatched} label={t('kids.statPairsMatched')} />
+        ) : (
+          <StatTile icon="🔢" value={totalPlayed} label={t('kids.statTotalPlayed')} />
+        )}
       </div>
 
       <div className="kid-progress__badges">

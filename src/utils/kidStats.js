@@ -9,3 +9,15 @@ export function computeBestAccuracy(scores, gameId) {
 
   return percentages.length > 0 ? Math.max(...percentages) : null
 }
+
+/**
+ * Lowest flip count across a memory game's recorded sessions.
+ * Returns null if no session recorded a positive flipAttempts.
+ */
+export function computeFewestFlips(scores, gameId) {
+  const flips = scores
+    .filter(s => s.gameId === gameId && Number.isFinite(s.flipAttempts) && s.flipAttempts > 0)
+    .map(s => s.flipAttempts)
+
+  return flips.length > 0 ? Math.min(...flips) : null
+}
