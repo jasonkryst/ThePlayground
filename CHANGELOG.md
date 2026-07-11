@@ -232,3 +232,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Changed
 - Extracted the shared game-loop logic (queue building, answer/score state, results screen) out of `AnimalSoundsGame` and `ColorMatchGame` into a shared `useGameSession` hook and `GameResults` component.
+
+## [0.2.0] - 2026-06-24
+
+### Added
+- Technical test harness: Vitest + React Testing Library unit tests, jest-axe accessibility assertions, Playwright E2E and visual regression tests, and Storybook component stories.
+
+## [0.1.0] - 2026-06-07
+
+### Added
+- Initial platform: auto-discovery plugin system for games (`src/games/<id>/` folders), Ocean & Dream design theme, Animal Sounds and Color Match games, admin settings page, swappable localStorage storage adapter, score history, and i18n scaffolding.
