@@ -6,6 +6,8 @@ Ideas for future development. Not committed to any timeline.
 
 ## Recently Completed
 
+> This section stopped tracking releases after v0.17.0 — see `CHANGELOG.md` for the complete, authoritative release record (v0.18.0+, including the Animal Memory Match game in v0.23.0 and memory personal bests in v0.24.0).
+
 ### v0.17.0 — CSS Validation for Dynamic Inline Styles (2026-07-06)
 - **`e2e/css-validity.spec.js`** — the standards audit's HTML5-validator addition (v0.15.0) had a CSS-side gap: Stylelint's existing conformance checking only scans `.css` files, never the per-item inline `style={{...}}` colors Color Match/Animal Sounds/GameCard set at runtime. This spec renders each affected route, extracts the live DOM's actual `style` attributes, and validates them against Stylelint's CSS3 conformance rules — `npm run validate:css`, or automatically under `npm run e2e`.
 - Documented explicitly in README/`docs/TESTING.md` that Stylelint already performs real CSS3 conformance checking (unknown properties/values/at-rules/selectors — the same class of check a W3C validator performs), not just style preferences — closing an awareness gap from the original audit report's phrasing.
@@ -139,7 +141,7 @@ Tracked in full detail in `docs/superpowers/plans/2026-07-05-standards-audit-rem
 
 ## Core Game Engine
 
-- **Sound effects layer** — shared audio feedback (chime on correct, low tone on wrong) independent of game-specific audio; configurable in admin alongside animations
+- **Sound effects layer** — shared audio feedback (chime on correct, low tone on wrong) independent of game-specific audio; configurable in admin alongside animations. Partially in place since v0.23.0: the `soundEffectsEnabled` setting and shared sound library (`src/assets/sounds`) exist, but only memory games use them — the correct/wrong chime layer for quiz games remains.
 
 ---
 
@@ -159,7 +161,7 @@ Tracked in full detail in `docs/superpowers/plans/2026-07-05-standards-audit-rem
 ## Scoring & Progress
 
 - **Per-child profiles** — support multiple child accounts with separate score histories
-- **Parent Dashboard enhancements** — interactive date-range filter, game-name labels in charts, month labels on the heatmap, PIN protection for the `/parent` route
+- **Parent Dashboard enhancements** — game-name labels in charts, PIN protection for the `/parent` route (the interactive date-range filter and heatmap month labels shipped in v0.21.0)
 
 ---
 

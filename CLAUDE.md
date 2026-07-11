@@ -9,7 +9,7 @@ The Playground — a browser-based game dashboard for infants/toddlers. React + 
 ## Commands
 
 ```bash
-npm run dev              # dev server (Vite, polling watcher enabled — repo lives on a network share)
+npm run dev              # dev server (Vite; file watcher uses polling, see vite.config.js)
 npm run build             # production build → dist/
 npm run lint               # eslint .
 npm test                     # vitest, watch mode
@@ -27,11 +27,11 @@ See [`docs/TESTING.md`](docs/TESTING.md) for the full testing reference (a11y, E
 
 **Auto-discovery is the core mechanic.** `src/App.jsx` uses Vite's `import.meta.glob('./games/*/manifest.json', { eager: true })` and `import.meta.glob('./games/*/index.jsx')` to find games. Dropping a new folder under `src/games/<id>/` with a `manifest.json` and `index.jsx` (default export accepting `onGameEnd`) makes it appear on the dashboard and routable at `/game/<id>` — no registry or import to edit. i18n strings follow the same auto-discovery principle: `src/games/<id>/i18n/en.json` is picked up automatically by `src/i18n/index.js` — no shared file to edit when adding a game.
 
-**Storage is adapter-based.** Everything persisted (scores, settings) goes through the four-method interface in `src/storage/adapter.js` (`getScores`, `addScore`, `getSettings`, `saveSettings`). `src/storage/index.js` re-exports the active implementation (`localStorageAdapter.js`) — swapping to a real backend means writing a new adapter and changing that one export, not touching game code or hooks.
+**Storage is adapter-based.** Everything persisted (scores, settings, best streaks, personal bests, badge data) goes through the paired get/save interface in `src/storage/adapter.js` (`getScores`/`addScore`, `getSettings`/`saveSettings`, `getBestStreaks`/`saveBestStreaks`, `getPersonalBests`/`savePersonalBests`, `getBadgeData`/`saveBadgeData`) — every stored shape is documented in that file's JSDoc. `src/storage/index.js` re-exports the active implementation (`localStorageAdapter.js`) — swapping to a real backend means writing a new adapter and changing that one export, not touching game code or hooks.
 
 **Games consume shared state via hooks, not props drilling.** `useSettings()` and `useScores()` (in `src/hooks/`) wrap the storage adapter. Game components call these directly rather than receiving settings/scores from a parent.
 
-**Score shape:** `{ gameId, score, total, date, timestamp }`. **Settings shape:** see `DEFAULT_SETTINGS` in `src/storage/adapter.js` (`numChoices`, `feedbackMode`, `questionsPerSession`, `gaId`, `childName`).
+**Score shape:** base `{ gameId, score, total, date, timestamp }`; quiz sessions add `timings[]` and `peakStreak`, memory sessions add `flipAttempts`, `mismatches`, `peakMatchStreak`, and `durationMs` — see the JSDoc in `src/storage/adapter.js` for the full contract. **Settings shape:** see `DEFAULT_SETTINGS` in `src/storage/adapter.js` (`numChoices`, `feedbackMode`, `questionsPerSession`, `memoryPairs`, `timerMode`, `childName`, and the rest).
 
 **Design tokens** (colors, radii) are CSS custom properties in `src/index.css` — use `var(--color-aqua)` etc. rather than hardcoding hex values, so games stay visually consistent with the dashboard.
 
