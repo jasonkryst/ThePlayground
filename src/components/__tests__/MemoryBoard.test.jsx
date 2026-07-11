@@ -43,14 +43,17 @@ describe('MemoryBoard', () => {
     expect(onFlip).toHaveBeenCalledWith('dog-a')
   })
 
-  it('matched tiles are disabled and not clickable', () => {
+  it('matched tiles are aria-disabled and not clickable, but keep keyboard focus', () => {
     const { onFlip } = renderBoard()
     const matched = screen.getByRole('button', { name: 'Cat — matched' })
-    expect(matched).toBeDisabled()
+    expect(matched).not.toBeDisabled()
+    expect(matched).toHaveAttribute('aria-disabled', 'true')
     fireEvent.click(matched)
     expect(onFlip).not.toHaveBeenCalled()
-    expect(screen.getByRole('button', { name: 'Hidden tile 1 of 4' })).not.toBeDisabled()
-    expect(screen.getByRole('button', { name: 'Dog' })).not.toBeDisabled()
+    matched.focus()
+    expect(matched).toHaveFocus()
+    expect(screen.getByRole('button', { name: 'Hidden tile 1 of 4' })).toHaveAttribute('aria-disabled', 'false')
+    expect(screen.getByRole('button', { name: 'Dog' })).toHaveAttribute('aria-disabled', 'false')
   })
 
   it('mismatch tiles show a decorative cross marker', () => {

@@ -21,8 +21,8 @@ export default function MemoryBoard({ tiles, onFlip, renderFace, getFaceLabel, a
               data-item-id={tile.itemId}
               data-tile-id={tile.tileId}
               aria-label={label}
-              disabled={tile.state === 'matched'}
-              onClick={() => onFlip(tile.tileId)}
+              aria-disabled={tile.state === 'matched'}
+              onClick={() => { if (tile.state !== 'matched') onFlip(tile.tileId) }}
             >
               <span className="memory-board__tile-inner" aria-hidden="true">
                 <span className="memory-board__tile-back">❓</span>

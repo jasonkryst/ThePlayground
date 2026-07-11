@@ -39,7 +39,7 @@ function getTiles() {
 }
 
 function findPairButtons() {
-  const tiles = getTiles().filter(b => !b.disabled)
+  const tiles = getTiles().filter(b => b.getAttribute('aria-disabled') !== 'true')
   for (const t of tiles) {
     const twin = tiles.find(o => o !== t && o.dataset.itemId === t.dataset.itemId)
     if (twin) return [t, twin]
