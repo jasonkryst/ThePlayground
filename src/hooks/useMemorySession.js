@@ -137,6 +137,7 @@ export default function useMemorySession({ gameId, items }) {
     if (animationsEnabled) fireFireworks()
     emit('complete')
 
+    const durationMs = Date.now() - startRef.current
     await addScore({
       gameId,
       score:      pairs,
@@ -147,12 +148,12 @@ export default function useMemorySession({ gameId, items }) {
       mismatches:      mismatchesRef.current,
       peakStreak:      peakMatchStreakRef.current,
       peakMatchStreak: peakMatchStreakRef.current,
-      durationMs:      Date.now() - startRef.current,
+      durationMs,
     })
 
     await recordStreak(peakMatchStreakRef.current)
 
-    const bestResult = await recordMemorySession({ flipAttempts: flipAttemptsRef.current, pairs })
+    const bestResult = await recordMemorySession({ flipAttempts: flipAttemptsRef.current, pairs, durationMs })
     setPersonalBestResult(bestResult)
 
     const earned = await awardSession(gameId, {

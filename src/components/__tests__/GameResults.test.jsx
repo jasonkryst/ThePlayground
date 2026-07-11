@@ -156,6 +156,44 @@ describe('GameResults', () => {
     expect(screen.queryByText(/new record/i)).not.toBeInTheDocument()
   })
 
+  it('shows the fastest-board banner with previous seconds when isNewRecord is true', () => {
+    render(
+      <GameResults
+        score={5} total={5} missed={[]} onPlayAgain={vi.fn()} onHome={vi.fn()} renderMissedItem={renderMissedItem}
+        personalBestResult={{
+          fastestMs: { isNewRecord: true, value: 42300, previous: { ms: 51800, timestamp: 1 } },
+        }}
+      />
+    )
+    expect(screen.getByText('⏱️ New record! Finished in 42.3s (was 51.8s)')).toBeInTheDocument()
+  })
+
+  it('does not show a fastest-board banner when the record was not broken', () => {
+    render(
+      <GameResults
+        score={5} total={5} missed={[]} onPlayAgain={vi.fn()} onHome={vi.fn()} renderMissedItem={renderMissedItem}
+        personalBestResult={{
+          fastestMs: { isNewRecord: false, value: 60000, previous: { ms: 51800, timestamp: 1 } },
+        }}
+      />
+    )
+    expect(screen.queryByText(/new record/i)).not.toBeInTheDocument()
+  })
+
+  it('stacks the fewest-flips and fastest-board banners when both records break', () => {
+    render(
+      <GameResults
+        score={5} total={5} missed={[]} onPlayAgain={vi.fn()} onHome={vi.fn()} renderMissedItem={renderMissedItem}
+        personalBestResult={{
+          fewestFlips: { isNewRecord: true, value: 7, previous: { flips: 9, timestamp: 1 } },
+          fastestMs:   { isNewRecord: true, value: 42300, previous: { ms: 51800, timestamp: 1 } },
+        }}
+      />
+    )
+    expect(screen.getByText('🃏 New record! Solved in 7 flips (was 9)')).toBeInTheDocument()
+    expect(screen.getByText('⏱️ New record! Finished in 42.3s (was 51.8s)')).toBeInTheDocument()
+  })
+
   it('does not show any badge announcement by default', () => {
     render(<GameResults score={3} total={5} missed={[]} onPlayAgain={vi.fn()} onHome={vi.fn()} renderMissedItem={renderMissedItem} />)
     expect(screen.queryByText(/new badge/i)).not.toBeInTheDocument()

@@ -141,6 +141,19 @@ describe('AnimalMemoryMatchGame', () => {
     expect(screen.getByText(/new record/i)).toBeInTheDocument()
   })
 
+  it('shows the fastest-board record banner on the results screen', async () => {
+    mockMemoryBestOutcome = {
+      fewestFlips: { isNewRecord: false, value: 3, previous: { flips: 3, timestamp: 1 } },
+      fastestMs:   { isNewRecord: true, value: 42300, previous: { ms: 51800, timestamp: 1 } },
+    }
+    vi.useFakeTimers()
+    await act(async () => { render(<AnimalMemoryMatchGame onGameEnd={onGameEnd} />) })
+    await playFullBoard()
+    act(() => { vi.advanceTimersByTime(2100) })
+    await act(async () => {})
+    expect(screen.getByText(/finished in 42\.3s/i)).toBeInTheDocument()
+  })
+
   it('shows no record banner when the session did not break the record', async () => {
     vi.useFakeTimers()
     await act(async () => { render(<AnimalMemoryMatchGame onGameEnd={onGameEnd} />) })

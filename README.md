@@ -9,10 +9,12 @@ A browser-based game dashboard designed for infants and toddlers. Games are disp
 - **Animal Sounds** — an animal sound plays automatically; the child picks the matching animal from picture buttons
 - **Color Match** — a color swatch is shown; the child picks the matching colored object from picture buttons
 - **Character Match** — a character's name is shown; the child picks the matching character from picture buttons
+- **Animal Memory Match** — face-down tiles (3–6 animal pairs, parent-configurable); the child flips two at a time, hearing the animal's sound on each match, with fireworks on completing the board
 - **Admin / Settings** — tabbed settings page (Settings · Games · History); configure child's name, answer choices (2–4), feedback mode, questions per session, Google Analytics ID, and per-game tag overrides
 - **My Progress page** — a kid-facing `/my-progress` page (🌟 link on the dashboard) showing each game's best score, best streak, total questions answered, and earned badges (memory games show fewest flips and pairs matched instead of score/questions), with locked badges shown dimmed rather than as unreadable text; separate from the parent-facing `/parent` analytics dashboard and the admin `/admin` settings page
 - **How-to-play intro screens** — each game shows a brief instructional screen before its first question; parents can permanently dismiss it per game, or bring it back from the admin Games tab
 - **Persistent scoring** — game history stored in `localStorage`; swappable for a backend without touching game code
+- **Personal bests** — quiz games track best accuracy and average answer speed; memory games track fewest flips and fastest board time per board size; new records are announced on the results screen
 - **Version display** — app version shown in the dashboard footer; game version shown in the game header
 - **Google Analytics** — optional GA4 tracking configured at runtime via the admin page; fires page view events on every React Router navigation
 
