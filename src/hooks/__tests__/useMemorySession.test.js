@@ -1,10 +1,12 @@
 import { renderHook, act, waitFor } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 
-const { mockAddScore, mockGetSettings, mockSaveBadgeData } = vi.hoisted(() => ({
+const { mockAddScore, mockGetSettings, mockSaveBadgeData, mockGetBestStreaks, mockSaveBestStreaks } = vi.hoisted(() => ({
   mockAddScore: vi.fn().mockResolvedValue(undefined),
   mockGetSettings: vi.fn(),
   mockSaveBadgeData: vi.fn().mockResolvedValue(undefined),
+  mockGetBestStreaks: vi.fn().mockResolvedValue({}),
+  mockSaveBestStreaks: vi.fn().mockResolvedValue(undefined),
 }))
 
 vi.mock('../../storage/index', () => ({
@@ -18,6 +20,8 @@ vi.mock('../../storage/index', () => ({
     addScore: mockAddScore,
     getBadgeData: vi.fn().mockResolvedValue({ awards: {}, lifetimeQuestions: {}, lifetimeCounters: {} }),
     saveBadgeData: mockSaveBadgeData,
+    getBestStreaks: mockGetBestStreaks,
+    saveBestStreaks: mockSaveBestStreaks,
   },
 }))
 
@@ -81,6 +85,7 @@ async function renderSession() {
 beforeEach(() => {
   vi.clearAllMocks()
   mockGetSettings.mockResolvedValue(SETTINGS)
+  mockGetBestStreaks.mockResolvedValue({})
 })
 afterEach(() => vi.useRealTimers())
 
@@ -250,6 +255,35 @@ describe('useMemorySession', () => {
     // have marked the freshly restarted game done.
     expect(result.current.done).toBe(false)
     expect(result.current.pairsFound).toBe(0)
+  })
+
+  it('completion records the peak match streak as the stored best streak', async () => {
+    const { result } = await renderSession()
+    vi.useFakeTimers()
+    for (let i = 0; i < 3; i++) {
+      const pair = findPair(result.current.tiles)
+      act(() => result.current.flipTile(pair[0]))
+      act(() => result.current.flipTile(pair[1]))
+      await act(async () => {})
+    }
+    await act(async () => {})
+
+    expect(mockSaveBestStreaks).toHaveBeenCalledWith({ 'test-memory': 3 })
+  })
+
+  it('does not overwrite a stored best streak the session did not beat', async () => {
+    mockGetBestStreaks.mockResolvedValue({ 'test-memory': 5 })
+    const { result } = await renderSession()
+    vi.useFakeTimers()
+    for (let i = 0; i < 3; i++) {
+      const pair = findPair(result.current.tiles)
+      act(() => result.current.flipTile(pair[0]))
+      act(() => result.current.flipTile(pair[1]))
+      await act(async () => {})
+    }
+    await act(async () => {})
+
+    expect(mockSaveBestStreaks).not.toHaveBeenCalled()
   })
 
   it('completion persists pairsMatched lifetime counter via awardSession', async () => {

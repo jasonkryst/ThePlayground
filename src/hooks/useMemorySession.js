@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import useSettings from './useSettings'
 import useScores from './useScores'
+import useBestStreak from './useBestStreak'
 import useBadges from './useBadges'
 import { fireConfetti, fireFireworks } from '../lib/confetti'
 import buildDeck from '../utils/buildDeck'
@@ -11,6 +12,7 @@ export const COMPLETE_DELAY_MS = 2000
 export default function useMemorySession({ gameId, items }) {
   const { settings, loaded, updateSetting } = useSettings()
   const { addScore } = useScores()
+  const { recordStreak } = useBestStreak(gameId)
   const { awardSession } = useBadges()
 
   const { memoryPairs, animationsEnabled, soundEffectsEnabled, timerMode } = settings
@@ -141,6 +143,8 @@ export default function useMemorySession({ gameId, items }) {
       peakMatchStreak: peakMatchStreakRef.current,
       durationMs:      Date.now() - startRef.current,
     })
+
+    await recordStreak(peakMatchStreakRef.current)
 
     const earned = await awardSession(gameId, {
       sessionStats: {

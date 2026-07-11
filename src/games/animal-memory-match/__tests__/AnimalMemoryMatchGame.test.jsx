@@ -19,6 +19,9 @@ vi.mock('../../../hooks/useSettings', () => ({
 vi.mock('../../../hooks/useScores', () => ({
   default: () => ({ addScore: vi.fn().mockResolvedValue(undefined), scores: [], getBestScore: () => 0, getScoresByGame: () => [], getAllScores: () => [] }),
 }))
+vi.mock('../../../hooks/useBestStreak', () => ({
+  default: () => ({ bestStreak: 0, recordStreak: vi.fn().mockResolvedValue(undefined) }),
+}))
 vi.mock('../../../hooks/useBadges', () => ({
   default: () => ({ badgeData: { awards: {}, lifetimeQuestions: {}, lifetimeCounters: {} }, awardSession: vi.fn().mockResolvedValue([]) }),
 }))
