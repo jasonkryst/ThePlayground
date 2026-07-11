@@ -10,6 +10,9 @@ import buildDeck from '../utils/buildDeck'
 export const MISMATCH_DELAY_MS = 1200
 export const COMPLETE_DELAY_MS = 2000
 
+// `items` must be referentially stable (a module-level constant or memoized):
+// the deck-rebuild effect depends on it, so a fresh array identity on every
+// render silently rebuilds the board mid-game.
 export default function useMemorySession({ gameId, items }) {
   const { settings, loaded, updateSetting } = useSettings()
   const { addScore } = useScores()
