@@ -3,6 +3,11 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.24.0] - 2026-07-11
+
+### Added
+- Fastest-board personal best for memory games (issue #51, final item): the quickest completion time is tracked per board size alongside the fewest-flips record and announced with a "⏱️ New record!" banner on the results screen. Additive `fastestMs` storage key — no migration.
+
 ## [0.23.0] - 2026-07-10
 
 ### Added
