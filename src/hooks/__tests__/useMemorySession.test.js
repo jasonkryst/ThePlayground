@@ -181,6 +181,25 @@ describe('useMemorySession', () => {
     }))
   })
 
+  it('persists a fastest-board time equal to the score record durationMs on completion', async () => {
+    const { result } = await renderSession()
+    vi.useFakeTimers()
+    for (let i = 0; i < 3; i++) {
+      const pair = findPair(result.current.tiles)
+      act(() => result.current.flipTile(pair[0]))
+      act(() => result.current.flipTile(pair[1]))
+      await act(async () => {})
+    }
+    const scoredDurationMs = mockAddScore.mock.calls[0][0].durationMs
+    expect(mockSavePersonalBests).toHaveBeenCalledWith(
+      expect.objectContaining({
+        'test-memory': expect.objectContaining({
+          fastestMs: expect.objectContaining({ 3: expect.objectContaining({ ms: scoredDurationMs }) }),
+        }),
+      })
+    )
+  })
+
   it('does not fire confetti or fireworks when animations are disabled', async () => {
     mockGetSettings.mockResolvedValue({ ...SETTINGS, animationsEnabled: false })
     const { result } = await renderSession()
