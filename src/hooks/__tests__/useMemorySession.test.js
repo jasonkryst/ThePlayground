@@ -184,6 +184,10 @@ describe('useMemorySession', () => {
   it('persists a fastest-board time equal to the score record durationMs on completion', async () => {
     const { result } = await renderSession()
     vi.useFakeTimers()
+    // Advance the (fake) clock while addScore runs so a durationMs computed a
+    // second time after it would diverge from the scored one — otherwise the
+    // frozen fake clock makes once- and twice-computed values identical.
+    mockAddScore.mockImplementationOnce(async () => { vi.advanceTimersByTime(500) })
     for (let i = 0; i < 3; i++) {
       const pair = findPair(result.current.tiles)
       act(() => result.current.flipTile(pair[0]))
