@@ -2,10 +2,20 @@ import { render, screen, act, fireEvent } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { axe } from 'jest-axe'
 import AnimalMemoryMatchGame from '../index'
+import { getSoundUrl } from '../../../lib/soundLibrary'
 
-const mockPlay = vi.fn().mockResolvedValue(undefined)
-window.HTMLMediaElement.prototype.play  = mockPlay
-window.HTMLMediaElement.prototype.pause = vi.fn()
+// Instance-tracking Audio mock: each `new Audio(url)` records its instance so
+// tests can assert which clip played, paused, or was reset — the stop-previous-
+// clip behavior can't be observed through a shared prototype spy.
+let audioInstances = []
+function MockAudio(src) {
+  this.src = src
+  this.currentTime = 0
+  this.play = vi.fn().mockResolvedValue(undefined)
+  this.pause = vi.fn()
+  audioInstances.push(this)
+}
+window.Audio = MockAudio
 
 vi.mock('../../../lib/confetti', () => ({ fireConfetti: vi.fn(), fireFireworks: vi.fn() }))
 vi.mock('../../../lib/soundLibrary', () => ({ getSoundUrl: vi.fn(() => 'blob:mock-sound') }))
@@ -38,6 +48,8 @@ const onGameEnd = vi.fn()
 
 beforeEach(() => {
   vi.clearAllMocks()
+  audioInstances = []
+  getSoundUrl.mockImplementation(() => 'blob:mock-sound')
   mockMemoryBestOutcome = { fewestFlips: { isNewRecord: false, value: 3, previous: null } }
   mockSettings = {
     memoryPairs: 3, animationsEnabled: true, soundEffectsEnabled: true,
@@ -57,6 +69,13 @@ function findPairButtons() {
     if (twin) return [t, twin]
   }
   return null
+}
+
+function findMismatchButtons() {
+  const tiles = getTiles().filter(b => b.getAttribute('aria-disabled') !== 'true')
+  const a = tiles[0]
+  const b = tiles.find(o => o.dataset.itemId !== a.dataset.itemId)
+  return [a, b]
 }
 
 async function playFullBoard() {
@@ -89,7 +108,9 @@ describe('AnimalMemoryMatchGame', () => {
     act(() => { fireEvent.click(a) })
     act(() => { fireEvent.click(b) })
     await act(async () => {})
-    expect(mockPlay).toHaveBeenCalledTimes(1)
+    expect(audioInstances).toHaveLength(1)
+    expect(audioInstances[0].src).toBe('blob:mock-sound')
+    expect(audioInstances[0].play).toHaveBeenCalledTimes(1)
   })
 
   it('does not play sound when soundEffectsEnabled is false', async () => {
@@ -99,7 +120,69 @@ describe('AnimalMemoryMatchGame', () => {
     act(() => { fireEvent.click(a) })
     act(() => { fireEvent.click(b) })
     await act(async () => {})
-    expect(mockPlay).not.toHaveBeenCalled()
+    expect(audioInstances).toHaveLength(0)
+  })
+
+  it('stops the previous match sound when a new match happens (issue #52)', async () => {
+    await act(async () => { render(<AnimalMemoryMatchGame onGameEnd={onGameEnd} />) })
+    let pair = findPairButtons()
+    act(() => { fireEvent.click(pair[0]) })
+    act(() => { fireEvent.click(pair[1]) })
+    await act(async () => {})
+    expect(audioInstances).toHaveLength(1)
+    expect(audioInstances[0].pause).not.toHaveBeenCalled()
+
+    audioInstances[0].currentTime = 5 // pretend the first clip is mid-playback
+    pair = findPairButtons()
+    act(() => { fireEvent.click(pair[0]) })
+    act(() => { fireEvent.click(pair[1]) })
+    await act(async () => {})
+    expect(audioInstances).toHaveLength(2)
+    expect(audioInstances[0].pause).toHaveBeenCalledTimes(1)
+    expect(audioInstances[0].currentTime).toBe(0)
+    expect(audioInstances[1].play).toHaveBeenCalledTimes(1)
+  })
+
+  it('stops the final match sound when the results screen appears (issue #52)', async () => {
+    vi.useFakeTimers()
+    await act(async () => { render(<AnimalMemoryMatchGame onGameEnd={onGameEnd} />) })
+    await playFullBoard()
+    const finalClip = audioInstances[audioInstances.length - 1]
+    expect(finalClip.pause).not.toHaveBeenCalled()
+    act(() => { vi.advanceTimersByTime(2100) })
+    await act(async () => {})
+    expect(screen.getByText(/you scored/i)).toBeInTheDocument()
+    expect(finalClip.pause).toHaveBeenCalledTimes(1)
+  })
+
+  it('stops an in-flight clip when the game is left mid-session (issue #52)', async () => {
+    let view
+    await act(async () => { view = render(<AnimalMemoryMatchGame onGameEnd={onGameEnd} />) })
+    const [a, b] = findPairButtons()
+    act(() => { fireEvent.click(a) })
+    act(() => { fireEvent.click(b) })
+    await act(async () => {})
+    view.unmount()
+    expect(audioInstances[0].pause).toHaveBeenCalledTimes(1)
+  })
+
+  it('does not play any sound on a mismatch', async () => {
+    await act(async () => { render(<AnimalMemoryMatchGame onGameEnd={onGameEnd} />) })
+    const [a, b] = findMismatchButtons()
+    act(() => { fireEvent.click(a) })
+    act(() => { fireEvent.click(b) })
+    await act(async () => {})
+    expect(audioInstances).toHaveLength(0)
+  })
+
+  it('does not create an Audio element when the item has no sound url', async () => {
+    getSoundUrl.mockImplementation(() => null)
+    await act(async () => { render(<AnimalMemoryMatchGame onGameEnd={onGameEnd} />) })
+    const [a, b] = findPairButtons()
+    act(() => { fireEvent.click(a) })
+    act(() => { fireEvent.click(b) })
+    await act(async () => {})
+    expect(audioInstances).toHaveLength(0)
   })
 
   it('announces the match in the live region', async () => {

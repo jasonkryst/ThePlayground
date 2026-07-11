@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import useMemorySession from '../../hooks/useMemorySession'
+import useSoundPlayer from '../../hooks/useSoundPlayer'
 import { useShellGameStatus } from '../../components/ShellContext'
 import MemoryBoard from '../../components/MemoryBoard'
 import GameResults from '../../components/GameResults'
@@ -21,14 +22,19 @@ export default function AnimalMemoryMatchGame({ onGameEnd }) {
   } = useMemorySession({ gameId: 'animal-memory-match', items: animals })
 
   useShellGameStatus({ streak: matchStreak, sessionActive: introResolved && !showIntro && !done })
+  const { play, stop } = useSoundPlayer()
 
   const itemById = id => animals.find(a => a.id === id)
 
   useEffect(() => {
     if (!lastEvent || lastEvent.type !== 'match' || !soundEffectsEnabled) return
-    const url = getSoundUrl(itemById(lastEvent.itemId).sound)
-    if (url) new Audio(url).play().catch(() => {})
-  }, [lastEvent, soundEffectsEnabled])
+    play(getSoundUrl(itemById(lastEvent.itemId).sound))
+  }, [lastEvent, soundEffectsEnabled, play])
+
+  // A long clip must not keep playing over the results screen (issue #52).
+  useEffect(() => {
+    if (done) stop()
+  }, [done, stop])
 
   if (!settingsLoaded || !introResolved) return null
 
