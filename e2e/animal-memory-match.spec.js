@@ -53,3 +53,20 @@ test('memory match game screen has no accessibility violations', async ({ page }
   const results = await new AxeBuilder({ page }).analyze()
   expect(results.violations).toEqual([])
 })
+
+test('memory match: results screen receives the shared themed styling (#53)', async ({ page }) => {
+  // Direct navigation matters: the bug only reproduced when no quiz game's
+  // stylesheet (which used to carry the .results rules) had been loaded first.
+  await startGame(page)
+  const ids = await page.locator('[data-tile-id]').evaluateAll(els => els.map(e => e.dataset.itemId))
+  for (const id of [...new Set(ids)]) {
+    const pair = page.locator(`[data-item-id="${id}"]`)
+    await pair.nth(0).click()
+    await pair.nth(1).click()
+  }
+  const results = page.locator('.results')
+  await expect(results).toBeVisible({ timeout: 10_000 })
+  await expect(results).toHaveCSS('display', 'flex')
+  await expect(results).toHaveCSS('text-align', 'center')
+  await expect(page.getByRole('button', { name: /play again/i })).toHaveCSS('border-radius', /px/)
+})
