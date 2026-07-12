@@ -58,7 +58,7 @@ npm run storybook         # browse stories locally at localhost:6006
 npm run build-storybook   # production build check
 ```
 
-Key components and both games have stories under `src/**/*.stories.jsx`. `e2e/visual.spec.js` navigates to each story's isolated URL and asserts `toHaveScreenshot()` against a baseline PNG committed in `e2e/visual.spec.js-snapshots/`.
+Key components and every game have stories under `src/**/*.stories.jsx`. `e2e/visual.spec.js` navigates to each story's isolated URL and asserts `toHaveScreenshot()` against a baseline PNG committed in `e2e/visual.spec.js-snapshots/`.
 
 **Updating a baseline after an intentional UI change:**
 

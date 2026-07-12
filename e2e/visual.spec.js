@@ -34,20 +34,18 @@ const stories = [
 ]
 
 // Run these tests one at a time rather than in parallel workers. Storybook's
-// dev server cold-compiles each story with Vite on first request, and this
-// repo lives on a network share (per CLAUDE.md) where that compile is slow;
-// 9 workers all cold-compiling at once causes contention that makes some
+// dev server cold-compiles each story with Vite on first request, and 9
+// workers all cold-compiling at once causes contention that makes some
 // requests exceed even a generous per-test timeout. Serializing avoids that.
 test.describe.configure({ mode: 'serial' })
 
-// This repo lives on a network share (per CLAUDE.md). Storybook's story
-// indexer reads all *.stories.jsx files concurrently and re-runs that read
-// whenever its watcher fires, including spurious events on this share; the
-// concurrent reads occasionally race and fail ("Could not parse expression
-// with acorn") for files unrelated to whatever changed, serving an error
-// overlay instead of any story. This can happen at boot or recur mid-run,
-// but always self-heals shortly after, so check before the suite starts and
-// retry any individual story that hits it rather than failing outright.
+// Storybook's story indexer reads all *.stories.jsx files concurrently and
+// re-runs that read whenever its watcher fires; the concurrent reads
+// occasionally race and fail ("Could not parse expression with acorn") for
+// files unrelated to whatever changed, serving an error overlay instead of
+// any story. This can happen at boot or recur mid-run, but always self-heals
+// shortly after, so check before the suite starts and retry any individual
+// story that hits it rather than failing outright.
 test.beforeAll(async ({ request }) => {
   await expect(async () => {
     const res = await request.get('http://localhost:6006/index.json')
@@ -76,9 +74,13 @@ for (const id of stories) {
     }
 
     // A small ratio tolerance absorbs font/icon edge anti-aliasing jitter
-    // that varies slightly on the first render after a Storybook cold boot,
-    // while still failing on real content/layout regressions (which differ
-    // by a much larger margin than this).
+    // that varies slightly on the first render after a Storybook cold boot.
+    // This tolerance is loose enough that it can miss real styling
+    // regressions — during the issue-#53 work, a fully unstyled GameResults
+    // screen still passed within 0.1 against a styled baseline. The
+    // computed-style e2e assertions (e.g. e2e/animal-memory-match.spec.js)
+    // are the guard against that class of regression, not this screenshot
+    // diff.
     await expect(page).toHaveScreenshot(`${id}.png`, { maxDiffPixelRatio: 0.1 })
   })
 }
