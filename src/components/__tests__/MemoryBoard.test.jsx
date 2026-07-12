@@ -81,3 +81,29 @@ describe('MemoryBoard', () => {
     expect(await axe(container)).toHaveNoViolations()
   })
 })
+
+describe('MemoryBoard grid sizing (issue #58)', () => {
+  it('sets --memory-board-columns to 5 for a 10-tile board (5×2)', () => {
+    const tenTiles = Array.from({ length: 10 }, (_, i) => ({
+      tileId: `t${i}`, itemId: `item${i % 5}`, state: 'down',
+    }))
+    const { container } = renderBoard({ tiles: tenTiles })
+    const grid = container.querySelector('.memory-board__grid')
+    expect(grid.style.getPropertyValue('--memory-board-columns')).toBe('5')
+  })
+
+  it('sets --memory-board-columns to 4 for a 12-tile board (4×3)', () => {
+    const twelveTiles = Array.from({ length: 12 }, (_, i) => ({
+      tileId: `t${i}`, itemId: `item${i % 6}`, state: 'down',
+    }))
+    const { container } = renderBoard({ tiles: twelveTiles })
+    const grid = container.querySelector('.memory-board__grid')
+    expect(grid.style.getPropertyValue('--memory-board-columns')).toBe('4')
+  })
+
+  it('never sets a non-positive column count for an empty board', () => {
+    const { container } = renderBoard({ tiles: [] })
+    const grid = container.querySelector('.memory-board__grid')
+    expect(Number(grid.style.getPropertyValue('--memory-board-columns'))).toBeGreaterThanOrEqual(1)
+  })
+})

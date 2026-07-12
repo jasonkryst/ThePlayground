@@ -1,13 +1,18 @@
 import { useTranslation } from 'react-i18next'
+import idealColumns from '../utils/idealColumns'
 import './MemoryBoard.css'
 
 export default function MemoryBoard({ tiles, onFlip, renderFace, getFaceLabel, animationsEnabled = true, liveMessage = '' }) {
   const { t } = useTranslation()
   const total = tiles.length
+  const columns = idealColumns(total)
 
   return (
     <div className="memory-board">
-      <div className={`memory-board__grid${animationsEnabled ? '' : ' memory-board__grid--no-anim'}`}>
+      <div
+        className={`memory-board__grid${animationsEnabled ? '' : ' memory-board__grid--no-anim'}`}
+        style={{ '--memory-board-columns': columns }}
+      >
         {tiles.map((tile, i) => {
           const faceUp = tile.state !== 'down'
           const label =

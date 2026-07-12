@@ -58,6 +58,53 @@ test('memory match game screen has no accessibility violations', async ({ page }
   expect(results.violations).toEqual([])
 })
 
+test('memory match: cards are large tap targets with breathing room from the screen edge on phone (issue #58)', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 667 })
+  await startGame(page)
+  const boxes = await page.locator('[data-tile-id]').evaluateAll(els =>
+    els.map(e => {
+      const r = e.getBoundingClientRect()
+      return { width: r.width, height: r.height, left: r.left }
+    })
+  )
+  for (const box of boxes) {
+    expect(box.width).toBeGreaterThanOrEqual(120)
+    expect(box.height).toBeGreaterThanOrEqual(120)
+    expect(box.left).toBeGreaterThan(0)
+  }
+  const overflowsHorizontally = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth)
+  expect(overflowsHorizontally).toBe(false)
+})
+
+test('memory match: cards grow to fill more of a tablet screen instead of staying tiny (issue #58)', async ({ page }) => {
+  await page.setViewportSize({ width: 768, height: 1024 })
+  await startGame(page)
+  const width = await page.locator('[data-tile-id]').first().evaluate(el => el.getBoundingClientRect().width)
+  // Default board is 10 tiles (5 pairs) → idealColumns=5, cap=748px. At a
+  // 768px viewport (minus .game's 32px horizontal padding, and minus a
+  // little more for a possible scrollbar) auto-fit still lands on 5
+  // columns, giving ~134-138px tiles — nowhere near the original ~112px.
+  // 125 leaves margin on both sides without being loose enough to pass on
+  // a regression back to the old sizing.
+  expect(width).toBeGreaterThanOrEqual(125)
+})
+
+test('memory match: board stays centered on a wide screen instead of sticking to one side (issue #58)', async ({ page }) => {
+  await page.setViewportSize({ width: 1024, height: 768 })
+  await startGame(page)
+  const gridBox = await page.locator('.memory-board__grid').boundingBox()
+  const leftGap = gridBox.x
+  const rightGap = 1024 - (gridBox.x + gridBox.width)
+  expect(Math.abs(leftGap - rightGap)).toBeLessThanOrEqual(2)
+  // Centering alone doesn't catch a shrink-wrapped board: if `.memory-board`
+  // ever loses its `width: 100%` rule, `align-items: center` on the parent
+  // flex container would still keep a collapsed board centered. Default
+  // board is 10 tiles (5 pairs) → idealColumns=5, cap=5*140+4*12=748px. 700
+  // is comfortably below the cap (rounding/scrollbar margin) but far above
+  // what a collapsed board would produce (well under 200px).
+  expect(gridBox.width).toBeGreaterThan(700)
+})
+
 test('memory match: results screen receives the shared themed styling (#53)', async ({ page }) => {
   // Direct navigation matters: the bug only reproduced when no quiz game's
   // stylesheet (which used to carry the .results rules) had been loaded first.

@@ -3,6 +3,11 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.24.4] - 2026-07-12
+
+### Changed
+- Animal Memory Match cards are bigger and the board now uses the available screen space instead of leaving large empty margins (issue #58). The shared `MemoryBoard` grid's tile floor grew from 90px to 120px (matching the tap-target size used by every quiz game's answer cards), and its previous fixed 560px width cap was replaced with a tile-count-aware cap, so boards grow toward a comfortable ~140px card size on tablet/desktop instead of staying pinned at ~112px. The game's page also now uses the same padding every other game gets, so cards no longer sit flush against the screen edge on phones. Trade-off: phones in the ~360–414px range now show 2 columns instead of 3, favoring larger tap targets over column count.
+
 ## [0.24.3] - 2026-07-12
 
 ### Fixed
