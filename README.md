@@ -6,17 +6,20 @@ A browser-based game dashboard designed for infants and toddlers. Games are disp
 
 - **Ocean & Dream design** — soft aquas, teals, lavenders, and lilacs; 64×64 px minimum tap targets throughout
 - **Auto-discovered games** — drop a folder into `src/games/` and it appears on the dashboard automatically
-- **Animal Sounds** — an animal sound plays automatically; the child picks the matching animal from picture buttons
-- **Color Match** — a color swatch is shown; the child picks the matching colored object from picture buttons
-- **Character Match** — a character's name is shown; the child picks the matching character from picture buttons
-- **Animal Memory Match** — face-down tiles (3–6 animal pairs, parent-configurable); the child flips two at a time, hearing the animal's sound on each match, with fireworks on completing the board
-- **Admin / Settings** — tabbed settings page (Settings · Games · History); configure child's name, answer choices (2–4), feedback mode, questions per session, Google Analytics ID, and per-game tag overrides
+- **Two game types** — *quiz games* (a prompt is shown or played; the child picks the matching answer from picture buttons) and *memory games* (face-down tiles flipped two at a time to find pairs)
+- **Animal Sounds** (quiz) — an animal sound plays automatically; the child picks the matching animal from picture buttons
+- **Color Match** (quiz) — a color swatch is shown; the child picks the matching colored object from picture buttons
+- **Character Match** (quiz) — a character's name is shown; the child picks the matching character from picture buttons (real images rather than emoji)
+- **Animal Memory Match** (memory) — face-down tiles (3–6 animal pairs, parent-configurable); the child flips two at a time, hearing the animal's sound on each match, with fireworks on completing the board
+- **Admin / Settings** — tabbed settings page (Settings · Games · Badges · History); configure child's name, answer choices (2–4), feedback mode, questions per session, memory board size, Google Analytics ID, and per-game tag overrides
 - **My Progress page** — a kid-facing `/my-progress` page (🌟 link on the dashboard) showing each game's best score, best streak, total questions answered, and earned badges (memory games show fewest flips and pairs matched instead of score/questions), with locked badges shown dimmed rather than as unreadable text; separate from the parent-facing `/parent` analytics dashboard and the admin `/admin` settings page
 - **How-to-play intro screens** — each game shows a brief instructional screen before its first question; parents can permanently dismiss it per game, or bring it back from the admin Games tab
-- **Persistent scoring** — game history stored in `localStorage`; swappable for a backend without touching game code
+- **Persistent scoring** — game history stored in `localStorage`; swappable for a backend without touching game code (see [Storage Adapter](#storage-adapter))
 - **Personal bests** — quiz games track best accuracy and average answer speed; memory games track fewest flips and fastest board time per board size; new records are announced on the results screen
-- **Version display** — app version shown in the dashboard footer; game version shown in the game header
-- **Google Analytics** — optional GA4 tracking configured at runtime via the admin page; fires page view events on every React Router navigation
+- **Milestone badges** — repeatable per-game achievements (streak tiers, perfect sessions, lifetime totals); memory games ship their own badge catalog via per-game `badges.js` files
+- **Kid-safe exit guard** — leaving a game mid-session requires a deliberate second tap, so a stray toddler tap can't kill a session
+- **Version display** — app version shown in the dashboard footer; game version shown alongside it on game routes
+- **Google Analytics** — optional GA4 tracking configured at runtime via the admin page; fires page view events on every React Router navigation (off by default — see [`SECURITY.md`](SECURITY.md))
 
 ---
 
@@ -37,7 +40,7 @@ This visual indicator comes from your existing score history with no additional 
 
 ### Game Categories & Tags
 
-Games are now organized under category headings ("Sounds 🔊", "Visual 👁️", etc.) on the dashboard. A tab strip at the top of the dashboard lets parents filter by category to see only games in a particular group. The "Today's Game" featured banner is unaffected by this filter and always stays at the top.
+Games are organized under category headings ("Sounds 🔊", "Visual 👁️", "Memory 🧠", etc.) on the dashboard. A tab strip at the top of the dashboard lets parents filter by category to see only games in a particular group. The "Today's Game" featured banner is unaffected by this filter and always stays at the top.
 
 Each game's category is defined by a `"tags"` array in its `manifest.json` (required field, minimum one tag). Tags can be customized per-game in the admin panel under the **Games** tab, allowing you to reorganize games without modifying code.
 
@@ -47,7 +50,7 @@ The first time a game is opened, it shows a full-screen intro with the game's ic
 
 ### My Progress Page
 
-A dedicated `/my-progress` page, linked via the 🌟 button on the main dashboard, shows kids their own progress: for each game, a best-score percentage, best streak, and lifetime questions answered, plus every milestone badge earned so far. Locked badges are shown as dimmed icons with no text label (rather than the admin page's "Locked" text), since the intended audience can't read yet — earned/locked state is still conveyed to assistive tech via each badge's `aria-label`.
+A dedicated `/my-progress` page, linked via the 🌟 button on the main dashboard, shows kids their own progress: for each game, a best-score percentage, best streak, and lifetime questions answered, plus every milestone badge earned so far. Memory games show memory-appropriate stats instead — fewest flips and lifetime pairs matched. Locked badges are shown as dimmed icons with no text label (rather than the admin page's "Locked" text), since the intended audience can't read yet — earned/locked state is still conveyed to assistive tech via each badge's `aria-label`.
 
 ### Parent Analytics Dashboard
 
@@ -68,17 +71,26 @@ npm run dev
 
 Open [http://localhost:5173](http://localhost:5173). The dashboard appears immediately; tap any game card to play.
 
+For production builds, Docker deployment, and self-hosting guidance, see [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
+
 ---
 
 ## Scripts
 
 | Command | Description |
 |---|---|
-| `npm run dev` | Start development server with hot reload |
+| `npm run dev` | Start development server with hot reload (port 5173) |
 | `npm run build` | Production build → `dist/` |
 | `npm run preview` | Serve the production build locally |
-| `npm test` | Run tests in watch mode |
+| `npm test` | Unit/component tests (Vitest), watch mode |
 | `npm run coverage` | Run tests once and generate coverage report |
+| `npm run lint` | ESLint (including `eslint-plugin-jsx-a11y`) |
+| `npm run lint:css` | Stylelint over every source `.css` file |
+| `npm run e2e` | Playwright: end-to-end + accessibility + visual regression + HTML5/CSS validation |
+| `npm run validate:html` | HTML5 validation of the rendered DOM only (subset of `e2e`) |
+| `npm run validate:css` | CSS validation of dynamic inline styles only (subset of `e2e`) |
+| `npm run storybook` | Browse component/game stories at [localhost:6006](http://localhost:6006) |
+| `npm run build-storybook` | Production Storybook build check |
 
 ---
 
@@ -86,40 +98,48 @@ Open [http://localhost:5173](http://localhost:5173). The dashboard appears immed
 
 ```
 src/
-├── App.jsx                    # Auto-discovery routing
+├── App.jsx                    # Auto-discovery routing, GA loader, locale sync
 ├── index.css                  # Design system (CSS custom properties)
 ├── main.jsx                   # React entry point
 │
 ├── components/                # Shared UI: AppShell (persistent header, route-aware footer + exit guard),
-│                               # ShellContext, GameCard, GameIntro/GameResults,
-│                               # GameChoiceGrid, BadgeGallery, Timer, StreakBadge, ...
+│                              #   ShellContext, Dashboard, GameCard, FeaturedGameCard, CategorySection,
+│                              #   GameIntro, GameResults, GameChoiceGrid, MemoryBoard, Timer, StreakBadge,
+│                              #   BadgeGallery, ScoreHistory, ManifestIcon, ExitConfirmDialog, LocaleSelector
 ├── admin/
 │   └── AdminPage.jsx          # Settings, game tags, badges, score history (tabbed)
 ├── parent/
-│   └── ParentDashboard.jsx    # Score/response-time charts, streak history, missed items
+│   └── ParentDashboard.jsx    # Score/response-time charts, streak history, play calendar, missed items
 ├── kids/
 │   └── KidsProgressPage.jsx   # Kid-facing per-game stats + badges (/my-progress)
 │
-├── hooks/                     # useSettings, useScores, useBadges, useGameSession, ...
-├── lib/                       # badges.js, confetti.js
-├── utils/                     # buildQueue, computeBadgeAwards, dashboardUtils, ...
+├── hooks/                     # useGameSession (quiz loop), useMemorySession (memory loop),
+│                              #   useSettings, useScores, useBadges, useBestStreak, usePersonalBest,
+│                              #   useSoundPlayer, useFocusOnMount, useFeaturedGame, useRecentlyPlayed, useGameTags
+├── lib/                       # badges.js (quiz badge catalog), confetti.js, soundLibrary.js
+├── utils/                     # buildQueue, buildDeck, reinsertMissed, idealColumns, kidStats,
+│                              #   dashboardUtils, dateRangeUtils, computeBadgeAwards,
+│                              #   computeGameBadgeAwards, evaluatePersonalBest, evaluateMemoryPersonalBest
+├── assets/
+│   └── sounds/                # Shared sound library (animal mp3s and future effect sounds)
 │
 ├── storage/
-│   ├── adapter.js             # Interface definition + DEFAULT_SETTINGS
+│   ├── adapter.js             # Interface definition + DEFAULT_SETTINGS (every stored shape documented here)
 │   ├── localStorageAdapter.js # localStorage implementation
 │   └── index.js               # Active adapter export (swap here for a backend)
 │
 ├── i18n/
 │   ├── en.json                # Core cross-cutting strings (common, dashboard, admin, ...)
-│   └── index.js                # Merges en.json + every game's i18n/en.json at startup
+│   └── index.js               # Merges en.json + every game's i18n/en.json at startup
 │
 └── games/                     # One folder per game — animal-sounds, color-match,
-    └── character-match/        # character-match today; drop a new folder to add one
-        ├── manifest.json      # Game metadata (id, name, tags, version)
-        ├── index.jsx          # Game component
-        ├── data/               # Item catalog (e.g. characters.js)
-        ├── i18n/en.json        # This game's own strings — auto-merged, no shared file to edit
-        └── <assets>/           # Images/audio, game-specific
+    └── animal-memory-match/   #   character-match, animal-memory-match; drop a new folder to add one
+        ├── manifest.json      # Game metadata (id, name, tags, version, optional gameType)
+        ├── index.jsx          # Game component (default export accepting onGameEnd)
+        ├── badges.js          # Optional per-game badge catalog (auto-discovered)
+        ├── data/              # Item catalog (e.g. animals.js, colors.js)
+        ├── i18n/en.json       # This game's own strings — auto-merged, no shared file to edit
+        └── <assets>/          # Images/audio, game-specific
 ```
 
 ### Auto-Discovery
@@ -131,7 +151,7 @@ const manifestModules = import.meta.glob('./games/*/manifest.json', { eager: tru
 const gameModules     = import.meta.glob('./games/*/index.jsx')
 ```
 
-Every `manifest.json` becomes a dashboard card. Every `index.jsx` becomes a lazy-loaded route at `/game/<id>`. No imports, no registries — just files.
+Every `manifest.json` becomes a dashboard card. Every `index.jsx` becomes a lazy-loaded route at `/game/<id>`. No imports, no registries — just files. The same auto-discovery principle covers a game's translations (`src/games/<id>/i18n/en.json`, merged at startup) and its optional badge catalog (`src/games/<id>/badges.js`).
 
 ### Wrapper UI (AppShell)
 
@@ -145,23 +165,31 @@ and the kid-safe exit guard on game routes. Games must NOT render their own
 useShellGameStatus({ streak, sessionActive: introResolved && !showIntro && !done })
 ```
 
-While `sessionActive` is true, leaving the game (home button or brand link)
-opens a confirm overlay instead of navigating, so a stray toddler tap can't
-kill a session. The guard is fail-open: a game that never reports status can
-always be exited immediately.
+While `sessionActive` is true, leaving the game (home button, brand link, or
+the browser back button) opens a confirm overlay instead of navigating, so a
+stray toddler tap can't kill a session. The guard is fail-open: a game that
+never reports status can always be exited immediately.
 
 ### Storage Adapter
 
-All persistence goes through a four-method interface:
+All persistence goes through the paired get/save interface defined in `src/storage/adapter.js` — ten methods in five pairs:
 
 ```js
-getScores()           // → Promise<Score[]>
-addScore(score)       // → Promise<void>
-getSettings()         // → Promise<Settings>
-saveSettings(settings)// → Promise<void>
+getScores()                  // → Promise<Score[]>
+addScore(score)              // → Promise<void>
+getSettings()                // → Promise<Settings>
+saveSettings(settings)       // → Promise<void>
+getBestStreaks()             // → Promise<{ [gameId]: number }>
+saveBestStreaks(streaksMap)  // → Promise<void>
+getPersonalBests()           // → Promise<{ [gameId]: { accuracy?, speedMs?, fewestFlips?, fastestMs? } }>
+savePersonalBests(bestsMap)  // → Promise<void>
+getBadgeData()               // → Promise<{ awards, lifetimeQuestions, lifetimeCounters }>
+saveBadgeData(data)          // → Promise<void>
 ```
 
-The active adapter is exported from `src/storage/index.js`. To swap `localStorage` for Supabase, Firebase, or any other backend, implement those four methods and change that one export.
+**Score shape:** every record carries the base `{ gameId, score, total, date, timestamp }`. Quiz sessions add `peakStreak` and a `timings[]` array (`{ questionIndex, itemId, correct, durationMs, attemptNumber, timedOut? }` per question). Memory sessions add `flipAttempts`, `mismatches`, `peakMatchStreak`, and `durationMs`. The JSDoc in `src/storage/adapter.js` is the authoritative contract for every stored shape.
+
+The active adapter is exported from `src/storage/index.js`. To swap `localStorage` for Supabase, Firebase, or any other backend, implement these ten methods and change that one export — no game code or hook changes needed. Games consume shared state through the `useSettings`/`useScores` hooks (and friends) rather than props drilling.
 
 ### Design Tokens
 
@@ -179,12 +207,14 @@ All colors and radii are CSS custom properties defined in `src/index.css`:
 --color-text-muted: #5B6B70
 ```
 
+Use `var(--color-aqua)` etc. rather than hardcoding hex values, so games stay visually consistent with the dashboard.
+
 ---
 
 ## Adding a New Game
 
 1. Create a folder under `src/games/<your-game-id>/`
-2. Add `manifest.json`:
+2. Add `manifest.json` — `tags` is **required** (it places the game in a dashboard category):
 
 ```json
 {
@@ -192,9 +222,13 @@ All colors and radii are CSS custom properties defined in `src/index.css`:
   "name": "Your Game Name",
   "description": "One sentence description.",
   "icon": "🎮",
-  "color": "#80DEEA"
+  "color": "#80DEEA",
+  "version": "1.0.0",
+  "tags": ["visual"]
 }
 ```
+
+The `icon` can also be an image path (see Character Match). Memory-type games add `"gameType": "memory"`, which switches the My Progress page to memory-appropriate stat tiles.
 
 3. Add `index.jsx` with a default export that accepts `onGameEnd`:
 
@@ -207,7 +241,12 @@ export default function YourGame({ onGameEnd }) {
 
 That's it — the game appears on the dashboard and gets its own route automatically.
 
-The game component receives settings via the `useSettings` hook and can persist scores via `useScores`:
+**Optional extension points, all auto-discovered:**
+
+- `i18n/en.json` — the game's own UI strings and item names, merged into the app's i18n resources at startup (see [`docs/TESTING.md`](docs/TESTING.md) for the string conventions).
+- `badges.js` — a per-game badge catalog that fully replaces the global quiz catalog for that game (Animal Memory Match's six badges work this way).
+
+**Engine hooks:** quiz games get their entire session loop (queue building, retries, hints, timers, scoring, personal bests, badges, intro screen) from `useGameSession`; memory games use `useMemorySession`. Settings and score persistence come from `useSettings` / `useScores`:
 
 ```js
 import useSettings from '../../hooks/useSettings'
@@ -217,29 +256,18 @@ const { settings } = useSettings()
 const { addScore }  = useScores()
 ```
 
-Score shape: `{ gameId, score, total, date, timestamp }`
+New quiz games should render their answer choices via `GameChoiceGrid` (render-prop pattern — see `AnimalSoundsGame`/`ColorMatchGame`) rather than duplicating the correct/wrong/hint/disabled logic.
 
 ---
 
-## Docker
+## Deployment
 
-**Prerequisites:** Docker with Compose
+Two supported paths:
 
-```bash
-docker compose up --build    # build image and start
-docker compose up -d         # run in background after first build
-```
+- **Static hosting:** `npm run build` produces a fully static `dist/` — serve it from any web server that can fall back to `index.html` for unmatched routes.
+- **Docker:** a two-stage build (Node compiles, `nginx:alpine` serves, ~25 MB image). `docker compose up --build`, then open [http://localhost:8080](http://localhost:8080).
 
-App is served at [http://localhost:8080](http://localhost:8080).
-
-The production image is a two-stage build: a Node LTS container compiles `dist/`, then a lean `nginx:alpine` container (~25 MB) serves the static files. `nginx.conf` includes an SPA fallback (`try_files`) so React Router routes like `/admin`, `/my-progress`, and `/game/animal-sounds` work on direct navigation and page refresh.
-
-| File | Purpose |
-|---|---|
-| `Dockerfile` | Multi-stage build definition |
-| `nginx.conf` | SPA routing fallback, asset caching, security headers |
-| `docker-compose.yml` | Single-service compose for local/self-hosted use |
-| `.dockerignore` | Excludes `node_modules`, `dist`, `coverage`, tool state |
+The full guide — annotated nginx configuration, cache tiers, HTTPS/reverse-proxy setup, data persistence and backup, troubleshooting — is in [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
 
 ---
 
@@ -249,10 +277,10 @@ The Playground has six layers of automated testing — unit/component (Vitest + 
 
 ```bash
 npm test           # unit/component tests, watch mode
-npm run lint        # ESLint (incl. jsx-a11y)
-npm run lint:css    # Stylelint (source .css files)
-npm run e2e         # end-to-end + accessibility + visual regression + HTML5/CSS validation
-npm run storybook   # browse component/game stories locally
+npm run lint       # ESLint (incl. jsx-a11y)
+npm run lint:css   # Stylelint (source .css files)
+npm run e2e        # end-to-end + accessibility + visual regression + HTML5/CSS validation
+npm run storybook  # browse component/game stories locally
 ```
 
 ---
@@ -286,13 +314,13 @@ Accessible from the dashboard via the gear icon (⚙).
 
 **Parent tap** — feedback shown after a parent taps "Next", giving time to discuss the answer.
 
-**Google Analytics** — when a Measurement ID is entered, the GA4 script is injected at runtime and page view events fire on every navigation. Leaving the field blank disables tracking entirely. The ID is stored in `localStorage` alongside other settings.
+**Google Analytics** — when a Measurement ID is entered, the GA4 script is injected at runtime and page view events fire on every navigation. Leaving the field blank disables tracking entirely. The ID is stored in `localStorage` alongside other settings. See [`SECURITY.md`](SECURITY.md) for the privacy analysis.
 
 **Child's Name** — when set, the dashboard title reads "<Name>'s Playground"; when left blank, it shows the default "My Playground".
 
-**Celebration animations** — when on, a confetti burst plays on every correct answer and the game header shows the current answer streak once it reaches 2; the end-of-game screen lists any missed items. Turning this off disables the confetti only — streak tracking and the missed-items summary remain.
+**Celebration animations** — when on, a confetti burst plays on every correct answer (and fireworks on completing a memory board) and the game header shows the current answer streak once it reaches 2; the end-of-game screen lists any missed items. Turning this off disables the confetti only — streak tracking and the missed-items summary remain.
 
-**Timer** — "Show timer" is a running stopwatch, purely informational. "Answer within Ns" instead counts down; when it reaches zero the question locks in as missed (same as exhausting retries) and always advances after a "Time's up!" message, regardless of feedback mode. "Off" hides the timer and enforces no limit.
+**Timer** — "Show timer" is a running stopwatch, purely informational. "Answer within Ns" instead counts down; when it reaches zero the question locks in as missed (same as exhausting retries) and always advances after a "Time's up!" message, regardless of feedback mode. "Off" hides the timer and enforces no limit. Memory games use the stopwatch for the fastest-board record but are not subject to the countdown.
 
 **Speed record threshold** — the minimum session accuracy required for a new average-speed personal best to be announced, so a fast-but-mostly-wrong session can't set a "speed record."
 
@@ -306,7 +334,7 @@ Accessible from the dashboard via the gear icon (⚙).
 
 **Difficulty auto-progression** — when on, finishing a session with a perfect score offers to raise Answer Choices by 1 (up to the maximum of 4) on the results screen.
 
-**Pairs per board** — pairs per board for the memory game type, 3–6.
+**Pairs per board** — pairs per board for memory games, 3–6 (10 tiles at the default 5).
 
 **Sound effects** — plays the matched animal's sound in memory games.
 
@@ -314,9 +342,9 @@ Accessible from the dashboard via the gear icon (⚙).
 
 ## Versioning
 
-The app version is read from `package.json` at build time (via Vite's JSON import) and displayed in the dashboard footer. Each game's version comes from its own `manifest.json` and is shown in the game header.
+The app version is read from `package.json` at build time (via Vite's JSON import) and displayed in the dashboard footer. Each game's version comes from its own `manifest.json` and is shown in the footer on that game's route.
 
-To release a new version, bump `version` in `package.json` and the relevant game `manifest.json` files, then rebuild.
+To release a new version, bump `version` in `package.json` and the relevant game `manifest.json` files, add a `CHANGELOG.md` entry, then rebuild.
 
 ---
 
@@ -324,17 +352,23 @@ To release a new version, bump `version` in `package.json` and the relevant game
 
 Animals: elephant, lion, cow, dog, cat, frog, duck, horse, pig, sheep, rooster, owl.
 
-Sound files live in `src/games/animal-sounds/sounds/` and must be named `<animal>.mp3`. The game uses a Vite asset glob to resolve URLs at build time, so the paths are production-safe:
+Sound files live in the shared sound library (`src/assets/sounds/`) and must be named `<animal>.mp3`. Games resolve URLs through a single Vite asset glob in `src/lib/soundLibrary.js`, so the paths are production-safe and multiple games can share one copy of each file:
 
 ```js
-// src/games/animal-sounds/data/sounds.js
-const sounds = import.meta.glob('../sounds/*.mp3', { eager: true, query: '?url', import: 'default' })
+// src/lib/soundLibrary.js
+const sounds = import.meta.glob('../assets/sounds/*.mp3', { eager: true, query: '?url', import: 'default' })
 ```
 
 Free CC0 animal sounds are available at [freesound.org](https://freesound.org).
 
 ---
 
-## Future Enhancements
+## Documentation
 
-A tracked list of ideas for new games, UX improvements, scoring features, and technical work is maintained in [`docs/ENHANCEMENTS.md`](docs/ENHANCEMENTS.md).
+| Document | What it covers |
+|---|---|
+| [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) | Local dev, production builds, Docker, nginx, HTTPS, data persistence, troubleshooting |
+| [`SECURITY.md`](SECURITY.md) | Security posture, data privacy, children's-privacy analysis, vulnerability reporting |
+| [`docs/TESTING.md`](docs/TESTING.md) | All six test layers, testing patterns and gotchas, i18n string conventions |
+| [`docs/ENHANCEMENTS.md`](docs/ENHANCEMENTS.md) | Backlog of planned games, features, and technical improvements |
+| [`CHANGELOG.md`](CHANGELOG.md) | Release history (Keep a Changelog format) |
