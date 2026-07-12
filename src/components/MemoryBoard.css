@@ -8,6 +8,12 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
   gap: var(--memory-board-gap);
+
+  /* 140px is kept deliberately close to the 120px auto-fit floor above.
+     auto-fit always packs as many columns as fit at the floor size
+     regardless of this cap, so a target much larger than the floor would
+     let auto-fit sneak an extra floor-sized column into the cap instead of
+     respecting the intended near-square column count. */
   width: min(100%, calc(var(--memory-board-columns) * 140px + (var(--memory-board-columns) - 1) * var(--memory-board-gap)));
   margin: 0 auto;
 }

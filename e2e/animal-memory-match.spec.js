@@ -96,6 +96,13 @@ test('memory match: board stays centered on a wide screen instead of sticking to
   const leftGap = gridBox.x
   const rightGap = 1024 - (gridBox.x + gridBox.width)
   expect(Math.abs(leftGap - rightGap)).toBeLessThanOrEqual(2)
+  // Centering alone doesn't catch a shrink-wrapped board: if `.memory-board`
+  // ever loses its `width: 100%` rule, `align-items: center` on the parent
+  // flex container would still keep a collapsed board centered. Default
+  // board is 10 tiles (5 pairs) → idealColumns=5, cap=5*140+4*12=748px. 700
+  // is comfortably below the cap (rounding/scrollbar margin) but far above
+  // what a collapsed board would produce (well under 200px).
+  expect(gridBox.width).toBeGreaterThan(700)
 })
 
 test('memory match: results screen receives the shared themed styling (#53)', async ({ page }) => {
