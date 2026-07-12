@@ -74,7 +74,7 @@ export default function AnimalMemoryMatchGame({ onGameEnd }) {
     : t('animalMemoryMatch.completeAnnounce')
 
   return (
-    <div className="memory-game">
+    <div className="game memory-game">
       <div className="memory-game__question">
         <div className="memory-game__progress">{t('animalMemoryMatch.progress', { found: pairsFound, total: totalPairs })}</div>
         <div className="memory-game__prompt">{t('animalMemoryMatch.prompt')}</div>

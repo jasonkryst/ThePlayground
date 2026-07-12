@@ -205,6 +205,12 @@ describe('AnimalMemoryMatchGame', () => {
     expect(document.querySelector('.timer')).not.toBeInTheDocument()
   })
 
+  it('renders inside the shared .game page layout for consistent padding (issue #58)', async () => {
+    let container
+    await act(async () => { container = render(<AnimalMemoryMatchGame onGameEnd={onGameEnd} />).container })
+    expect(container.querySelector('.memory-game')).toHaveClass('game')
+  })
+
   it('reaches the results screen after all pairs are found', async () => {
     vi.useFakeTimers()
     await act(async () => { render(<AnimalMemoryMatchGame onGameEnd={onGameEnd} />) })
