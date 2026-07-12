@@ -23,6 +23,7 @@ function installMatchMedia({ coarse = false, landscape = true } = {}) {
       state.landscape = landscapeNow
       listeners.forEach(fn => fn())
     },
+    listenerCount: () => listeners.size,
   }
 }
 
@@ -84,7 +85,7 @@ describe('useOrientation', () => {
   })
 
   it('unknown screen.orientation.type values degrade to landscape (negative)', () => {
-    installMatchMedia({ coarse: true })
+    installMatchMedia({ coarse: true, landscape: false })
     installScreenOrientation('some-future-value')
     const { result } = renderHook(() => useOrientation())
     expect(result.current).toBe('landscape')
@@ -93,7 +94,8 @@ describe('useOrientation', () => {
   it('unsubscribes on unmount (no listener leak)', () => {
     const media = installMatchMedia({ coarse: false, landscape: true })
     const { unmount } = renderHook(() => useOrientation())
+    expect(media.listenerCount()).toBe(1)
     unmount()
-    expect(() => act(() => media.rotate(false))).not.toThrow()
+    expect(media.listenerCount()).toBe(0)
   })
 })
