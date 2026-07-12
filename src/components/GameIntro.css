@@ -1,9 +1,15 @@
+/* Fills the shell's available content area (AppShell already reserves
+   min-height: 100vh for header + content + footer) instead of also
+   demanding a full extra viewport height here, which overflowed one screen
+   on tablet/phone and modestly-sized desktop windows alike (issue #55).
+   Mirrors .game in GameLayout.css. */
 .game-intro {
-  min-height: 100vh;
   display: flex;
+  flex: 1;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  width: 100%;
   gap: 20px;
   padding: 24px;
   text-align: center;

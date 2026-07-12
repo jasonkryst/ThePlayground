@@ -3,6 +3,11 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.24.3] - 2026-07-12
+
+### Fixed
+- The intro and results screens could render taller than one device screen (issue #55), pushing the Start/Play Again buttons below the fold on tablet, phone, and even modestly-sized desktop windows. `GameIntro`/`GameResults` still carried a `min-height: 100vh` left over from before the `AppShell` wrapper existed; nested inside the shell (which already reserves `min-height: 100vh` for its own header/content/footer), that stacked a redundant extra full-viewport height on top. Both now use `flex: 1` to fill the shell's actual available space, matching the pattern every game's own `.game` layout already used. Legitimately long content (e.g. a long missed-items list) still scrolls the page rather than being clipped.
+
 ## [0.24.2] - 2026-07-12
 
 ### Fixed
