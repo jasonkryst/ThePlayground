@@ -3,6 +3,11 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.24.2] - 2026-07-12
+
+### Fixed
+- Character Match game updates which resolves issue #54, incorrect file names within code. Updates game manifest version and core engine version for consistency.
+
 ## [0.24.1] - 2026-07-11
 
 ### Fixed
