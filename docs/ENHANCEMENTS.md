@@ -72,3 +72,4 @@ Everything from the 2026-07-05 standards audit is resolved (shipped across v0.13
 
 - **PWA / installable** — `vite-plugin-pwa` to generate a service worker and `manifest.webmanifest` for home-screen install
 - **CI pipeline** — GitHub Actions workflow to run `npm test`, `npm run build`, and Docker build on every push
+- **Tighten the Playwright visual suite's `maxDiffPixelRatio`** (currently 0.1) — during the issue-#53 work a fully unstyled `GameResults` screen passed against styled baselines, so the tolerance cannot catch missing-stylesheet regressions (the e2e computed-style test in `animal-memory-match.spec.js` is the current guard). Re-validate flakiness on local disk before tightening (the tolerance predates the repo's move off the network share).
