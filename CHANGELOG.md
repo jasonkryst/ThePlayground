@@ -3,6 +3,12 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.24.1] - 2026-07-11
+
+### Fixed
+- Memory match sounds no longer outlast their moment (issue #52): matching a new pair cuts off the previous animal's clip, and any playing clip stops when the results screen appears or the game is left mid-session. Game audio now goes through a shared `useSoundPlayer` hook; Animal Sounds was refactored onto it with no behavior change.
+- The memory game's results screen now shows the same themed layout as every other game (issue #53). The shared `.results` styles were duplicated in each quiz game's stylesheet and missing from the `GameResults` component's own CSS, so navigating straight to the memory game rendered its results screen unstyled. The styles now live in `GameResults.css` and load with the component everywhere; the GameResults visual-regression baselines were regenerated (they had captured the unstyled look).
+
 ## [0.24.0] - 2026-07-11
 
 ### Added

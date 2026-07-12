@@ -4,6 +4,6 @@
   "description": "Match the color to its object!",
   "icon": "🎨",
   "color": "#CE93D8",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "tags": ["visual", "colors"]
 }

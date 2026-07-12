@@ -4,6 +4,6 @@
   "description": "Match the animal to its sound!",
   "icon": "🐘",
   "color": "#B39DDB",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "tags": ["sounds", "animals"]
 }
