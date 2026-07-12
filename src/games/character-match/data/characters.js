@@ -8,8 +8,8 @@ const characters = [
   { id: 'mackenzie',   nameKey: 'character.mackenzie.name',   show: 'Bluey',          image: 'mackenzie.webp' },
   { id: 'pete',        nameKey: 'character.pete.name',        show: 'Pete the Cat',   image: 'pete.webp' },
   { id: 'callie',      nameKey: 'character.callie.name',      show: 'Pete the Cat',   image: 'callie.webp' },
-  { id: 'grumpy-toad', nameKey: 'character.grumpy-toad.name', show: 'Pete the Cat',   image: 'grumpy-toad.webp' },
-  { id: 'marty',       nameKey: 'character.marty.name',       show: 'Pete the Cat',   image: 'ptc_emma.webp' },
+  { id: 'grumpy-toad', nameKey: 'character.grumpytoad.name', show: 'Pete the Cat',   image: 'grumpytoad.webp' },
+  { id: 'marty',       nameKey: 'character.marty.name',       show: 'Pete the Cat',   image: 'emma.webp' },
   { id: 'gus',         nameKey: 'character.gus.name',         show: 'Pete the Cat',   image: 'gus.webp' },
   { id: 'neville',     nameKey: 'character.neville.name',     show: 'Pete the Cat',   image: 'neville.webp' },
   { id: 'sally',       nameKey: 'character.sally.name',       show: 'Pete the Cat',   image: 'sally.webp' },
@@ -20,8 +20,8 @@ const characters = [
   { id: 'oona',        nameKey: 'character.oona.name',        show: 'Bubble Guppies', image: 'oona.webp' },
   { id: 'nonny',       nameKey: 'character.nonny.name',       show: 'Bubble Guppies', image: 'nonny.webp' },
   { id: 'zooli',       nameKey: 'character.zooli.name',       show: 'Bubble Guppies', image: 'zooli.webp' },
-  { id: 'bubble-puppy',nameKey: 'character.bubble-puppy.name', show: 'Bubble Guppies', image: 'bubble-puppy.webp' },
-  { id: 'mr-grouper',  nameKey: 'character.mr-grouper.name',  show: 'Bubble Guppies', image: 'mr-grouper.webp' },
+  { id: 'bubble-puppy',nameKey: 'character.bubble-puppy.name', show: 'Bubble Guppies', image: 'bubblepuppy.webp' },
+  { id: 'mr-grouper',  nameKey: 'character.mrgrouper.name',  show: 'Bubble Guppies', image: 'mrgrouper.webp' },
 ]
 
 export default characters
