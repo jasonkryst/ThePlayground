@@ -4,38 +4,42 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-The Playground — a browser-based game dashboard for infants/toddlers. React + Vite SPA. See `README.md` for full feature docs, Docker deployment, and the settings reference; see `docs/ENHANCEMENTS.md` for the backlog of planned games/features.
+The Playground — a browser-based game dashboard for infants/toddlers. React + Vite SPA. See `README.md` for full feature docs and the settings reference; `docs/DEPLOYMENT.md` for running it in production (Docker, nginx, HTTPS); `SECURITY.md` for the security posture; and `docs/ENHANCEMENTS.md` for the backlog of planned games/features.
 
 ## Commands
 
 ```bash
 npm run dev              # dev server (Vite; file watcher uses polling, see vite.config.js)
 npm run build             # production build → dist/
-npm run lint               # eslint .
-npm test                     # vitest, watch mode
-npm run coverage              # vitest run --coverage (single run)
-npm run e2e                    # playwright test — E2E, page-level a11y, and visual regression
-npm run storybook                # browse component/game stories at localhost:6006
-npm run build-storybook           # production Storybook build check
+npm run preview            # serve the production build locally
+npm run lint                # eslint .
+npm run lint:css             # stylelint over source .css files
+npm test                      # vitest, watch mode
+npm run coverage               # vitest run --coverage (single run)
+npm run e2e                     # playwright test — E2E, page-level a11y, visual regression, HTML/CSS validation
+npm run validate:html            # HTML5 validation of rendered DOM only (subset of e2e)
+npm run validate:css              # CSS validation of dynamic inline styles only (subset of e2e)
+npm run storybook                  # browse component/game stories at localhost:6006
+npm run build-storybook             # production Storybook build check
 ```
 
 Run a single test file: `npx vitest run src/games/animal-sounds/__tests__/AnimalSoundsGame.test.jsx`
 
-See [`docs/TESTING.md`](docs/TESTING.md) for the full testing reference (a11y, E2E, visual regression, i18n string convention).
+See [`docs/TESTING.md`](docs/TESTING.md) for the full testing reference (all six layers, a11y, E2E, visual regression, i18n string convention).
 
 ## Architecture
 
-**Auto-discovery is the core mechanic.** `src/App.jsx` uses Vite's `import.meta.glob('./games/*/manifest.json', { eager: true })` and `import.meta.glob('./games/*/index.jsx')` to find games. Dropping a new folder under `src/games/<id>/` with a `manifest.json` and `index.jsx` (default export accepting `onGameEnd`) makes it appear on the dashboard and routable at `/game/<id>` — no registry or import to edit. i18n strings follow the same auto-discovery principle: `src/games/<id>/i18n/en.json` is picked up automatically by `src/i18n/index.js` — no shared file to edit when adding a game.
+**Auto-discovery is the core mechanic.** `src/App.jsx` uses Vite's `import.meta.glob('./games/*/manifest.json', { eager: true })` and `import.meta.glob('./games/*/index.jsx')` to find games. Dropping a new folder under `src/games/<id>/` with a `manifest.json` (the `tags` field is required; memory games also set `gameType: "memory"`) and `index.jsx` (default export accepting `onGameEnd`) makes it appear on the dashboard and routable at `/game/<id>` — no registry or import to edit. The same principle covers per-game i18n (`src/games/<id>/i18n/en.json`, picked up by `src/i18n/index.js`) and per-game badge catalogs (`src/games/<id>/badges.js`, which fully replace the global quiz catalog for that game).
 
 **Storage is adapter-based.** Everything persisted (scores, settings, best streaks, personal bests, badge data) goes through the paired get/save interface in `src/storage/adapter.js` (`getScores`/`addScore`, `getSettings`/`saveSettings`, `getBestStreaks`/`saveBestStreaks`, `getPersonalBests`/`savePersonalBests`, `getBadgeData`/`saveBadgeData`) — every stored shape is documented in that file's JSDoc. `src/storage/index.js` re-exports the active implementation (`localStorageAdapter.js`) — swapping to a real backend means writing a new adapter and changing that one export, not touching game code or hooks.
 
-**Games consume shared state via hooks, not props drilling.** `useSettings()` and `useScores()` (in `src/hooks/`) wrap the storage adapter. Game components call these directly rather than receiving settings/scores from a parent.
+**Games consume shared state via hooks, not props drilling.** `useSettings()` and `useScores()` (in `src/hooks/`) wrap the storage adapter. Game components call these directly rather than receiving settings/scores from a parent. The session loop itself is also a hook: quiz games get queue building, retries, hints, timers, scoring, personal bests, and badges from `useGameSession`; memory games use `useMemorySession` (+ the shared `MemoryBoard` component). Game audio goes through `useSoundPlayer`.
 
 **Score shape:** base `{ gameId, score, total, date, timestamp }`; quiz sessions add `timings[]` and `peakStreak`, memory sessions add `flipAttempts`, `mismatches`, `peakMatchStreak`, and `durationMs` — see the JSDoc in `src/storage/adapter.js` for the full contract. **Settings shape:** see `DEFAULT_SETTINGS` in `src/storage/adapter.js` (`numChoices`, `feedbackMode`, `questionsPerSession`, `memoryPairs`, `timerMode`, `childName`, and the rest).
 
 **Design tokens** (colors, radii) are CSS custom properties in `src/index.css` — use `var(--color-aqua)` etc. rather than hardcoding hex values, so games stay visually consistent with the dashboard.
 
-**Versioning:** app version is read from `package.json` at build time and shown in the dashboard footer; each game's version comes from its own `manifest.json` and is shown in that game's header. Bump both when releasing, and add an entry to `CHANGELOG.md`.
+**Versioning:** app version is read from `package.json` at build time and shown in the dashboard footer; each game's version comes from its own `manifest.json` and is shown on that game's route. Bump both when releasing, and add an entry to `CHANGELOG.md`.
 
 ## Testing notes
 
@@ -44,3 +48,5 @@ Stack is Vitest + React Testing Library + jsdom. Tests live in `__tests__/` fold
 - Tests covering timed feedback (correct/wrong delays) must use `vi.useFakeTimers()` with `fireEvent`, not `userEvent` — `userEvent` deadlocks with fake timers in this stack.
 - Hook tests mock `src/storage/index.js` via `vi.mock()` + `vi.hoisted()` so the mock exists before the hoisted `vi.mock` call runs.
 - Game components expose a hidden `data-testid="correct-<thing>-id"` element so tests can assert the correct answer without depending on choice display order — follow this pattern for new games.
+- Game audio's mock seam is the `useSoundPlayer` hook (like `src/lib/confetti.js` is for confetti) — mock the hook, not the browser `Audio` constructor.
+- Matched memory tiles use `aria-disabled`, not `disabled` (keyboard focus must survive mid-game) — query and assert accordingly in memory-game tests.

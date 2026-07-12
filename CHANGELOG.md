@@ -3,6 +3,17 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.24.5] - 2026-07-12
+
+### Added
+- `docs/DEPLOYMENT.md` — full deployment guide: local dev, production build, Docker walkthrough, annotated nginx configuration, HTTPS/reverse-proxy guidance, data persistence and backup, troubleshooting (issue #61).
+- `SECURITY.md` — security posture and disclosure policy: threat model, localStorage data inventory, children's-privacy analysis of the opt-in GA integration, XSS mitigations, HTTP security headers with known gaps, Docker posture, dependency policy, vulnerability reporting (issue #61).
+- Full security audit (`docs/superpowers/specs/2026-07-12-security-audit-findings.md`) — no HIGH findings; one MEDIUM nginx header-inheritance misconfiguration (SEC-1) and four hardening items, all added to `docs/ENHANCEMENTS.md` § Security; production `npm audit` clean; verified-safe observations recorded for future audits.
+- Accessibility/i18n/UX audit (`docs/accessibility_usability.md`) — automated scans clean (119/119 e2e incl. per-route axe, 727/727 unit incl. jest-axe); six judgment-level findings added to `docs/ENHANCEMENTS.md` (color-only quiz feedback, missing correct/wrong screen-reader announcements, focus-dropping `disabled` quiz choices, raw ISO dates in score history, undersized dashboard filter tabs, silent audio-autoplay failure); one stale backlog entry (memory-board reduced-motion audit) verified already resolved and removed.
+
+### Changed
+- Full documentation review against the v0.24.4 codebase (issue #61). README corrected: all four games in the architecture tree, the real ten-method storage adapter, `tags`/`gameType` in the add-a-game guide, complete score shapes, all 12 npm scripts, and a documentation index. `docs/TESTING.md` corrected to six layers plus static linting and extended with memory-game test patterns and the current e2e spec inventory. `docs/ENHANCEMENTS.md` reorganized and expanded with UI/UX/accessibility/engine-migration/security/testing suggestions, including a named audit of quiz-game code duplicated across the three games. `CLAUDE.md` updated to match.
+
 ## [0.24.4] - 2026-07-12
 
 ### Changed
