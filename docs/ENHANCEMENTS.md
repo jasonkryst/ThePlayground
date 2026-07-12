@@ -28,13 +28,21 @@ Everything from the 2026-07-05 standards audit is resolved (shipped across v0.13
 - **Practice mode** — wrong answers repeat the question rather than moving on; removes session pressure for the youngest users who are still learning the mechanic itself.
 - **Parental lock on settings** — require a simple PIN or gesture to open the admin page; a toddler exploring the screen can currently reach and change settings. (Cross-listed under Security.)
 - **Session resume after interruption** — the exit guard (v0.18.0) stops accidental exits, but a browser crash, tab close, or reload still loses an in-progress session; persisting minimal session state would let it offer "pick up where you left off."
+- **Honor the tap-target standard on the dashboard tab strip (AU-7)** — `.dashboard__tab` is ~33 px tall (`padding: 6px 16px`), which passes WCAG 2.5.8 but contradicts the README's "64×64 px minimum tap targets throughout" claim, on the home screen a child is most likely to be handling. Raise the strip to ≥44 px (regenerate visual baselines) — or, second-best, scope the README claim to child-facing game surfaces; the claim-vs-reality gap is the defect. (From `docs/accessibility_usability.md`.)
+- **Visible recovery when audio autoplay is blocked (AU-8)** — `useSoundPlayer.play()` deliberately swallows `audio.play()` rejections, so a blocked autoplay leaves an Animal Sounds question with no prompt and no cue; surface the rejection and pulse the 🔊 replay button with a localized "tap to hear" hint until first successful playback. (From `docs/accessibility_usability.md`.)
 
 ## Accessibility
 
-- **Full RTL support (`dir` attribute sync)** — the remaining half of RTL readiness (logical CSS properties already shipped in v0.16.0); requires an actual RTL locale to exist before it can be meaningfully verified.
-- **Reduced-motion audit for the memory board** — quiz feedback animations respect `prefers-reduced-motion` (v0.12.0), but the memory game's flip/mismatch/wiggle animations shipped later (v0.23.0) and deserve the same explicit audit.
+Items marked **AU-n** come from the 2026-07-12 a11y/i18n/UX audit (`docs/accessibility_usability.md`), which found zero automated-scan violations — these are the judgment-level gaps automation can't see. (That audit also verified the memory board's reduced-motion coverage is already complete, so the previous "reduced-motion audit for the memory board" entry is resolved and removed.)
+
+- **Non-color quiz feedback (AU-1, WCAG 1.4.1)** — `.correct`/`.wrong`/`.highlight-correct` are background-color-only (green vs red of similar lightness — the classic CVD-confusable pair), and the pulse/shake secondary cue is disabled under `prefers-reduced-motion`. Add an `aria-hidden` ✓/✗ glyph (and/or outline) in `GameChoiceGrid` so all three quiz games inherit three-signal feedback — the memory board's mismatch state (✗ + outline + color) is the in-repo model.
+- **Announce correct/wrong to screen readers (AU-2, WCAG 4.1.3)** — a wrong answer currently produces no announcement at all (the streak badge unmounts below 2), and early correct answers none either. Add a persistent visually-hidden `role="status"` region to the quiz scaffold (natural home: the planned `QuizGameShell`); the memory game's per-event live region already does this right.
+- **Keep keyboard focus on quiz choices (AU-3)** — `GameChoiceGrid` uses real `disabled`, dropping focus to `<body>` when the focused choice locks; mirror the v0.23.0 memory-tile fix (`aria-disabled` + click guard).
+- **Localize score-history dates (AU-6, i18n)** — `ScoreHistory.jsx` renders the raw ISO `YYYY-MM-DD` string; format via `Intl.DateTimeFormat(i18n.language, …)` (parsing the ISO string as a *local* date to avoid the UTC day-shift trap).
+- **Full RTL support (`dir` attribute sync)** — the remaining half of RTL readiness (logical CSS properties already shipped in v0.16.0); requires an actual RTL locale to exist before it can be meaningfully verified. (Re-confirmed outstanding by the 2026-07-12 audit: `lang` syncs, `dir` doesn't.)
 - **200% zoom / large-text audit** — verify layouts (especially the memory board and results screens) survive browser zoom and OS large-text settings; this audience's parents often hand devices to grandparents.
 - **Switch-access exploration** — the target audience overlaps with early-intervention users; investigating single-switch scanning support (sequential focus + one activation input) would widen who can play.
+- **Real assistive-technology pass** — one NVDA or VoiceOver session through a full game loop (ideally after AU-2 lands); static audits and axe can't judge announcement verbosity or pronunciation.
 
 ## Core Engine
 
