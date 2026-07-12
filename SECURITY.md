@@ -2,6 +2,8 @@
 
 This document is both the security **posture** description for The Playground (what the app does and doesn't do with data, what its attack surface is, what protections are in place) and its vulnerability **reporting policy** (bottom of this document).
 
+**Last full audit:** 2026-07-12 — findings and verified-safe observations recorded in [`docs/superpowers/specs/2026-07-12-security-audit-findings.md`](docs/superpowers/specs/2026-07-12-security-audit-findings.md) (no HIGH-severity findings; one MEDIUM nginx misconfiguration and four hardening items, all tracked in [`docs/ENHANCEMENTS.md`](docs/ENHANCEMENTS.md#security)).
+
 ## Scope
 
 The Playground is a self-hosted, browser-based game dashboard for infants and toddlers, typically run by one family on a home network or private server. It is not a hosted service and has no central operator. This document describes the app as shipped; anyone self-hosting it is responsible for the environment around it (TLS, network exposure — see [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md)).
@@ -49,7 +51,7 @@ A no-backend SPA's main runtime risk is cross-site scripting. The surfaces and t
 
 ## HTTP security headers
 
-Shipped in the Docker image's [`nginx.conf`](nginx.conf) (mechanics annotated in [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md#nginx-configuration-annotated)):
+Declared in the Docker image's [`nginx.conf`](nginx.conf) (mechanics annotated in [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md#nginx-configuration-annotated)):
 
 | Header | Value | Protects against |
 |---|---|---|
@@ -57,11 +59,15 @@ Shipped in the Docker image's [`nginx.conf`](nginx.conf) (mechanics annotated in
 | `X-Frame-Options` | `SAMEORIGIN` | Clickjacking — third-party sites framing the app to hijack taps |
 | `Referrer-Policy` | `strict-origin-when-cross-origin` | Leaking full URLs to external destinations (relevant only to the GA request and the freesound.org link) |
 
+**Coverage caveat (audit finding SEC-1):** because the two asset `location` blocks declare their own `add_header Cache-Control`, nginx's inheritance rule means these three headers currently apply only to HTML/document responses — **not** to JS/CSS/font/image/audio responses. The fix (repeating the headers in those blocks, plus an automated header test) is tracked in [`docs/ENHANCEMENTS.md`](docs/ENHANCEMENTS.md#security).
+
 ### Known gaps
 
 Stated plainly rather than papered over (each is tracked in [`docs/ENHANCEMENTS.md`](docs/ENHANCEMENTS.md#security)):
 
-- **No `Content-Security-Policy`.** A CSP is the strongest structural XSS defense and this app doesn't ship one yet. A workable policy needs the GA script/connect sources allowed when analytics is on, and must accommodate the app's legitimate per-item inline `style` attributes — it needs to be designed and tested, not bolted on.
+- **Security headers don't reach static-asset responses** — the SEC-1 coverage caveat above.
+- **No `Content-Security-Policy`.** A CSP is the strongest structural XSS defense and this app doesn't ship one yet. A workable policy needs the GA script/connect sources allowed when analytics is on, and must accommodate the app's legitimate per-item inline `style` attributes — the 2026-07-12 audit includes a starter policy to iterate from; it needs to be designed and tested, not bolted on.
+- **No `Permissions-Policy`; nginx version disclosed** (`server_tokens` defaults on) — both free hardening.
 - **No HSTS / TLS in the container.** Deliberate: the image serves plain HTTP, and TLS termination (with HSTS) belongs at the reverse proxy in front of it — see [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md#https--running-behind-a-reverse-proxy). A home-LAN deployment without TLS is accepting that traffic is readable on the local network.
 
 ## Docker posture

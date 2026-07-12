@@ -74,12 +74,15 @@ Memory-type (exercise the v0.23.0 memory engine — `useMemorySession`, `MemoryB
 
 ## Security
 
-Mirrors the "known gaps" in `SECURITY.md` — each of these is acknowledged there and tracked here:
+Mirrors the "known gaps" in `SECURITY.md` — each of these is acknowledged there and tracked here. Items marked **SEC-n** come from the 2026-07-12 full security audit (`docs/superpowers/specs/2026-07-12-security-audit-findings.md`), which found no HIGH-severity issues:
 
-- **Content-Security-Policy rollout** — the strongest structural XSS defense; needs a designed policy (GA's script/connect sources when analytics is on, allowances for the app's legitimate per-item inline `style` attributes) and e2e verification, not a bolted-on header.
+- **Fix nginx security-header inheritance (SEC-1, Medium)** — the two asset `location` blocks in `nginx.conf` declare their own `add_header Cache-Control`, which per nginx's documented inheritance rule silently cancels the three server-level security headers on every JS/CSS/font/image/audio response — `nosniff` is missing exactly where it matters most. Repeat the headers in those blocks (or factor into a shared `include`), and add an e2e header assertion so a future `location` can't reintroduce the drop.
+- **Content-Security-Policy rollout (SEC-2)** — the strongest structural XSS defense; the audit includes a concrete starter policy (GA script/connect sources, `style-src 'unsafe-inline'` for the app's legitimate per-item inline styles, `object-src 'none'`, `frame-ancestors 'self'`) to iterate from with e2e verification, not a bolted-on header.
+- **`Permissions-Policy` + `server_tokens off` (SEC-3)** — deny camera/microphone/geolocation/payment outright (the app uses none; free hardening against any future third-party script) and stop advertising the nginx version.
+- **Harden the CSV builder (SEC-5)** — `buildCsvContent` (`src/utils/dashboardUtils.js`) does no RFC 4180 quoting or formula-prefix escaping; safe with today's all-app-generated fields, but the first free-text column added to the export (child name, user-created content) becomes spreadsheet formula injection. Quote every field, prefix-escape `=`/`+`/`-`/`@`, add hostile-input unit tests now while the function is small.
 - **PIN gate for `/admin` and `/parent`** — same as the UX parental-lock entry; listed here because it's also the only access control the app would have.
-- **`npm audit` in CI** — dependency vulnerabilities are currently caught only when someone runs the audit manually; a CI gate makes it continuous. (Depends on the CI pipeline below.)
-- **Container hardening** — run nginx as a non-root user; add automated image vulnerability scanning (e.g. Trivy) once CI exists.
+- **`npm audit` in CI** — dependency vulnerabilities are currently caught only when someone runs the audit manually; a CI gate makes it continuous. Gate on `--omit=dev` (fail on production-tree findings; report-only for the dev tree — the 2026-07-12 audit found the prod tree clean and 3 moderate dev-only advisories in the Storybook 8 chain, SEC-6, not worth a breaking downgrade). (Depends on the CI pipeline below.)
+- **Container hardening (extended by SEC-4)** — run nginx as a non-root user (e.g. the official `nginxinc/nginx-unprivileged` image, adjusting the compose port mapping); pin base images to at least major/minor (`nginx:1.27-alpine`) or by digest for reproducible builds; add automated image vulnerability scanning (e.g. Trivy) once CI exists.
 - **Subresource integrity for the GA loader** — noted for completeness with honest caveats: the gtag URL serves Google-rotated content, so SRI would break on their rotation; a CSP `script-src` allowlist is the practical control instead.
 
 ## Testing Layers
