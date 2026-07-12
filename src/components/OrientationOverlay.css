@@ -25,7 +25,8 @@
   margin: 0;
 }
 
-.orientation-overlay__heading:focus { outline: none; }
+.orientation-overlay__heading:focus         { outline: none; }
+.orientation-overlay__heading:focus-visible { outline: 3px solid var(--color-lavender); outline-offset: 3px; }
 
 .orientation-overlay__body {
   font-size: 20px;
