@@ -3,6 +3,15 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.24.5] - 2026-07-12
+
+### Added
+- `docs/DEPLOYMENT.md` — full deployment guide: local dev, production build, Docker walkthrough, annotated nginx configuration, HTTPS/reverse-proxy guidance, data persistence and backup, troubleshooting (issue #61).
+- `SECURITY.md` — security posture and disclosure policy: threat model, localStorage data inventory, children's-privacy analysis of the opt-in GA integration, XSS mitigations, HTTP security headers with known gaps, Docker posture, dependency policy, vulnerability reporting (issue #61).
+
+### Changed
+- Full documentation review against the v0.24.4 codebase (issue #61). README corrected: all four games in the architecture tree, the real ten-method storage adapter, `tags`/`gameType` in the add-a-game guide, complete score shapes, all 12 npm scripts, and a documentation index. `docs/TESTING.md` corrected to six layers plus static linting and extended with memory-game test patterns and the current e2e spec inventory. `docs/ENHANCEMENTS.md` reorganized and expanded with UI/UX/accessibility/engine-migration/security/testing suggestions, including a named audit of quiz-game code duplicated across the three games. `CLAUDE.md` updated to match.
+
 ## [0.24.4] - 2026-07-12
 
 ### Changed
