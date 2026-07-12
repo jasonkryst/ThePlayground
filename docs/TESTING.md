@@ -49,7 +49,7 @@ If either layer reports a violation, the failure message names the specific rule
 npm run e2e
 ```
 
-Specs live in `e2e/`, covering: the dashboard, every game's full play-through (launch → complete the session → results → home; one spec per game, including the memory game's flip-to-completion flow), admin settings persistence, the parent dashboard, the kids progress page, and — in `e2e/app-shell.spec.js` — the wrapper UI itself (chrome persisting across routes, and the exit-confirm dialog's guarded navigation via a real browser-level resume/leave pass). Playwright starts both `npm run dev` (port 5173) and `npm run storybook -- --ci` (port 6006) automatically via the `webServer` array in `playwright.config.js`.
+Specs live in `e2e/`, covering: the dashboard, every game's full play-through (launch → complete the session → results → home; one spec per game, including the memory game's flip-to-completion flow), admin settings persistence, the parent dashboard, the kids progress page, and — in `e2e/app-shell.spec.js` — the wrapper UI itself (chrome persisting across routes, and the exit-confirm dialog's guarded navigation via a real browser-level resume/leave pass). `e2e/intro-results-height.spec.js` covers the intro/results screens fitting within one device screen at phone/tablet/desktop viewport sizes (no page scroll needed to reach the primary button), while confirming legitimately long content is still allowed to scroll rather than being clipped — layout/overflow behavior that isn't observable in jsdom. Playwright starts both `npm run dev` (port 5173) and `npm run storybook -- --ci` (port 6006) automatically via the `webServer` array in `playwright.config.js`.
 
 ## Visual regression (Storybook + Playwright screenshots)
 
