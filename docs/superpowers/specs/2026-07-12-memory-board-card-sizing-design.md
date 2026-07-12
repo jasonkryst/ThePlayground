@@ -93,18 +93,26 @@ That column count becomes an upper bound on the grid's width (not a fixed
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
   gap: 0.75rem;
-  width: min(100%, calc(var(--memory-board-columns) * 160px + (var(--memory-board-columns) - 1) * 0.75rem));
+  width: min(100%, calc(var(--memory-board-columns) * 140px + (var(--memory-board-columns) - 1) * 0.75rem));
   margin: 0 auto;
 }
 ```
 
 `--memory-board-columns` is set as an inline style from `tiles.length` in
-`MemoryBoard.jsx`. 160px is the comfortable target size cards grow toward on
+`MemoryBoard.jsx`. 140px is the comfortable target size cards grow toward on
 wide screens (tablet/desktop) before the grid just stays centered instead of
-stretching further — this is what fixes the tablet dead-space case (768px
-viewport, 10 tiles: cap computes to `5 × 160 + 4 × 12 = 848px`, cards render
-at a full 160px instead of today's 112px, and the grid centers with modest
-side margins instead of a mostly-empty screen below).
+stretching further. It's deliberately kept close to the 120px floor rather
+than a rounder number like 160px: `auto-fit` always packs as many columns as
+fit *at the floor size*, regardless of the cap, so a cap computed from a
+target much larger than the floor is wide enough for an extra floor-sized
+column to sneak in — defeating the cap's purpose. For N columns, the cap
+(`N×140 + (N−1)×12`) must stay below the width at which an `(N+1)`th
+floor-sized column would start fitting (`(N+1)×120 + N×12`); at 140px vs.
+120px that margin is 72px/52px/32px for N=3/4/5 (this game's real range) —
+comfortable. This is what fixes the tablet dead-space case (768px viewport,
+10 tiles: cap computes to `5 × 140 + 4 × 12 = 748px`, cards render at
+~134-138px instead of today's ~112px, and the grid centers with modest side
+margins instead of a mostly-empty screen below).
 
 On narrower viewports (below the cap), `auto-fit` + the 120px floor still
 determines the actual column count responsively, same mechanism as today —
