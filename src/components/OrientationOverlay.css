@@ -1,0 +1,49 @@
+/* Fills whatever positioned container the gate provides (inset: 0), with an
+   opaque background so the broken portrait layout underneath never shows. */
+.orientation-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 24px;
+  text-align: center;
+  background: var(--color-bg);
+}
+
+.orientation-overlay__icon {
+  font-size: 96px;
+  line-height: 1;
+}
+
+.orientation-overlay__heading {
+  font-size: 28px;
+  font-weight: 800;
+  margin: 0;
+}
+
+.orientation-overlay__heading:focus { outline: none; }
+
+.orientation-overlay__body {
+  font-size: 20px;
+  opacity: 0.8;
+  max-width: 480px;
+  margin: 0;
+}
+
+/* Rock the phone glyph toward horizontal and back — a wordless hint for a
+   pre-reading audience. Static for reduced-motion users. */
+@media (prefers-reduced-motion: no-preference) {
+  .orientation-overlay__icon {
+    animation: orientation-overlay-rotate 2s ease-in-out infinite;
+  }
+}
+
+@keyframes orientation-overlay-rotate {
+  0%, 20%   { transform: rotate(0deg); }
+  50%, 70%  { transform: rotate(90deg); }
+  100%      { transform: rotate(0deg); }
+}

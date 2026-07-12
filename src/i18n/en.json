@@ -22,7 +22,9 @@
     "newFewestFlipsRecord": "🃏 New record! Solved in {{flips}} flips (was {{prevFlips}})",
     "newFastestBoardRecord": "⏱️ New record! Finished in {{seconds}}s (was {{prevSeconds}}s)",
     "newBadgeAnnounce": "🎉 New Badge!",
-    "resultsHeading": "Results"
+    "resultsHeading": "Results",
+    "orientationOverlayHeading": "Turn it sideways!",
+    "orientationOverlayBody": "This game needs a wide screen. Turn your device to keep playing!"
   },
   "shell": {
     "brand": "The Playground",
