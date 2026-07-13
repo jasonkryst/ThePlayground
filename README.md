@@ -134,7 +134,7 @@ src/
 │
 └── games/                     # One folder per game — animal-sounds, color-match,
     └── animal-memory-match/   #   character-match, animal-memory-match; drop a new folder to add one
-        ├── manifest.json      # Game metadata (id, name, tags, version, optional gameType)
+        ├── manifest.json      # Game metadata (id, name, tags, version, optional gameType, orientation)
         ├── index.jsx          # Game component (default export accepting onGameEnd)
         ├── badges.js          # Optional per-game badge catalog (auto-discovered)
         ├── data/              # Item catalog (e.g. animals.js, colors.js)
@@ -229,6 +229,8 @@ Use `var(--color-aqua)` etc. rather than hardcoding hex values, so games stay vi
 ```
 
 The `icon` can also be an image path (see Character Match). Memory-type games add `"gameType": "memory"`, which switches the My Progress page to memory-appropriate stat tiles.
+
+Games that only lay out well in a horizontal viewport can add `"orientation": "landscape"`. The engine then enforces it for that game's whole route: a full-screen rotate prompt blocks play (and pauses the memory-session timer) whenever the device/viewport is portrait, the intro slide announces the requirement, and the dashboard card shows a ↔️ *Landscape only* badge. Detection is hybrid — physical device orientation on touch devices, viewport aspect ratio on desktop. No game code is needed beyond the manifest field (pass `manifest.orientation` to `GameIntro` if the game renders its own intro).
 
 3. Add `index.jsx` with a default export that accepts `onGameEnd`:
 

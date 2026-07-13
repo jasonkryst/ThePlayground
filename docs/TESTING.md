@@ -41,6 +41,8 @@ Tests live in `__tests__/` folders next to the code under test. Patterns used th
 - **Choice-rendering games:** new quiz games should render their answer choices via `src/components/GameChoiceGrid.jsx` rather than duplicating the correct/wrong/hint/disabled class logic — see `AnimalSoundsGame`/`ColorMatchGame` for the render-prop pattern (`getChoiceProps`, `renderChoiceContent`).
 - **`AppShell`:** `src/components/__tests__/AppShell.test.jsx` covers route-driven chrome states (home, subpages, game routes), footer visibility, route-entry focus, and the exit-guard dialog end to end (open on a guarded nav/home click, resume, leave, and focus restoring to the trigger element). `ExitConfirmDialog` has its own dedicated a11y test (`jest-axe`, no violations) alongside its interaction tests, including Escape-key dismissal.
 - **Native date inputs:** drive `<input type="date">` fields with `fireEvent.change(input, { target: { value: 'YYYY-MM-DD' } })`, not `userEvent.type` — typing a date character-by-character through `userEvent` doesn't reliably produce a valid date-input value across browsers/jsdom. See `src/parent/__tests__/DateRangeFilter.test.jsx` for the pattern.
+- **Mocking orientation APIs:** jsdom has neither `window.matchMedia` nor `screen.orientation`. Orientation tests install getter-based mocks (see `src/hooks/__tests__/useOrientation.test.jsx` — `installMatchMedia` / `installScreenOrientation`, with listener sets the test fires manually) and delete them in `afterEach`. Production code fails open to `'landscape'` when the APIs are missing, so unmocked jsdom renders are never blocked.
+- **Orientation-gate pause:** hooks that must react to the rotate overlay read `useOrientationGate()` (default `{ blocked: false }`); tests drive it by wrapping `renderHook` in an `OrientationGateContext.Provider` whose value the test flips (see `useMemorySession.pause.test.jsx`).
 
 ## Layer 2: Accessibility audits (jest-axe + axe-core/playwright)
 
@@ -72,6 +74,7 @@ Playwright starts both `npm run dev` (port 5173) and Storybook (port 6006) autom
 | `color-match.spec.js` | Full play-through |
 | `character-match.spec.js` | Full play-through |
 | `animal-memory-match.spec.js` | Full flip-to-completion memory flow, plus a computed-style guard on the board layout |
+| `orientation-gate.spec.js` | Manifest-driven forced-landscape enforcement: overlay blocks portrait play, clears on rotate, home stays reachable, axe scan of the overlay, and a no-flag game never blocks |
 | `intro-results-height.spec.js` | Intro/results screens fit one device screen at phone/tablet/desktop sizes (primary button reachable without scrolling), while legitimately long content still scrolls rather than clips — layout behavior not observable in jsdom |
 | `visual.spec.js` | Visual regression (layer 4, below) |
 | `html-validity.spec.js` | HTML5 validation (layer 5, below) |
