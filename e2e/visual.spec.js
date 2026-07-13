@@ -23,6 +23,8 @@ const stories = [
   'components-gameresults--with-new-badges',
   'components-gameintro--default',
   'components-gameintro--dont-show-again-checked',
+  'components-gameintro--landscape-required',
+  'components-orientationoverlay--default',
   'components-badgegallery--all-locked',
   'components-badgegallery--mixed-progress',
   'pages-adminpage--default',
