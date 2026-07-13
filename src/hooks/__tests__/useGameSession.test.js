@@ -19,6 +19,7 @@ let mockSettings = {
   timerMode: 'countUp', timeLimitSeconds: 10, speedRecordMinAccuracy: 70,
   maxTries: 'none', hintsEnabled: false, hintAfterWrongTaps: 2, retryCountsAsStreak: true,
   spacedRepetitionEnabled: false, difficultyAutoProgressionEnabled: false,
+  soundEffectsEnabled: true,
   introDismissed: {},
 }
 let mockLoaded = true
@@ -70,6 +71,7 @@ beforeEach(() => {
     timerMode: 'countUp', timeLimitSeconds: 10, speedRecordMinAccuracy: 70,
     maxTries: 'none', hintsEnabled: false, hintAfterWrongTaps: 2, retryCountsAsStreak: true,
     spacedRepetitionEnabled: false, difficultyAutoProgressionEnabled: false,
+    soundEffectsEnabled: true,
     introDismissed: {},
   }
 })
@@ -876,5 +878,57 @@ describe('useGameSession — personal best and badges on finish', () => {
 
     expect(result.current.personalBestResult).toBe(null)
     expect(result.current.newBadges).toEqual([])
+  })
+})
+
+describe('useGameSession — lastEvent', () => {
+  it('starts null and emits correct with increasing seq on right answers', async () => {
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.current).toBeDefined())
+    expect(result.current.lastEvent).toBeNull()
+
+    await act(async () => { result.current.handleChoice(result.current.current.correct) })
+    expect(result.current.lastEvent).toEqual({ seq: 1, type: 'correct' })
+
+    await act(async () => { result.current.advance() })
+    await act(async () => { result.current.handleChoice(result.current.current.correct) })
+    expect(result.current.lastEvent).toEqual({ seq: 2, type: 'correct' })
+  })
+
+  it('emits wrong on every wrong tap, including non-locking retries', async () => {
+    setSettings({ maxTries: 3 })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.current).toBeDefined())
+
+    const wrongItem = result.current.current.choices.find(c => c.id !== result.current.current.correct.id)
+    await act(async () => { result.current.handleChoice(wrongItem) })
+    expect(result.current.locked).toBe(false) // retry still available — event fires anyway
+    expect(result.current.lastEvent).toEqual({ seq: 1, type: 'wrong' })
+  })
+
+  it('emits timeout when the countdown expires', () => {
+    vi.useFakeTimers()
+    setSettings({ timerMode: 'countdown', timeLimitSeconds: 5 })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    act(() => {})
+    act(() => { vi.advanceTimersByTime(5001) })
+    expect(result.current.lastEvent).toEqual({ seq: 1, type: 'timeout' })
+    vi.useRealTimers()
+  })
+
+  it('exposes soundEffectsEnabled from settings', async () => {
+    setSettings({ soundEffectsEnabled: false })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.current).toBeDefined())
+    expect(result.current.soundEffectsEnabled).toBe(false)
+  })
+
+  it('negative: restart clears lastEvent', async () => {
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.current).toBeDefined())
+    await act(async () => { result.current.handleChoice(result.current.current.correct) })
+    expect(result.current.lastEvent).not.toBeNull()
+    await act(async () => { result.current.restart() })
+    expect(result.current.lastEvent).toBeNull()
   })
 })

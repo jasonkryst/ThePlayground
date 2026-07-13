@@ -25,7 +25,7 @@ export default function useGameSession({ gameId, items }) {
     numChoices, feedbackMode, questionsPerSession, animationsEnabled,
     timerMode, timeLimitSeconds, maxTries, hintsEnabled, hintAfterWrongTaps,
     retryCountsAsStreak, spacedRepetitionEnabled, difficultyAutoProgressionEnabled,
-    speedRecordMinAccuracy,
+    speedRecordMinAccuracy, soundEffectsEnabled,
   } = settings
 
   const timeLimitMs = timerMode === 'countdown' ? timeLimitSeconds * 1000 : undefined
@@ -49,6 +49,7 @@ export default function useGameSession({ gameId, items }) {
   const [showIntro,            setShowIntro]           = useState(false)
   const [introResolved,        setIntroResolved]       = useState(false)
   const [dontShowAgain,        setDontShowAgain]       = useState(false)
+  const [lastEvent,            setLastEvent]           = useState(null)
 
   // Refs avoid stale closures in setTimeout/setInterval callbacks
   const scoreRef        = useRef(0)
@@ -65,6 +66,7 @@ export default function useGameSession({ gameId, items }) {
   const handleTimeoutRef = useRef(null)
   const pendingReinsertRef = useRef(null)
   const introInitializedRef = useRef(false)
+  const eventSeqRef     = useRef(0)
 
   // Runs once, when settings finish their initial async load. The ref guard
   // prevents later introDismissed writes (including this hook's own
@@ -141,6 +143,14 @@ export default function useGameSession({ gameId, items }) {
     }
   }
 
+  // Semantic per-answer events (mirrors useMemorySession's emit): consumers
+  // (QuizGameShell) turn these into chimes and live-region announcements.
+  // seq increments so repeated same-type events are still distinct.
+  function emit(type) {
+    eventSeqRef.current += 1
+    setLastEvent({ seq: eventSeqRef.current, type })
+  }
+
   function handleTimeout() {
     if (lockedRef.current) return
     const q = queueRef.current[indexRef.current]
@@ -152,6 +162,7 @@ export default function useGameSession({ gameId, items }) {
     const nextTimings = [...timingsRef.current, entry]
     timingsRef.current = nextTimings
     setTimings(nextTimings)
+    emit('timeout')
 
     lockAsMissed(q.correct)
     setLocked(true)
@@ -175,6 +186,7 @@ export default function useGameSession({ gameId, items }) {
     const nextTimings = [...timingsRef.current, entry]
     timingsRef.current = nextTimings
     setTimings(nextTimings)
+    emit(isCorrect ? 'correct' : 'wrong')
 
     let willLock = false
 
@@ -300,6 +312,7 @@ export default function useGameSession({ gameId, items }) {
     pendingReinsertRef.current = null
     wrongAttemptsRef.current = 0
     disabledChoiceIdsRef.current = []
+    eventSeqRef.current = 0
     const q = buildQueue(items, numChoices, questionsPerSession)
     queueRef.current = q
     setQueue(q)
@@ -318,6 +331,7 @@ export default function useGameSession({ gameId, items }) {
     setPersonalBestResult(null)
     setNewBadges([])
     setOfferDifficultyBump(false)
+    setLastEvent(null)
   }
 
   function dismissIntro(dontShowAgainFlag) {
@@ -333,6 +347,7 @@ export default function useGameSession({ gameId, items }) {
     currentElapsedMs, timings, timerMode, timeLimitMs, timedOut, offerDifficultyBump,
     personalBestResult, newBadges,
     showIntro, introResolved, settingsLoaded: loaded, dontShowAgain, setDontShowAgain,
+    lastEvent, soundEffectsEnabled,
     handleChoice, advance, restart, acceptDifficultyBump, dismissDifficultyBump, dismissIntro,
   }
 }
