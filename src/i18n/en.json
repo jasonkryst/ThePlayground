@@ -28,7 +28,9 @@
     "orientationOverlayBody": "This game needs a wide screen. Turn your device to keep playing!",
     "orientationOverlayHeadingPortrait": "Turn it upright!",
     "orientationOverlayBodyPortrait": "This game needs a tall screen. Turn your device to keep playing!",
-    "gameIntroPortrait": "Play this game with your screen upright!"
+    "gameIntroPortrait": "Play this game with your screen upright!",
+    "answerCorrectAnnounce": "Correct!",
+    "answerWrongAnnounce": "Not quite!"
   },
   "shell": {
     "brand": "The Playground",

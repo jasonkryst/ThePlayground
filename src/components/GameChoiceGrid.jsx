@@ -1,3 +1,5 @@
+import './GameChoiceGrid.css'
+
 export default function GameChoiceGrid({
   choices, correctId, selected, locked, disabledChoiceIds, hintActive,
   onChoose, getChoiceProps, renderChoiceContent,

@@ -1,0 +1,32 @@
+/* Shared answer-card grid for every quiz game. Games override background /
+   name color in their own stylesheets (imported after this one). */
+.game__choices {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  width: 100%;
+  max-width: 480px;
+}
+
+.game__choice {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 20px 12px;
+  border-radius: var(--radius-card);
+  border: none;
+  box-shadow: 0 4px 16px rgb(0 0 0 / 10%);
+  font-size: 48px;
+  cursor: pointer;
+  min-height: 120px;
+  transition: transform 0.1s ease;
+}
+
+.game__choice:disabled { cursor: default; }
+.game__choice:focus         { outline: none; }
+.game__choice:focus-visible { outline: 3px solid var(--color-lavender); outline-offset: 3px; }
+.game__choice:hover:not(:disabled) { transform: scale(1.04); }
+
+.game__choice-name { font-size: 18px; font-weight: 700; color: white; }
