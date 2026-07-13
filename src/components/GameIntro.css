@@ -34,6 +34,13 @@ img.game-intro__icon { width: 96px; height: 96px; object-fit: contain; }
   margin: 0;
 }
 
+.game-intro__orientation {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0;
+  color: var(--color-text-muted);
+}
+
 .game-intro__checkbox-label {
   display: flex;
   align-items: center;

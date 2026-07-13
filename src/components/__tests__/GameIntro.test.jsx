@@ -53,4 +53,28 @@ describe('GameIntro', () => {
     )
     expect(await axe(container)).toHaveNoViolations()
   })
+
+  it('shows the landscape notice when orientation is "landscape"', () => {
+    render(<GameIntro icon="🧠" name="Memory" instructions="x" orientation="landscape" dontShowAgain={false} onDontShowAgainChange={vi.fn()} onStart={vi.fn()} />)
+    const notice = screen.getByTestId('game-intro-orientation')
+    expect(notice).toHaveTextContent(/sideways/i)
+    expect(screen.getByText('↔️')).toHaveAttribute('aria-hidden', 'true')
+  })
+
+  it('shows no notice when orientation is absent (negative)', () => {
+    render(<GameIntro icon="🐘" name="Animal Sounds" instructions="x" dontShowAgain={false} onDontShowAgainChange={vi.fn()} onStart={vi.fn()} />)
+    expect(screen.queryByTestId('game-intro-orientation')).not.toBeInTheDocument()
+  })
+
+  it('shows no notice for an unrecognized orientation value (negative)', () => {
+    render(<GameIntro icon="🐘" name="Animal Sounds" instructions="x" orientation="portrait" dontShowAgain={false} onDontShowAgainChange={vi.fn()} onStart={vi.fn()} />)
+    expect(screen.queryByTestId('game-intro-orientation')).not.toBeInTheDocument()
+  })
+
+  it('has no accessibility violations with the landscape notice', async () => {
+    const { container } = render(
+      <GameIntro icon="🧠" name="Memory" instructions="x" orientation="landscape" dontShowAgain={false} onDontShowAgainChange={vi.fn()} onStart={vi.fn()} />
+    )
+    expect(await axe(container)).toHaveNoViolations()
+  })
 })

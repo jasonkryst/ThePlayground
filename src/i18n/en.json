@@ -16,6 +16,7 @@
     "timerCountdownAriaLabel": "Time remaining: {{seconds}} seconds",
     "gameIntroStart": "Let's Play!",
     "gameIntroDontShowAgain": "Don't show this again",
+    "gameIntroLandscape": "Play this game with your screen sideways!",
     "timeUp": "⏰ Time's up!",
     "newAccuracyRecord": "🏆 New accuracy record! {{score}}/{{total}} (was {{prevScore}}/{{prevTotal}})",
     "newSpeedRecord": "⚡ New speed record! {{seconds}}s avg (was {{prevSeconds}}s avg)",

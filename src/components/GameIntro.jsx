@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next'
 import ManifestIcon from './ManifestIcon'
 import './GameIntro.css'
 
-export default function GameIntro({ icon, name, instructions, dontShowAgain, onDontShowAgainChange, onStart }) {
+export default function GameIntro({ icon, name, instructions, orientation, dontShowAgain, onDontShowAgainChange, onStart }) {
   const { t } = useTranslation()
 
   return (
@@ -10,6 +10,12 @@ export default function GameIntro({ icon, name, instructions, dontShowAgain, onD
       <ManifestIcon icon={icon} as="div" className="game-intro__icon" ariaHidden />
       <h2 className="game-intro__name">{name}</h2>
       <p className="game-intro__instructions">{instructions}</p>
+
+      {orientation === 'landscape' && (
+        <p className="game-intro__orientation" data-testid="game-intro-orientation">
+          <span aria-hidden="true">↔️</span> {t('common.gameIntroLandscape')}
+        </p>
+      )}
 
       <label className="game-intro__checkbox-label">
         <input

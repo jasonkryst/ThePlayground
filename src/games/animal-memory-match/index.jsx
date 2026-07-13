@@ -44,6 +44,7 @@ export default function AnimalMemoryMatchGame({ onGameEnd }) {
         icon={manifest.icon}
         name={manifest.name}
         instructions={t('animalMemoryMatch.howToPlay')}
+        orientation={manifest.orientation}
         dontShowAgain={dontShowAgain}
         onDontShowAgainChange={setDontShowAgain}
         onStart={() => dismissIntro(dontShowAgain)}
