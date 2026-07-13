@@ -26,3 +26,15 @@ export const DontShowAgainChecked = {
     onStart: () => {},
   },
 }
+
+export const LandscapeRequired = {
+  args: {
+    icon: '🧠',
+    name: 'Animal Memory Match',
+    instructions: 'Flip the tiles and find the matching animal pairs!',
+    orientation: 'landscape',
+    dontShowAgain: false,
+    onDontShowAgainChange: () => {},
+    onStart: () => {},
+  },
+}

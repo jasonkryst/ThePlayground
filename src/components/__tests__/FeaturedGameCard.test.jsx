@@ -63,4 +63,19 @@ describe('FeaturedGameCard', () => {
     const { container } = renderFeatured()
     expect(await axe(container)).toHaveNoViolations()
   })
+
+  it('shows an accessible landscape-only badge when the manifest requires landscape', () => {
+    renderFeatured({ ...manifest, orientation: 'landscape' })
+    expect(screen.getByTestId('landscape-badge')).toHaveAccessibleName('Landscape only')
+  })
+
+  it('shows no landscape badge when the manifest has no orientation (negative)', () => {
+    renderFeatured(manifest)
+    expect(screen.queryByTestId('landscape-badge')).not.toBeInTheDocument()
+  })
+
+  it('shows no landscape badge for an unrecognized orientation value (negative)', () => {
+    renderFeatured({ ...manifest, orientation: 'upside-down' })
+    expect(screen.queryByTestId('landscape-badge')).not.toBeInTheDocument()
+  })
 })

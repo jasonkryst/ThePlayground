@@ -33,6 +33,14 @@ img.game-card__icon { width: 52px; height: 52px; object-fit: contain; }
   border-top: none;
 }
 
+.game-card__landscape-badge {
+  font-size: 14px;
+  line-height: 1;
+  background: rgb(0 0 0 / 5%);
+  border-radius: 12px;
+  padding: 4px 10px;
+}
+
 .game-card__recent-badge {
   font-size: 12px;
   font-weight: 600;

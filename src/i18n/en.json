@@ -16,13 +16,16 @@
     "timerCountdownAriaLabel": "Time remaining: {{seconds}} seconds",
     "gameIntroStart": "Let's Play!",
     "gameIntroDontShowAgain": "Don't show this again",
+    "gameIntroLandscape": "Play this game with your screen sideways!",
     "timeUp": "⏰ Time's up!",
     "newAccuracyRecord": "🏆 New accuracy record! {{score}}/{{total}} (was {{prevScore}}/{{prevTotal}})",
     "newSpeedRecord": "⚡ New speed record! {{seconds}}s avg (was {{prevSeconds}}s avg)",
     "newFewestFlipsRecord": "🃏 New record! Solved in {{flips}} flips (was {{prevFlips}})",
     "newFastestBoardRecord": "⏱️ New record! Finished in {{seconds}}s (was {{prevSeconds}}s)",
     "newBadgeAnnounce": "🎉 New Badge!",
-    "resultsHeading": "Results"
+    "resultsHeading": "Results",
+    "orientationOverlayHeading": "Turn it sideways!",
+    "orientationOverlayBody": "This game needs a wide screen. Turn your device to keep playing!"
   },
   "shell": {
     "brand": "The Playground",
@@ -47,6 +50,7 @@
     "tabAll": "All",
     "tabsLabel": "Filter games by category",
     "featuredAriaLabel": "Play today's featured game: {{name}}",
+    "landscapeOnly": "Landscape only",
     "tag": {
       "sounds": "Sounds",
       "visual": "Visual",

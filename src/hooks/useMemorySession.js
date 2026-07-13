@@ -4,6 +4,7 @@ import useScores from './useScores'
 import useBestStreak from './useBestStreak'
 import usePersonalBest from './usePersonalBest'
 import useBadges from './useBadges'
+import { useOrientationGate } from '../components/OrientationGateContext'
 import { fireConfetti, fireFireworks } from '../lib/confetti'
 import buildDeck from '../utils/buildDeck'
 
@@ -19,6 +20,7 @@ export default function useMemorySession({ gameId, items }) {
   const { recordStreak } = useBestStreak(gameId)
   const { recordMemorySession } = usePersonalBest(gameId)
   const { awardSession } = useBadges()
+  const { blocked } = useOrientationGate()
 
   const { memoryPairs, animationsEnabled, soundEffectsEnabled, timerMode } = settings
 
@@ -52,6 +54,8 @@ export default function useMemorySession({ gameId, items }) {
   const introInitializedRef = useRef(false)
   const mismatchTimeoutRef  = useRef(null)
   const completeTimeoutRef  = useRef(null)
+  const blockedRef          = useRef(false)
+  const pausedAtRef         = useRef(null)
 
   // Same intro-initialization contract as useGameSession (see its comment).
   useEffect(() => {
@@ -69,11 +73,25 @@ export default function useMemorySession({ gameId, items }) {
     startRef.current = Date.now()
   }, [loaded, memoryPairs, items])
 
+  // Orientation-gate pause (issue #62): while the gate blocks play, freeze
+  // the wall-clock baseline. Shifting startRef forward by the paused span on
+  // resume keeps every derived figure (currentElapsedMs, durationMs, fastest-
+  // board personal bests) honest with no other bookkeeping.
   useEffect(() => {
-    if (done || !introResolved || showIntro) return
+    blockedRef.current = blocked
+    if (blocked) {
+      pausedAtRef.current = Date.now()
+    } else if (pausedAtRef.current != null) {
+      startRef.current += Date.now() - pausedAtRef.current
+      pausedAtRef.current = null
+    }
+  }, [blocked])
+
+  useEffect(() => {
+    if (done || !introResolved || showIntro || blocked) return
     const id = setInterval(() => setCurrentElapsedMs(Date.now() - startRef.current), 100)
     return () => clearInterval(id)
-  }, [done, introResolved, showIntro])
+  }, [done, introResolved, showIntro, blocked])
 
   function emit(type, itemId = null) {
     seqRef.current += 1
@@ -86,7 +104,7 @@ export default function useMemorySession({ gameId, items }) {
   }
 
   function flipTile(tileId) {
-    if (lockedRef.current || doneRef.current) return
+    if (lockedRef.current || doneRef.current || blockedRef.current) return
     const tile = tilesRef.current.find(t => t.tileId === tileId)
     if (!tile || tile.state !== 'down') return
 

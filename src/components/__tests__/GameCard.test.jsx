@@ -24,6 +24,14 @@ function renderCard(bestScore = 0, recentInfo = null) {
   )
 }
 
+function renderCardWithManifest(manifestOverrides) {
+  return render(
+    <MemoryRouter>
+      <GameCard manifest={manifestOverrides} bestScore={0} recentInfo={null} />
+    </MemoryRouter>
+  )
+}
+
 describe('GameCard', () => {
   it('renders game name and description', () => {
     renderCard()
@@ -94,5 +102,20 @@ describe('GameCard', () => {
   it('has no accessibility violations', async () => {
     const { container } = renderCard(5, { lastPlayed: TODAY, playCount: 3 })
     expect(await axe(container)).toHaveNoViolations()
+  })
+
+  it('shows an accessible landscape-only badge when the manifest requires landscape', () => {
+    renderCardWithManifest({ ...manifest, orientation: 'landscape' })
+    expect(screen.getByTestId('landscape-badge')).toHaveAccessibleName('Landscape only')
+  })
+
+  it('shows no landscape badge when the manifest has no orientation (negative)', () => {
+    renderCardWithManifest(manifest)
+    expect(screen.queryByTestId('landscape-badge')).not.toBeInTheDocument()
+  })
+
+  it('shows no landscape badge for an unrecognized orientation value (negative)', () => {
+    renderCardWithManifest({ ...manifest, orientation: 'upside-down' })
+    expect(screen.queryByTestId('landscape-badge')).not.toBeInTheDocument()
   })
 })

@@ -5,6 +5,7 @@ import AdminPage from './admin/AdminPage'
 import ParentDashboard from './parent/ParentDashboard'
 import KidsProgressPage from './kids/KidsProgressPage'
 import AppShell from './components/AppShell'
+import OrientationGate from './components/OrientationGate'
 import useSettings from './hooks/useSettings'
 import i18n from './i18n'
 import './components/GameLayout.css'
@@ -71,13 +72,16 @@ function GameRoute() {
   const { gameId } = useParams()
   const navigate   = useNavigate()
   const Game       = gameComponents[gameId]
+  const manifest   = manifests.find(m => m.id === gameId)
 
   if (!Game) return <div style={{ padding: 24 }}>Game not found.</div>
 
   return (
-    <Suspense fallback={<div style={{ padding: 24 }}>Loading...</div>}>
-      <Game onGameEnd={() => navigate('/')} />
-    </Suspense>
+    <OrientationGate orientation={manifest?.orientation}>
+      <Suspense fallback={<div style={{ padding: 24 }}>Loading...</div>}>
+        <Game onGameEnd={() => navigate('/')} />
+      </Suspense>
+    </OrientationGate>
   )
 }
 

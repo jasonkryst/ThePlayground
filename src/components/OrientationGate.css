@@ -1,0 +1,18 @@
+/* Both wrappers replicate .shell__content's flex column so the game's own
+   `.game { flex: 1 }` layout behaves exactly as if the gate weren't there.
+   position: relative anchors the absolutely-positioned overlay to the game
+   content area only — the shell header/footer stay above/below it. */
+.orientation-gate {
+  position: relative;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  width: 100%;
+}
+
+.orientation-gate__content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  width: 100%;
+}

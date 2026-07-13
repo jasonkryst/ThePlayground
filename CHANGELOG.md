@@ -3,6 +3,11 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.25.0] - 2026-07-12
+
+### Added
+- Games can require a horizontal layout via a new optional manifest field, `"orientation": "landscape"` (issue #62). The engine enforces it for the game's whole route: an accessible full-content rotate prompt ("Turn it sideways!") blocks play whenever the layout is portrait — physical device orientation on touch devices, viewport aspect ratio on desktop — while the shell's home button stays reachable. The game stays mounted (state survives rotation), the memory-session clock pauses so personal-best times stay fair, the intro slide announces the requirement, and dashboard cards show a ↔️ "Landscape only" badge. First adopter: Animal Memory Match (v1.2.0). New engine pieces: `useOrientation` hook, `OrientationGate`/`OrientationOverlay` components, `OrientationGateContext`.
+
 ## [0.24.5] - 2026-07-12
 
 ### Added
