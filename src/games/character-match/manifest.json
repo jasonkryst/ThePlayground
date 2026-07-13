@@ -4,6 +4,6 @@
   "description": "Match the name to the character!",
   "icon": "/games/character-match/icon.webp",
   "color": "#FFB74D",
-  "version": "1.4.2",
+  "version": "1.4.3",
   "tags": ["visual", "characters"]
 }
