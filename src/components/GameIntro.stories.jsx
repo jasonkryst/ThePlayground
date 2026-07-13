@@ -38,3 +38,5 @@ export const LandscapeRequired = {
     onStart: () => {},
   },
 }
+
+export const PortraitRequired = { args: { ...LandscapeRequired.args, orientation: 'portrait' } }

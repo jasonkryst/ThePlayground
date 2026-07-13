@@ -67,7 +67,17 @@ describe('GameIntro', () => {
   })
 
   it('shows no notice for an unrecognized orientation value (negative)', () => {
-    render(<GameIntro icon="🐘" name="Animal Sounds" instructions="x" orientation="portrait" dontShowAgain={false} onDontShowAgainChange={vi.fn()} onStart={vi.fn()} />)
+    render(<GameIntro icon="🐘" name="Animal Sounds" instructions="x" orientation="upside-down" dontShowAgain={false} onDontShowAgainChange={vi.fn()} onStart={vi.fn()} />)
+    expect(screen.queryByTestId('game-intro-orientation')).not.toBeInTheDocument()
+  })
+
+  it('shows the portrait notice when orientation is "portrait"', () => {
+    render(<GameIntro icon="🧠" name="Memory" instructions="x" orientation="portrait" dontShowAgain={false} onDontShowAgainChange={vi.fn()} onStart={vi.fn()} />)
+    expect(screen.getByTestId('game-intro-orientation')).toHaveTextContent(/screen upright/i)
+  })
+
+  it('negative: no orientation notice for an unrecognized orientation value', () => {
+    render(<GameIntro icon="🐘" name="Animal Sounds" instructions="x" orientation="diagonal" dontShowAgain={false} onDontShowAgainChange={vi.fn()} onStart={vi.fn()} />)
     expect(screen.queryByTestId('game-intro-orientation')).not.toBeInTheDocument()
   })
 

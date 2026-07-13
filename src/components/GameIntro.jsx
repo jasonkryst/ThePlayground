@@ -16,6 +16,11 @@ export default function GameIntro({ icon, name, instructions, orientation, dontS
           <span aria-hidden="true">↔️</span> {t('common.gameIntroLandscape')}
         </p>
       )}
+      {orientation === 'portrait' && (
+        <p className="game-intro__orientation" data-testid="game-intro-orientation">
+          <span aria-hidden="true">↕️</span> {t('common.gameIntroPortrait')}
+        </p>
+      )}
 
       <label className="game-intro__checkbox-label">
         <input

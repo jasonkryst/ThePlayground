@@ -118,4 +118,14 @@ describe('GameCard', () => {
     renderCardWithManifest({ ...manifest, orientation: 'upside-down' })
     expect(screen.queryByTestId('landscape-badge')).not.toBeInTheDocument()
   })
+
+  it('shows a portrait badge when the manifest requires portrait', () => {
+    renderCardWithManifest({ ...manifest, orientation: 'portrait' })
+    expect(screen.getByTestId('portrait-badge')).toHaveAccessibleName('Portrait only')
+  })
+
+  it('negative: no portrait badge without an orientation field', () => {
+    renderCardWithManifest(manifest)
+    expect(screen.queryByTestId('portrait-badge')).not.toBeInTheDocument()
+  })
 })

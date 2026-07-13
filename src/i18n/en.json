@@ -25,7 +25,10 @@
     "newBadgeAnnounce": "🎉 New Badge!",
     "resultsHeading": "Results",
     "orientationOverlayHeading": "Turn it sideways!",
-    "orientationOverlayBody": "This game needs a wide screen. Turn your device to keep playing!"
+    "orientationOverlayBody": "This game needs a wide screen. Turn your device to keep playing!",
+    "orientationOverlayHeadingPortrait": "Turn it upright!",
+    "orientationOverlayBodyPortrait": "This game needs a tall screen. Turn your device to keep playing!",
+    "gameIntroPortrait": "Play this game with your screen upright!"
   },
   "shell": {
     "brand": "The Playground",
@@ -51,6 +54,7 @@
     "tabsLabel": "Filter games by category",
     "featuredAriaLabel": "Play today's featured game: {{name}}",
     "landscapeOnly": "Landscape only",
+    "portraitOnly": "Portrait only",
     "tag": {
       "sounds": "Sounds",
       "visual": "Visual",

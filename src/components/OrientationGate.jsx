@@ -4,7 +4,7 @@ import { OrientationGateContext } from './OrientationGateContext'
 import OrientationOverlay from './OrientationOverlay'
 import './OrientationGate.css'
 
-const RECOGNIZED_ORIENTATIONS = ['landscape']
+const RECOGNIZED_ORIENTATIONS = ['landscape', 'portrait']
 
 // Engine-level enforcement for a manifest's `"orientation"` field (issue
 // #62). Children (the game) stay mounted while blocked so game state
@@ -56,7 +56,7 @@ export default function OrientationGate({ orientation, children }) {
         <div className="orientation-gate__content" ref={contentRef}>
           {children}
         </div>
-        {blocked && <OrientationOverlay headingRef={headingRef} />}
+        {blocked && <OrientationOverlay headingRef={headingRef} required={required} />}
       </div>
     </OrientationGateContext.Provider>
   )

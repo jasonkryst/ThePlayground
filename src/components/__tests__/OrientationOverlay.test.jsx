@@ -33,3 +33,23 @@ describe('OrientationOverlay', () => {
     expect(await axe(container)).toHaveNoViolations()
   })
 })
+
+describe('OrientationOverlay — portrait required', () => {
+  it('renders the upright heading, tall-screen body, and rotated icon modifier', () => {
+    render(<OrientationOverlay required="portrait" />)
+    expect(screen.getByRole('heading', { name: /turn it upright/i })).toBeInTheDocument()
+    expect(screen.getByText(/needs a tall screen/i)).toBeInTheDocument()
+    expect(screen.getByText('📱')).toHaveClass('orientation-overlay__icon--portrait')
+  })
+
+  it('negative: default (no required prop) keeps the landscape copy and no portrait modifier', () => {
+    render(<OrientationOverlay />)
+    expect(screen.getByRole('heading', { name: /turn it sideways/i })).toBeInTheDocument()
+    expect(screen.getByText('📱')).not.toHaveClass('orientation-overlay__icon--portrait')
+  })
+
+  it('has no accessibility violations in portrait mode', async () => {
+    const { container } = render(<OrientationOverlay required="portrait" />)
+    expect(await axe(container)).toHaveNoViolations()
+  })
+})
