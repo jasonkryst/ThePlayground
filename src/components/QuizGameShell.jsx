@@ -113,8 +113,6 @@ export default function QuizGameShell({
           reach screen readers; mirrors MemoryBoard's per-event live message. */}
       <div className="sr-only" role="status" data-testid="quiz-live-region">{announcement}</div>
 
-      {timedOut && <div className="game__timeout" role="status">{t('common.timeUp')}</div>}
-
       {locked && feedbackMode === 'parent-tap' && !timedOut && (
         <button className="game__next" onClick={advance}>{t('common.next')}</button>
       )}
