@@ -59,7 +59,7 @@ test('memory match game screen has no accessibility violations', async ({ page }
 })
 
 test('memory match: cards are large tap targets with breathing room from the screen edge on phone (issue #58)', async ({ page }) => {
-  await page.setViewportSize({ width: 375, height: 667 })
+  await page.setViewportSize({ width: 667, height: 375 }) // landscape phone — the game now requires landscape (#62)
   await startGame(page)
   const boxes = await page.locator('[data-tile-id]').evaluateAll(els =>
     els.map(e => {
@@ -77,15 +77,13 @@ test('memory match: cards are large tap targets with breathing room from the scr
 })
 
 test('memory match: cards grow to fill more of a tablet screen instead of staying tiny (issue #58)', async ({ page }) => {
-  await page.setViewportSize({ width: 768, height: 1024 })
+  await page.setViewportSize({ width: 1024, height: 768 }) // landscape tablet — the game now requires landscape (#62)
   await startGame(page)
   const width = await page.locator('[data-tile-id]').first().evaluate(el => el.getBoundingClientRect().width)
-  // Default board is 10 tiles (5 pairs) → idealColumns=5, cap=748px. At a
-  // 768px viewport (minus .game's 32px horizontal padding, and minus a
-  // little more for a possible scrollbar) auto-fit still lands on 5
-  // columns, giving ~134-138px tiles — nowhere near the original ~112px.
-  // 125 leaves margin on both sides without being loose enough to pass on
-  // a regression back to the old sizing.
+  // Default board is 10 tiles (5 pairs) → idealColumns=5, cap=748px. At
+  // 1024x768 the cap (748px) is what limits width, giving exactly 140px
+  // tiles. 125 leaves margin on both sides without being loose enough to
+  // pass on a regression back to the old sizing.
   expect(width).toBeGreaterThanOrEqual(125)
 })
 
