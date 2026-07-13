@@ -16,10 +16,25 @@ const TODAY     = new Date(); TODAY.setHours(12, 0, 0, 0)
 const YESTERDAY = new Date(TODAY); YESTERDAY.setDate(TODAY.getDate() - 1)
 const THREE_AGO = new Date(TODAY); THREE_AGO.setDate(TODAY.getDate() - 3)
 
-function renderCard(bestScore = 0, recentInfo = null) {
+function renderCard(manifestOrBestScore, recentInfoOrBestScore, actualRecentInfo) {
+  let testManifest = manifest
+  let bestScore = 0
+  let recentInfo = null
+
+  // Check if first parameter is a manifest object (has 'id' property)
+  if (typeof manifestOrBestScore === 'object' && manifestOrBestScore !== null && 'id' in manifestOrBestScore) {
+    testManifest = manifestOrBestScore
+    bestScore = recentInfoOrBestScore || 0
+    recentInfo = actualRecentInfo || null
+  } else {
+    // Legacy behavior: first param is bestScore
+    bestScore = manifestOrBestScore || 0
+    recentInfo = recentInfoOrBestScore || null
+  }
+
   return render(
     <MemoryRouter>
-      <GameCard manifest={manifest} bestScore={bestScore} recentInfo={recentInfo} />
+      <GameCard manifest={testManifest} bestScore={bestScore} recentInfo={recentInfo} />
     </MemoryRouter>
   )
 }
@@ -94,5 +109,20 @@ describe('GameCard', () => {
   it('has no accessibility violations', async () => {
     const { container } = renderCard(5, { lastPlayed: TODAY, playCount: 3 })
     expect(await axe(container)).toHaveNoViolations()
+  })
+
+  it('shows an accessible landscape-only badge when the manifest requires landscape', () => {
+    renderCard({ ...manifest, orientation: 'landscape' })
+    expect(screen.getByTestId('landscape-badge')).toHaveAccessibleName('Landscape only')
+  })
+
+  it('shows no landscape badge when the manifest has no orientation (negative)', () => {
+    renderCard(manifest)
+    expect(screen.queryByTestId('landscape-badge')).not.toBeInTheDocument()
+  })
+
+  it('shows no landscape badge for an unrecognized orientation value (negative)', () => {
+    renderCard({ ...manifest, orientation: 'upside-down' })
+    expect(screen.queryByTestId('landscape-badge')).not.toBeInTheDocument()
   })
 })

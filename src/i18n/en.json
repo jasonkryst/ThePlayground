@@ -50,6 +50,7 @@
     "tabAll": "All",
     "tabsLabel": "Filter games by category",
     "featuredAriaLabel": "Play today's featured game: {{name}}",
+    "landscapeOnly": "Landscape only",
     "tag": {
       "sounds": "Sounds",
       "visual": "Visual",

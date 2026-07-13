@@ -6,7 +6,7 @@ import './FeaturedGameCard.css'
 export default function FeaturedGameCard({ manifest }) {
   const { t } = useTranslation()
   if (!manifest) return null
-  const { id, name, description, icon, color } = manifest
+  const { id, name, description, icon, color, orientation } = manifest
   return (
     <Link
       to={`/game/${id}`}
@@ -18,6 +18,16 @@ export default function FeaturedGameCard({ manifest }) {
       <ManifestIcon icon={icon} className="featured-card__icon" />
       <span className="featured-card__name">{name}</span>
       <span className="featured-card__desc">{description}</span>
+      {orientation === 'landscape' && (
+        <span
+          className="featured-card__landscape-badge"
+          data-testid="landscape-badge"
+          role="img"
+          aria-label={t('dashboard.landscapeOnly')}
+        >
+          ↔️
+        </span>
+      )}
     </Link>
   )
 }
