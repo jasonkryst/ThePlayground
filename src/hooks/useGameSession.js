@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { useOrientationGate } from '../components/OrientationGateContext'
 import useSettings from './useSettings'
 import useScores from './useScores'
 import useBestStreak from './useBestStreak'
@@ -20,6 +21,7 @@ export default function useGameSession({ gameId, items }) {
   const { bestStreak, recordStreak } = useBestStreak(gameId)
   const { personalBest, recordSession: recordPersonalBestSession } = usePersonalBest(gameId)
   const { awardSession } = useBadges()
+  const { blocked } = useOrientationGate()
 
   const {
     numChoices, feedbackMode, questionsPerSession, animationsEnabled,
@@ -67,6 +69,9 @@ export default function useGameSession({ gameId, items }) {
   const pendingReinsertRef = useRef(null)
   const introInitializedRef = useRef(false)
   const eventSeqRef     = useRef(0)
+  const blockedRef       = useRef(false)
+  const pausedAtRef      = useRef(null)
+  const remainingMsRef   = useRef(null)
 
   // Runs once, when settings finish their initial async load. The ref guard
   // prevents later introDismissed writes (including this hook's own
@@ -93,10 +98,12 @@ export default function useGameSession({ gameId, items }) {
     }
   }, [numChoices, questionsPerSession, items])
 
-  // Per-question timer, retry-state reset, and optional timeout
+  // Per-question state reset; also seeds the countdown budget the timer
+  // effect below draws down across block/unblock segments.
   useEffect(() => {
     if (!queueRef.current[indexRef.current]) return
     questionStartRef.current = Date.now()
+    remainingMsRef.current = timeLimitMs ?? null
     lockedRef.current = false
     wrongAttemptsRef.current = 0
     disabledChoiceIdsRef.current = []
@@ -105,29 +112,52 @@ export default function useGameSession({ gameId, items }) {
     setDisabledChoiceIds([])
     setCurrentElapsedMs(0)
     setTimedOut(false)
+  }, [index, queue, timeLimitMs, timerMode])
 
-    // currentElapsedMs is tracked unconditionally (not gated on timerMode):
-    // this keeps the effect's behavior uniform across timer modes so the
-    // Timer component's currentElapsedMs prop ticks smoothly whenever it's
-    // rendered, including across timerMode transitions. It has no bearing on
-    // scored timing data — durationMs values come from a separate
-    // Date.now() - questionStartRef.current computation in
-    // handleChoice/handleTimeout.
+  // Question timers, orientation-gate aware (issue #65, mirroring
+  // useMemorySession): while the gate blocks play no timers run; on resume
+  // the countdown re-arms with its remaining budget and questionStartRef
+  // shifts forward by the paused span so durationMs stays honest.
+  //
+  // currentElapsedMs is tracked unconditionally (not gated on timerMode):
+  // this keeps the effect's behavior uniform across timer modes so the
+  // Timer component's currentElapsedMs prop ticks smoothly whenever it's
+  // rendered, including across timerMode transitions. It has no bearing on
+  // scored timing data — durationMs values come from a separate
+  // Date.now() - questionStartRef.current computation in
+  // handleChoice/handleTimeout.
+  useEffect(() => {
+    blockedRef.current = blocked
+    if (!queueRef.current[indexRef.current]) return
+
+    if (blocked) {
+      pausedAtRef.current = Date.now()
+      return
+    }
+    if (pausedAtRef.current != null) {
+      questionStartRef.current += Date.now() - pausedAtRef.current
+      pausedAtRef.current = null
+    }
+
     const intervalId = setInterval(() => {
       setCurrentElapsedMs(Date.now() - questionStartRef.current)
     }, 100)
 
-    const timeoutId = timeLimitMs
+    const segmentStart = Date.now()
+    const timeoutId = remainingMsRef.current != null
       ? setTimeout(() => {
           if (!lockedRef.current) handleTimeoutRef.current?.()
-        }, timeLimitMs)
+        }, remainingMsRef.current)
       : null
 
     return () => {
       clearInterval(intervalId)
-      if (timeoutId) clearTimeout(timeoutId)
+      if (timeoutId) {
+        clearTimeout(timeoutId)
+        remainingMsRef.current -= Date.now() - segmentStart
+      }
     }
-  }, [index, queue, timeLimitMs, timerMode])
+  }, [index, queue, timeLimitMs, timerMode, blocked])
 
   const current = queue[index]
   const hintActive = hintsEnabled && !locked && wrongAttempts >= hintAfterWrongTaps
@@ -174,6 +204,7 @@ export default function useGameSession({ gameId, items }) {
   useEffect(() => { handleTimeoutRef.current = handleTimeout })
 
   function handleChoice(item) {
+    if (blockedRef.current) return
     if (lockedRef.current) return
     if (disabledChoiceIdsRef.current.includes(item.id)) return
     setSelected(item.id)
