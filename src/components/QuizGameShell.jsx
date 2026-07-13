@@ -41,10 +41,10 @@ export default function QuizGameShell({
     play(getSoundUrl(lastEvent.type === 'correct' ? 'chime-correct.wav' : 'chime-wrong.wav'))
   }, [lastEvent, soundEffectsEnabled, play])
 
-  const announcement = !lastEvent ? ''
-    : lastEvent.type === 'correct' ? t('common.answerCorrectAnnounce')
-    : lastEvent.type === 'wrong' ? t('common.answerWrongAnnounce')
-    : t('common.timeUp')
+  const announcement =
+    lastEvent?.type === 'correct' ? t('common.answerCorrectAnnounce')
+    : lastEvent?.type === 'wrong' ? t('common.answerWrongAnnounce')
+    : ''
 
   if (!settingsLoaded || !introResolved) return null
 
@@ -109,9 +109,15 @@ export default function QuizGameShell({
         renderChoiceContent={renderChoiceContent}
       />
 
-      {/* AU-2 (WCAG 4.1.3): persistent live region so correct/wrong/time-up
-          reach screen readers; mirrors MemoryBoard's per-event live message. */}
+      {/* AU-2 (WCAG 4.1.3): persistent live region so correct/wrong reach
+          screen readers; mirrors MemoryBoard's per-event live message.
+          Timeout is intentionally silent here: the visible .game__timeout
+          row below is itself a role="status" region that announces on
+          appearance, so announcing timeout here too would double-announce
+          and duplicate the on-screen text. */}
       <div className="sr-only" role="status" data-testid="quiz-live-region">{announcement}</div>
+
+      {timedOut && <div className="game__timeout" role="status">{t('common.timeUp')}</div>}
 
       {locked && feedbackMode === 'parent-tap' && !timedOut && (
         <button className="game__next" onClick={advance}>{t('common.next')}</button>

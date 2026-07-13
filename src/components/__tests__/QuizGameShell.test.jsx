@@ -184,7 +184,7 @@ describe('QuizGameShell — AU-2 live region', () => {
     expect(screen.getByTestId('quiz-live-region')).toHaveTextContent('')
   })
 
-  it('announces correct, wrong, and timeout events', () => {
+  it('announces correct and wrong events; stays silent on timeout (visible row announces it)', () => {
     renderShell(makeSession({ lastEvent: { seq: 1, type: 'correct' } }))
     expect(screen.getByTestId('quiz-live-region')).toHaveTextContent('Correct!')
 
@@ -192,7 +192,7 @@ describe('QuizGameShell — AU-2 live region', () => {
     expect(screen.getAllByTestId('quiz-live-region').at(-1)).toHaveTextContent('Not quite!')
 
     renderShell(makeSession({ lastEvent: { seq: 1, type: 'timeout' } }))
-    expect(screen.getAllByTestId('quiz-live-region').at(-1)).toHaveTextContent(/time's up/i)
+    expect(screen.getAllByTestId('quiz-live-region').at(-1)).toBeEmptyDOMElement()
   })
 
   it('question screen has no accessibility violations', async () => {
