@@ -48,3 +48,21 @@
   50%, 70%  { transform: rotate(90deg); }
   100%      { transform: rotate(0deg); }
 }
+
+/* Portrait-required flips the wordless hint: the glyph starts sideways and
+   rocks upright. Static (sideways) for reduced-motion users. */
+.orientation-overlay__icon--portrait {
+  transform: rotate(90deg);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .orientation-overlay__icon--portrait {
+    animation: orientation-overlay-rotate-portrait 2s ease-in-out infinite;
+  }
+}
+
+@keyframes orientation-overlay-rotate-portrait {
+  0%, 20%   { transform: rotate(90deg); }
+  50%, 70%  { transform: rotate(0deg); }
+  100%      { transform: rotate(90deg); }
+}

@@ -28,6 +28,16 @@ export default function FeaturedGameCard({ manifest }) {
           ↔️
         </span>
       )}
+      {orientation === 'portrait' && (
+        <span
+          className="featured-card__landscape-badge"
+          data-testid="portrait-badge"
+          role="img"
+          aria-label={t('dashboard.portraitOnly')}
+        >
+          ↕️
+        </span>
+      )}
     </Link>
   )
 }

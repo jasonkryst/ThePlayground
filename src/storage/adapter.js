@@ -23,19 +23,30 @@ export const DEFAULT_SETTINGS = {
 }
 
 /**
- * Storage adapter interface. Every adapter must implement these four async methods.
+ * Storage adapter interface. Every adapter must implement all ten async
+ * methods below: the score, settings, best-streak, personal-best, and
+ * badge-data get/save pairs.
  *
  * getScores()              → Promise<Score[]>
  * addScore(score)          → Promise<void>
  * getSettings()             → Promise<Settings>
  * saveSettings(settings)   → Promise<void>
  *
- * Score shape:   { gameId, score, total, date, timestamp, peakStreak?, timings? }
- *   peakStreak?: number — highest consecutive-correct run in that session (added v0.4.0)
+ * Score shape:   { gameId, score, total, date, timestamp, peakStreak?, timings?,
+ *                  flipAttempts?, mismatches?, peakMatchStreak?, durationMs? }
+ *   peakStreak?: number — highest consecutive-correct run in that session (added v0.4.0);
+ *     memory sessions (v0.23.0+) also write it, mirroring peakMatchStreak
+ *   Quiz sessions (useGameSession) add:
  *   timings?: Array<{ questionIndex: number, itemId: string, correct: boolean, durationMs: number, attemptNumber: number, timedOut?: boolean }>
  *     itemId added in v0.4.0; older records omit it
  *     attemptNumber added in v0.6.0 (1 = first tap, 2 = first retry, etc.); older records omit it
  *     timedOut added in v0.8.0 (true when the entry was recorded because the countdown ran out); older records omit it
+ *   Memory sessions (useMemorySession, added v0.23.0) add:
+ *   flipAttempts?: number — pair-flip attempts taken to clear the board
+ *   mismatches?: number — flips that revealed a non-matching pair
+ *   peakMatchStreak?: number — longest run of consecutive matches
+ *   durationMs?: number — wall-clock board time (excludes time paused behind the
+ *     orientation overlay; added v0.24.0)
  * Settings shape: { numChoices, feedbackMode, questionsPerSession, gaId, childName, animationsEnabled, tagOverrides,
  *                    timerMode, timeLimitSeconds, maxTries, hintsEnabled, hintAfterWrongTaps, retryCountsAsStreak,
  *                    spacedRepetitionEnabled, difficultyAutoProgressionEnabled, introDismissed, speedRecordMinAccuracy, locale,
@@ -50,7 +61,7 @@ export const DEFAULT_SETTINGS = {
  *     preset: '7d' | '30d' | '90d' | 'all' | 'custom'; start/end are 'YYYY-MM-DD'
  *     strings, only meaningful when preset === 'custom'. Added v0.21.0.
  *   memoryPairs: 3 | 4 | 5 | 6 — pairs per board for memory-type games (added v0.23.0)
- *   soundEffectsEnabled: boolean — gates celebratory sound effects (e.g. memory match sound); added v0.23.0
+ *   soundEffectsEnabled: boolean — gates game sound effects: memory match sounds and quiz correct/wrong chimes (added v0.23.0; quiz chimes v0.26.0)
  *
  * Best-streak adapter methods (added for per-game streak tracking):
  * getBestStreaks()            → Promise<{ [gameId: string]: number }>

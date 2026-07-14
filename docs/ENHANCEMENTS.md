@@ -4,7 +4,7 @@ Ideas for future development. Not committed to any timeline.
 
 Completed work is recorded in `CHANGELOG.md` — entries here are removed once they ship. Each entry carries a one-line rationale so the "why" survives until someone picks it up.
 
-Organized by the improvement categories from issue #61: UI, UX, accessibility, core engine, game features, new games, security, testing layers, and backend/sync.
+Organized by the improvement categories from issue #61: UI, UX, accessibility, game features, new games, security, testing layers, and backend/sync.
 
 ---
 
@@ -36,24 +36,12 @@ Everything from the 2026-07-05 standards audit is resolved (shipped across v0.13
 Items marked **AU-n** come from the 2026-07-12 a11y/i18n/UX audit (`docs/accessibility_usability.md`), which found zero automated-scan violations — these are the judgment-level gaps automation can't see. (That audit also verified the memory board's reduced-motion coverage is already complete, so the previous "reduced-motion audit for the memory board" entry is resolved and removed.)
 
 - **Non-color quiz feedback (AU-1, WCAG 1.4.1)** — `.correct`/`.wrong`/`.highlight-correct` are background-color-only (green vs red of similar lightness — the classic CVD-confusable pair), and the pulse/shake secondary cue is disabled under `prefers-reduced-motion`. Add an `aria-hidden` ✓/✗ glyph (and/or outline) in `GameChoiceGrid` so all three quiz games inherit three-signal feedback — the memory board's mismatch state (✗ + outline + color) is the in-repo model.
-- **Announce correct/wrong to screen readers (AU-2, WCAG 4.1.3)** — a wrong answer currently produces no announcement at all (the streak badge unmounts below 2), and early correct answers none either. Add a persistent visually-hidden `role="status"` region to the quiz scaffold (natural home: the planned `QuizGameShell`); the memory game's per-event live region already does this right.
 - **Keep keyboard focus on quiz choices (AU-3)** — `GameChoiceGrid` uses real `disabled`, dropping focus to `<body>` when the focused choice locks; mirror the v0.23.0 memory-tile fix (`aria-disabled` + click guard).
 - **Localize score-history dates (AU-6, i18n)** — `ScoreHistory.jsx` renders the raw ISO `YYYY-MM-DD` string; format via `Intl.DateTimeFormat(i18n.language, …)` (parsing the ISO string as a *local* date to avoid the UTC day-shift trap).
 - **Full RTL support (`dir` attribute sync)** — the remaining half of RTL readiness (logical CSS properties already shipped in v0.16.0); requires an actual RTL locale to exist before it can be meaningfully verified. (Re-confirmed outstanding by the 2026-07-12 audit: `lang` syncs, `dir` doesn't.)
 - **200% zoom / large-text audit** — verify layouts (especially the memory board and results screens) survive browser zoom and OS large-text settings; this audience's parents often hand devices to grandparents.
 - **Switch-access exploration** — the target audience overlaps with early-intervention users; investigating single-switch scanning support (sequential focus + one activation input) would widen who can play.
-- **Real assistive-technology pass** — one NVDA or VoiceOver session through a full game loop (ideally after AU-2 lands); static audits and axe can't judge announcement verbosity or pronunciation.
-
-## Core Engine
-
-Duplication findings from the 2026-07-12 issue-#61 audit — concrete migrations of copy-pasted game code into the engine:
-
-- **Orientation pause for quiz games** — `useMemorySession` pauses timing behind the issue-#62 rotate overlay, but `useGameSession` doesn't: its per-question countdown (`timeLimitMs` timeout) keeps running if a future quiz game sets `"orientation"` in its manifest. Suspend/resume the question timer off `useOrientationGate()` before any quiz game adopts the flag.
-- **`"orientation": "portrait"` support** — the manifest field and gate are enum-shaped; recognizing `portrait` is the same overlay with a flipped condition and a rotated glyph, if a vertical-first game ever wants it.
-- **`QuizGameShell` component** — `src/games/animal-sounds/index.jsx`, `src/games/color-match/index.jsx`, and `src/games/character-match/index.jsx` each repeat a near-identical ~70-line scaffold: the 21-field `useGameSession` destructure → `useShellGameStatus` call → `settingsLoaded`/`introResolved` guard → `GameIntro` wiring (6 identical props) → `GameResults` wiring (11 props, 8 identical) → hidden `data-testid` span → progress/prompt block → identical `timerMode !== 'off' && <Timer …/>` line → timeout status row → parent-tap Next button. Only the prompt area, choice rendering, and missed-item rendering genuinely differ per game. A slot-based engine component (`renderPrompt`, `getChoiceProps`, `renderChoiceContent`, `renderMissedItem`) would shrink each quiz game to its actual content and make the next quiz game ~30 lines.
-- **Consolidate duplicated `.game__*` CSS** — 41 near-identical rule occurrences (`.game__choice`, `.game__question`, `.game__prompt`, `.game__progress`, `.game__next`, `.game__timeout`) are spread across the three quiz-game stylesheets (13–14 each). This is the same drift pattern that caused the v0.24.1 unstyled-results bug (shared styles duplicated per game, one copy missed). They belong in the shared component CSS (`GameLayout.css` / `GameChoiceGrid`'s own stylesheet).
-- **Quiz correct/wrong chime layer** — shared audio feedback (chime on correct, low tone on wrong) independent of game-specific audio; configurable in admin alongside animations. Partially in place since v0.23.0: the `soundEffectsEnabled` setting, shared sound library (`src/assets/sounds`), and `useSoundPlayer` hook exist, but only memory games use them — the correct/wrong chime layer for quiz games remains.
-- **Fix the stale JSDoc in `src/storage/adapter.js`** — the header still says "every adapter must implement these four async methods" above what is now a ten-method contract, and the documented Score shape omits the memory-session fields (`flipAttempts`, `mismatches`, `peakMatchStreak`, `durationMs`) that `useMemorySession` actually saves. Docs-in-code drift; small fix, high confusion value.
+- **Real assistive-technology pass** — one NVDA or VoiceOver session through a full game loop (AU-2 landed in v0.26.0; known gap for that pass: consecutive same-type events render identical live-region text, so screen readers may not re-announce the second of two correct answers in a row — the memory game's mismatch announcement shares this property); static audits and axe can't judge announcement verbosity or pronunciation.
 
 ## Game Features
 

@@ -3,6 +3,20 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.26.0] - 2026-07-13
+
+### Added
+- Quiz games now play shared audio feedback (issue #65): a bright chime on a correct answer and a soft low tone on a wrong tap or timeout, generated as tiny committed WAV assets (`scripts/generate-chimes.mjs`) and gated by the existing Sound Effects setting. `useGameSession` emits semantic `lastEvent`s (mirroring `useMemorySession`) that also drive a new persistent screen-reader live region announcing correct and wrong answers (AU-2, WCAG 4.1.3) — timeouts keep their existing visible role="status" row as the announcement path.
+- `"orientation": "portrait"` manifest support (issue #65): the same engine gate as landscape with flipped condition, upright-rotation overlay copy/glyph, intro-slide notice, and a ↕️ dashboard badge — ready for a future vertical-first game.
+- `QuizGameShell` engine component (issue #65): the shared quiz scaffold (intro/results wiring, question chrome, timer, timeout row, parent-tap Next, chime layer, live region) in one place. All three quiz games now pass their `useGameSession` session plus content slots to it — each game's `index.jsx` shrank to its actual content, and the next quiz game costs ~35 lines.
+
+### Changed
+- Quiz orientation pause (issue #65): if a quiz game sets a manifest `orientation`, `useGameSession` now suspends the per-question countdown (preserving remaining time), freezes the visible timer, ignores taps, and excludes overlay time from recorded per-question durations while the rotate overlay is up — matching the fairness guarantees memory games already had.
+- Consolidated the `.game__*` CSS duplicated across the three quiz-game stylesheets into `QuizGameShell.css`/`GameChoiceGrid.css` (issue #65) — removing the drift pattern behind the v0.24.1 unstyled-results bug. Per-game stylesheets now hold only genuinely game-specific rules.
+
+### Fixed
+- `src/storage/adapter.js` JSDoc now documents the real ten-method adapter contract and the memory-session Score fields (`flipAttempts`, `mismatches`, `peakMatchStreak`, `durationMs`) (issue #65).
+
 ## [0.25.0] - 2026-07-12
 
 ### Added

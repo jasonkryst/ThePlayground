@@ -1,64 +1,7 @@
-.game__question {
-  width: 100%;
-  max-width: 480px;
-  background: linear-gradient(135deg, var(--color-aqua), var(--color-lavender));
-  border-radius: var(--radius-card);
-  padding: 28px 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-  box-shadow: 0 4px 16px rgb(0 0 0 / 10%);
-}
-
-.game__prompt { color: white; font-size: 20px; font-weight: 700; text-align: center; }
 .game__swatch { width: 96px; height: 96px; border-radius: var(--radius-card); box-shadow: 0 4px 12px rgb(0 0 0 / 25%); border: 4px solid white; }
 
-.game__progress { font-size: 15px; color: rgb(255 255 255 / 85%); font-weight: 600; }
-
-.game__choices {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-  width: 100%;
-  max-width: 480px;
-}
-
-.game__choice {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 20px 12px;
-  border-radius: var(--radius-card);
-  border: none;
-  box-shadow: 0 4px 16px rgb(0 0 0 / 10%);
-  font-size: 48px;
-  cursor: pointer;
-  min-height: 120px;
-  transition: transform 0.1s ease;
-}
-
-.game__choice:disabled { cursor: default; }
 .game__choice--bordered { border: 2px solid rgb(0 0 0 / 15%); }
-.game__choice:focus         { outline: none; }
-.game__choice:focus-visible { outline: 3px solid var(--color-lavender); outline-offset: 3px; }
-.game__choice:hover:not(:disabled) { transform: scale(1.04); }
 
-.game__choice-name { font-size: 18px; font-weight: 700; color: inherit; }
-
-.game__next {
-  padding: 16px 48px;
-  background: var(--color-teal);
-  color: white;
-  font-size: 20px;
-  font-weight: 700;
-  border-radius: var(--radius-button);
-  border: none;
-  min-height: 64px;
-}
-.game__next:focus         { outline: none; }
-.game__next:focus-visible { outline: 3px solid var(--color-lavender); outline-offset: 3px; }
-
-.game__timeout { text-align: center; font-size: 18px; font-weight: 700; color: var(--color-error); margin-top: 8px; }
+/* Color names sit on the answer's own color; inherit the per-choice inline
+   text color instead of the shared white. */
+.game__choice-name { color: inherit; }

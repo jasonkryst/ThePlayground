@@ -57,6 +57,16 @@ export default function GameCard({ manifest, bestScore, recentInfo = null }) {
           ↔️
         </span>
       )}
+      {manifest.orientation === 'portrait' && (
+        <span
+          className="game-card__landscape-badge"
+          data-testid="portrait-badge"
+          role="img"
+          aria-label={t('dashboard.portraitOnly')}
+        >
+          ↕️
+        </span>
+      )}
       {recentInfo && (
         <span className="game-card__recent-badge" data-testid="recently-played-badge">
           {recentLabel(recentInfo, t)}

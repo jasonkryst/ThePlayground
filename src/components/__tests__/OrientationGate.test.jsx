@@ -108,3 +108,28 @@ describe('OrientationGate — landscape required', () => {
     expect(await axe(container)).toHaveNoViolations()
   })
 })
+
+describe('OrientationGate — portrait required', () => {
+  it('unsatisfied: blocks in landscape with the portrait overlay copy', () => {
+    installMatchMedia({ landscape: true })
+    renderGate('portrait')
+    expect(screen.getByTestId('orientation-overlay')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /turn it upright/i })).toHaveFocus()
+    expect(screen.getByTestId('blocked-probe')).toHaveTextContent('true')
+  })
+
+  it('satisfied: no overlay in portrait, context unblocked', () => {
+    installMatchMedia({ landscape: false })
+    renderGate('portrait')
+    expect(screen.queryByTestId('orientation-overlay')).not.toBeInTheDocument()
+    expect(screen.getByTestId('blocked-probe')).toHaveTextContent('false')
+  })
+
+  it('rotating to portrait clears the overlay', () => {
+    const media = installMatchMedia({ landscape: true })
+    renderGate('portrait')
+    expect(screen.getByTestId('orientation-overlay')).toBeInTheDocument()
+    act(() => media.rotate(false))
+    expect(screen.queryByTestId('orientation-overlay')).not.toBeInTheDocument()
+  })
+})

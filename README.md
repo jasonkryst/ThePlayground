@@ -104,8 +104,9 @@ src/
 │
 ├── components/                # Shared UI: AppShell (persistent header, route-aware footer + exit guard),
 │                              #   ShellContext, Dashboard, GameCard, FeaturedGameCard, CategorySection,
-│                              #   GameIntro, GameResults, GameChoiceGrid, MemoryBoard, Timer, StreakBadge,
-│                              #   BadgeGallery, ScoreHistory, ManifestIcon, ExitConfirmDialog, LocaleSelector
+│                              #   GameIntro, GameResults, QuizGameShell, GameChoiceGrid, MemoryBoard, Timer,
+│                              #   StreakBadge, BadgeGallery, ScoreHistory, ManifestIcon, ExitConfirmDialog,
+│                              #   LocaleSelector
 ├── admin/
 │   └── AdminPage.jsx          # Settings, game tags, badges, score history (tabbed)
 ├── parent/
@@ -230,7 +231,7 @@ Use `var(--color-aqua)` etc. rather than hardcoding hex values, so games stay vi
 
 The `icon` can also be an image path (see Character Match). Memory-type games add `"gameType": "memory"`, which switches the My Progress page to memory-appropriate stat tiles.
 
-Games that only lay out well in a horizontal viewport can add `"orientation": "landscape"`. The engine then enforces it for that game's whole route: a full-screen rotate prompt blocks play (and pauses the memory-session timer) whenever the device/viewport is portrait, the intro slide announces the requirement, and the dashboard card shows a ↔️ *Landscape only* badge. Detection is hybrid — physical device orientation on touch devices, viewport aspect ratio on desktop. No game code is needed beyond the manifest field (pass `manifest.orientation` to `GameIntro` if the game renders its own intro).
+Games that only lay out well in one orientation can add `"orientation": "landscape"` or `"orientation": "portrait"`. The engine then enforces it for that game's whole route: a full-screen rotate prompt blocks play (and pauses the memory-session/quiz-session timer) whenever the device/viewport is in the wrong orientation, the intro slide announces the requirement, and the dashboard card shows a ↔️ *Landscape only* badge (or a ↕️ *Portrait only* badge). Detection is hybrid — physical device orientation on touch devices, viewport aspect ratio on desktop. No game code is needed beyond the manifest field (pass `manifest.orientation` to `GameIntro` if the game renders its own intro).
 
 3. Add `index.jsx` with a default export that accepts `onGameEnd`:
 
@@ -338,7 +339,7 @@ Accessible from the dashboard via the gear icon (⚙).
 
 **Pairs per board** — pairs per board for memory games, 3–6 (10 tiles at the default 5).
 
-**Sound effects** — plays the matched animal's sound in memory games.
+**Sound effects** — gates memory-game celebration sounds (e.g. the matched animal's sound) and quiz games' correct/wrong chimes.
 
 ---
 

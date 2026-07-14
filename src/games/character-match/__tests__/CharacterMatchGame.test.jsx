@@ -7,6 +7,10 @@ import { ShellContext } from '../../../components/ShellContext'
 
 vi.mock('../../../lib/confetti', () => ({ fireConfetti: vi.fn() }))
 
+vi.mock('../../../hooks/useSoundPlayer', () => ({
+  default: () => ({ play: vi.fn(), stop: vi.fn() }),
+}))
+
 let mockSettings = {
   numChoices: 2, feedbackMode: 'immediate', questionsPerSession: 3,
   maxTries: 'none', hintsEnabled: false, hintAfterWrongTaps: 2, retryCountsAsStreak: true,
