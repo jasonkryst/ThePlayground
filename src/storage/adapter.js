@@ -61,7 +61,7 @@ export const DEFAULT_SETTINGS = {
  *     preset: '7d' | '30d' | '90d' | 'all' | 'custom'; start/end are 'YYYY-MM-DD'
  *     strings, only meaningful when preset === 'custom'. Added v0.21.0.
  *   memoryPairs: 3 | 4 | 5 | 6 — pairs per board for memory-type games (added v0.23.0)
- *   soundEffectsEnabled: boolean — gates celebratory sound effects (e.g. memory match sound); added v0.23.0
+ *   soundEffectsEnabled: boolean — gates game sound effects: memory match sounds and quiz correct/wrong chimes (added v0.23.0; quiz chimes v0.26.0)
  *
  * Best-streak adapter methods (added for per-game streak tracking):
  * getBestStreaks()            → Promise<{ [gameId: string]: number }>

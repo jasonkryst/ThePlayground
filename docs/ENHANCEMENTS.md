@@ -41,7 +41,7 @@ Items marked **AU-n** come from the 2026-07-12 a11y/i18n/UX audit (`docs/accessi
 - **Full RTL support (`dir` attribute sync)** — the remaining half of RTL readiness (logical CSS properties already shipped in v0.16.0); requires an actual RTL locale to exist before it can be meaningfully verified. (Re-confirmed outstanding by the 2026-07-12 audit: `lang` syncs, `dir` doesn't.)
 - **200% zoom / large-text audit** — verify layouts (especially the memory board and results screens) survive browser zoom and OS large-text settings; this audience's parents often hand devices to grandparents.
 - **Switch-access exploration** — the target audience overlaps with early-intervention users; investigating single-switch scanning support (sequential focus + one activation input) would widen who can play.
-- **Real assistive-technology pass** — one NVDA or VoiceOver session through a full game loop (AU-2 landed in v0.26.0); static audits and axe can't judge announcement verbosity or pronunciation.
+- **Real assistive-technology pass** — one NVDA or VoiceOver session through a full game loop (AU-2 landed in v0.26.0; known gap for that pass: consecutive same-type events render identical live-region text, so screen readers may not re-announce the second of two correct answers in a row — the memory game's mismatch announcement shares this property); static audits and axe can't judge announcement verbosity or pronunciation.
 
 ## Game Features
 
