@@ -3,6 +3,15 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.27.0] - 2026-07-14
+
+### Added
+- **Fruit & Veggie ID** game (issue #68) — a fruit or vegetable's name is spoken aloud via the browser's Web Speech API (`useSpeech`) and the child taps the matching picture. Choices are picture-only (emoji, no text label) for pure listen→identify vocabulary practice; each tile carries an `aria-label` name for screen readers. When the browser has no speech synthesis, the prompt falls back to naming the target on screen and the replay button is hidden.
+- `useSpeech` hook (`src/hooks/useSpeech.js`) — shared engine wrapper over `SpeechSynthesis` (speak/cancel/`supported`), mirroring `useSoundPlayer`'s lifecycle shape.
+
+### Changed
+- Extracted the question-audio lifecycle into a shared `useQuestionAudio` hook (`src/hooks/useQuestionAudio.js`) — auto-announce the active question, stop on leave/results/intro, and a manual replay callback — and moved Animal Sounds onto it (behaviour-preserving). The generic `.game__replay` button style now lives in the shared `QuizGameShell.css`, and the label-less `.game__choice-emoji` tile style in the shared `GameChoiceGrid.css`.
+
 ## [0.26.0] - 2026-07-13
 
 ### Added

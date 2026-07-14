@@ -35,6 +35,7 @@ const stories = [
   'games-animalsoundsgame--default',
   'games-charactermatchgame--default',
   'games-colormatchgame--default',
+  'games-fruitveggieidgame--default',
 ]
 
 // Run these tests one at a time rather than in parallel workers. Storybook's
