@@ -1,0 +1,22 @@
+{
+  "fruitVeggie": {
+    "prompt": "Which one did you hear?",
+    "promptFallback": "Find the {{name}}!",
+    "replay": "Say it again",
+    "howToPlay": "Listen to the name, then tap the matching picture!"
+  },
+  "food": {
+    "apple": { "name": "Apple" },
+    "banana": { "name": "Banana" },
+    "orange": { "name": "Orange" },
+    "strawberry": { "name": "Strawberry" },
+    "grapes": { "name": "Grapes" },
+    "watermelon": { "name": "Watermelon" },
+    "carrot": { "name": "Carrot" },
+    "tomato": { "name": "Tomato" },
+    "corn": { "name": "Corn" },
+    "broccoli": { "name": "Broccoli" },
+    "potato": { "name": "Potato" },
+    "pepper": { "name": "Pepper" }
+  }
+}

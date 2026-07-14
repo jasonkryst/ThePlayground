@@ -30,3 +30,5 @@
 .game__choice:hover:not(:disabled) { transform: scale(1.04); }
 
 .game__choice-name { font-size: 18px; font-weight: 700; color: white; }
+
+.game__choice-emoji { font-size: 56px; line-height: 1; }

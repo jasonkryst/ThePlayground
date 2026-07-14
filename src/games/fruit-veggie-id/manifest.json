@@ -1,0 +1,9 @@
+{
+  "id": "fruit-veggie-id",
+  "name": "Fruit & Veggie ID",
+  "description": "Hear the name, tap the matching fruit or veggie!",
+  "icon": "🍎",
+  "color": "#AED581",
+  "version": "1.0.0",
+  "tags": ["vocabulary", "food"]
+}
