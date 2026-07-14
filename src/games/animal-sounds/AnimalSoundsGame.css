@@ -1,4 +1,0 @@
-.game__replay    { font-size: 36px; background: rgb(255 255 255 / 30%); border-radius: 50%; width: 72px; height: 72px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: none; transition: background 0.15s; }
-.game__replay:hover { background: rgb(255 255 255 / 50%); }
-.game__replay:focus         { outline: none; }
-.game__replay:focus-visible { outline: 3px solid var(--color-lavender); outline-offset: 3px; }

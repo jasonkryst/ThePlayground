@@ -1,5 +1,5 @@
 /* Shared question chrome for every quiz game. Per-game stylesheets keep only
-   genuinely game-specific rules (swatch, replay button, per-game overrides) —
+   genuinely game-specific rules (swatch, per-game overrides) —
    consolidation of the drift that caused the v0.24.1 unstyled-results bug. */
 .game__question {
   width: 100%;
@@ -31,3 +31,8 @@
 .game__next:focus-visible { outline: 3px solid var(--color-lavender); outline-offset: 3px; }
 
 .game__timeout { text-align: center; font-size: 18px; font-weight: 700; color: var(--color-error); margin-top: 8px; }
+
+.game__replay    { font-size: 36px; background: rgb(255 255 255 / 30%); border-radius: 50%; width: 72px; height: 72px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: none; transition: background 0.15s; }
+.game__replay:hover { background: rgb(255 255 255 / 50%); }
+.game__replay:focus         { outline: none; }
+.game__replay:focus-visible { outline: 3px solid var(--color-lavender); outline-offset: 3px; }

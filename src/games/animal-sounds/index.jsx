@@ -1,12 +1,12 @@
-import { useCallback, useEffect } from 'react'
+import { useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import useGameSession from '../../hooks/useGameSession'
 import useSoundPlayer from '../../hooks/useSoundPlayer'
+import useQuestionAudio from '../../hooks/useQuestionAudio'
 import QuizGameShell from '../../components/QuizGameShell'
 import animals from './data/animals'
 import { getSoundUrl } from './data/sounds'
 import manifest from './manifest.json'
-import './AnimalSoundsGame.css'
 
 const CHOICE_COLORS = [
   'var(--color-lavender-dark)',
@@ -21,33 +21,10 @@ export default function AnimalSoundsGame({ onGameEnd }) {
   const { current, index, done, showIntro, introResolved } = session
 
   // Game-owned question audio: its own player instance, independent of the
-  // shell's chime layer.
-  const { play, stop: stopSound } = useSoundPlayer()
-
-  const playSound = useCallback(() => {
-    if (!current) return
-    play(getSoundUrl(current.correct.sound))
-  }, [current, play])
-
-  useEffect(() => {
-    if (!current) return
-
-    // Stop any in-flight audio when moving away from this question.
-    return () => {
-      stopSound()
-    }
-  }, [current, stopSound])
-
-  useEffect(() => {
-    if (!current || showIntro || !introResolved) return
-    playSound()
-  }, [index, playSound, current, showIntro, introResolved])
-
-  useEffect(() => {
-    if (done || showIntro) {
-      stopSound()
-    }
-  }, [done, showIntro, stopSound])
+  // shell's chime layer. The announce/stop lifecycle lives in useQuestionAudio.
+  const { play, stop } = useSoundPlayer()
+  const announce = useCallback(animal => play(getSoundUrl(animal.correct.sound)), [play])
+  const replay = useQuestionAudio({ index, current, showIntro, introResolved, done, announce, stop })
 
   return (
     <QuizGameShell
@@ -58,7 +35,7 @@ export default function AnimalSoundsGame({ onGameEnd }) {
       correctTestId="correct-animal-id"
       prompt={t('animalSounds.prompt')}
       renderPromptExtra={() => (
-        <button className="game__replay" aria-label={t('animalSounds.replay')} onClick={playSound}>🔊</button>
+        <button className="game__replay" aria-label={t('animalSounds.replay')} onClick={replay}>🔊</button>
       )}
       getChoiceProps={(animal, i) => ({
         style: { background: CHOICE_COLORS[i % CHOICE_COLORS.length] },
