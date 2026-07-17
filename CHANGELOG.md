@@ -3,6 +3,11 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.28.0] - 2026-07-17
+
+### Changed
+- Hints (issue #20): the correct-answer highlight now ramps in intensity with wrong taps instead of a flat highlight — subtle on the first hint-eligible attempt, reaching full strength on the last try before the question locks as missed (a fixed 3-attempt ramp when Retry attempts is Unlimited). `useGameSession` exposes this as `hintStrength`; `GameChoiceGrid` renders it via a `--hint-strength`-driven overlay instead of swapping the choice's background outright, which also means the highlight no longer needs an `!important` override to beat a game's inline swatch color.
+
 ## [0.27.0] - 2026-07-14
 
 ### Added

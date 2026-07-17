@@ -330,7 +330,7 @@ Accessible from the dashboard via the gear icon (⚙).
 
 **Retry attempts** — how many wrong taps are allowed on a question before it locks in as missed. "None" reproduces the original behavior (locks on the very first wrong tap). Each wrong choice becomes disabled (but stays visible) so the child can try a different one.
 
-**Hints** — when on, the correct answer is highlighted once the child has reached "Show hint after" wrong taps on the current question, without locking it.
+**Hints** — when on, the correct answer is highlighted once the child has reached "Show hint after" wrong taps on the current question, without locking it. The highlight starts subtle and grows bolder with each further wrong tap, reaching full strength on the last try before the question locks in as missed (or, with Retry attempts set to Unlimited, after a fixed few wrong taps past the threshold).
 
 **Retry counts toward streak** — when on, getting a question right after 1+ wrong taps still counts toward the answer streak. When off, a correct-after-retry still scores as correct but resets the streak to 0.
 
