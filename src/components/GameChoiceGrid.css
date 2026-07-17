@@ -22,12 +22,31 @@
   cursor: pointer;
   min-height: 120px;
   transition: transform 0.1s ease;
+  position: relative;
 }
 
 .game__choice:disabled { cursor: default; }
 .game__choice:focus         { outline: none; }
 .game__choice:focus-visible { outline: 3px solid var(--color-lavender); outline-offset: 3px; }
 .game__choice:hover:not(:disabled) { transform: scale(1.04); }
+
+/* Hint highlight is a translucent overlay, not a background swap, so it
+   tints whatever's really behind the button (an inline swatch color, e.g.
+   Color Match, or the default) instead of replacing it outright.
+   --hint-strength is set inline only for the pre-lock hint ramp (issue #20);
+   the locked answer-reveal sets no inline value and gets the full-strength
+   default below. */
+.game__choice.highlight-correct::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: #a5d6a7;
+  opacity: var(--hint-strength, 1);
+  pointer-events: none;
+  z-index: -1;
+  transition: opacity 0.15s ease;
+}
 
 .game__choice-name { font-size: 18px; font-weight: 700; color: white; }
 

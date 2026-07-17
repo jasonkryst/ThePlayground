@@ -87,18 +87,21 @@ button {
   .game__choice--disabled-wrong { animation: shake-red 0.6s ease; }
 }
 
-/* !important on these three is load-bearing, not a specificity oversight:
+/* !important on these two is load-bearing, not a specificity oversight:
    Color Match/Animal Sounds set each choice's resting background via an
    inline `style`, which no non-important stylesheet rule — regardless of
    selector specificity — can out-rank. `.wrong` needs it for the same
-   reason `.correct`/`.highlight-correct` already had it: without it, a
+   reason `.correct` already had it: without it, a
    reduced-motion user (who never gets the shake-red animation, only this
    static rule) sees no red at all on a wrong Color Match/Animal Sounds
    choice, since the inline background silently wins. Verified via a real
-   browser, not assumed — see e2e/color-match.spec.js's shake-animation test. */
+   browser, not assumed — see e2e/color-match.spec.js's shake-animation test.
+   `.highlight-correct` (the hint ramp / answer-reveal highlight, issue #20)
+   no longer needs this treatment: GameChoiceGrid.css layers it as a
+   `::after` overlay instead of replacing `background`, so it paints over
+   any inline color without an !important fight. */
 .correct { background: #a5d6a7 !important; }
 .wrong   { background: #ef9a9a !important; }
-.highlight-correct { background: #a5d6a7 !important; }
 
 /* grayscale(85%)/brightness(0.88) (this rule's pre-2026-07-06 values) dropped some
    Color Match swatches (red, blue) below WCAG 1.4.3's 4.5:1 text contrast once their
