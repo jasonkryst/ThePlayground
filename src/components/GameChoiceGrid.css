@@ -23,6 +23,7 @@
   min-height: 120px;
   transition: transform 0.1s ease;
   position: relative;
+  z-index: 0;
 }
 
 .game__choice:disabled { cursor: default; }
