@@ -16,5 +16,6 @@ export default {
 
 export const Default = { args: { ...baseArgs, selected: null, locked: false, disabledChoiceIds: [], hintActive: false } }
 export const RetryInProgress = { args: { ...baseArgs, selected: null, locked: false, disabledChoiceIds: ['b'], hintActive: false } }
-export const HintActive = { args: { ...baseArgs, selected: null, locked: false, disabledChoiceIds: ['b'], hintActive: true } }
+export const HintActiveSubtle = { args: { ...baseArgs, selected: null, locked: false, disabledChoiceIds: ['b'], hintActive: true, hintStrength: 0.33 } }
+export const HintActiveBold = { args: { ...baseArgs, selected: null, locked: false, disabledChoiceIds: ['b'], hintActive: true, hintStrength: 1 } }
 export const Locked = { args: { ...baseArgs, selected: 'a', locked: true, disabledChoiceIds: [], hintActive: false } }
