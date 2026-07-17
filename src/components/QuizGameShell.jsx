@@ -22,7 +22,7 @@ export default function QuizGameShell({
 }) {
   const { t } = useTranslation()
   const {
-    current, index, total, locked, disabledChoiceIds, hintActive, selected,
+    current, index, total, locked, disabledChoiceIds, hintActive, hintStrength, selected,
     score, streak, missed, done, feedbackMode, handleChoice, advance, restart,
     currentElapsedMs, timerMode, timeLimitMs, timedOut, offerDifficultyBump, numChoices,
     personalBestResult, newBadges, lastEvent, soundEffectsEnabled,
@@ -104,6 +104,7 @@ export default function QuizGameShell({
         locked={locked}
         disabledChoiceIds={disabledChoiceIds}
         hintActive={hintActive}
+        hintStrength={hintStrength}
         onChoose={handleChoice}
         getChoiceProps={getChoiceProps}
         renderChoiceContent={renderChoiceContent}
