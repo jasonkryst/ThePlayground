@@ -51,4 +51,9 @@ describe('computeBadgeAwards', () => {
     const earned = computeBadgeAwards({ peakStreak: 2, isPerfect: false, prevLifetimeTotal: 10, newLifetimeTotal: 15 })
     expect(earned).toEqual([])
   })
+
+  it('does not re-award a totalQuestions tier when prevLifetimeTotal already equals the tier exactly', () => {
+    const earned = computeBadgeAwards({ peakStreak: 0, isPerfect: false, prevLifetimeTotal: 50, newLifetimeTotal: 60 })
+    expect(earned).toEqual([])
+  })
 })

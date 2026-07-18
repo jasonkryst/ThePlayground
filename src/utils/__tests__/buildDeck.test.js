@@ -38,9 +38,32 @@ describe('buildDeck', () => {
     const deck = buildDeck(ITEMS.slice(0, 2), 5)
     expect(deck).toHaveLength(4)
     expect(warn).toHaveBeenCalledTimes(1)
+    expect(warn).toHaveBeenCalledWith('buildDeck: requested 5 pairs but pool has 2 items; clamping')
+  })
+
+  it('does not warn when the pool is large enough for the requested pairs', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    buildDeck(ITEMS, 5)
+    expect(warn).not.toHaveBeenCalled()
+  })
+
+  it('does not warn when the pool size exactly matches the requested pairs', () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    buildDeck(ITEMS.slice(0, 5), 5)
+    expect(warn).not.toHaveBeenCalled()
   })
 
   it('throws when pairs < 1', () => {
     expect(() => buildDeck(ITEMS, 0)).toThrow(/pairs/)
+  })
+
+  it('throws exactly at the pairs < 1 boundary but not at pairs === 1', () => {
+    expect(() => buildDeck(ITEMS, 1)).not.toThrow()
+  })
+
+  it('shuffle draws from the full 0..i range, not a narrowed range', () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0.5)
+    const deck = buildDeck(ITEMS, 1)
+    expect(deck.map(t => t.tileId)).toEqual(['dog-a', 'dog-b'])
   })
 })

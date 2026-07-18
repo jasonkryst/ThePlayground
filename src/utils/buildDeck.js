@@ -1,6 +1,9 @@
 // src/utils/buildDeck.js
 function shuffle(arr) {
   const a = [...arr]
+  // Stryker disable next-line EqualityOperator: i>0 vs i>=0 is behaviorally
+  // equivalent here — at i===0, j is always floor(rand*(0+1))=0 too, so the
+  // i===0 iteration is always a self-swap no-op either way.
   for (let i = a.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [a[i], a[j]] = [a[j], a[i]]

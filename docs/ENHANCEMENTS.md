@@ -87,7 +87,6 @@ Mirrors the "known gaps" in `SECURITY.md` — each of these is acknowledged ther
 ## Testing Layers
 
 - **CI pipeline** — GitHub Actions workflow running `npm run lint`, `npm run lint:css`, `npm test`, `npm run build`, `npm run e2e`, and the Docker build on every push; today the six local layers only protect a developer who remembers to run them.
-- **Mutation testing (Stryker) on engine utils** — `buildQueue`, `buildDeck`, `reinsertMissed`, the badge/personal-best evaluators are pure functions with high test counts; mutation testing would reveal whether those tests actually pin behavior or just execute lines.
 - **Lighthouse budgets in CI** — automated performance/accessibility scoring per route with regression thresholds; complements axe (which checks violations, not degradation trends). (Depends on the CI pipeline.)
 
 ## Backend / Sync

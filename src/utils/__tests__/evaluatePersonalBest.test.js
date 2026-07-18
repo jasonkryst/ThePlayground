@@ -72,6 +72,7 @@ describe('evaluatePersonalBest', () => {
 
     expect(result.speed.isNewRecord).toBe(true)
     expect(result.speed.value).toBe(1100) // avg of the two correct durations, wrong excluded
+    expect(result.updatedBests.speedMs.avgMs).toBe(1100)
   })
 
   it('is not speed-eligible when session accuracy is below minAccuracyPct, even if fast', () => {
@@ -113,5 +114,40 @@ describe('evaluatePersonalBest', () => {
     expect(result.speed.isNewRecord).toBe(false)
     expect(result.speed.value).toBe(null)
     expect(result.updatedBests.speedMs).toEqual(previous.speedMs)
+  })
+
+  it('reports zero accuracy without dividing by zero when total is 0', () => {
+    const result = evaluatePersonalBest({
+      score: 0, total: 0, timings: [], minAccuracyPct: 70, previous: null,
+    })
+
+    expect(result.accuracy.value).toBe(0)
+    expect(result.updatedBests.accuracy.ratio).toBe(0)
+  })
+
+  it('does not treat a tied average duration as an improvement', () => {
+    const previous = { speedMs: { avgMs: 1000, timestamp: 111 } }
+    const result = evaluatePersonalBest({
+      score: 1, total: 1,
+      timings: [{ questionIndex: 0, itemId: 'a', correct: true, durationMs: 1000, attemptNumber: 1 }],
+      minAccuracyPct: 70, previous,
+    })
+
+    expect(result.speed.isNewRecord).toBe(false)
+    expect(result.updatedBests.speedMs).toEqual(previous.speedMs)
+  })
+
+  it('does not persist a speed record when accuracy is below the eligibility gate, even on a first session', () => {
+    const result = evaluatePersonalBest({
+      score: 1, total: 2,
+      timings: [
+        { questionIndex: 0, itemId: 'a', correct: true, durationMs: 500, attemptNumber: 1 },
+        { questionIndex: 1, itemId: 'b', correct: false, durationMs: 500, attemptNumber: 1 },
+      ],
+      minAccuracyPct: 90, previous: null,
+    })
+
+    expect(result.speed.isNewRecord).toBe(false)
+    expect(result.updatedBests.speedMs).toBeUndefined()
   })
 })

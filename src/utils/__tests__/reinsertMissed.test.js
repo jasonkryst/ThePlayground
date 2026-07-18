@@ -53,4 +53,12 @@ describe('reinsertMissed', () => {
     const next = reinsertMissed(queue, 0, missed)
     expect(next.filter(e => e === queue[2])).toHaveLength(0)
   })
+
+  it('reaches offset 4 at the top of the random range in an unclamped queue (pins the multiplier, not just the clamped result)', () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0.99)
+    const queue = [entry('a'), entry('b'), entry('c'), entry('d'), entry('e'), entry('f')]
+    const missed = entry('a')
+    const next = reinsertMissed(queue, 0, missed)
+    expect(next[4]).toBe(missed)
+  })
 })

@@ -1,4 +1,4 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi, afterEach } from 'vitest'
 import buildQueue from '../buildQueue'
 
 const items = [
@@ -82,5 +82,31 @@ describe('buildQueue', () => {
     const queue = buildQueue(items, 4, 1)
     const ids = queue[0].choices.map(c => c.id)
     expect(new Set(ids).size).toBe(ids.length)
+  })
+
+  it('shuffles: 25 runs produce more than one distinct correct-answer ordering', () => {
+    const orderings = new Set(
+      Array.from({ length: 25 }, () => buildQueue(items, 2, 4).map(entry => entry.correct.id).join(','))
+    )
+    expect(orderings.size).toBeGreaterThan(1)
+  })
+})
+
+describe('buildQueue — pinned shuffle formula', () => {
+  afterEach(() => vi.restoreAllMocks())
+
+  it('shuffle draws from the full 0..i range, not a narrowed range', () => {
+    vi.spyOn(Math, 'random').mockReturnValue(0.5)
+    const queue = buildQueue(items, 1, 4)
+    expect(queue.map(entry => entry.correct.id)).toEqual(['a', 'd', 'b', 'c'])
+  })
+
+  it('swaps away from a repeat when the new pass would start with the item that just ended the previous pass', () => {
+    const pair = [{ id: 'a' }, { id: 'b' }]
+    vi.spyOn(Math, 'random')
+      .mockReturnValueOnce(0.99) // pass 1 shuffle (n=2): j=floor(0.99*2)=1 -> self-swap, pass1=[a,b]
+      .mockReturnValueOnce(0)    // pass 2 shuffle (n=2): j=floor(0*2)=0 -> swap -> pass2=[b,a], pass2[0].id='b'===lastId('b')
+    const queue = buildQueue(pair, 1, 3)
+    expect(queue.map(entry => entry.correct.id)).toEqual(['a', 'b', 'a'])
   })
 })
