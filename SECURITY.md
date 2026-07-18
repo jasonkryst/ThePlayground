@@ -71,10 +71,11 @@ Stated plainly rather than papered over (each is tracked in [`docs/ENHANCEMENTS.
 
 ## Docker posture
 
-- **Official base images only:** `node:lts-alpine` (build), `nginx:alpine` (runtime).
+- **Official base images, pinned:** `node:24-alpine` (build), `nginxinc/nginx-unprivileged:1.27-alpine` (runtime) — both pinned to a major.minor version rather than a floating tag, for reproducible builds (issue #85).
+- **Non-root runtime:** nginx runs as its image's built-in non-root `nginx` user (uid 101), not root — a container-escape or nginx RCE chain starts with less privilege (issue #85).
 - **Multi-stage build:** node, npm, `node_modules`, and the source tree never enter the runtime image — a compromise of the running container yields a static file server and public assets, not a toolchain.
 - **Stateless runtime:** no volumes, no secrets, no env vars in the image; nothing sensitive to exfiltrate server-side.
-- **Hardening backlog** (tracked in [`docs/ENHANCEMENTS.md`](docs/ENHANCEMENTS.md#security)): running nginx as a non-root user, and automated image vulnerability scanning.
+- **Hardening backlog** (tracked in [`docs/ENHANCEMENTS.md`](docs/ENHANCEMENTS.md#security)): automated image vulnerability scanning (Trivy), once a CI pipeline exists to run it.
 
 ## Dependency policy
 
