@@ -84,6 +84,7 @@ RUN npm run build
 ```dockerfile
 FROM nginx:alpine
 COPY --from=build /app/dist /usr/share/nginx/html
+COPY nginx/security-headers.conf /etc/nginx/security-headers.conf
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
@@ -123,6 +124,7 @@ Compose rebuilds the image (fast if only source changed, thanks to the layer spl
 |---|---|
 | `Dockerfile` | Two-stage build definition |
 | `nginx.conf` | SPA routing fallback, asset cache tiers, security headers |
+| `nginx/security-headers.conf` | The three security headers, shared via `include` so every `location` block gets them (see below) |
 | `docker-compose.yml` | Single-service compose for local/self-hosted use |
 | `.dockerignore` | Excludes `node_modules`, `dist`, `coverage`, tool state from the build context |
 
@@ -138,6 +140,13 @@ server {
     root /usr/share/nginx/html;
     index index.html;
 
+    # Security headers. NOTE: nginx does not merge add_header directives
+    # across nesting levels — any location block below that sets its own
+    # add_header (e.g. for Cache-Control) must also `include` this same
+    # file, or these three headers silently disappear from its responses.
+    # See nginx/security-headers.conf and SEC-1 in SECURITY.md.
+    include /etc/nginx/security-headers.conf;
+
     # SPA fallback: all unmatched paths serve index.html so React Router
     # handles client-side routing (/admin, /game/:id, etc.)
     location / {
@@ -148,19 +157,24 @@ server {
     location ~* \.(js|css|woff2?|ttf|svg|ico|png|jpg|jpeg)$ {
         expires 1y;
         add_header Cache-Control "public, immutable";
+        include /etc/nginx/security-headers.conf;
     }
 
     # Audio files — shorter cache so sound updates propagate
     location ~* \.mp3$ {
         expires 7d;
         add_header Cache-Control "public";
+        include /etc/nginx/security-headers.conf;
     }
-
-    # Security headers
-    add_header X-Content-Type-Options "nosniff";
-    add_header X-Frame-Options "SAMEORIGIN";
-    add_header Referrer-Policy "strict-origin-when-cross-origin";
 }
+```
+
+`nginx/security-headers.conf`, included above wherever the headers need to land:
+
+```nginx
+add_header X-Content-Type-Options "nosniff" always;
+add_header X-Frame-Options "SAMEORIGIN" always;
+add_header Referrer-Policy "strict-origin-when-cross-origin" always;
 ```
 
 Block by block:
@@ -173,7 +187,7 @@ Block by block:
 
 **HTML (implicit)** — `index.html` deliberately gets *no* long-cache header. nginx serves it with an ETag by default, so browsers revalidate it cheaply, always pick up a new deploy's hashed asset references, and the "stale UI after deploy" failure mode is avoided.
 
-**Security headers** — `X-Content-Type-Options: nosniff`, `X-Frame-Options: SAMEORIGIN`, `Referrer-Policy: strict-origin-when-cross-origin`. What each protects against — and the gaps we know about (no CSP yet) — is documented in [`SECURITY.md`](../SECURITY.md#http-security-headers).
+**Security headers** — `X-Content-Type-Options: nosniff`, `X-Frame-Options: SAMEORIGIN`, `Referrer-Policy: strict-origin-when-cross-origin`. What each protects against — and the gaps we know about (no CSP yet) — is documented in [`SECURITY.md`](../SECURITY.md#http-security-headers). **Why an `include` instead of repeating the three lines in each block:** nginx's `add_header` inheritance breaks the moment a `location` block declares its own `add_header` (here, for `Cache-Control`) — the block then gets *only* what it declares itself, nothing from the enclosing `server` block. A single shared file `include`d everywhere avoids the alternative (copy-pasting the three lines into every block that sets `Cache-Control`), which is exactly how this dropped silently in the first place (SEC-1) — a future asset tier just needs `include /etc/nginx/security-headers.conf;` alongside its own `add_header`, and both the static config test (`nginx/__tests__/securityHeaders.test.js`) and the live e2e check (`e2e/nginx-headers.spec.js`) fail loudly if it's forgotten.
 
 ---
 

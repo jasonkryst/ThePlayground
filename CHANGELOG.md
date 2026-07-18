@@ -3,6 +3,11 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.28.1] - 2026-07-17
+
+### Fixed
+- nginx security headers were silently dropped from every JS/CSS/font/image/audio response (issue #84, audit finding SEC-1): the two asset `location` blocks in `nginx.conf` declare their own `add_header Cache-Control`, which per nginx's documented inheritance rule cancels inheritance of the three server-level security headers — `nosniff` was missing exactly where MIME-sniffing protection matters most. The three headers now live in a shared `nginx/security-headers.conf`, `include`d in the `server` block and both asset `location` blocks (each also gained `always`, so the headers now survive error responses like a 404 too). Guarded against regression by a static config test (`nginx/__tests__/securityHeaders.test.js`, no Docker required) and a live e2e check (`e2e/nginx-headers.spec.js`) that boots the real config in `nginx:alpine` and asserts the headers on every asset tier plus a 404.
+
 ## [0.28.0] - 2026-07-17
 
 ### Changed

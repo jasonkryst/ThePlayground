@@ -78,9 +78,12 @@ Playwright starts both `npm run dev` (port 5173) and Storybook (port 6006) autom
 | `animal-memory-match.spec.js` | Full flip-to-completion memory flow, plus a computed-style guard on the board layout |
 | `orientation-gate.spec.js` | Manifest-driven forced-landscape enforcement: overlay blocks portrait play, clears on rotate, home stays reachable, axe scan of the overlay, and a no-flag game never blocks |
 | `intro-results-height.spec.js` | Intro/results screens fit one device screen at phone/tablet/desktop sizes (primary button reachable without scrolling), while legitimately long content still scrolls rather than clips — layout behavior not observable in jsdom |
+| `nginx-headers.spec.js` | Live nginx security-header coverage (SEC-1): boots `nginx.conf` in a real `nginx:alpine` container (not the app's dev server) and asserts all three security headers on every asset tier plus a 404. Skips (doesn't fail) when Docker isn't available — see below |
 | `visual.spec.js` | Visual regression (layer 4, below) |
 | `html-validity.spec.js` | HTML5 validation (layer 5, below) |
 | `css-validity.spec.js` | Inline-style CSS validation (layer 6, below) |
+
+**`nginx-headers.spec.js` is the one spec that isn't a browser test against the dev server** — the app's `vite dev` server never applies `nginx.conf` at all, so the only way to prove the shipped config actually sends the right headers is to run it in real nginx. The spec boots `nginx:alpine` directly (mounting `nginx.conf`, `nginx/security-headers.conf`, and a handful of fixture asset files — not the full `Dockerfile` build, which needs `npm run build` first and is much slower) and drives it with Playwright's `request` fixture. It requires a running Docker daemon; `test.skip()`s with a clear reason when Docker isn't available, so `npm run e2e` still runs everywhere else. A companion fast check with no Docker dependency, `nginx/__tests__/securityHeaders.test.js` (runs under `npm test`), statically parses `nginx.conf` and fails if any `location` block sets its own `add_header` without including the shared security-headers snippet — this is what actually catches a regression on a machine without Docker.
 
 ## Layer 4: Visual regression (Storybook + Playwright screenshots)
 
