@@ -66,10 +66,10 @@ The app is served at [http://localhost:8080](http://localhost:8080).
 
 `Dockerfile` is a two-stage build:
 
-**Stage 1 — build (`node:lts-alpine`):**
+**Stage 1 — build (`node:24-alpine`):**
 
 ```dockerfile
-FROM node:lts-alpine AS build
+FROM node:24-alpine AS build
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci
@@ -79,18 +79,18 @@ RUN npm run build
 
 `package*.json` is copied and `npm ci` run *before* the rest of the source is copied. Docker caches layers by input: as long as the lockfile hasn't changed, rebuilds skip dependency installation entirely and only re-run `vite build`. `npm ci` (rather than `npm install`) installs exactly what `package-lock.json` pins — reproducible builds, no surprise version drift.
 
-**Stage 2 — serve (`nginx:alpine`):**
+**Stage 2 — serve (`nginxinc/nginx-unprivileged:1.27-alpine`):**
 
 ```dockerfile
-FROM nginx:alpine
+FROM nginxinc/nginx-unprivileged:1.27-alpine
 COPY --from=build /app/dist /usr/share/nginx/html
 COPY nginx/security-headers.conf /etc/nginx/security-headers.conf
 COPY nginx.conf /etc/nginx/conf.d/default.conf
-EXPOSE 80
+EXPOSE 8080
 CMD ["nginx", "-g", "daemon off;"]
 ```
 
-Only `dist/` and the nginx config cross into the final image. Node, npm, `node_modules`, and the source tree are all discarded with the build stage — the runtime image is ~25 MB and contains a static file server and static files, nothing else. (This is also a security property; see [`SECURITY.md`](../SECURITY.md#docker-posture).)
+Only `dist/` and the nginx config cross into the final image. Node, npm, `node_modules`, and the source tree are all discarded with the build stage — the runtime image is ~25 MB and contains a static file server and static files, nothing else. (This is also a security property; see [`SECURITY.md`](../SECURITY.md#docker-posture).) Both base images are pinned to a specific major.minor version rather than a floating tag, for reproducible builds, and nginx runs as its image's built-in non-root `nginx` user (uid 101) rather than root — that's also why it listens on 8080 instead of 80: unprivileged processes can't bind ports below 1024 (issue #85).
 
 ### Compose
 
@@ -101,11 +101,11 @@ services:
   app:
     build: .
     ports:
-      - "8080:80"
+      - "8080:8080"
     restart: unless-stopped
 ```
 
-- **`8080:80`** — nginx listens on 80 inside the container; change the left side if 8080 is taken on your host.
+- **`8080:8080`** — nginx listens on 8080 inside the container (its non-root user can't bind the privileged port 80); change the left side if 8080 is taken on your host.
 - **`restart: unless-stopped`** — the container survives daemon restarts and host reboots, but stays down if you explicitly `docker compose stop` it.
 - **No volumes** — the container is stateless. All user data lives in the *browser*, not the container (see [Data persistence](#data-persistence--backup)). You can destroy and recreate the container freely.
 
@@ -136,7 +136,7 @@ The full `nginx.conf` shipped into the image:
 
 ```nginx
 server {
-    listen 80;
+    listen 8080;
     root /usr/share/nginx/html;
     index index.html;
 
@@ -193,10 +193,10 @@ Block by block:
 
 ## HTTPS / running behind a reverse proxy
 
-The container serves plain HTTP on port 80. For anything beyond a trusted home LAN, put a TLS-terminating reverse proxy in front — Caddy, Traefik, or another nginx:
+The container serves plain HTTP on port 8080 (its non-root nginx process can't bind the privileged port 80). For anything beyond a trusted home LAN, put a TLS-terminating reverse proxy in front — Caddy, Traefik, or another nginx:
 
 ```
-browser ──HTTPS──▶ reverse proxy ──HTTP──▶ playground container (:8080 → :80)
+browser ──HTTPS──▶ reverse proxy ──HTTP──▶ playground container (:8080 → :8080)
 ```
 
 Notes for that setup:
@@ -238,6 +238,6 @@ Consequences worth understanding before you rely on the data:
 | Blank page or 404 when refreshing on `/admin`, `/game/...`, etc. | Serving `dist/` from a host without an SPA fallback | Configure the host to serve `index.html` for unmatched paths (the Docker image's nginx already does) |
 | Old UI still showing after a deploy | Cached `index.html` (usually an over-aggressive CDN/proxy rule, not this image's nginx) | Ensure HTML is served with revalidation (ETag / short max-age); hashed assets may keep their 1-year tier |
 | A replaced sound file still plays the old audio | mp3s cache for 7 days by design | Wait out the TTL, hard-refresh, or rename the file (a new name bypasses every cache) |
-| `docker compose up` fails: port already allocated | Host port 8080 in use | Change the left side of `ports:` in `docker-compose.yml` (e.g. `"8081:80"`) |
+| `docker compose up` fails: port already allocated | Host port 8080 in use | Change the left side of `ports:` in `docker-compose.yml` (e.g. `"8081:8080"`) |
 | Scores/settings vanished | Browser site data was cleared, or a different browser/device/profile is in use | Restore expectations, not data — see [Data persistence](#data-persistence--backup); export CSV periodically if the history matters |
 | Dev server doesn't pick up file changes | Editor writing via a path the poller misses (rare) | The watcher already polls every 300 ms (`vite.config.js`); restart `npm run dev` |

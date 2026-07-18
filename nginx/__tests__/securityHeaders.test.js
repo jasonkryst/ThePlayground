@@ -106,3 +106,58 @@ describe('nginx/security-headers.conf', () => {
     }
   })
 })
+
+/**
+ * Guards SEC-4 (docs/superpowers/specs/2026-07-12-security-audit-findings.md):
+ * a floating base-image tag (`alpine`, `latest`, no tag at all) makes builds
+ * non-reproducible and silently inherits upstream regressions. Accepts a
+ * tag containing a version number (major, or major.minor, or major.minor.patch)
+ * or a `@sha256:` digest pin.
+ */
+function isPinnedImageTag(image) {
+  if (/@sha256:[0-9a-f]{64}$/i.test(image)) return true
+  const tagMatch = image.match(/:([^:]+)$/)
+  if (!tagMatch) return false
+  const tag = tagMatch[1]
+  if (tag === 'latest') return false
+  return /\d/.test(tag)
+}
+
+describe('isPinnedImageTag (validator)', () => {
+  it('accepts a major.minor pinned tag', () => {
+    expect(isPinnedImageTag('nginx:1.27-alpine')).toBe(true)
+  })
+
+  it('accepts a digest-pinned image', () => {
+    expect(isPinnedImageTag(`nginx@sha256:${'a'.repeat(64)}`)).toBe(true)
+  })
+
+  it('rejects a floating alias tag with no version (e.g. nginx:alpine)', () => {
+    expect(isPinnedImageTag('nginx:alpine')).toBe(false)
+  })
+
+  it('rejects an explicit latest tag', () => {
+    expect(isPinnedImageTag('node:latest')).toBe(false)
+  })
+
+  it('rejects an image with no tag at all', () => {
+    expect(isPinnedImageTag('nginx')).toBe(false)
+  })
+})
+
+describe('Dockerfile image pinning and non-root runtime (SEC-4)', () => {
+  const dockerfileText = fs.readFileSync(DOCKERFILE_PATH, 'utf8')
+  const fromImages = [...dockerfileText.matchAll(/^FROM\s+(\S+)/gm)].map(([, image]) => image)
+
+  it('pins every FROM image to a specific version (no floating tags)', () => {
+    expect(fromImages.length).toBeGreaterThan(0)
+    for (const image of fromImages) {
+      expect(isPinnedImageTag(image), `${image} is not pinned to a version`).toBe(true)
+    }
+  })
+
+  it('runs the runtime (final) stage on the non-root nginx-unprivileged image', () => {
+    const runtimeImage = fromImages[fromImages.length - 1]
+    expect(runtimeImage.startsWith('nginxinc/nginx-unprivileged:')).toBe(true)
+  })
+})
