@@ -3,6 +3,11 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.28.2] - 2026-07-18
+
+### Fixed
+- Container hardening (issue #85, audit finding SEC-4): the Docker image's runtime stage now runs nginx as a non-root user via the official `nginxinc/nginx-unprivileged:1.27-alpine` image (listening on 8080, since unprivileged processes can't bind port 80) instead of stock `nginx:alpine` running as root; both base images (`node:24-alpine`, `nginxinc/nginx-unprivileged:1.27-alpine`) are now pinned to a major.minor version instead of a floating tag. `docker-compose.yml`'s port mapping adjusted to `8080:8080`. Guarded by a static Dockerfile test (pinned-tag + non-root-image assertions) and an upgraded live e2e check that boots the real pinned image and confirms the nginx process is non-root. Automated image vulnerability scanning (Trivy) remains backlogged pending a CI pipeline.
+
 ## [0.28.1] - 2026-07-17
 
 ### Fixed
