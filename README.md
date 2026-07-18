@@ -193,6 +193,8 @@ saveBadgeData(data)          // → Promise<void>
 
 The active adapter is exported from `src/storage/index.js`. To swap `localStorage` for Supabase, Firebase, or any other backend, implement these ten methods and change that one export — no game code or hook changes needed. Games consume shared state through the `useSettings`/`useScores` hooks (and friends) rather than props drilling.
 
+A new adapter's compliance with this interface is enforced by a shared contract test suite (`src/storage/__tests__/adapterContract.js`) rather than left to convention — see [`docs/TESTING.md`](docs/TESTING.md) § Layer 1.
+
 ### Design Tokens
 
 All colors and radii are CSS custom properties defined in `src/index.css`:

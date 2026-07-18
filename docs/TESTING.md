@@ -45,6 +45,7 @@ Tests live in `__tests__/` folders next to the code under test. Patterns used th
 - **Native date inputs:** drive `<input type="date">` fields with `fireEvent.change(input, { target: { value: 'YYYY-MM-DD' } })`, not `userEvent.type` — typing a date character-by-character through `userEvent` doesn't reliably produce a valid date-input value across browsers/jsdom. See `src/parent/__tests__/DateRangeFilter.test.jsx` for the pattern.
 - **Mocking orientation APIs:** jsdom has neither `window.matchMedia` nor `screen.orientation`. Orientation tests install getter-based mocks (see `src/hooks/__tests__/useOrientation.test.jsx` — `installMatchMedia` / `installScreenOrientation`, with listener sets the test fires manually) and delete them in `afterEach`. Production code fails open to `'landscape'` when the APIs are missing, so unmocked jsdom renders are never blocked.
 - **Orientation-gate pause:** hooks that must react to the rotate overlay read `useOrientationGate()` (default `{ blocked: false }`); tests drive it by wrapping `renderHook` in an `OrientationGateContext.Provider` whose value the test flips (see `useMemorySession.pause.test.jsx`).
+- **Storage-adapter contract:** `src/storage/__tests__/adapterContract.js` exports `runAdapterContractTests(adapterFactory, { label })`, an adapter-agnostic suite asserting the ten-method interface documented in `src/storage/adapter.js` (default/empty shapes, round-trips, key isolation). Any adapter's own test file calls it in one line — see `localStorageAdapter.contract.test.js`. It's separate from `localStorageAdapter.*.test.js`, which cover localStorage-specific behavior (corrupt-JSON recovery, migrations) out of the contract's scope.
 
 ## Layer 2: Accessibility audits (jest-axe + axe-core/playwright)
 
@@ -121,6 +122,18 @@ npm run validate:css
 ```
 
 **Dynamic inline styles are the one CSS surface Stylelint's file scan can't reach.** `npm run lint:css` only reads `.css` files — it never sees the inline `style={{...}}` objects Color Match/Animal Sounds/GameCard set per item (colors, swatches, tag accents), since those are JS values assembled at runtime. `e2e/css-validity.spec.js` renders each affected route, extracts every element's actual `style` attribute from the live DOM, and runs each one through Stylelint's Node API — scoped to `stylelint-config-recommended` only (pure conformance), not `-standard`'s style-preference layer, since reading an inline style back via `getAttribute('style')` returns the browser's own CSSOM serialization (always legacy `rgb(r, g, b)` comma syntax, regardless of how the source authored the color), which would fail `-standard`'s modernization rules unconditionally and prove nothing. It runs automatically as part of `npm run e2e`.
+
+## Mutation testing (Stryker)
+
+```bash
+npm run mutation   # stryker run
+```
+
+Mutation testing is a diagnostic developer tool, not a pass/fail CI layer — it isn't part of the six layers above and isn't run automatically. It answers a different question than coverage: coverage shows a line *executed*, mutation testing shows whether a test actually *pins the behavior* of that line. Stryker rewrites the source in small ways (`<` → `<=`, `&&` → `||`, drops a branch) one mutation at a time and reruns the tests; a mutant that still passes ("survived") means no test would catch that regression.
+
+`stryker.config.json` scopes mutation to `buildQueue.js`, `buildDeck.js`, `reinsertMissed.js`, `evaluatePersonalBest.js`, `evaluateMemoryPersonalBest.js`, `computeBadgeAwards.js`, and `computeGameBadgeAwards.js` — the engine's pure-function utils named in issue #89, which have high test counts and no UI to exercise them through. Scoping to these files (rather than all of `src/`) keeps a run to a couple of minutes.
+
+**Handling a surviving mutant:** open `reports/mutation/mutation.html` (or read the `clear-text` output) for the exact mutation and which tests ran against it, then either add/strengthen a unit test that fails against the mutant, or — if the mutant is truly behaviorally unobservable — mark it `// Stryker disable next-line <MutatorName>: <reason>` directly above the line, with the reasoning written out (see `src/utils/buildQueue.js` and `buildDeck.js` for examples: e.g., a Fisher-Yates loop's `i > 0` vs `i >= 0` bound is equivalent because the `i === 0` iteration is always a self-swap no-op). Don't disable a mutant just because writing the killing test is inconvenient — an unexplained disable defeats the point of running this at all.
 
 ## i18n string convention
 

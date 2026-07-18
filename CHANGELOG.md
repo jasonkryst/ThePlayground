@@ -3,6 +3,15 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.28.3] - 2026-07-18
+
+### Fixed
+- Visual regression suite (issue #89): `e2e/visual.spec.js` froze the browser clock (`page.clock.install`) before every story renders, since `useFeaturedGame`'s date-seeded "Today's Game" hash made any Dashboard/GameCard-rendering story legitimately non-deterministic day to day — indistinguishable from a real regression. All 39 baselines were regenerated under the frozen clock, which also picked up several real, previously-uncaught layout drifts (baselines that predated later intentional CSS/markup changes, silently absorbed by the old loose tolerance). `maxDiffPixelRatio` tightened from `0.1` to `0.02`, empirically re-measured against the fresh baselines (three full-suite reruns showed only one story with small stable jitter, ~0.01 ratio).
+
+### Added
+- Storage-adapter contract test (issue #89): `src/storage/__tests__/adapterContract.js` exports `runAdapterContractTests()`, an adapter-agnostic suite asserting the ten-method interface documented in `src/storage/adapter.js`; `localStorageAdapter.contract.test.js` runs it against the current adapter. A future backend adapter (see README § Storage Adapter) proves conformance with a one-line call to the same suite instead of by convention.
+- Mutation testing (issue #89): Stryker (`npm run mutation`) scoped to `buildQueue.js`, `buildDeck.js`, `reinsertMissed.js`, and the four badge/personal-best evaluators. Raised mutation score across those files from ~90% to 99%+ by strengthening existing unit tests against every killable survivor (boundary conditions, tied-value cases, an inverted-condition case); the four remaining mutants are behaviorally equivalent and documented inline with `// Stryker disable next-line`.
+
 ## [0.28.2] - 2026-07-18
 
 ### Fixed

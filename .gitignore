@@ -18,6 +18,10 @@ dist-ssr
 # Generated output
 coverage/
 
+# Stryker mutation testing
+reports/
+.stryker-tmp/
+
 # Playwright
 playwright-report/
 test-results/

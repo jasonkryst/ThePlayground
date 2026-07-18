@@ -1,0 +1,15 @@
+{
+  "$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
+  "testRunner": "vitest",
+  "mutate": [
+    "src/utils/buildQueue.js",
+    "src/utils/buildDeck.js",
+    "src/utils/reinsertMissed.js",
+    "src/utils/evaluatePersonalBest.js",
+    "src/utils/evaluateMemoryPersonalBest.js",
+    "src/utils/computeBadgeAwards.js",
+    "src/utils/computeGameBadgeAwards.js"
+  ],
+  "reporters": ["html", "json", "clear-text", "progress"],
+  "coverageAnalysis": "perTest"
+}

@@ -63,6 +63,12 @@ test.beforeAll(async ({ request }) => {
 for (const id of stories) {
   test(`visual: ${id}`, async ({ page }) => {
     test.setTimeout(90_000)
+    // Freeze the clock before any story renders. useFeaturedGame hashes the
+    // real calendar date to pick "Today's Game" (see src/hooks/useFeaturedGame.js),
+    // so any story rendering the Dashboard/GameCard hero would otherwise
+    // produce a different, legitimately-different screenshot every day —
+    // indistinguishable from a real regression without this.
+    await page.clock.install({ time: new Date('2026-01-02T12:00:00Z') })
     const url = `http://localhost:6006/iframe.html?id=${id}&viewMode=story`
     const errorOverlay = page.getByText('Unable to index files')
 
@@ -79,14 +85,18 @@ for (const id of stories) {
       break
     }
 
-    // A small ratio tolerance absorbs font/icon edge anti-aliasing jitter
-    // that varies slightly on the first render after a Storybook cold boot.
-    // This tolerance is loose enough that it can miss real styling
-    // regressions — during the issue-#53 work, a fully unstyled GameResults
-    // screen still passed within 0.1 against a styled baseline. The
-    // computed-style e2e assertions (e.g. e2e/animal-memory-match.spec.js)
-    // are the guard against that class of regression, not this screenshot
-    // diff.
-    await expect(page).toHaveScreenshot(`${id}.png`, { maxDiffPixelRatio: 0.1 })
+    // maxDiffPixelRatio was 0.1 until issue #89 — loose enough that a fully
+    // unstyled GameResults screen passed against a styled baseline during
+    // the issue-#53 work (the computed-style e2e assertions, e.g.
+    // e2e/animal-memory-match.spec.js, are the real guard against that class
+    // of regression, not this screenshot diff). Re-measured empirically
+    // (2026-07-18, this machine): with fresh baselines and the clock frozen
+    // above, 35 of 36 stories render pixel-identical to their baseline
+    // across repeated runs; only games-animalmemorymatchgame--default shows
+    // small stable jitter (~0.01 ratio, likely tile-icon sub-pixel
+    // rendering), consistent across three full-suite reruns. 0.02 clears
+    // that noise floor with margin while catching anything shaped like the
+    // issue-#53 regression (which differed by far more than 2%).
+    await expect(page).toHaveScreenshot(`${id}.png`, { maxDiffPixelRatio: 0.02 })
   })
 }
