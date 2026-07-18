@@ -8,10 +8,12 @@ import { fileURLToPath } from 'node:url'
 // Verifies the real nginx.conf's runtime behavior against a live nginx
 // server (SEC-1) — the static check in nginx/__tests__/securityHeaders.test.js
 // catches the config-text pattern, but only a live request proves nginx
-// actually sends the headers. Spins up nginx:alpine directly (not the full
-// Dockerfile build, which requires `npm run build` first and is slow),
-// mounting this repo's nginx.conf/security-headers.conf plus minimal
-// fixture assets. Requires Docker; skips (not fails) when unavailable so
+// actually sends the headers. Spins up the same pinned, non-root image the
+// Dockerfile ships (nginxinc/nginx-unprivileged:1.27-alpine) directly (not
+// the full Dockerfile build, which requires `npm run build` first and is
+// slow), mounting this repo's nginx.conf/security-headers.conf plus
+// minimal fixture assets. Also asserts the nginx process itself is
+// non-root (SEC-4). Requires Docker; skips (not fails) when unavailable so
 // `npm run e2e` still runs on machines without it.
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -61,11 +63,11 @@ test.describe('nginx security headers (live container)', () => {
       [
         'run', '-d', '--rm',
         '--name', CONTAINER_NAME,
-        '-p', '127.0.0.1:0:80',
+        '-p', '127.0.0.1:0:8080',
         '-v', `${fixtureDir}:/usr/share/nginx/html:ro`,
         '-v', `${path.join(REPO_ROOT, 'nginx.conf')}:/etc/nginx/conf.d/default.conf:ro`,
         '-v', `${path.join(REPO_ROOT, 'nginx', 'security-headers.conf')}:/etc/nginx/security-headers.conf:ro`,
-        'nginx:alpine',
+        'nginxinc/nginx-unprivileged:1.27-alpine',
       ],
       { encoding: 'utf8' }
     )
@@ -73,7 +75,7 @@ test.describe('nginx security headers (live container)', () => {
       throw new Error(`docker run failed: ${run.stderr}`)
     }
 
-    const portOutput = execFileSync('docker', ['port', CONTAINER_NAME, '80'], { encoding: 'utf8' })
+    const portOutput = execFileSync('docker', ['port', CONTAINER_NAME, '8080'], { encoding: 'utf8' })
     containerPort = Number(portOutput.trim().split(':').pop())
   })
 
@@ -94,6 +96,11 @@ test.describe('nginx security headers (live container)', () => {
     }
     throw new Error('nginx container did not become ready in time')
   }
+
+  test('nginx worker process runs as a non-root user (SEC-4)', () => {
+    const whoami = execFileSync('docker', ['exec', CONTAINER_NAME, 'whoami'], { encoding: 'utf8' }).trim()
+    expect(whoami).not.toBe('root')
+  })
 
   test('HTML document response carries all three security headers', async ({ request }) => {
     await waitUntilReady(request)
