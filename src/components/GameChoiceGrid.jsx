@@ -1,7 +1,7 @@
 import './GameChoiceGrid.css'
 
 export default function GameChoiceGrid({
-  choices, correctId, selected, locked, disabledChoiceIds, hintActive,
+  choices, correctId, selected, locked, disabledChoiceIds, hintActive, hintStrength = 1,
   onChoose, getChoiceProps, renderChoiceContent,
 }) {
   return (
@@ -10,6 +10,7 @@ export default function GameChoiceGrid({
         const isSelected = selected === item.id
         const isCorrect = item.id === correctId
         const isDisabledWrong = disabledChoiceIds.includes(item.id)
+        const isHintedCorrect = hintActive && !locked && !isSelected && isCorrect
 
         let cls = 'game__choice'
         if (locked && isSelected && isCorrect) cls += ' correct'
@@ -17,13 +18,16 @@ export default function GameChoiceGrid({
         if ((locked || hintActive) && !isSelected && isCorrect) cls += ' highlight-correct'
         if (!locked && isDisabledWrong) cls += ' game__choice--disabled-wrong'
 
-        const { className: extraClassName, ...restExtraProps } = getChoiceProps(item, i) ?? {}
+        const { className: extraClassName, style: extraStyle, ...restExtraProps } = getChoiceProps(item, i) ?? {}
         if (extraClassName) cls += ` ${extraClassName}`
+
+        const style = isHintedCorrect ? { ...extraStyle, '--hint-strength': hintStrength } : extraStyle
 
         return (
           <button
             key={item.id}
             className={cls}
+            style={style}
             disabled={locked || isDisabledWrong}
             onClick={() => onChoose(item)}
             {...restExtraProps}

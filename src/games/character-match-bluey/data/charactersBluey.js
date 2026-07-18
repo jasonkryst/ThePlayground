@@ -1,0 +1,33 @@
+const charactersBluey = [
+  { id: 'bluey',       nameKey: 'charactersBluey.bluey.name',       show: 'Bluey',          image: 'b_bluey.webp' },
+  { id: 'bingo',       nameKey: 'charactersBluey.bingo.name',       show: 'Bluey',          image: 'b_bingo.webp' },
+  { id: 'bandit',      nameKey: 'charactersBluey.bandit.name',      show: 'Bluey',          image: 'b_bandit.webp' },
+  { id: 'chilli',      nameKey: 'charactersBluey.chilli.name',      show: 'Bluey',          image: 'b_chilli.webp' },
+  { id: 'muffin',      nameKey: 'charactersBluey.muffin.name',      show: 'Bluey',          image: 'b_muffin.webp' },
+  { id: 'socks',       nameKey: 'charactersBluey.socks.name',       show: 'Bluey',          image: 'b_socks.webp' },
+  { id: 'mackenzie',   nameKey: 'charactersBluey.mackenzie.name',   show: 'Bluey',          image: 'b_mackenzie.webp' },
+  { id: 'brandy',      nameKey: 'charactersBluey.brandy.name',      show: 'Bluey',          image: 'b_brandy.webp' },
+  { id: 'rad',         nameKey: 'charactersBluey.rad.name',         show: 'Bluey',          image: 'b_rad.webp' },
+  { id: 'buddy',       nameKey: 'charactersBluey.buddy.name',       show: 'Bluey',          image: 'b_buddy.webp' },
+  { id: 'busker',      nameKey: 'charactersBluey.busker.name',      show: 'Bluey',          image: 'b_busker.webp' },
+  { id: 'calypso',     nameKey: 'charactersBluey.calypso.name',     show: 'Bluey',          image: 'b_calypso.webp' },
+  { id: 'chloe',       nameKey: 'charactersBluey.chloe.name',       show: 'Bluey',          image: 'b_chloe.webp' },
+  { id: 'coco',        nameKey: 'charactersBluey.coco.name',        show: 'Bluey',          image: 'b_coco.webp' },
+  { id: 'doreen',      nameKey: 'charactersBluey.doreen.name',      show: 'Bluey',          image: 'b_doreen.webp' },
+  { id: 'dusty',       nameKey: 'charactersBluey.dusty.name',       show: 'Bluey',          image: 'b_dusty.webp' },
+  { id: 'honey',       nameKey: 'charactersBluey.honey.name',       show: 'Bluey',          image: 'b_honey.webp' },
+  { id: 'indy',        nameKey: 'charactersBluey.indy.name',        show: 'Bluey',          image: 'b_indy.webp' },
+  { id: 'jack',        nameKey: 'charactersBluey.jack.name',        show: 'Bluey',          image: 'b_jack.webp' },
+  { id: 'jean-luc',    nameKey: 'charactersBluey.jean-luc.name',    show: 'Bluey',          image: 'b_jeanluc.webp' },
+  { id: 'jerry-lee',   nameKey: 'charactersBluey.jerry-lee.name',   show: 'Bluey',          image: 'b_jerrylee.webp' },
+  { id: 'judo',        nameKey: 'charactersBluey.judo.name',        show: 'Bluey',          image: 'b_judo.webp' },
+  { id: 'lucky',       nameKey: 'charactersBluey.lucky.name',       show: 'Bluey',          image: 'b_lucky.webp' },
+  { id: 'major-tom',   nameKey: 'charactersBluey.major-tom.name',   show: 'Bluey',          image: 'b_majortom.webp' },
+  { id: 'mia',         nameKey: 'charactersBluey.mia.name',         show: 'Bluey',          image: 'b_mia.webp' },
+  { id: 'rusty',       nameKey: 'charactersBluey.rusty.name',       show: 'Bluey',          image: 'b_rusty.webp' },
+  { id: 'snickers',    nameKey: 'charactersBluey.snickers.name',    show: 'Bluey',          image: 'b_snickers.webp' },
+  { id: 'stripe',      nameKey: 'charactersBluey.stripe.name',      show: 'Bluey',          image: 'b_stripe.webp' },
+  { id: 'winton',      nameKey: 'charactersBluey.winton.name',      show: 'Bluey',          image: 'b_winton.webp' }
+]
+
+export default charactersBluey

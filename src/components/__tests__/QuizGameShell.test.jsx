@@ -14,7 +14,7 @@ const manifest = { icon: '🎨', name: 'Test Quiz', version: '1.0.0' }
 function makeSession(overrides = {}) {
   return {
     current: { correct: { id: 'a' }, choices: [{ id: 'a' }, { id: 'b' }] },
-    index: 0, total: 3, locked: false, disabledChoiceIds: [], hintActive: false, selected: null,
+    index: 0, total: 3, locked: false, disabledChoiceIds: [], hintActive: false, hintStrength: 0, selected: null,
     score: 0, streak: 0, missed: [], done: false, feedbackMode: 'immediate',
     currentElapsedMs: 0, timerMode: 'countUp', timeLimitMs: undefined, timedOut: false,
     offerDifficultyBump: false, numChoices: 2, personalBestResult: null, newBadges: [],
@@ -82,6 +82,12 @@ describe('QuizGameShell — screens', () => {
     renderShell(session)
     fireEvent.click(screen.getByRole('button', { name: 'B' }))
     expect(session.handleChoice).toHaveBeenCalledWith(expect.objectContaining({ id: 'b' }))
+  })
+
+  it('passes hintStrength through to GameChoiceGrid', () => {
+    renderShell(makeSession({ hintActive: true, hintStrength: 0.5 }))
+    const correctBtn = screen.getByRole('button', { name: 'A' })
+    expect(correctBtn.style.getPropertyValue('--hint-strength')).toBe('0.5')
   })
 
   it('shows the results screen when done; Play Again restarts, Home reports the score', () => {

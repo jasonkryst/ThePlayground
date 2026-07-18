@@ -15,6 +15,11 @@ function resolveMaxTries(maxTries) {
   return Number(maxTries)
 }
 
+// maxTries: 'unlimited' has no natural "last try" to ramp toward, so the hint
+// ramp treats it as if lock happened this many wrong attempts past the hint
+// threshold, then holds at full strength for any further wrong attempt.
+const UNLIMITED_HINT_RAMP_STEPS = 3
+
 export default function useGameSession({ gameId, items }) {
   const { settings, loaded, updateSetting } = useSettings()
   const { addScore } = useScores()
@@ -161,6 +166,20 @@ export default function useGameSession({ gameId, items }) {
 
   const current = queue[index]
   const hintActive = hintsEnabled && !locked && wrongAttempts >= hintAfterWrongTaps
+
+  // Ramp: subtlest (1/totalHintSteps) on the first hint-eligible wrong
+  // attempt, full strength (1) on the last try before the question locks as
+  // missed. The min/max clamp below keeps this well-defined once maxTries is
+  // 'unlimited' (effectiveMaxTries substitutes a fixed ramp window) or once
+  // wrongAttempts has already passed that window.
+  const resolvedMaxTries = resolveMaxTries(maxTries)
+  const effectiveMaxTries = resolvedMaxTries === Infinity
+    ? hintAfterWrongTaps + UNLIMITED_HINT_RAMP_STEPS
+    : resolvedMaxTries
+  const totalHintSteps = effectiveMaxTries - hintAfterWrongTaps
+  const triesRemaining = effectiveMaxTries - wrongAttempts
+  const hintStep = Math.min(Math.max(totalHintSteps - triesRemaining + 1, 1), totalHintSteps)
+  const hintStrength = hintActive ? hintStep / totalHintSteps : 0
 
   function lockAsMissed(missedItem) {
     streakRef.current = 0
@@ -373,7 +392,7 @@ export default function useGameSession({ gameId, items }) {
   }
 
   return {
-    current, index, total: queue.length, locked, disabledChoiceIds, hintActive, selected,
+    current, index, total: queue.length, locked, disabledChoiceIds, hintActive, hintStrength, selected,
     score, streak, bestStreak, missed, done, feedbackMode, numChoices,
     currentElapsedMs, timings, timerMode, timeLimitMs, timedOut, offerDifficultyBump,
     personalBestResult, newBadges,

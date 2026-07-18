@@ -74,6 +74,29 @@ describe('GameChoiceGrid', () => {
     expect(screen.getByText('A').closest('button')).not.toHaveClass('highlight-correct')
   })
 
+  it('sets --hint-strength on the hinted correct choice to match the hintStrength prop', () => {
+    renderGrid({ hintActive: true, hintStrength: 0.5 })
+    expect(screen.getByText('A').closest('button').style.getPropertyValue('--hint-strength')).toBe('0.5')
+  })
+
+  it('does not set an inline --hint-strength on the locked answer reveal', () => {
+    renderGrid({ locked: true, selected: 'b', disabledChoiceIds: ['b'] })
+    const correctBtn = screen.getByText('A').closest('button')
+    expect(correctBtn).toHaveClass('highlight-correct')
+    expect(correctBtn.style.getPropertyValue('--hint-strength')).toBe('')
+  })
+
+  it('merges --hint-strength into an existing inline style from getChoiceProps', () => {
+    renderGrid({
+      hintActive: true,
+      hintStrength: 0.5,
+      getChoiceProps: item => ({ style: { background: 'hotpink' }, 'data-choice-id': item.id }),
+    })
+    const correctBtn = screen.getByText('A').closest('button')
+    expect(correctBtn.style.background).toBe('hotpink')
+    expect(correctBtn.style.getPropertyValue('--hint-strength')).toBe('0.5')
+  })
+
   it('has no accessibility violations', async () => {
     const { container } = renderGrid()
     expect(await axe(container)).toHaveNoViolations()

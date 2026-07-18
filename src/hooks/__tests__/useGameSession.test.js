@@ -394,6 +394,125 @@ describe('useGameSession — hints', () => {
   })
 })
 
+describe('useGameSession — hint strength ramp', () => {
+  it('hintStrength is 0 before hintAfterWrongTaps is reached', async () => {
+    setSettings({ maxTries: 'unlimited', numChoices: 4, hintsEnabled: true, hintAfterWrongTaps: 2 })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.current).toBeDefined())
+
+    const correctItem = result.current.current.correct
+    const wrongItems = result.current.current.choices.filter(c => c.id !== correctItem.id)
+    await act(async () => { result.current.handleChoice(wrongItems[0]) })
+
+    expect(result.current.hintStrength).toBe(0)
+  })
+
+  it('hintStrength is 0 when hintsEnabled is false, regardless of wrong taps', async () => {
+    setSettings({ maxTries: 'unlimited', numChoices: 4, hintsEnabled: false, hintAfterWrongTaps: 1 })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.current).toBeDefined())
+
+    const correctItem = result.current.current.correct
+    const wrongItem = result.current.current.choices.find(c => c.id !== correctItem.id)
+    await act(async () => { result.current.handleChoice(wrongItem) })
+
+    expect(result.current.hintStrength).toBe(0)
+  })
+
+  it('hintStrength is 0 when hintAfterWrongTaps is set past maxTries (totalHintSteps would be negative)', async () => {
+    setSettings({ maxTries: 2, numChoices: 4, hintsEnabled: true, hintAfterWrongTaps: 3 })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.current).toBeDefined())
+
+    const correctItem = result.current.current.correct
+    const wrongItem = result.current.current.choices.find(c => c.id !== correctItem.id)
+    await act(async () => { result.current.handleChoice(wrongItem) })
+
+    expect(result.current.hintStrength).toBe(0)
+  })
+
+  it('hintStrength ramps across a multi-step numeric maxTries window, reaching 1 on the last try', async () => {
+    setSettings({ maxTries: 3, numChoices: 4, hintsEnabled: true, hintAfterWrongTaps: 1 })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.current).toBeDefined())
+
+    const correctItem = result.current.current.correct
+    const wrongItems = result.current.current.choices.filter(c => c.id !== correctItem.id)
+
+    await act(async () => { result.current.handleChoice(wrongItems[0]) })
+    expect(result.current.hintStrength).toBe(0.5)
+
+    await act(async () => { result.current.handleChoice(wrongItems[1]) })
+    expect(result.current.hintStrength).toBe(1)
+  })
+
+  it('hintStrength is 1 immediately when only one try separates the threshold from lock', async () => {
+    setSettings({ maxTries: 2, numChoices: 2, hintsEnabled: true, hintAfterWrongTaps: 1 })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.current).toBeDefined())
+
+    const correctItem = result.current.current.correct
+    const wrongItem = result.current.current.choices.find(c => c.id !== correctItem.id)
+
+    await act(async () => { result.current.handleChoice(wrongItem) })
+    expect(result.current.hintStrength).toBe(1)
+  })
+
+  it('hintStrength ramps over a fixed 3 steps then holds at 1 when maxTries is unlimited', async () => {
+    const fiveItems = [...items, { id: 'e' }]
+    setSettings({ maxTries: 'unlimited', numChoices: 5, hintsEnabled: true, hintAfterWrongTaps: 1 })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items: fiveItems }))
+    await waitFor(() => expect(result.current.current).toBeDefined())
+
+    const correctItem = result.current.current.correct
+    const wrongItems = result.current.current.choices.filter(c => c.id !== correctItem.id)
+    expect(wrongItems.length).toBe(4)
+
+    await act(async () => { result.current.handleChoice(wrongItems[0]) })
+    expect(result.current.hintStrength).toBeCloseTo(1 / 3)
+
+    await act(async () => { result.current.handleChoice(wrongItems[1]) })
+    expect(result.current.hintStrength).toBeCloseTo(2 / 3)
+
+    await act(async () => { result.current.handleChoice(wrongItems[2]) })
+    expect(result.current.hintStrength).toBe(1)
+
+    await act(async () => { result.current.handleChoice(wrongItems[3]) })
+    expect(result.current.hintStrength).toBe(1)
+  })
+
+  it('hintStrength resets to 0 after advance() moves to the next question', async () => {
+    setSettings({ maxTries: 'unlimited', numChoices: 3, hintsEnabled: true, hintAfterWrongTaps: 1 })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.current).toBeDefined())
+
+    const correctItem = result.current.current.correct
+    const wrongItem = result.current.current.choices.find(c => c.id !== correctItem.id)
+    await act(async () => { result.current.handleChoice(wrongItem) })
+    expect(result.current.hintStrength).toBeGreaterThan(0)
+
+    await act(async () => { result.current.handleChoice(correctItem) })
+    await act(async () => { result.current.advance() })
+
+    expect(result.current.hintStrength).toBe(0)
+  })
+
+  it('hintStrength resets to 0 after restart()', async () => {
+    setSettings({ maxTries: 'unlimited', numChoices: 3, hintsEnabled: true, hintAfterWrongTaps: 1 })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.current).toBeDefined())
+
+    const correctItem = result.current.current.correct
+    const wrongItem = result.current.current.choices.find(c => c.id !== correctItem.id)
+    await act(async () => { result.current.handleChoice(wrongItem) })
+    expect(result.current.hintStrength).toBeGreaterThan(0)
+
+    await act(async () => { result.current.restart() })
+
+    expect(result.current.hintStrength).toBe(0)
+  })
+})
+
 describe('useGameSession — spaced repetition', () => {
   it('reinserts a missed item into the queue when spacedRepetitionEnabled is true', async () => {
     setSettings({ spacedRepetitionEnabled: true, questionsPerSession: 4 })
