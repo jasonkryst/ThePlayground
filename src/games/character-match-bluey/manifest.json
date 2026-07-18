@@ -1,0 +1,9 @@
+{
+  "id": "character-match-bluey",
+  "name": "Character Match - Bluey",
+  "description": "Match the name to the character!",
+  "icon": "/games/character-match-bluey/bluey.webp",
+  "color": "#FFB74D",
+  "version": "1.0.0",
+  "tags": ["visual", "characters", "bluey"]
+}

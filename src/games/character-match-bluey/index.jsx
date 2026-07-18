@@ -1,0 +1,42 @@
+import { useTranslation } from 'react-i18next'
+import useGameSession from '../../hooks/useGameSession'
+import QuizGameShell from '../../components/QuizGameShell'
+import charactersBluey from './data/charactersBluey'
+import { getImageUrl } from './data/images'
+import manifest from './manifest.json'
+import './CharacterMatchGameBluey.css'
+
+export default function CharacterMatchGameBluey({ onGameEnd }) {
+  const { t } = useTranslation()
+  const session = useGameSession({ gameId: 'character-match-bluey', items: charactersBluey })
+
+  return (
+    <QuizGameShell
+      session={session}
+      manifest={manifest}
+      onGameEnd={onGameEnd}
+      instructions={t('characterMatchGameBluey.howToPlay')}
+      correctTestId="correct-character-id"
+      prompt={current => t('characterMatchGameBluey.prompt', { name: t(current.correct.nameKey) })}
+      getChoiceProps={character => ({
+        'data-character-id': character.id,
+      })}
+      renderChoiceContent={character => (
+        <>
+          <img src={getImageUrl(character.image)} alt="" className="game__choice-image" />
+          <span className="game__choice-name">{t(character.nameKey)}</span>
+        </>
+      )}
+      renderMissedItem={character => (
+        <>
+          <img
+            src={getImageUrl(character.image)}
+            alt=""
+            style={{ display: 'inline-block', width: 20, height: 20, objectFit: 'contain', verticalAlign: 'middle' }}
+          />{' '}
+          {t(character.nameKey)}
+        </>
+      )}
+    />
+  )
+}

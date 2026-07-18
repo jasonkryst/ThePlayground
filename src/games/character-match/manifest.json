@@ -2,7 +2,7 @@
   "id": "character-match",
   "name": "Character Match",
   "description": "Match the name to the character!",
-  "icon": "/games/character-match/icon.webp",
+  "icon": "/games/character-match/character-match.png",
   "color": "#FFB74D",
   "version": "1.4.3",
   "tags": ["visual", "characters"]
