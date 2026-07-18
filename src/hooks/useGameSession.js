@@ -169,9 +169,9 @@ export default function useGameSession({ gameId, items }) {
 
   // Ramp: subtlest (1/totalHintSteps) on the first hint-eligible wrong
   // attempt, full strength (1) on the last try before the question locks as
-  // missed. clamp() keeps this well-defined once maxTries is 'unlimited'
-  // (effectiveMaxTries substitutes a fixed ramp window) or once wrongAttempts
-  // has already passed that window.
+  // missed. The min/max clamp below keeps this well-defined once maxTries is
+  // 'unlimited' (effectiveMaxTries substitutes a fixed ramp window) or once
+  // wrongAttempts has already passed that window.
   const resolvedMaxTries = resolveMaxTries(maxTries)
   const effectiveMaxTries = resolvedMaxTries === Infinity
     ? hintAfterWrongTaps + UNLIMITED_HINT_RAMP_STEPS

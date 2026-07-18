@@ -419,6 +419,18 @@ describe('useGameSession — hint strength ramp', () => {
     expect(result.current.hintStrength).toBe(0)
   })
 
+  it('hintStrength is 0 when hintAfterWrongTaps is set past maxTries (totalHintSteps would be negative)', async () => {
+    setSettings({ maxTries: 2, numChoices: 4, hintsEnabled: true, hintAfterWrongTaps: 3 })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.current).toBeDefined())
+
+    const correctItem = result.current.current.correct
+    const wrongItem = result.current.current.choices.find(c => c.id !== correctItem.id)
+    await act(async () => { result.current.handleChoice(wrongItem) })
+
+    expect(result.current.hintStrength).toBe(0)
+  })
+
   it('hintStrength ramps across a multi-step numeric maxTries window, reaching 1 on the last try', async () => {
     setSettings({ maxTries: 3, numChoices: 4, hintsEnabled: true, hintAfterWrongTaps: 1 })
     const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
