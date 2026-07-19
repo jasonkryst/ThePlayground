@@ -114,3 +114,21 @@ describe('buildResources', () => {
     expect(resources.fr.translation).toEqual({ foo: { prompt: 'Choisis' } })
   })
 })
+
+function collectLeafPaths(obj, prefix = '') {
+  const paths = []
+  for (const [key, value] of Object.entries(obj)) {
+    const path = prefix ? `${prefix}.${key}` : key
+    if (value && typeof value === 'object') paths.push(...collectLeafPaths(value, path))
+    else paths.push(path)
+  }
+  return paths
+}
+
+describe('en/es key parity', () => {
+  it('has the exact same set of translation keys in en and es across core + every game', () => {
+    const enKeys = collectLeafPaths(i18n.getResourceBundle('en', 'translation')).sort()
+    const esKeys = collectLeafPaths(i18n.getResourceBundle('es', 'translation')).sort()
+    expect(esKeys).toEqual(enKeys)
+  })
+})

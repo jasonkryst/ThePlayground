@@ -1,0 +1,19 @@
+{
+  "colorMatch": {
+    "prompt": "¿Cuál es de este color?",
+    "howToPlay": "¡Aparece una muestra de color — toca el objeto que tenga ese color!"
+  },
+  "color": {
+    "red": { "name": "Rojo" },
+    "orange": { "name": "Naranja" },
+    "yellow": { "name": "Amarillo" },
+    "green": { "name": "Verde" },
+    "blue": { "name": "Azul" },
+    "purple": { "name": "Morado" },
+    "pink": { "name": "Rosado" },
+    "brown": { "name": "Marrón" },
+    "black": { "name": "Negro" },
+    "white": { "name": "Blanco" },
+    "gray": { "name": "Gris" }
+  }
+}

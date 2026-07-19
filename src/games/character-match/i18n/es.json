@@ -1,0 +1,31 @@
+{
+  "characterMatch": {
+    "prompt": "¿Cuál es {{name}}?",
+    "howToPlay": "¡Mira el nombre y luego toca el personaje correspondiente!"
+  },
+  "character": {
+    "bluey": { "name": "Bluey" },
+    "bingo": { "name": "Bingo" },
+    "bandit": { "name": "Bandit" },
+    "chilli": { "name": "Chilli" },
+    "muffin": { "name": "Muffin" },
+    "socks": { "name": "Socks" },
+    "mackenzie": { "name": "Mackenzie" },
+    "pete": { "name": "Pete" },
+    "callie": { "name": "Callie" },
+    "grumpytoad": { "name": "Grumpy Toad" },
+    "marty": { "name": "Marty" },
+    "gus": { "name": "Gus" },
+    "neville": { "name": "Neville" },
+    "sally": { "name": "Sally" },
+    "molly": { "name": "Molly" },
+    "gil": { "name": "Gil" },
+    "deema": { "name": "Deema" },
+    "goby": { "name": "Goby" },
+    "oona": { "name": "Oona" },
+    "nonny": { "name": "Nonny" },
+    "zooli": { "name": "Zooli" },
+    "bubblepuppy": { "name": "Bubble Puppy" },
+    "mrgrouper": { "name": "Mr. Grouper" }
+  }
+}

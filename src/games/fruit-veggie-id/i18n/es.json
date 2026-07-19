@@ -1,0 +1,22 @@
+{
+  "fruitVeggie": {
+    "prompt": "¿Cuál escuchaste?",
+    "promptFallback": "¡Encuentra: {{name}}!",
+    "replay": "Decirlo de nuevo",
+    "howToPlay": "¡Escucha el nombre y luego toca la imagen correspondiente!"
+  },
+  "food": {
+    "apple": { "name": "Manzana" },
+    "banana": { "name": "Banana" },
+    "orange": { "name": "Naranja" },
+    "strawberry": { "name": "Fresa" },
+    "grapes": { "name": "Uvas" },
+    "watermelon": { "name": "Sandía" },
+    "carrot": { "name": "Zanahoria" },
+    "tomato": { "name": "Tomate" },
+    "corn": { "name": "Maíz" },
+    "broccoli": { "name": "Brócoli" },
+    "potato": { "name": "Papa" },
+    "pepper": { "name": "Pimiento" }
+  }
+}
