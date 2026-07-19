@@ -1,5 +1,7 @@
 import { useTranslation } from 'react-i18next'
 
+const LOCALE_NAMES = { en: 'English', es: 'Español' }
+
 export default function LocaleSelector({ locales, value, onChange }) {
   const { t } = useTranslation()
   if (locales.length < 2) return null
@@ -14,7 +16,7 @@ export default function LocaleSelector({ locales, value, onChange }) {
         onChange={e => onChange(e.target.value)}
       >
         {locales.map(loc => (
-          <option key={loc} value={loc}>{loc}</option>
+          <option key={loc} value={loc}>{LOCALE_NAMES[loc] ?? loc}</option>
         ))}
       </select>
     </div>
