@@ -83,15 +83,26 @@ The border rules apply only on the state classes (not reserved as a transparent 
 ## 3. AU-6 — Localized score-history dates (`ScoreHistory.jsx`)
 
 ```jsx
-function parseIsoDateLocal(isoDate) {
-  const [year, month, day] = isoDate.split('-').map(Number)
-  return new Date(year, month - 1, day)
-}
-
 function formatScoreDate(isoDate, locale) {
-  return new Intl.DateTimeFormat(locale, { dateStyle: 'medium' }).format(parseIsoDateLocal(isoDate))
+  try {
+    const [year, month, day] = isoDate.split('-').map(Number)
+    // Validate parsed components to catch malformed dates early
+    if (!year || !month || !day || month < 1 || month > 12 || day < 1 || day > 31) {
+      return isoDate
+    }
+    const date = new Date(year, month - 1, day)
+    // Check if the date is valid
+    if (Number.isNaN(date.getTime())) {
+      return isoDate
+    }
+    return new Intl.DateTimeFormat(locale, { dateStyle: 'medium' }).format(date)
+  } catch {
+    return isoDate
+  }
 }
 ```
+**Hardened during implementation (not in the original sketch below the fold of this spec's first draft):** a pre-existing regression suite, `src/components/__tests__/ScoreHistory.security.test.jsx`, feeds `date` malicious/malformed strings (an XSS payload, an attribute-injection string) to prove `ScoreHistory` never crashes or executes injected markup. A naive `isoDate.split('-').map(Number)` on a hyphen-less payload yields `NaN` components; `new Date(NaN, NaN, NaN)` is an `Invalid Date`; `Intl.DateTimeFormat.prototype.format()` throws a `RangeError` on an `Invalid Date`. `formatScoreDate` therefore validates the parsed components and falls back to returning `isoDate` verbatim (still safely escaped by React's default JSX text-child rendering) rather than throwing. Do not simplify this back to the two-function sketch without re-running that security suite.
+
 Used in place of the raw `s.date ?? ...` interpolation:
 ```jsx
 {s.date ? formatScoreDate(s.date, i18n.language) : new Date(s.timestamp).toLocaleDateString()}
