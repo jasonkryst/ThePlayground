@@ -186,9 +186,23 @@ describe('ColorMatchGame', () => {
     const wrongBtn = buttons.find(b => b.dataset.colorId !== correctId)
     await act(async () => { await userEvent.click(wrongBtn) })
 
-    expect(wrongBtn).toBeDisabled()
+    expect(wrongBtn).toHaveAttribute('aria-disabled', 'true')
     const correctBtn = buttons.find(b => b.dataset.colorId === correctId)
-    expect(correctBtn).not.toBeDisabled()
+    expect(correctBtn).toHaveAttribute('aria-disabled', 'false')
+  })
+
+  it('keeps keyboard focus on the tapped choice through the lock transition (AU-3)', async () => {
+    mockSettings = { ...mockSettings, feedbackMode: 'parent-tap', numChoices: 3 }
+    await act(async () => { render(<ColorMatchGame onGameEnd={onGameEnd} />) })
+
+    const buttons = screen.getAllByRole('button').filter(b => b.dataset.colorId)
+    const correctId = screen.getByTestId('correct-color-id').textContent
+    const correctBtn = buttons.find(b => b.dataset.colorId === correctId)
+    correctBtn.focus()
+    await act(async () => { await userEvent.click(correctBtn) })
+
+    expect(correctBtn).toHaveAttribute('aria-disabled', 'true')
+    expect(correctBtn).toHaveFocus()
   })
 
   it('does not render a Next button while the countdown timeout message is showing in parent-tap mode (regression guard against double-advance)', async () => {
