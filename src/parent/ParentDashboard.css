@@ -11,7 +11,7 @@
 
 .parent__export-btn {
   padding: 10px 20px;
-  font-size: 15px;
+  font-size: 0.9375rem;
   font-weight: 700;
   background: var(--color-aqua-dark);
   color: #fff;
@@ -25,7 +25,7 @@
 
 .parent__empty {
   text-align: center;
-  font-size: 18px;
+  font-size: 1.125rem;
   color: var(--color-text-muted);
   margin-top: 64px;
 }
@@ -39,20 +39,20 @@
 }
 
 .parent__section h2 {
-  font-size: 18px;
+  font-size: 1.125rem;
   font-weight: 800;
   margin-bottom: 6px;
   color: var(--color-lavender-dark);
 }
 
 .parent__hint {
-  font-size: 13px;
+  font-size: 0.8125rem;
   color: var(--color-text-muted);
   margin-bottom: 16px;
 }
 
 .parent__empty-chart {
-  font-size: 14px;
+  font-size: 0.875rem;
   color: var(--color-text-muted);
   text-align: center;
   padding: 24px 0;
@@ -63,7 +63,7 @@
 .parent__streak-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 15px;
+  font-size: 0.9375rem;
 }
 
 .parent__streak-table th,
@@ -75,7 +75,7 @@
 
 .parent__streak-table th {
   font-weight: 700;
-  font-size: 13px;
+  font-size: 0.8125rem;
   color: var(--color-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.04em;
@@ -106,9 +106,9 @@
 }
 
 .heatmap__day-label {
-  width: 14px;
-  height: 14px;
-  font-size: 10px;
+  min-width: 14px;
+  min-height: 14px;
+  font-size: 0.625rem;
   color: var(--color-text-muted);
   display: flex;
   align-items: center;
@@ -136,11 +136,11 @@
 .heatmap__month-label {
   width: 14px;
   flex-shrink: 0;
-  font-size: 10px;
+  font-size: 0.625rem;
   color: var(--color-text-muted);
   white-space: nowrap;
   overflow: visible;
-  line-height: 14px;
+  line-height: 0.875rem;
 }
 
 .heatmap__grid {
@@ -167,7 +167,7 @@
   align-items: center;
   gap: 4px;
   margin-top: 8px;
-  font-size: 12px;
+  font-size: 0.75rem;
   color: var(--color-text-muted);
 }
 .heatmap__legend .heatmap__cell { flex-shrink: 0; }
@@ -177,7 +177,7 @@
 .parent__missed-game:last-child { margin-bottom: 0; }
 
 .parent__missed-title {
-  font-size: 14px;
+  font-size: 0.875rem;
   font-weight: 700;
   color: var(--color-text-muted);
   text-transform: uppercase;
@@ -199,7 +199,7 @@
   grid-template-columns: 90px 1fr 36px;
   align-items: center;
   gap: 10px;
-  font-size: 14px;
+  font-size: 0.875rem;
 }
 
 .parent__missed-label { font-weight: 600; }
