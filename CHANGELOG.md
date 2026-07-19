@@ -3,6 +3,11 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.29.0] - 2026-07-19
+
+### Fixed
+- Accessibility wave 2 (issue #83, 200%-zoom / large-text audit): OS/browser "larger text" accessibility settings previously had no effect anywhere in the app — every `font-size` declaration was hardcoded in `px`, which does not respond to the root-font-size scaling those settings use (confirmed: doubling the root font-size produced a byte-for-byte identical render); converted app-wide to `rem`, including a fix to `ParentDashboard`'s heatmap day-label box (fixed `width`/`height` → `min-width`/`min-height`) so its now-larger glyph can't clip. Separately, the memory board's keyboard-focused tiles could land up to 71% hidden behind the sticky app header at 200%-zoom-equivalent or other short viewports, since nothing reserved scroll space for the header's height; a new `useHeaderHeightVar` hook publishes the header's live `ResizeObserver`-measured height as `--shell-header-height`, consumed by a new `html { scroll-padding-top: var(--shell-header-height) }` rule so native browser scroll-into-view never lands focus underneath it. Guarded by a new reusable `e2e/zoom-large-text.spec.js` suite.
+
 ## [0.28.5] - 2026-07-18
 
 ### Fixed
