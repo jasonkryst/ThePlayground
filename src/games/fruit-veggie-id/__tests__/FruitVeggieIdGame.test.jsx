@@ -1,9 +1,10 @@
 import { render, screen, act, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 import { axe } from 'jest-axe'
 import FruitVeggieIdGame from '../index'
 import { ShellContext } from '../../../components/ShellContext'
+import i18n from '../../../i18n'
 
 vi.mock('../../../lib/confetti', () => ({ fireConfetti: vi.fn() }))
 
@@ -241,5 +242,24 @@ describe('FruitVeggieIdGame — how-to-play intro', () => {
     await act(async () => { await userEvent.click(screen.getByTestId('game-intro-dont-show-again')) })
     await act(async () => { await userEvent.click(screen.getByTestId('game-intro-start')) })
     expect(mockUpdateSetting).toHaveBeenCalledWith('introDismissed', { 'fruit-veggie-id': true })
+  })
+})
+
+describe('FruitVeggieIdGame — Spanish locale', () => {
+  beforeEach(async () => { await i18n.changeLanguage('es') })
+  afterEach(async () => { await i18n.changeLanguage('en') })
+
+  it('replay button speaks the Spanish item name under the es locale', async () => {
+    await act(async () => { render(<FruitVeggieIdGame onGameEnd={onGameEnd} />) })
+    mockSpeak.mockClear()
+    const replay = screen.getByLabelText(/decirlo de nuevo/i)
+    await act(async () => { await userEvent.click(replay) })
+    const correctId = screen.getByTestId('correct-food-id').textContent
+    const spanishNameById = {
+      apple: 'Manzana', banana: 'Banana', orange: 'Naranja', strawberry: 'Fresa',
+      grapes: 'Uvas', watermelon: 'Sandía', carrot: 'Zanahoria', tomato: 'Tomate',
+      corn: 'Maíz', broccoli: 'Brócoli', potato: 'Papa', pepper: 'Pimiento',
+    }
+    expect(mockSpeak).toHaveBeenCalledWith(spanishNameById[correctId])
   })
 })
