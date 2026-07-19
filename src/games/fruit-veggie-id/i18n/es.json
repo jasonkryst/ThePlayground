@@ -1,5 +1,7 @@
 {
   "fruitVeggie": {
+    "manifestName": "Identifica Frutas y Verduras",
+    "manifestDescription": "¡Escucha el nombre y toca la fruta o verdura correspondiente!",
     "prompt": "¿Cuál escuchaste?",
     "promptFallback": "¡Encuentra: {{name}}!",
     "replay": "Decirlo de nuevo",

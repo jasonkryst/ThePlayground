@@ -1,5 +1,7 @@
 {
   "colorMatch": {
+    "manifestName": "Combinar Colores",
+    "manifestDescription": "¡Empareja el color con su objeto!",
     "prompt": "¿Cuál es de este color?",
     "howToPlay": "¡Aparece una muestra de color — toca el objeto que tenga ese color!"
   },

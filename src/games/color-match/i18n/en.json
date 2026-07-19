@@ -1,5 +1,7 @@
 {
   "colorMatch": {
+    "manifestName": "Color Match",
+    "manifestDescription": "Match the color to its object!",
     "prompt": "Which one is this color?",
     "howToPlay": "A color swatch shows — tap the matching colored object!"
   },

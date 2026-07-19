@@ -1,5 +1,7 @@
 {
   "characterMatchGameBluey": {
+    "manifestName": "Character Match - Bluey",
+    "manifestDescription": "Match the name to the character!",
     "prompt": "Which one is {{name}}?",
     "howToPlay": "See the name, then tap the matching character!"
   },

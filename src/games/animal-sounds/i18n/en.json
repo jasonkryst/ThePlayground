@@ -1,5 +1,7 @@
 {
   "animalSounds": {
+    "manifestName": "Animal Sounds",
+    "manifestDescription": "Match the animal to its sound!",
     "prompt": "What animal makes this sound?",
     "replay": "Replay sound",
     "howToPlay": "Listen to the sound, then tap the matching animal!"

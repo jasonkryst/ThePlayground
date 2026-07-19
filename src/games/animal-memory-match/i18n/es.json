@@ -1,5 +1,7 @@
 {
   "animalMemoryMatch": {
+    "manifestName": "Memorama de Animales",
+    "manifestDescription": "¡Voltea las fichas y encuentra los pares de animales!",
     "prompt": "¡Encuentra los pares!",
     "progress": "{{found}} de {{total}} pares encontrados",
     "howToPlay": "¡Voltea dos fichas a la vez y encuentra todos los pares de animales!",

@@ -1,5 +1,7 @@
 {
   "characterMatchGameBluey": {
+    "manifestName": "Combinar Personajes - Bluey",
+    "manifestDescription": "¡Empareja el nombre con el personaje!",
     "prompt": "¿Cuál es {{name}}?",
     "howToPlay": "¡Mira el nombre y luego toca el personaje correspondiente!"
   },

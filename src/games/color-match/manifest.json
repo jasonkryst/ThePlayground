@@ -1,9 +1,9 @@
 {
   "id": "color-match",
-  "name": "Color Match",
-  "description": "Match the color to its object!",
+  "nameKey": "colorMatch.manifestName",
+  "descriptionKey": "colorMatch.manifestDescription",
   "icon": "🎨",
   "color": "#CE93D8",
-  "version": "1.6.2",
+  "version": "1.6.3",
   "tags": ["visual", "colors"]
 }
