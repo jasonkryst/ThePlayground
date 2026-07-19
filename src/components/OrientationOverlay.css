@@ -15,12 +15,12 @@
 }
 
 .orientation-overlay__icon {
-  font-size: 96px;
+  font-size: 6rem;
   line-height: 1;
 }
 
 .orientation-overlay__heading {
-  font-size: 28px;
+  font-size: 1.75rem;
   font-weight: 800;
   margin: 0;
 }
@@ -29,7 +29,7 @@
 .orientation-overlay__heading:focus-visible { outline: 3px solid var(--color-lavender); outline-offset: 3px; }
 
 .orientation-overlay__body {
-  font-size: 20px;
+  font-size: 1.25rem;
   opacity: 0.8;
   max-width: 480px;
   margin: 0;

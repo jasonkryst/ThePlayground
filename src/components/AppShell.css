@@ -35,7 +35,7 @@
   min-width: 0;
   min-height: 48px;
   padding: 0 8px;
-  font-size: 20px;
+  font-size: 1.25rem;
   font-weight: 800;
   color: var(--color-lavender-dark);
   text-decoration: none;
@@ -73,7 +73,7 @@
   justify-content: center;
   min-width: 48px;
   min-height: 48px;
-  font-size: 24px;
+  font-size: 1.5rem;
   color: var(--color-text);
   text-decoration: none;
   border-radius: var(--radius-button);
@@ -83,7 +83,7 @@
 .shell__home {
   min-width: 48px;
   min-height: 48px;
-  font-size: 24px;
+  font-size: 1.5rem;
   background: transparent;
 }
 
@@ -128,14 +128,14 @@
   flex: 1 1 auto;
   min-width: 0;
   overflow: hidden;
-  font-size: 18px;
+  font-size: 1.125rem;
   font-weight: 800;
   color: var(--color-lavender-dark);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.shell__title-icon { font-size: 20px; line-height: 1; }
+.shell__title-icon { font-size: 1.25rem; line-height: 1; }
 img.shell__title-icon { width: 20px; height: 20px; object-fit: contain; }
 
 /* The route-focused h1 gets a real focus target (tabIndex={-1}) but no visible
@@ -162,7 +162,7 @@ img.shell__title-icon { width: 20px; height: 20px; object-fit: contain; }
   align-items: center;
   justify-content: space-between;
   padding: 12px 16px;
-  font-size: 13px;
+  font-size: 0.8125rem;
   color: var(--color-text-muted);
   border-top: 1px solid rgb(0 0 0 / 8%);
 }
