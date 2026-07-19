@@ -123,4 +123,43 @@ describe('GameChoiceGrid', () => {
     const { container } = renderGrid()
     expect(await axe(container)).toHaveNoViolations()
   })
+
+  it('shows a check glyph on the selected correct choice once locked', () => {
+    renderGrid({ locked: true, selected: 'a' })
+    const glyph = screen.getByText('A').closest('button').querySelector('.game__choice-glyph')
+    expect(glyph).toHaveTextContent('✓')
+    expect(glyph).toHaveAttribute('aria-hidden', 'true')
+  })
+
+  it('shows a cross glyph on the selected wrong choice once locked', () => {
+    renderGrid({ locked: true, selected: 'b', disabledChoiceIds: ['b'] })
+    const glyph = screen.getByText('B').closest('button').querySelector('.game__choice-glyph')
+    expect(glyph).toHaveTextContent('✗')
+  })
+
+  it('shows a check glyph on the revealed correct choice when locked on a wrong pick', () => {
+    renderGrid({ locked: true, selected: 'b', disabledChoiceIds: ['b'] })
+    const btn = screen.getByText('A').closest('button')
+    expect(btn).toHaveClass('highlight-correct')
+    expect(btn.querySelector('.game__choice-glyph')).toHaveTextContent('✓')
+  })
+
+  it('shows no glyph on any choice before locking', () => {
+    renderGrid()
+    for (const btn of screen.getAllByRole('button')) {
+      expect(btn.querySelector('.game__choice-glyph')).toBeNull()
+    }
+  })
+
+  it('shows no glyph on the hint-only highlight-correct choice (not locked)', () => {
+    renderGrid({ hintActive: true })
+    const btn = screen.getByText('A').closest('button')
+    expect(btn).toHaveClass('highlight-correct')
+    expect(btn.querySelector('.game__choice-glyph')).toBeNull()
+  })
+
+  it('shows no glyph on a disabled-wrong choice before lock', () => {
+    renderGrid({ disabledChoiceIds: ['b'] })
+    expect(screen.getByText('B').closest('button').querySelector('.game__choice-glyph')).toBeNull()
+  })
 })
