@@ -52,7 +52,7 @@ export default function QuizGameShell({
     return (
       <GameIntro
         icon={manifest.icon}
-        name={manifest.name}
+        name={t(manifest.nameKey)}
         instructions={instructions}
         orientation={manifest.orientation}
         dontShowAgain={dontShowAgain}

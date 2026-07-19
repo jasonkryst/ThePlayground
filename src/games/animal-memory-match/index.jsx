@@ -42,7 +42,7 @@ export default function AnimalMemoryMatchGame({ onGameEnd }) {
     return (
       <GameIntro
         icon={manifest.icon}
-        name={manifest.name}
+        name={t(manifest.nameKey)}
         instructions={t('animalMemoryMatch.howToPlay')}
         orientation={manifest.orientation}
         dontShowAgain={dontShowAgain}

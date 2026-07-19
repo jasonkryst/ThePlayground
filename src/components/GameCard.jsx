@@ -29,7 +29,9 @@ function recentLabel(recentInfo, t) {
 
 export default function GameCard({ manifest, bestScore, recentInfo = null }) {
   const { t } = useTranslation()
-  const { id, name, description, icon, color } = manifest
+  const { id, nameKey, descriptionKey, icon, color } = manifest
+  const name = t(nameKey)
+  const description = t(descriptionKey)
 
   const cardStyle = recentInfo
     ? { boxShadow: `0 0 0 3px ${color}, 0 4px 16px rgba(0,0,0,0.1)` }

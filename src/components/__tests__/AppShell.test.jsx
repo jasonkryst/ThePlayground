@@ -7,7 +7,7 @@ import AppShell from '../AppShell'
 import { useShellGameStatus } from '../ShellContext'
 
 const manifests = [
-  { id: 'color-match', name: 'Color Match', description: 'Colors!', icon: '🎨', color: '#CE93D8', version: '1.6.0' },
+  { id: 'color-match', nameKey: 'colorMatch.manifestName', icon: '🎨', color: '#CE93D8', version: '1.6.0' },
 ]
 
 function FakeGame({ streak = 0, sessionActive = false }) {

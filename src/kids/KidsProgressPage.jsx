@@ -59,7 +59,7 @@ function GameProgressSection({ manifest, scores, badgeData, bestStreak, t }) {
       aria-labelledby={`kid-progress-${manifest.id}`}
     >
       <h2 id={`kid-progress-${manifest.id}`} className="kid-progress__game-name">
-        <ManifestIcon icon={manifest.icon} className="kid-progress__game-icon" ariaHidden /> {manifest.name}
+        <ManifestIcon icon={manifest.icon} className="kid-progress__game-icon" ariaHidden /> {t(manifest.nameKey)}
       </h2>
 
       <div className="kid-progress__stats">
