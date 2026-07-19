@@ -1,8 +1,9 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, act } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, afterEach, beforeEach } from 'vitest'
 import { axe } from 'jest-axe'
 import GameCard from '../GameCard'
+import i18n from '../../i18n'
 
 const manifest = {
   id: 'animal-sounds',
@@ -127,5 +128,16 @@ describe('GameCard', () => {
   it('negative: no portrait badge without an orientation field', () => {
     renderCardWithManifest(manifest)
     expect(screen.queryByTestId('portrait-badge')).not.toBeInTheDocument()
+  })
+})
+
+describe('GameCard — Spanish locale', () => {
+  beforeEach(async () => { await act(async () => { await i18n.changeLanguage('es') }) })
+  afterEach(async () => { await act(async () => { await i18n.changeLanguage('en') }) })
+
+  it('renders the translated Spanish name and description under the es locale', () => {
+    renderCard()
+    expect(screen.getByText('Sonidos de Animales')).toBeInTheDocument()
+    expect(screen.getByText('¡Empareja el animal con su sonido!')).toBeInTheDocument()
   })
 })
