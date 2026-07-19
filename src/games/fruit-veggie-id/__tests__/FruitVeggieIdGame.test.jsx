@@ -246,8 +246,12 @@ describe('FruitVeggieIdGame — how-to-play intro', () => {
 })
 
 describe('FruitVeggieIdGame — Spanish locale', () => {
-  beforeEach(async () => { await i18n.changeLanguage('es') })
-  afterEach(async () => { await i18n.changeLanguage('en') })
+  // changeLanguage triggers a state update in react-i18next's internal
+  // subscription on any mounted useTranslation() consumer; wrap in act()
+  // so the afterEach reset (which fires while the tree from this test's
+  // render is still mounted) doesn't warn outside React's test render cycle.
+  beforeEach(async () => { await act(async () => { await i18n.changeLanguage('es') }) })
+  afterEach(async () => { await act(async () => { await i18n.changeLanguage('en') }) })
 
   it('replay button speaks the Spanish item name under the es locale', async () => {
     await act(async () => { render(<FruitVeggieIdGame onGameEnd={onGameEnd} />) })
