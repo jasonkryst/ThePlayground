@@ -131,6 +131,18 @@ export function computeMissedItems(scores) {
 }
 
 /**
+ * Escapes a single CSV field per RFC 4180 (quote the field, double any
+ * embedded quote) and defuses spreadsheet formula injection: a value
+ * beginning with =, +, -, or @ gets a leading apostrophe, which Excel/Sheets
+ * treat as a forced-text marker rather than evaluating a formula.
+ */
+function escapeCsvField(value) {
+  const str     = value === null || value === undefined ? '' : String(value)
+  const defused = /^[=+\-@]/.test(str) ? `'${str}` : str
+  return `"${defused.replace(/"/g, '""')}"`
+}
+
+/**
  * Build a CSV string from scores. Includes a header row.
  */
 export function buildCsvContent(scores) {
@@ -149,9 +161,9 @@ export function buildCsvContent(scores) {
       avgMs,
       s.peakStreak ?? '',
       s.timestamp  ?? '',
-    ].join(',')
+    ].map(escapeCsvField).join(',')
   })
-  return [headers.join(','), ...rows].join('\n')
+  return [headers.map(escapeCsvField).join(','), ...rows].join('\n')
 }
 
 /**

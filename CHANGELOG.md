@@ -3,6 +3,11 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.28.4] - 2026-07-18
+
+### Fixed
+- Security hardening (issue #86, audit findings SEC-2, SEC-3, SEC-5): shipped a `Content-Security-Policy` (`default-src 'self'`, GA script/connect hosts allowed, `style-src 'unsafe-inline'` for the app's per-item inline styles, `object-src 'none'`, `frame-ancestors 'self'`) and a `Permissions-Policy` (`camera=(), microphone=(), geolocation=(), payment=()`) via `nginx/security-headers.conf`, and `server_tokens off;` in `nginx.conf` to stop disclosing the nginx version. `buildCsvContent` (`src/utils/dashboardUtils.js`) now RFC 4180-quotes every field and defuses spreadsheet formula injection (a leading apostrophe on any value starting with `=`/`+`/`-`/`@`) — preventive hardening ahead of the CSV export's first free-text column. The previously-noted Subresource Integrity gap for the GA loader is resolved by the new CSP `script-src` allowlist instead, per the audit's own recommendation. Guarded by static config/unit tests plus a live e2e Docker check, matching the pattern used for SEC-1 and SEC-4.
+
 ## [0.28.3] - 2026-07-18
 
 ### Fixed

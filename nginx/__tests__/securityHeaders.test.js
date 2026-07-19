@@ -14,7 +14,14 @@ const REQUIRED_HEADERS = [
   ['X-Content-Type-Options', 'nosniff'],
   ['X-Frame-Options', 'SAMEORIGIN'],
   ['Referrer-Policy', 'strict-origin-when-cross-origin'],
+  ['Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=()'],
 ]
+
+// Permissions-Policy's value contains regex metacharacters ( ) , that the
+// original three header values didn't — escape before building a pattern.
+function escapeRegExp(str) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+}
 
 /**
  * nginx does not merge `add_header` directives across nesting levels (see
@@ -82,10 +89,10 @@ describe('nginx.conf', () => {
 })
 
 describe('nginx/security-headers.conf', () => {
-  it('exists and declares all three required security headers with `always`', () => {
+  it('exists and declares all required security headers with `always`', () => {
     const snippetText = fs.readFileSync(SECURITY_HEADERS_CONF_PATH, 'utf8')
     for (const [name, value] of REQUIRED_HEADERS) {
-      const pattern = new RegExp(`add_header\\s+${name}\\s+"${value}"\\s+always;`)
+      const pattern = new RegExp(`add_header\\s+${escapeRegExp(name)}\\s+"${escapeRegExp(value)}"\\s+always;`)
       expect(snippetText).toMatch(pattern)
     }
   })
@@ -104,6 +111,58 @@ describe('nginx/security-headers.conf', () => {
     for (const [, includedPath] of includeLines) {
       expect(includedPath).toBe(imagePath)
     }
+  })
+})
+
+/**
+ * Guards SEC-2 (docs/superpowers/specs/2026-07-12-security-audit-findings.md):
+ * extracts the raw Content-Security-Policy header value from
+ * nginx/security-headers.conf so directive-level assertions don't depend on
+ * the exact ordering/formatting of the full policy string.
+ */
+function extractCspValue(snippetText) {
+  const match = snippetText.match(/add_header\s+Content-Security-Policy\s+"([^"]+)"\s+always;/)
+  return match ? match[1] : null
+}
+
+describe('Content-Security-Policy (SEC-2)', () => {
+  const snippetText = fs.readFileSync(SECURITY_HEADERS_CONF_PATH, 'utf8')
+  const csp = extractCspValue(snippetText)
+
+  it('is declared with `always`', () => {
+    expect(csp).not.toBeNull()
+  })
+
+  it.each([
+    `default-src 'self'`,
+    `script-src 'self' https://www.googletagmanager.com`,
+    `connect-src 'self' https://*.google-analytics.com https://*.googletagmanager.com`,
+    `img-src 'self' data:`,
+    `style-src 'self' 'unsafe-inline'`,
+    `media-src 'self'`,
+    `object-src 'none'`,
+    `base-uri 'self'`,
+    `frame-ancestors 'self'`,
+  ])('includes the directive: %s', (directive) => {
+    expect(csp).toContain(directive)
+  })
+
+  it('does not allow inline or eval script execution (no unsafe-inline/unsafe-eval on script-src)', () => {
+    const scriptSrc = csp.match(/script-src ([^;]+)/)[1]
+    expect(scriptSrc).not.toContain('unsafe-inline')
+    expect(scriptSrc).not.toContain('unsafe-eval')
+  })
+
+  it('does not allow any wildcard host in default-src (would defeat the policy)', () => {
+    const defaultSrc = csp.match(/default-src ([^;]+)/)[1]
+    expect(defaultSrc).not.toContain('*')
+  })
+})
+
+describe('server_tokens off (SEC-3)', () => {
+  it('nginx.conf disables server_tokens so the nginx version is not disclosed', () => {
+    const confText = fs.readFileSync(NGINX_CONF_PATH, 'utf8')
+    expect(confText).toMatch(/server_tokens\s+off;/)
   })
 })
 

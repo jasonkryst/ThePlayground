@@ -6,15 +6,17 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 // Verifies the real nginx.conf's runtime behavior against a live nginx
-// server (SEC-1) — the static check in nginx/__tests__/securityHeaders.test.js
-// catches the config-text pattern, but only a live request proves nginx
-// actually sends the headers. Spins up the same pinned, non-root image the
-// Dockerfile ships (nginxinc/nginx-unprivileged:1.27-alpine) directly (not
-// the full Dockerfile build, which requires `npm run build` first and is
-// slow), mounting this repo's nginx.conf/security-headers.conf plus
-// minimal fixture assets. Also asserts the nginx process itself is
-// non-root (SEC-4). Requires Docker; skips (not fails) when unavailable so
-// `npm run e2e` still runs on machines without it.
+// server (SEC-1, SEC-2, SEC-3) — the static check in
+// nginx/__tests__/securityHeaders.test.js catches the config-text pattern,
+// but only a live request proves nginx actually sends the headers. Spins up
+// the same pinned, non-root image the Dockerfile ships
+// (nginxinc/nginx-unprivileged:1.27-alpine) directly (not the full
+// Dockerfile build, which requires `npm run build` first and is slow),
+// mounting this repo's nginx.conf/security-headers.conf plus minimal
+// fixture assets. Also asserts the nginx process itself is non-root
+// (SEC-4) and that the Server header discloses no version (SEC-3).
+// Requires Docker; skips (not fails) when unavailable so `npm run e2e`
+// still runs on machines without it.
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const REPO_ROOT = path.resolve(__dirname, '..')
@@ -24,7 +26,18 @@ const EXPECTED_SECURITY_HEADERS = {
   'x-content-type-options': 'nosniff',
   'x-frame-options': 'SAMEORIGIN',
   'referrer-policy': 'strict-origin-when-cross-origin',
+  'permissions-policy': 'camera=(), microphone=(), geolocation=(), payment=()',
 }
+
+// Checked separately from EXPECTED_SECURITY_HEADERS (exact-match map) since
+// the full CSP string is long — directive-level substring checks are more
+// resilient to reordering and easier to read on failure.
+const EXPECTED_CSP_DIRECTIVES = [
+  `default-src 'self'`,
+  `script-src 'self' https://www.googletagmanager.com`,
+  `object-src 'none'`,
+  `frame-ancestors 'self'`,
+]
 
 function dockerAvailable() {
   try {
@@ -38,6 +51,9 @@ function dockerAvailable() {
 function assertSecurityHeaders(headers) {
   for (const [name, value] of Object.entries(EXPECTED_SECURITY_HEADERS)) {
     expect(headers[name], `missing/wrong ${name} header`).toBe(value)
+  }
+  for (const directive of EXPECTED_CSP_DIRECTIVES) {
+    expect(headers['content-security-policy'], 'missing content-security-policy header').toContain(directive)
   }
 }
 
@@ -107,6 +123,12 @@ test.describe('nginx security headers (live container)', () => {
     const res = await request.get(`http://localhost:${containerPort}/`)
     expect(res.status()).toBe(200)
     assertSecurityHeaders(res.headers())
+  })
+
+  test('Server header discloses no version (server_tokens off, SEC-3)', async ({ request }) => {
+    await waitUntilReady(request)
+    const res = await request.get(`http://localhost:${containerPort}/`)
+    expect(res.headers()['server']).toBe('nginx')
   })
 
   for (const [label, urlPath] of [
