@@ -2,6 +2,7 @@ import { render, waitFor, screen } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import i18n from './i18n'
 import App from './App'
+import storage from './storage/index'
 
 vi.mock('./storage/index', () => ({
   default: {
@@ -29,6 +30,14 @@ describe('App — locale sync', () => {
     const spy = vi.spyOn(i18n, 'changeLanguage')
     render(<App />)
     await waitFor(() => expect(spy).toHaveBeenCalledWith('en'))
+  })
+
+  it('drives a Spanish locale end-to-end: changeLanguage + document.documentElement.lang', async () => {
+    storage.getSettings.mockResolvedValueOnce({ locale: 'es' })
+    const spy = vi.spyOn(i18n, 'changeLanguage')
+    render(<App />)
+    await waitFor(() => expect(spy).toHaveBeenCalledWith('es'))
+    await waitFor(() => expect(document.documentElement.lang).toBe('es'))
   })
 })
 

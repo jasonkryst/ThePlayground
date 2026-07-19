@@ -12,7 +12,11 @@ describe('i18n', () => {
   })
 
   it('exports SUPPORTED_LOCALES derived from what was actually discovered, not a hardcoded list', () => {
-    expect(SUPPORTED_LOCALES).toEqual(['en'])
+    expect(SUPPORTED_LOCALES).toEqual(['en', 'es'])
+  })
+
+  it('resolves a known es key to its Spanish translation', () => {
+    expect(i18n.t('common.home', { lng: 'es' })).toBe('Inicio')
   })
 
   it('pluralizes common.difficultyOfferHeading correctly for singular and plural counts', () => {
