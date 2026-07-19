@@ -132,7 +132,8 @@ src/
 │
 ├── i18n/
 │   ├── en.json                # Core cross-cutting strings (common, dashboard, admin, ...)
-│   └── index.js               # Merges en.json + every game's i18n/en.json at startup
+│   ├── es.json                # Spanish translation, same structure as en.json
+│   └── index.js               # Merges en.json/es.json + every game's i18n/*.json at startup
 │
 └── games/                     # One folder per game — animal-sounds, color-match,
     └── animal-memory-match/   #   character-match, animal-memory-match; drop a new folder to add one
@@ -141,6 +142,7 @@ src/
         ├── badges.js          # Optional per-game badge catalog (auto-discovered)
         ├── data/              # Item catalog (e.g. animals.js, colors.js)
         ├── i18n/en.json       # This game's own strings — auto-merged, no shared file to edit
+        ├── i18n/es.json       # Spanish translation of the same strings
         └── <assets>/          # Images/audio, game-specific
 ```
 
@@ -298,6 +300,7 @@ Accessible from the dashboard via the gear icon (⚙).
 | Setting | Default | Options |
 |---|---|---|
 | Child's Name | *(empty)* | Any text |
+| Language | English | English, Español |
 | Answer choices | 2 | 2, 3, 4 |
 | Feedback mode | Immediate | Immediate, Parent tap |
 | Questions per session | 10 | 5, 10, 15, 20 |

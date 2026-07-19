@@ -3,6 +3,14 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.29.0] - 2026-07-19
+
+### Added
+- Spanish (`es`) locale support (issue #105): activates the existing (previously dormant) locale-switching infrastructure — `src/i18n/index.js` already auto-discovered per-locale JSON and derived `SUPPORTED_LOCALES` from what it found, and `AdminPage` already rendered a `LocaleSelector` once 2+ locales existed, but `en` was the only one that ever shipped. Ships a complete `es.json` (Latin American/US Spanish) alongside every existing `en.json`, core and all 6 games — `character-match`/`character-match-bluey`'s licensed-show character names stay untranslated, matching the pre-existing convention that manifest fields and proper names aren't localized. The locale picker (`LocaleSelector`) now shows friendly language names ("English"/"Español") instead of raw locale codes now that it's actually visible. A new cross-locale key-parity test (`src/i18n/__tests__/i18n.test.js`) walks the merged `en`/`es` resource trees and fails if either locale is missing a key the other has.
+
+### Fixed
+- `useSpeech` (`fruit-veggie-id`'s spoken-name prompt) hardcoded `utterance.lang = 'en-US'` regardless of the active locale — under Spanish this spoke translated Spanish text with a forced English voice. `speak()` now derives the utterance language from the active i18next locale via a small `SPEECH_LANG_BY_LOCALE` map, falling back to `en-US` for any locale without a mapped speech voice.
+
 ## [0.28.5] - 2026-07-18
 
 ### Fixed
