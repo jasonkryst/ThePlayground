@@ -19,6 +19,10 @@
   --font-main:      'Nunito', sans-serif;
 }
 
+html {
+  scroll-padding-top: var(--shell-header-height, 0);
+}
+
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 .sr-only {

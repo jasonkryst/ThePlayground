@@ -52,6 +52,14 @@ describe('AppShell — home route', () => {
     const { container } = renderShell('/')
     expect(await axe(container)).toHaveNoViolations()
   })
+
+  it('publishes the header height as a CSS custom property (issue #83)', () => {
+    renderShell('/')
+    const header = document.querySelector('.shell__header')
+    expect(header).toBeTruthy()
+    const published = document.documentElement.style.getPropertyValue('--shell-header-height')
+    expect(published).toMatch(/^[0-9.]+px$/)
+  })
 })
 
 describe('AppShell — subpages', () => {
