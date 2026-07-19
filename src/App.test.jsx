@@ -33,11 +33,16 @@ describe('App — locale sync', () => {
   })
 
   it('drives a Spanish locale end-to-end: changeLanguage + document.documentElement.lang', async () => {
-    storage.getSettings.mockResolvedValueOnce({ locale: 'es' })
+    // App mounts several independent useSettings() consumers (GoogleAnalytics,
+    // LocaleSync, and more via AppShell/Dashboard), each issuing its own
+    // adapter.getSettings() call — mockResolvedValueOnce would only patch
+    // whichever one happens to call first, not necessarily LocaleSync.
+    storage.getSettings.mockResolvedValue({ locale: 'es' })
     const spy = vi.spyOn(i18n, 'changeLanguage')
     render(<App />)
     await waitFor(() => expect(spy).toHaveBeenCalledWith('es'))
     await waitFor(() => expect(document.documentElement.lang).toBe('es'))
+    storage.getSettings.mockResolvedValue({ locale: 'en' })
   })
 })
 
