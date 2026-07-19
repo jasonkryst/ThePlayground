@@ -378,8 +378,8 @@ describe('buildCsvContent', () => {
     const csv   = buildCsvContent([score])
     const row   = csv.split('\n')[1]
     const cols  = row.split(',')
-    // avgResponseMs is column index 5 (0-based)
-    expect(cols[5]).toBe('')
+    // avgResponseMs is column index 5 (0-based); every field is quoted (SEC-5)
+    expect(cols[5]).toBe('""')
   })
 
   it('leaves peakStreak empty when undefined (legacy record)', () => {
@@ -387,14 +387,79 @@ describe('buildCsvContent', () => {
     const csv   = buildCsvContent([score])
     const row   = csv.split('\n')[1]
     const cols  = row.split(',')
-    // peakStreak is column index 6
-    expect(cols[6]).toBe('')
+    // peakStreak is column index 6; every field is quoted (SEC-5)
+    expect(cols[6]).toBe('""')
   })
 
   it('includes timestamp in the last column', () => {
     const score = makeScore({ timestamp: 9999 })
     const csv   = buildCsvContent([score])
     expect(csv).toContain('9999')
+  })
+})
+
+// ─── buildCsvContent — CSV injection hardening (SEC-5) ──────────────────────
+// buildCsvContent joins raw values with no quoting or escaping; safe today
+// because every field is app-generated (dates, gameId, numerics), but the
+// first free-text column (child name, user content) would become
+// spreadsheet formula injection. Hardened per the 2026-07-12 audit (SEC-5):
+// every field is RFC 4180-quoted, and a leading =/+/-/@ gets a defusing
+// leading apostrophe (the standard Excel/Sheets CSV-injection mitigation).
+
+describe('buildCsvContent — CSV injection hardening (SEC-5)', () => {
+  it('quotes every field per RFC 4180, including plain safe values', () => {
+    const csv    = buildCsvContent([makeScore({ gameId: 'animal-sounds' })])
+    const header = csv.split('\n')[0]
+    const row    = csv.split('\n')[1]
+    expect(header).toBe('"date","gameId","score","total","accuracy","avgResponseMs","peakStreak","timestamp"')
+    expect(row).toContain('"animal-sounds"')
+  })
+
+  it('defuses a gameId beginning with = with a leading apostrophe', () => {
+    const csv = buildCsvContent([makeScore({ gameId: '=1+1' })])
+    expect(csv).toContain(`"'=1+1"`)
+  })
+
+  it('defuses a value beginning with + ', () => {
+    const csv = buildCsvContent([makeScore({ gameId: '+1+1' })])
+    expect(csv).toContain(`"'+1+1"`)
+  })
+
+  it('defuses a value beginning with - ', () => {
+    const csv = buildCsvContent([makeScore({ gameId: '-1+1' })])
+    expect(csv).toContain(`"'-1+1"`)
+  })
+
+  it('defuses a value beginning with @ (e.g. a DDE formula)', () => {
+    const csv = buildCsvContent([makeScore({ gameId: '@SUM(A1:A2)' })])
+    expect(csv).toContain(`"'@SUM(A1:A2)"`)
+  })
+
+  it('does not prefix a value that merely contains = elsewhere (only a leading char triggers defusal)', () => {
+    const csv = buildCsvContent([makeScore({ gameId: 'a=b' })])
+    expect(csv).toContain('"a=b"')
+    expect(csv).not.toContain(`"'a=b"`)
+  })
+
+  it('doubles an embedded double quote so the field round-trips safely', () => {
+    const csv = buildCsvContent([makeScore({ gameId: 'she said "hi"' })])
+    expect(csv).toContain('"she said ""hi"""')
+  })
+
+  it('keeps an embedded comma inside the field\'s own quotes (does not create an extra column)', () => {
+    const csv = buildCsvContent([makeScore({ gameId: 'game,with,commas' })])
+    expect(csv).toContain('"game,with,commas"')
+  })
+
+  it('keeps an embedded newline inside the field\'s own quotes', () => {
+    const csv = buildCsvContent([makeScore({ gameId: 'line1\nline2' })])
+    expect(csv).toContain('"line1\nline2"')
+  })
+
+  it('leaves a null/undefined field as an empty quoted pair, not a bare apostrophe or unquoted empty string', () => {
+    const csv = buildCsvContent([makeScore({ peakStreak: undefined })])
+    const row = csv.split('\n')[1]
+    expect(row.split(',')[6]).toBe('""')
   })
 })
 
