@@ -107,6 +107,18 @@ test.describe('OS/browser large-text settings', () => {
     expect(scaled).toBeGreaterThan(baseline * 1.8)
   })
 
+  test('base body text actually scales under a large-text setting (Fix 1 regression guard — base/inherited size, not just component-level)', async ({ page }) => {
+    await page.goto('/')
+    const bodyEl = page.locator('body')
+    const baseline = await bodyEl.evaluate(el => parseFloat(getComputedStyle(el).fontSize))
+
+    await simulateLargeText(page, 2)
+    await page.waitForTimeout(100)
+    const scaled = await bodyEl.evaluate(el => parseFloat(getComputedStyle(el).fontSize))
+
+    expect(scaled).toBeGreaterThan(baseline * 1.8)
+  })
+
   for (const vp of REFERENCE_VIEWPORTS) {
     test(`dashboard at ${vp.name} viewport: large text introduces no new horizontal overflow (negative)`, async ({ page }) => {
       await page.setViewportSize({ width: vp.width, height: vp.height })
