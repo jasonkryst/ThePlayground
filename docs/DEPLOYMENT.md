@@ -140,6 +140,10 @@ server {
     root /usr/share/nginx/html;
     index index.html;
 
+    # Don't disclose the nginx version in the Server header / error pages
+    # (SEC-3). Not an add_header, so it doesn't need the include below.
+    server_tokens off;
+
     # Security headers. NOTE: nginx does not merge add_header directives
     # across nesting levels — any location block below that sets its own
     # add_header (e.g. for Cache-Control) must also `include` this same
@@ -175,6 +179,8 @@ server {
 add_header X-Content-Type-Options "nosniff" always;
 add_header X-Frame-Options "SAMEORIGIN" always;
 add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+add_header Content-Security-Policy "default-src 'self'; script-src 'self' https://www.googletagmanager.com; connect-src 'self' https://*.google-analytics.com https://*.googletagmanager.com; img-src 'self' data:; style-src 'self' 'unsafe-inline'; media-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'self'" always;
+add_header Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()" always;
 ```
 
 Block by block:
@@ -187,7 +193,7 @@ Block by block:
 
 **HTML (implicit)** — `index.html` deliberately gets *no* long-cache header. nginx serves it with an ETag by default, so browsers revalidate it cheaply, always pick up a new deploy's hashed asset references, and the "stale UI after deploy" failure mode is avoided.
 
-**Security headers** — `X-Content-Type-Options: nosniff`, `X-Frame-Options: SAMEORIGIN`, `Referrer-Policy: strict-origin-when-cross-origin`. What each protects against — and the gaps we know about (no CSP yet) — is documented in [`SECURITY.md`](../SECURITY.md#http-security-headers). **Why an `include` instead of repeating the three lines in each block:** nginx's `add_header` inheritance breaks the moment a `location` block declares its own `add_header` (here, for `Cache-Control`) — the block then gets *only* what it declares itself, nothing from the enclosing `server` block. A single shared file `include`d everywhere avoids the alternative (copy-pasting the three lines into every block that sets `Cache-Control`), which is exactly how this dropped silently in the first place (SEC-1) — a future asset tier just needs `include /etc/nginx/security-headers.conf;` alongside its own `add_header`, and both the static config test (`nginx/__tests__/securityHeaders.test.js`) and the live e2e check (`e2e/nginx-headers.spec.js`) fail loudly if it's forgotten.
+**Security headers** — `X-Content-Type-Options: nosniff`, `X-Frame-Options: SAMEORIGIN`, `Referrer-Policy: strict-origin-when-cross-origin`, `Content-Security-Policy` (restricts scripts/styles/connections/images/media to first-party plus the opt-in GA hosts, blocks plugin content and framing), and `Permissions-Policy` (denies camera/microphone/geolocation/payment outright — the app uses none of them). What each protects against is documented in [`SECURITY.md`](../SECURITY.md#http-security-headers). **Why an `include` instead of repeating the five lines in each block:** nginx's `add_header` inheritance breaks the moment a `location` block declares its own `add_header` (here, for `Cache-Control`) — the block then gets *only* what it declares itself, nothing from the enclosing `server` block. A single shared file `include`d everywhere avoids the alternative (copy-pasting the lines into every block that sets `Cache-Control`), which is exactly how this dropped silently in the first place (SEC-1) — a future asset tier just needs `include /etc/nginx/security-headers.conf;` alongside its own `add_header`, and both the static config test (`nginx/__tests__/securityHeaders.test.js`) and the live e2e check (`e2e/nginx-headers.spec.js`) fail loudly if it's forgotten. **`server_tokens off;`** (hides the nginx version from the `Server` header and error pages) lives directly in the `server` block instead — it isn't an `add_header`, so the inheritance problem above doesn't apply to it, and one line covers every location.
 
 ---
 

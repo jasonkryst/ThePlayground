@@ -79,7 +79,7 @@ Playwright starts both `npm run dev` (port 5173) and Storybook (port 6006) autom
 | `animal-memory-match.spec.js` | Full flip-to-completion memory flow, plus a computed-style guard on the board layout |
 | `orientation-gate.spec.js` | Manifest-driven forced-landscape enforcement: overlay blocks portrait play, clears on rotate, home stays reachable, axe scan of the overlay, and a no-flag game never blocks |
 | `intro-results-height.spec.js` | Intro/results screens fit one device screen at phone/tablet/desktop sizes (primary button reachable without scrolling), while legitimately long content still scrolls rather than clips — layout behavior not observable in jsdom |
-| `nginx-headers.spec.js` | Live nginx security-header (SEC-1) and non-root-process (SEC-4) coverage: boots `nginx.conf` in the real `nginxinc/nginx-unprivileged:1.27-alpine` container (not the app's dev server) and asserts all three security headers on every asset tier plus a 404, and that the nginx process is non-root. Skips (doesn't fail) when Docker isn't available — see below |
+| `nginx-headers.spec.js` | Live nginx security-header (SEC-1, SEC-2, SEC-3) and non-root-process (SEC-4) coverage: boots `nginx.conf` in the real `nginxinc/nginx-unprivileged:1.27-alpine` container (not the app's dev server) and asserts all security headers (including CSP and Permissions-Policy) on every asset tier plus a 404, that the `Server` header discloses no version, and that the nginx process is non-root. Skips (doesn't fail) when Docker isn't available — see below |
 | `visual.spec.js` | Visual regression (layer 4, below) |
 | `html-validity.spec.js` | HTML5 validation (layer 5, below) |
 | `css-validity.spec.js` | Inline-style CSS validation (layer 6, below) |

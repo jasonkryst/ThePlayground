@@ -2,7 +2,7 @@
 
 This document is both the security **posture** description for The Playground (what the app does and doesn't do with data, what its attack surface is, what protections are in place) and its vulnerability **reporting policy** (bottom of this document).
 
-**Last full audit:** 2026-07-12 — findings and verified-safe observations recorded in [`docs/superpowers/specs/2026-07-12-security-audit-findings.md`](docs/superpowers/specs/2026-07-12-security-audit-findings.md) (no HIGH-severity findings; one MEDIUM nginx misconfiguration — SEC-1, fixed 2026-07-17, issue #84 — and four hardening items, all tracked in [`docs/ENHANCEMENTS.md`](docs/ENHANCEMENTS.md#security)).
+**Last full audit:** 2026-07-12 — findings and verified-safe observations recorded in [`docs/superpowers/specs/2026-07-12-security-audit-findings.md`](docs/superpowers/specs/2026-07-12-security-audit-findings.md) (no HIGH-severity findings; one MEDIUM nginx misconfiguration — SEC-1, fixed 2026-07-17, issue #84). Of the five hardening/preventive items: SEC-4 fixed 2026-07-18 (issue #85); SEC-2, SEC-3, and SEC-5 fixed 2026-07-18 (issue #86); SEC-6 is informational (dev-only dependency advisories, no action needed). All tracked in [`docs/ENHANCEMENTS.md`](docs/ENHANCEMENTS.md#security).
 
 ## Scope
 
@@ -33,7 +33,7 @@ Everything the app persists lives in the browser's `localStorage`, on the device
 
 The only PII in the system is an optional first name, entered by the parent, displayed in the dashboard title, and stored locally. Nothing is transmitted anywhere — with one deliberate, opt-in exception: Google Analytics, below.
 
-Practical corollaries: clearing browser site data erases everything (backup path: the Parent Dashboard's CSV export — see [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md#data-persistence--backup)), and physical access to the device/browser profile is access to the data. There is no server to breach.
+Practical corollaries: clearing browser site data erases everything (backup path: the Parent Dashboard's CSV export, which RFC 4180-quotes every field and defuses spreadsheet formula injection — see [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md#data-persistence--backup)), and physical access to the device/browser profile is access to the data. There is no server to breach.
 
 ## Analytics and children's privacy
 
@@ -46,7 +46,7 @@ Children's-privacy assessment (also recorded in [`docs/ENHANCEMENTS.md`](docs/EN
 A no-backend SPA's main runtime risk is cross-site scripting. The surfaces and their mitigations:
 
 - **Rendered strings** — every user-influenced string (the child's name, score history, any stored value) is rendered through React, which escapes by construction. The codebase contains **no** `dangerouslySetInnerHTML` (grep-verified as part of this document's last review).
-- **The GA script loader** — the one place the app builds a script URL from stored data. `sanitizeGaId` (`src/App.jsx`) strips every character outside `[A-Za-z0-9_-]` from the stored ID before it is interpolated into `https://www.googletagmanager.com/gtag/js?id=…`, so a corrupted or maliciously seeded `localStorage` value cannot break out of the URL or inject markup. The script element is only created when a non-empty sanitized ID exists.
+- **The GA script loader** — the one place the app builds a script URL from stored data. `sanitizeGaId` (`src/App.jsx`) strips every character outside `[A-Za-z0-9_-]` from the stored ID before it is interpolated into `https://www.googletagmanager.com/gtag/js?id=…`, so a corrupted or maliciously seeded `localStorage` value cannot break out of the URL or inject markup. The script element is only created when a non-empty sanitized ID exists. The `Content-Security-Policy`'s `script-src` (below) is a second, independent backstop: even if a future bug widened what could be interpolated into a script tag, only `'self'` and `https://www.googletagmanager.com` can ever execute. Subresource integrity was considered and rejected for this loader — the gtag URL serves Google-rotated content, so a script-hash pin would break on rotation; the `script-src` allowlist is the practical control instead.
 - **`localStorage` values generally** — treated strictly as data: parsed as JSON, rendered through React, never `eval`'d or written into HTML. Note that `localStorage` is *within* the browser's same-origin protection; seeding it maliciously already requires code running on the origin.
 
 ## HTTP security headers
@@ -58,15 +58,17 @@ Declared in the Docker image's [`nginx.conf`](nginx.conf) (mechanics annotated i
 | `X-Content-Type-Options` | `nosniff` | MIME-type sniffing — browsers executing a mislabeled file as a script |
 | `X-Frame-Options` | `SAMEORIGIN` | Clickjacking — third-party sites framing the app to hijack taps |
 | `Referrer-Policy` | `strict-origin-when-cross-origin` | Leaking full URLs to external destinations (relevant only to the GA request and the freesound.org link) |
+| `Content-Security-Policy` | `default-src 'self'; script-src 'self' https://www.googletagmanager.com; connect-src 'self' https://*.google-analytics.com https://*.googletagmanager.com; img-src 'self' data:; style-src 'self' 'unsafe-inline'; media-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'self'` | The strongest structural XSS defense — restricts script/style/connect/image/media sources to first-party plus the opt-in GA hosts; blocks plugin content and framing outright |
+| `Permissions-Policy` | `camera=(), microphone=(), geolocation=(), payment=()` | A future third-party script (i.e. if GA's payload ever changed) trying to use device APIs the app has no legitimate use for |
 
 **Fixed (audit finding SEC-1, issue #84):** the two asset `location` blocks declare their own `add_header Cache-Control`, which per nginx's documented inheritance rule cancels inheritance of any `add_header` from the enclosing `server` block. All three headers now come from a shared [`nginx/security-headers.conf`](nginx/security-headers.conf) snippet, `include`d in the `server` block *and* in both asset `location` blocks — so a location that declares its own `add_header` still gets them. Each header also carries `always`, so it's sent on error responses (e.g. a 404 for a missing asset) too, not just 2xx/3xx. Two guards keep this from regressing: a static check (`nginx/__tests__/securityHeaders.test.js`) that fails if a future `location` block sets `add_header` without including the snippet, and a live e2e check (`e2e/nginx-headers.spec.js`) that boots the real config in nginx and asserts the headers on every asset type plus a 404.
+
+**Fixed (audit findings SEC-2/SEC-3, issue #86):** `Content-Security-Policy` and `Permissions-Policy` now live in the same shared `nginx/security-headers.conf` snippet as the original three headers, so they get identical `include`-everywhere coverage — no new inheritance risk to guard. `server_tokens off;` (nginx version disclosure) is set directly in `nginx.conf`'s `server` block; it isn't an `add_header`, so SEC-1's inheritance rule doesn't apply to it. `style-src` still needs `'unsafe-inline'` for the app's legitimate per-item inline `style` attributes — tightening that further (nonces or a refactor to CSS custom properties) is a deliberately separate follow-up, not part of this fix. Full design rationale: [`docs/superpowers/specs/2026-07-18-security-hardening-design.md`](docs/superpowers/specs/2026-07-18-security-hardening-design.md). Guarded the same way as SEC-1: a static test (directive-level assertions on the CSP, exact-value assertion on `Permissions-Policy`, and a `server_tokens off;` presence check) and a live e2e check (asserts both headers plus a `Server` header with no version on a real container).
 
 ### Known gaps
 
 Stated plainly rather than papered over (each is tracked in [`docs/ENHANCEMENTS.md`](docs/ENHANCEMENTS.md#security)):
 
-- **No `Content-Security-Policy`.** A CSP is the strongest structural XSS defense and this app doesn't ship one yet. A workable policy needs the GA script/connect sources allowed when analytics is on, and must accommodate the app's legitimate per-item inline `style` attributes — the 2026-07-12 audit includes a starter policy to iterate from; it needs to be designed and tested, not bolted on.
-- **No `Permissions-Policy`; nginx version disclosed** (`server_tokens` defaults on) — both free hardening.
 - **No HSTS / TLS in the container.** Deliberate: the image serves plain HTTP, and TLS termination (with HSTS) belongs at the reverse proxy in front of it — see [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md#https--running-behind-a-reverse-proxy). A home-LAN deployment without TLS is accepting that traffic is readable on the local network.
 
 ## Docker posture
