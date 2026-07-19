@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react'
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi, afterEach } from 'vitest'
 import { axe } from 'jest-axe'
 import ScoreHistory from '../ScoreHistory'
 
@@ -17,9 +17,28 @@ describe('ScoreHistory', () => {
     expect(rows[1]).toHaveTextContent('6 / 10')
   })
 
-  it('shows the date for each score', () => {
+  it('shows the localized, formatted date for each score', () => {
     render(<ScoreHistory scores={scores} />)
-    expect(screen.getByText('2026-06-07')).toBeInTheDocument()
+    expect(screen.getByText('Jun 7, 2026')).toBeInTheDocument()
+    expect(screen.queryByText('2026-06-07')).not.toBeInTheDocument()
+  })
+
+  it('falls back to the timestamp-derived date for legacy scores with no date field', () => {
+    const legacyTimestamp = new Date(2026, 5, 7).getTime()
+    const legacyScores = [{ gameId: 'animal-sounds', score: 5, total: 10, timestamp: legacyTimestamp }]
+    render(<ScoreHistory scores={legacyScores} />)
+    expect(screen.getByText(new Date(legacyTimestamp).toLocaleDateString())).toBeInTheDocument()
+  })
+
+  describe('timezone boundary', () => {
+    afterEach(() => { vi.unstubAllEnvs() })
+
+    it('avoids the UTC day-shift trap in a negative-offset timezone', () => {
+      vi.stubEnv('TZ', 'America/Los_Angeles')
+      render(<ScoreHistory scores={[{ gameId: 'animal-sounds', score: 1, total: 1, date: '2026-06-07', timestamp: 1 }]} />)
+      expect(screen.getByText('Jun 7, 2026')).toBeInTheDocument()
+      expect(screen.queryByText('Jun 6, 2026')).not.toBeInTheDocument()
+    })
   })
 
   it('renders empty message when no scores', () => {

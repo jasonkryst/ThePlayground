@@ -16,6 +16,7 @@ const stories = [
   'components-gamechoicegrid--hint-active-subtle',
   'components-gamechoicegrid--hint-active-bold',
   'components-gamechoicegrid--locked',
+  'components-gamechoicegrid--locked-wrong',
   'components-memoryboard--default',
   'components-gameresults--perfect-run',
   'components-gameresults--with-missed-items',

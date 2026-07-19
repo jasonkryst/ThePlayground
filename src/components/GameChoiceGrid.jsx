@@ -11,12 +11,18 @@ export default function GameChoiceGrid({
         const isCorrect = item.id === correctId
         const isDisabledWrong = disabledChoiceIds.includes(item.id)
         const isHintedCorrect = hintActive && !locked && !isSelected && isCorrect
+        const isChoiceDisabled = locked || isDisabledWrong
 
         let cls = 'game__choice'
         if (locked && isSelected && isCorrect) cls += ' correct'
         if (locked && isSelected && !isCorrect) cls += ' wrong'
         if ((locked || hintActive) && !isSelected && isCorrect) cls += ' highlight-correct'
         if (!locked && isDisabledWrong) cls += ' game__choice--disabled-wrong'
+
+        let glyph = null
+        if (locked && isSelected && isCorrect) glyph = '✓'
+        else if (locked && isSelected && !isCorrect) glyph = '✗'
+        else if (locked && !isSelected && isCorrect) glyph = '✓'
 
         const { className: extraClassName, style: extraStyle, ...restExtraProps } = getChoiceProps(item, i) ?? {}
         if (extraClassName) cls += ` ${extraClassName}`
@@ -28,11 +34,12 @@ export default function GameChoiceGrid({
             key={item.id}
             className={cls}
             style={style}
-            disabled={locked || isDisabledWrong}
-            onClick={() => onChoose(item)}
+            aria-disabled={isChoiceDisabled}
+            onClick={() => { if (!isChoiceDisabled) onChoose(item) }}
             {...restExtraProps}
           >
             {renderChoiceContent(item, i)}
+            {glyph && <span className="game__choice-glyph" aria-hidden="true">{glyph}</span>}
           </button>
         )
       })}

@@ -216,9 +216,9 @@ describe('AnimalSoundsGame', () => {
     const wrongBtn = buttons.find(b => b.dataset.animalId !== correctId)
     await act(async () => { await userEvent.click(wrongBtn) })
 
-    expect(wrongBtn).toBeDisabled()
+    expect(wrongBtn).toHaveAttribute('aria-disabled', 'true')
     const correctBtn = buttons.find(b => b.dataset.animalId === correctId)
-    expect(correctBtn).not.toBeDisabled()
+    expect(correctBtn).toHaveAttribute('aria-disabled', 'false')
   })
 
   it('does not render a Next button while the countdown timeout message is showing in parent-tap mode (regression guard against double-advance)', async () => {

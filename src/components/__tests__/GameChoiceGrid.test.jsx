@@ -40,22 +40,44 @@ describe('GameChoiceGrid', () => {
     expect(screen.getByText('A').closest('button')).toHaveAttribute('data-choice-id', 'a')
   })
 
-  it('disables all choices when locked', () => {
+  it('marks all choices aria-disabled when locked, but keeps the native disabled state off', () => {
     renderGrid({ locked: true })
     for (const btn of screen.getAllByRole('button')) {
-      expect(btn).toBeDisabled()
+      expect(btn).toHaveAttribute('aria-disabled', 'true')
+      expect(btn).not.toBeDisabled()
     }
   })
 
-  it('disables only the wrong-tapped choice when not locked', () => {
+  it('aria-disables only the wrong-tapped choice when not locked', () => {
     renderGrid({ disabledChoiceIds: ['b'] })
-    expect(screen.getByText('B').closest('button')).toBeDisabled()
-    expect(screen.getByText('A').closest('button')).not.toBeDisabled()
+    expect(screen.getByText('B').closest('button')).toHaveAttribute('aria-disabled', 'true')
+    expect(screen.getByText('A').closest('button')).toHaveAttribute('aria-disabled', 'false')
   })
 
   it('marks a disabled wrong choice with the disabled-wrong class, not locked', () => {
     renderGrid({ disabledChoiceIds: ['b'] })
     expect(screen.getByText('B').closest('button')).toHaveClass('game__choice--disabled-wrong')
+  })
+
+  it('keeps keyboard focus on a choice after it becomes aria-disabled (locked)', () => {
+    renderGrid({ locked: true, selected: 'a' })
+    const btn = screen.getByText('A').closest('button')
+    btn.focus()
+    expect(btn).toHaveFocus()
+  })
+
+  it('does not call onChoose when a locked choice is clicked', () => {
+    const onChoose = vi.fn()
+    renderGrid({ locked: true, onChoose })
+    screen.getByText('A').click()
+    expect(onChoose).not.toHaveBeenCalled()
+  })
+
+  it('does not call onChoose when an already-tried wrong choice is clicked', () => {
+    const onChoose = vi.fn()
+    renderGrid({ disabledChoiceIds: ['b'], onChoose })
+    screen.getByText('B').click()
+    expect(onChoose).not.toHaveBeenCalled()
   })
 
   it('shows correct/wrong classes only once locked', () => {
@@ -100,5 +122,44 @@ describe('GameChoiceGrid', () => {
   it('has no accessibility violations', async () => {
     const { container } = renderGrid()
     expect(await axe(container)).toHaveNoViolations()
+  })
+
+  it('shows a check glyph on the selected correct choice once locked', () => {
+    renderGrid({ locked: true, selected: 'a' })
+    const glyph = screen.getByText('A').closest('button').querySelector('.game__choice-glyph')
+    expect(glyph).toHaveTextContent('✓')
+    expect(glyph).toHaveAttribute('aria-hidden', 'true')
+  })
+
+  it('shows a cross glyph on the selected wrong choice once locked', () => {
+    renderGrid({ locked: true, selected: 'b', disabledChoiceIds: ['b'] })
+    const glyph = screen.getByText('B').closest('button').querySelector('.game__choice-glyph')
+    expect(glyph).toHaveTextContent('✗')
+  })
+
+  it('shows a check glyph on the revealed correct choice when locked on a wrong pick', () => {
+    renderGrid({ locked: true, selected: 'b', disabledChoiceIds: ['b'] })
+    const btn = screen.getByText('A').closest('button')
+    expect(btn).toHaveClass('highlight-correct')
+    expect(btn.querySelector('.game__choice-glyph')).toHaveTextContent('✓')
+  })
+
+  it('shows no glyph on any choice before locking', () => {
+    renderGrid()
+    for (const btn of screen.getAllByRole('button')) {
+      expect(btn.querySelector('.game__choice-glyph')).toBeNull()
+    }
+  })
+
+  it('shows no glyph on the hint-only highlight-correct choice (not locked)', () => {
+    renderGrid({ hintActive: true })
+    const btn = screen.getByText('A').closest('button')
+    expect(btn).toHaveClass('highlight-correct')
+    expect(btn.querySelector('.game__choice-glyph')).toBeNull()
+  })
+
+  it('shows no glyph on a disabled-wrong choice before lock', () => {
+    renderGrid({ disabledChoiceIds: ['b'] })
+    expect(screen.getByText('B').closest('button').querySelector('.game__choice-glyph')).toBeNull()
   })
 })
