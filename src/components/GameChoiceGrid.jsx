@@ -11,6 +11,7 @@ export default function GameChoiceGrid({
         const isCorrect = item.id === correctId
         const isDisabledWrong = disabledChoiceIds.includes(item.id)
         const isHintedCorrect = hintActive && !locked && !isSelected && isCorrect
+        const isChoiceDisabled = locked || isDisabledWrong
 
         let cls = 'game__choice'
         if (locked && isSelected && isCorrect) cls += ' correct'
@@ -28,8 +29,8 @@ export default function GameChoiceGrid({
             key={item.id}
             className={cls}
             style={style}
-            disabled={locked || isDisabledWrong}
-            onClick={() => onChoose(item)}
+            aria-disabled={isChoiceDisabled}
+            onClick={() => { if (!isChoiceDisabled) onChoose(item) }}
             {...restExtraProps}
           >
             {renderChoiceContent(item, i)}

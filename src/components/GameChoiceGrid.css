@@ -26,10 +26,10 @@
   z-index: 0;
 }
 
-.game__choice:disabled { cursor: default; }
+.game__choice[aria-disabled="true"] { cursor: default; }
 .game__choice:focus         { outline: none; }
 .game__choice:focus-visible { outline: 3px solid var(--color-lavender); outline-offset: 3px; }
-.game__choice:hover:not(:disabled) { transform: scale(1.04); }
+.game__choice:hover:not([aria-disabled="true"]) { transform: scale(1.04); }
 
 /* Hint highlight is a translucent overlay, not a background swap, so it
    tints whatever's really behind the button (an inline swatch color, e.g.
