@@ -1,14 +1,14 @@
 /* See the equivalent comment on .game-intro in GameIntro.css (issue #55). */
 .results { display: flex; flex: 1; flex-direction: column; align-items: center; justify-content: center; width: 100%; gap: 24px; padding: 24px; text-align: center; }
-.results__emoji  { font-size: 96px; }
-.results__score  { font-size: 36px; font-weight: 800; color: var(--color-lavender); }
-.results__label  { font-size: 20px; opacity: 0.7; }
+.results__emoji  { font-size: 6rem; }
+.results__score  { font-size: 2.25rem; font-weight: 800; color: var(--color-lavender); }
+.results__label  { font-size: 1.25rem; opacity: 0.7; }
 .results__record { font-weight: 700; color: var(--color-teal-dark); }
 .results__badge-award { font-weight: 700; }
 .results__missed { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 8px; }
-.results__missed-heading { font-size: 16px; font-weight: 700; opacity: 0.8; }
+.results__missed-heading { font-size: 1rem; font-weight: 700; opacity: 0.8; }
 .results__actions { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; }
-.results__btn { padding: 16px 36px; font-size: 20px; font-weight: 700; border-radius: var(--radius-button); min-height: 64px; }
+.results__btn { padding: 16px 36px; font-size: 1.25rem; font-weight: 700; border-radius: var(--radius-button); min-height: 64px; }
 .results__btn--play  { background: var(--color-lavender); color: white; border: none; }
 .results__btn--home  { background: transparent; border: 2px solid var(--color-aqua); color: var(--color-text); }
 .results__btn:focus         { outline: none; }

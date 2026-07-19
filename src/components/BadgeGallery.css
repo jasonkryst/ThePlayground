@@ -1,5 +1,5 @@
 .badge-gallery__game { margin-bottom: 24px; }
-.badge-gallery__game-name { font-size: 16px; font-weight: 700; margin-bottom: 10px; }
+.badge-gallery__game-name { font-size: 1rem; font-weight: 700; margin-bottom: 10px; }
 
 .badge-gallery__badges {
   display: flex;
@@ -28,9 +28,9 @@
   background: rgb(91 107 112 / 8%);
 }
 
-.badge-gallery__icon { font-size: 28px; }
+.badge-gallery__icon { font-size: 1.75rem; }
 .badge-gallery__badge--locked .badge-gallery__icon { opacity: 0.45; }
 
-.badge-gallery__name { font-size: 13px; font-weight: 700; }
-.badge-gallery__count { font-size: 12px; font-weight: 700; color: var(--color-teal-dark); }
-.badge-gallery__locked-label { font-size: 11px; color: var(--color-text-muted); }
+.badge-gallery__name { font-size: 0.8125rem; font-weight: 700; }
+.badge-gallery__count { font-size: 0.75rem; font-weight: 700; color: var(--color-teal-dark); }
+.badge-gallery__locked-label { font-size: 0.6875rem; color: var(--color-text-muted); }
