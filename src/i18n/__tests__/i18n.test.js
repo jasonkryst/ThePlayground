@@ -12,7 +12,7 @@ describe('i18n', () => {
   })
 
   it('exports SUPPORTED_LOCALES derived from what was actually discovered, not a hardcoded list', () => {
-    expect(SUPPORTED_LOCALES).toEqual(['en', 'es'])
+    expect(SUPPORTED_LOCALES).toEqual(['en', 'es', 'pl'])
   })
 
   it('resolves a known es key to its Spanish translation', () => {
@@ -25,6 +25,28 @@ describe('i18n', () => {
     )
     expect(i18n.t('common.difficultyOfferHeading', { count: 3 })).toBe(
       'Perfect session! Try 3 choices next time?'
+    )
+  })
+
+  it('resolves a known pl key to its Polish translation', () => {
+    expect(i18n.t('common.home', { lng: 'pl' })).toBe('Strona główna')
+  })
+
+  it('pluralizes common.difficultyOfferHeading with all four Polish plural categories', () => {
+    expect(i18n.t('common.difficultyOfferHeading', { count: 1, lng: 'pl' })).toBe(
+      'Świetna sesja! Spróbować 1 opcję następnym razem?'
+    )
+    expect(i18n.t('common.difficultyOfferHeading', { count: 3, lng: 'pl' })).toBe(
+      'Świetna sesja! Spróbować 3 opcje następnym razem?'
+    )
+    expect(i18n.t('common.difficultyOfferHeading', { count: 5, lng: 'pl' })).toBe(
+      'Świetna sesja! Spróbować 5 opcji następnym razem?'
+    )
+  })
+
+  it('falls back to the Polish "other" plural form for a non-integer count instead of the raw key', () => {
+    expect(i18n.t('common.difficultyOfferHeading', { count: 1.5, lng: 'pl' })).toBe(
+      'Świetna sesja! Spróbować 1.5 opcji następnym razem?'
     )
   })
 })
