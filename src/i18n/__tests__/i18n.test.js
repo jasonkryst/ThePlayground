@@ -147,10 +147,39 @@ function collectLeafPaths(obj, prefix = '') {
   return paths
 }
 
-describe('en/es key parity', () => {
-  it('has the exact same set of translation keys in en and es across core + every game', () => {
-    const enKeys = collectLeafPaths(i18n.getResourceBundle('en', 'translation')).sort()
-    const esKeys = collectLeafPaths(i18n.getResourceBundle('es', 'translation')).sort()
-    expect(esKeys).toEqual(enKeys)
+const PLURAL_SUFFIX_RE = /_(?:one|few|many|other)$/
+
+function toBaseKey(path) {
+  return path.replace(PLURAL_SUFFIX_RE, '')
+}
+
+function baseKeySet(locale) {
+  return [...new Set(collectLeafPaths(i18n.getResourceBundle(locale, 'translation')).map(toBaseKey))].sort()
+}
+
+function pluralSuffixesFor(locale, basePath) {
+  return collectLeafPaths(i18n.getResourceBundle(locale, 'translation'))
+    .filter(p => p.startsWith(basePath) && PLURAL_SUFFIX_RE.test(p))
+    .map(p => p.match(PLURAL_SUFFIX_RE)[0].slice(1))
+    .sort()
+}
+
+describe('cross-locale key parity', () => {
+  it('has the exact same set of base translation keys in en, es, and pl across core + every game', () => {
+    const enKeys = baseKeySet('en')
+    expect(baseKeySet('es')).toEqual(enKeys)
+    expect(baseKeySet('pl')).toEqual(enKeys)
+  })
+
+  it('en and es define exactly the one/other plural forms for pluralizable keys', () => {
+    expect(pluralSuffixesFor('en', 'common.difficultyOfferHeading')).toEqual(['one', 'other'])
+    expect(pluralSuffixesFor('es', 'common.difficultyOfferHeading')).toEqual(['one', 'other'])
+    expect(pluralSuffixesFor('en', 'gameCard.playCount')).toEqual(['one', 'other'])
+    expect(pluralSuffixesFor('es', 'gameCard.playCount')).toEqual(['one', 'other'])
+  })
+
+  it('pl defines all four CLDR plural forms for pluralizable keys', () => {
+    expect(pluralSuffixesFor('pl', 'common.difficultyOfferHeading')).toEqual(['few', 'many', 'one', 'other'])
+    expect(pluralSuffixesFor('pl', 'gameCard.playCount')).toEqual(['few', 'many', 'one', 'other'])
   })
 })

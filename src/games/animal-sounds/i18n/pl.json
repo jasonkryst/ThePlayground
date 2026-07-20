@@ -1,0 +1,23 @@
+{
+  "animalSounds": {
+    "manifestName": "Dźwięki Zwierząt",
+    "manifestDescription": "Dopasuj zwierzę do jego dźwięku!",
+    "prompt": "Jakie zwierzę wydaje ten dźwięk?",
+    "replay": "Odtwórz ponownie",
+    "howToPlay": "Posłuchaj dźwięku, a potem dotknij pasującego zwierzęcia!"
+  },
+  "animal": {
+    "elephant": { "name": "Słoń" },
+    "lion": { "name": "Lew" },
+    "cow": { "name": "Krowa" },
+    "dog": { "name": "Pies" },
+    "cat": { "name": "Kot" },
+    "frog": { "name": "Żaba" },
+    "duck": { "name": "Kaczka" },
+    "horse": { "name": "Koń" },
+    "pig": { "name": "Świnia" },
+    "sheep": { "name": "Owca" },
+    "rooster": { "name": "Kogut" },
+    "owl": { "name": "Sowa" }
+  }
+}

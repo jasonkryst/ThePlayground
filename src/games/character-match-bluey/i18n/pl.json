@@ -1,0 +1,39 @@
+{
+  "characterMatchGameBluey": {
+    "manifestName": "Dopasuj Postacie - Bluey",
+    "manifestDescription": "Dopasuj imię do postaci!",
+    "prompt": "Który to {{name}}?",
+    "howToPlay": "Zobacz imię, a potem dotknij pasującej postaci!"
+  },
+  "charactersBluey": {
+    "bluey": { "name": "Bluey" },
+    "bingo": { "name": "Bingo" },
+    "bandit": { "name": "Bandit" },
+    "chilli": { "name": "Chilli" },
+    "muffin": { "name": "Muffin" },
+    "socks": { "name": "Socks" },
+    "mackenzie": { "name": "Mackenzie" },
+    "brandy": { "name": "Brandy" },
+    "rad": { "name": "Rad" },
+    "buddy": { "name": "Buddy" },
+    "busker": { "name": "Busker" },
+    "calypso": { "name": "Calypso" },
+    "chloe": { "name": "Chloe" },
+    "coco": { "name": "Coco" },
+    "doreen": { "name": "Doreen" },
+    "dusty": { "name": "Dusty" },
+    "honey": { "name": "Honey" },
+    "indy": { "name": "Indy" },
+    "jack": { "name": "Jack" },
+    "jean-luc": { "name": "Jean-Luc" },
+    "jerry-lee": { "name": "Jerry Lee" },
+    "judo": { "name": "Judo" },
+    "lucky": { "name": "Lucky" },
+    "major-tom": { "name": "Major Tom" },
+    "mia": { "name": "Mia" },
+    "rusty": { "name": "Rusty" },
+    "snickers": { "name": "Snickers" },
+    "stripe": { "name": "Stripe" },
+    "winton": { "name": "Winton" }
+  }
+}

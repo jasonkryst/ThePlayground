@@ -1,0 +1,24 @@
+{
+  "fruitVeggie": {
+    "manifestName": "Owoce i Warzywa",
+    "manifestDescription": "Posłuchaj nazwy i dotknij pasującego owocu lub warzywa!",
+    "prompt": "Co słyszysz?",
+    "promptFallback": "Znajdź: {{name}}!",
+    "replay": "Powiedz ponownie",
+    "howToPlay": "Posłuchaj nazwy, a potem dotknij pasującego obrazka!"
+  },
+  "food": {
+    "apple": { "name": "Jabłko" },
+    "banana": { "name": "Banan" },
+    "orange": { "name": "Pomarańcza" },
+    "strawberry": { "name": "Truskawka" },
+    "grapes": { "name": "Winogrona" },
+    "watermelon": { "name": "Arbuz" },
+    "carrot": { "name": "Marchewka" },
+    "tomato": { "name": "Pomidor" },
+    "corn": { "name": "Kukurydza" },
+    "broccoli": { "name": "Brokuł" },
+    "potato": { "name": "Ziemniak" },
+    "pepper": { "name": "Papryka" }
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "animalMemoryMatch": {
+    "manifestName": "Zwierzęce Memory",
+    "manifestDescription": "Odwracaj kafelki i znajdź pasujące pary zwierząt!",
+    "prompt": "Znajdź pasujące pary!",
+    "progress": "Znaleziono {{found}} z {{total}} par",
+    "howToPlay": "Odwracaj po dwa kafelki i znajdź wszystkie pasujące pary zwierząt!",
+    "matchAnnounce": "To para! {{name}}!",
+    "noMatchAnnounce": "To nie para — spróbuj ponownie!",
+    "completeAnnounce": "Wszystkie pary znalezione!",
+    "animals": {
+      "dog":  { "name": "Pies" },
+      "cat":  { "name": "Kot" },
+      "cow":  { "name": "Krowa" },
+      "duck": { "name": "Kaczka" },
+      "frog": { "name": "Żaba" },
+      "lion": { "name": "Lew" }
+    },
+    "badges": {
+      "sharpMind":    { "name": "Bystry umysł",       "desc": "Ukończ planszę z prawie zerową liczbą niepotrzebnych ruchów." },
+      "matchStreak":  { "name": "Seria dopasowań",    "desc": "Dopasuj 3 pary z rzędu bez pomyłki." },
+      "bigBoard":     { "name": "Duża plansza",       "desc": "Ukończ planszę z 6 parami." },
+      "pairSpotter":  { "name": "Tropiciel par",      "desc": "Dopasuj łącznie 25 par." },
+      "pairPro":      { "name": "Ekspert od par",     "desc": "Dopasuj łącznie 100 par." },
+      "pairChampion": { "name": "Mistrz par",         "desc": "Dopasuj łącznie 500 par." }
+    }
+  }
+}
