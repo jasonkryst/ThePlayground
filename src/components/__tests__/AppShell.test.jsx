@@ -209,3 +209,14 @@ describe('AppShell — Spanish locale', () => {
     expect(screen.getByText('Combinar Colores v1.6.0')).toBeInTheDocument()
   })
 })
+
+describe('AppShell — Polish locale', () => {
+  beforeEach(async () => { await act(async () => { await i18n.changeLanguage('pl') }) })
+  afterEach(async () => { await act(async () => { await i18n.changeLanguage('en') }) })
+
+  it('renders the translated Polish game name as the in-game h1 title and footer version line', () => {
+    renderShell('/game/color-match')
+    expect(screen.getByRole('heading', { level: 1, name: /dopasuj kolory/i })).toBeInTheDocument()
+    expect(screen.getByText('Dopasuj Kolory v1.6.0')).toBeInTheDocument()
+  })
+})

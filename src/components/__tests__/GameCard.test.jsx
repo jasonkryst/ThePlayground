@@ -141,3 +141,14 @@ describe('GameCard — Spanish locale', () => {
     expect(screen.getByText('¡Empareja el animal con su sonido!')).toBeInTheDocument()
   })
 })
+
+describe('GameCard — Polish locale', () => {
+  beforeEach(async () => { await act(async () => { await i18n.changeLanguage('pl') }) })
+  afterEach(async () => { await act(async () => { await i18n.changeLanguage('en') }) })
+
+  it('renders the translated Polish name and description under the pl locale', () => {
+    renderCard()
+    expect(screen.getByText('Dźwięki Zwierząt')).toBeInTheDocument()
+    expect(screen.getByText('Dopasuj zwierzę do jego dźwięku!')).toBeInTheDocument()
+  })
+})
