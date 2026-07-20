@@ -3,18 +3,10 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [0.30.0] - 2026-07-19
-
-### Changed
-- Manifest `name`/`description` i18n (issue #105 follow-up): these two fields render in 6 and 2 user-facing places respectively (dashboard tile, featured card, in-game intro screen and page title, kids progress page) and were explicitly out of scope in the initial Spanish i18n work as "game-author metadata" — in practice they're clearly user-facing UI text. Every `manifest.json` now carries `nameKey`/`descriptionKey` instead of literal `name`/`description`, pointing into that game's own i18n namespace exactly like the existing item-`nameKey` pattern (e.g. `food.apple.nameKey`); the 6 consuming components resolve them via `t()`. A new test (`src/__tests__/manifestI18nKeys.test.js`) asserts every manifest's keys resolve in both locales, and the existing cross-locale parity test covers the 12 new translation keys automatically.
-
 ## [0.29.0] - 2026-07-19
 
-### Added
-- Spanish (`es`) locale support (issue #105): activates the existing (previously dormant) locale-switching infrastructure — `src/i18n/index.js` already auto-discovered per-locale JSON and derived `SUPPORTED_LOCALES` from what it found, and `AdminPage` already rendered a `LocaleSelector` once 2+ locales existed, but `en` was the only one that ever shipped. Ships a complete `es.json` (Latin American/US Spanish) alongside every existing `en.json`, core and all 6 games — `character-match`/`character-match-bluey`'s licensed-show character names stay untranslated, matching the pre-existing convention that manifest fields and proper names aren't localized. The locale picker (`LocaleSelector`) now shows friendly language names ("English"/"Español") instead of raw locale codes now that it's actually visible. A new cross-locale key-parity test (`src/i18n/__tests__/i18n.test.js`) walks the merged `en`/`es` resource trees and fails if either locale is missing a key the other has.
-
 ### Fixed
-- `useSpeech` (`fruit-veggie-id`'s spoken-name prompt) hardcoded `utterance.lang = 'en-US'` regardless of the active locale — under Spanish this spoke translated Spanish text with a forced English voice. `speak()` now derives the utterance language from the active i18next locale via a small `SPEECH_LANG_BY_LOCALE` map, falling back to `en-US` for any locale without a mapped speech voice.
+- Accessibility wave 2 (issue #83, 200%-zoom / large-text audit): OS/browser "larger text" accessibility settings previously had no effect anywhere in the app — every `font-size` declaration was hardcoded in `px`, which does not respond to the root-font-size scaling those settings use (confirmed: doubling the root font-size produced a byte-for-byte identical render); converted app-wide to `rem`, including a fix to `ParentDashboard`'s heatmap day-label box (fixed `width`/`height` → `min-width`/`min-height`) so its now-larger glyph can't clip. Separately, the memory board's keyboard-focused tiles could land up to 71% hidden behind the sticky app header at 200%-zoom-equivalent or other short viewports, since nothing reserved scroll space for the header's height; a new `useHeaderHeightVar` hook publishes the header's live `ResizeObserver`-measured height as `--shell-header-height`, consumed by a new `html { scroll-padding-top: var(--shell-header-height) }` rule so native browser scroll-into-view never lands focus underneath it. Guarded by a new reusable `e2e/zoom-large-text.spec.js` suite.
 
 ## [0.28.5] - 2026-07-18
 

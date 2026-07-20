@@ -16,26 +16,26 @@
 }
 
 .game-intro__icon {
-  font-size: 96px;
+  font-size: 6rem;
 }
 
 img.game-intro__icon { width: 96px; height: 96px; object-fit: contain; }
 
 .game-intro__name {
-  font-size: 28px;
+  font-size: 1.75rem;
   font-weight: 800;
   margin: 0;
 }
 
 .game-intro__instructions {
-  font-size: 20px;
+  font-size: 1.25rem;
   opacity: 0.8;
   max-width: 480px;
   margin: 0;
 }
 
 .game-intro__orientation {
-  font-size: 18px;
+  font-size: 1.125rem;
   font-weight: 700;
   margin: 0;
   color: var(--color-text-muted);
@@ -45,7 +45,7 @@ img.game-intro__icon { width: 96px; height: 96px; object-fit: contain; }
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 16px;
+  font-size: 1rem;
   opacity: 0.8;
 }
 
@@ -56,7 +56,7 @@ img.game-intro__icon { width: 96px; height: 96px; object-fit: contain; }
 
 .game-intro__start {
   padding: 16px 36px;
-  font-size: 20px;
+  font-size: 1.25rem;
   font-weight: 700;
   border-radius: var(--radius-button);
   min-height: 64px;

@@ -21,11 +21,11 @@
   border-radius: var(--radius-card);
 }
 
-.exit-confirm__title { font-size: 22px; font-weight: 800; color: var(--color-text); }
+.exit-confirm__title { font-size: 1.375rem; font-weight: 800; color: var(--color-text); }
 
 .exit-confirm__keep {
   min-height: 80px;
-  font-size: 22px;
+  font-size: 1.375rem;
   font-weight: 800;
   color: var(--color-teal-dark);
   background: var(--color-teal);

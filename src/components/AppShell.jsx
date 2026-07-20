@@ -6,6 +6,7 @@ import ExitConfirmDialog from './ExitConfirmDialog'
 import StreakBadge from './StreakBadge'
 import ManifestIcon from './ManifestIcon'
 import useFocusOnMount from '../hooks/useFocusOnMount'
+import useHeaderHeightVar from '../hooks/useHeaderHeightVar'
 import { version } from '../../package.json'
 import './AppShell.css'
 
@@ -30,6 +31,8 @@ export default function AppShell({ manifests = [] }) {
   const exitTriggerRef = useRef(null)
   const titleRef = useFocusOnMount([location.pathname])
   const bodyRef = useRef(null)
+  const headerRef = useRef(null)
+  useHeaderHeightVar(headerRef)
 
   // Read inside the popstate handler below instead of closing over
   // gameStatus/isGameRoute directly, so the handler (registered once) always
@@ -134,7 +137,7 @@ export default function AppShell({ manifests = [] }) {
         {/* display:contents so this wrapper is invisible to layout — it exists
             solely as an inert/aria-hidden host while the exit dialog is open. */}
         <div className="shell__body" ref={bodyRef}>
-          <header className="shell__header">
+          <header className="shell__header" ref={headerRef}>
             {/* Row 1: app-level chrome (brand, back, nav/home) — identical
                 shape on every route. Row 2 (below): route content — the page
                 title, plus the streak badge on game routes — gets the full
