@@ -3,6 +3,16 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.31.0] - 2026-07-19
+
+### Added
+- Polish (`pl`) locale support (issue #107): a third locale alongside `en`/`es`, built on the same auto-discovered `src/i18n/index.js` infrastructure — no plumbing changes needed. Ships a complete `pl.json` core file plus per-game `pl.json` files for all 6 games, including translated `manifestName`/`manifestDescription` (per the `nameKey`/`descriptionKey` convention from #105's follow-up). `character-match`/`character-match-bluey`'s licensed-show character names stay untranslated, matching the existing convention. `useSpeech`'s `SPEECH_LANG_BY_LOCALE` map and `LocaleSelector`'s `LOCALE_NAMES` map both gain a `pl` entry (`pl-PL`, "Polski").
+- Polish grammar needs four CLDR cardinal plural categories (`one`/`few`/`many`/`other`) where English and Spanish only need two (`one`/`other`) — e.g. "1 opcja" / "2 opcje" / "5 opcji" all take different endings. Both pluralized keys (`common.difficultyOfferHeading`, `gameCard.playCount`) now carry all four Polish forms; i18next's `Intl.PluralRules`-backed resolver (already the default, no config change) picks the right one automatically.
+
+### Changed
+- The cross-locale key-parity test (`src/i18n/__tests__/i18n.test.js`) now compares *base* keys (stripping any plural suffix) across `en`/`es`/`pl`, plus a separate assertion that each locale defines the plural-suffix set its own grammar requires — the previous version's exact-key-set comparison couldn't express a locale needing more plural categories than another.
+- `src/__tests__/manifestI18nKeys.test.js` now iterates `SUPPORTED_LOCALES` instead of hardcoding `en`/`es`, so it automatically covers whichever locales actually exist rather than needing a manual update every time one is added.
+
 ## [0.30.0] - 2026-07-19
 
 ### Changed
