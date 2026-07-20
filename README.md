@@ -33,6 +33,7 @@ Each day, one game is automatically selected as "Today's Game" and displayed as 
 ### Recently Played Badges
 
 When a game has been played, its card displays a colored glow border and a badge showing when it was last played:
+
 - "Today · N plays" — played today
 - "Yesterday · N plays" — played yesterday
 - "N days ago · N plays" — played N days ago
@@ -97,7 +98,7 @@ For production builds, Docker deployment, and self-hosting guidance, see [`docs/
 
 ## Architecture
 
-```
+```text
 src/
 ├── App.jsx                    # Auto-discovery routing, GA loader, locale sync
 ├── index.css                  # Design system (CSS custom properties)
@@ -224,21 +225,21 @@ Use `var(--color-aqua)` etc. rather than hardcoding hex values, so games stay vi
 1. Create a folder under `src/games/<your-game-id>/`
 2. Add `manifest.json` — `tags` is **required** (it places the game in a dashboard category). `nameKey`/`descriptionKey` point at strings you'll add to the game's own `i18n/en.json`/`es.json`/`pl.json` (step 4) rather than literal text:
 
-```json
-{
-  "id": "your-game-id",
-  "nameKey": "yourGame.manifestName",
-  "descriptionKey": "yourGame.manifestDescription",
-  "icon": "🎮",
-  "color": "#80DEEA",
-  "version": "1.0.0",
-  "tags": ["visual"]
-}
-```
+   ```json
+   {
+     "id": "your-game-id",
+     "nameKey": "yourGame.manifestName",
+     "descriptionKey": "yourGame.manifestDescription",
+     "icon": "🎮",
+     "color": "#80DEEA",
+     "version": "1.0.0",
+     "tags": ["visual"]
+   }
+   ```
 
-The `icon` can also be an image path (see Character Match). Memory-type games add `"gameType": "memory"`, which switches the My Progress page to memory-appropriate stat tiles.
+   The `icon` can also be an image path (see Character Match). Memory-type games add `"gameType": "memory"`, which switches the My Progress page to memory-appropriate stat tiles.
 
-Games that only lay out well in one orientation can add `"orientation": "landscape"` or `"orientation": "portrait"`. The engine then enforces it for that game's whole route: a full-screen rotate prompt blocks play (and pauses the memory-session/quiz-session timer) whenever the device/viewport is in the wrong orientation, the intro slide announces the requirement, and the dashboard card shows a ↔️ *Landscape only* badge (or a ↕️ *Portrait only* badge). Detection is hybrid — physical device orientation on touch devices, viewport aspect ratio on desktop. No game code is needed beyond the manifest field (pass `manifest.orientation` to `GameIntro` if the game renders its own intro).
+   Games that only lay out well in one orientation can add `"orientation": "landscape"` or `"orientation": "portrait"`. The engine then enforces it for that game's whole route: a full-screen rotate prompt blocks play (and pauses the memory-session/quiz-session timer) whenever the device/viewport is in the wrong orientation, the intro slide announces the requirement, and the dashboard card shows a ↔️ *Landscape only* badge (or a ↕️ *Portrait only* badge). Detection is hybrid — physical device orientation on touch devices, viewport aspect ratio on desktop. No game code is needed beyond the manifest field (pass `manifest.orientation` to `GameIntro` if the game renders its own intro).
 
 3. Add `index.jsx` with a default export that accepts `onGameEnd`:
 
@@ -327,7 +328,7 @@ Accessible from the dashboard via the gear icon (⚙).
 
 **Google Analytics** — when a Measurement ID is entered, the GA4 script is injected at runtime and page view events fire on every navigation. Leaving the field blank disables tracking entirely. The ID is stored in `localStorage` alongside other settings. See [`SECURITY.md`](SECURITY.md) for the privacy analysis.
 
-**Child's Name** — when set, the dashboard title reads "<Name>'s Playground"; when left blank, it shows the default "My Playground".
+**Child's Name** — when set, the dashboard title reads "&lt;Name&gt;'s Playground"; when left blank, it shows the default "My Playground".
 
 **Celebration animations** — when on, a confetti burst plays on every correct answer (and fireworks on completing a memory board) and the game header shows the current answer streak once it reaches 2; the end-of-game screen lists any missed items. Turning this off disables the confetti only — streak tracking and the missed-items summary remain.
 

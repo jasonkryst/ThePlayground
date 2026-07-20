@@ -21,6 +21,7 @@
 New file, structurally identical to `src/i18n/en.json`: same top-level namespaces (`common`, `shell`, `dashboard`, `parent`, `gameCard`, `admin`, `scoreHistory`, `kids`, `badges`, `memoryBoard`), same key names, same `{{interpolation}}` placeholders.
 
 Both pluralized keys get all four CLDR forms, e.g.:
+
 ```json
 "difficultyOfferHeading_one": "Świetna sesja! Spróbować {{count}} opcji następnym razem?",
 "difficultyOfferHeading_few": "Świetna sesja! Spróbować {{count}} opcji następnym razem?",
@@ -31,6 +32,7 @@ Both pluralized keys get all four CLDR forms, e.g.:
 "playCount_many": "{{count}} gier",
 "playCount_other": "{{count}} gry"
 ```
+
 (Exact wording finalized during implementation — `opcji`/`opcja`/`opcje` may vary by count per Polish noun declension; the implementer should verify each form is grammatically correct for its category, not just structurally present.)
 
 `admin.localeHeading` ("Language" → "Język") is the string the picker's `<h2>` uses.
@@ -53,11 +55,13 @@ One new file per existing game folder (6 total), each mirroring that game's `en.
 ## 3. Code changes
 
 **`src/hooks/useSpeech.js`** — add one map entry:
+
 ```js
 export const SPEECH_LANG_BY_LOCALE = { en: 'en-US', es: 'es-US', pl: 'pl-PL' }
 ```
 
 **`src/components/LocaleSelector.jsx`** — add one map entry:
+
 ```js
 const LOCALE_NAMES = { en: 'English', es: 'Español', pl: 'Polski' }
 ```
@@ -69,6 +73,7 @@ No other source changes required.
 Positive and negative cases at each layer, per standing preference.
 
 **`src/i18n/__tests__/i18n.test.js`:**
+
 - Positive: `SUPPORTED_LOCALES` now equals `['en', 'es', 'pl']`.
 - Positive: a known `pl` key resolves correctly (e.g. `i18n.t('common.home', { lng: 'pl' })` → the Polish string).
 - Positive: `i18n.t('common.difficultyOfferHeading', { count: 1, lng: 'pl' })`, `{ count: 3, lng: 'pl' }`, and `{ count: 5, lng: 'pl' }` each resolve to the correct `one`/`few`/`many` Polish form.
@@ -76,18 +81,22 @@ Positive and negative cases at each layer, per standing preference.
 - **Parity test rewrite** (replaces the old exact-key-set assertion, since it no longer holds once `pl` has extra plural suffixes): strip known plural suffixes (`_one`/`_few`/`_many`/`_other`) from leaf paths to get each locale's base-key set; assert `en`, `es`, and `pl` base-key sets are identical across core + every game (still catches a genuinely missing/misspelled key). Separately, for each of the two pluralizable base keys, assert `en`/`es` define exactly `{one, other}` and `pl` defines exactly `{one, few, many, other}` — catches an incomplete Polish plural set or an accidentally-added stray suffix.
 
 **`src/hooks/__tests__/useSpeech.test.js`:**
+
 - Positive: `speak()` sets `lang: 'pl-PL'` when the active locale is `pl`.
 - Existing positive (`en`→`en-US`, `es`→`es-US`) and negative (unmapped locale → `en-US` fallback) cases continue to pass unchanged.
 - Positive (updated): every code in `SUPPORTED_LOCALES` has an entry in `SPEECH_LANG_BY_LOCALE` — this test already exists from the Spanish work and now also enforces `pl`'s presence without modification.
 
 **`src/components/__tests__/LocaleSelector.test.jsx`:**
+
 - Positive: `locales={['en','es','pl']}` renders 3 options with friendly names `['English', 'Español', 'Polski']`.
 - Existing negative (unmapped code `fr` renders raw code) continues to pass unchanged.
 
 **`src/App.test.jsx`:**
+
 - Positive: `settings.locale = 'pl'` drives `i18n.changeLanguage('pl')` and `document.documentElement.lang === 'pl'`.
 
 **`src/games/fruit-veggie-id/__tests__/FruitVeggieIdGame.test.jsx`:**
+
 - Positive: under the `pl` locale, the replay button triggers `speak()` with the Polish item name.
 
 **e2e:** no visual-regression baseline changes expected (see decisions above) — confirm by running `npm run e2e` and checking the AdminPage snapshot diff is empty, not by pre-emptively regenerating it.
