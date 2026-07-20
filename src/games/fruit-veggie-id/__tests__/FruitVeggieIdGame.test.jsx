@@ -267,3 +267,22 @@ describe('FruitVeggieIdGame — Spanish locale', () => {
     expect(mockSpeak).toHaveBeenCalledWith(spanishNameById[correctId])
   })
 })
+
+describe('FruitVeggieIdGame — Polish locale', () => {
+  beforeEach(async () => { await act(async () => { await i18n.changeLanguage('pl') }) })
+  afterEach(async () => { await act(async () => { await i18n.changeLanguage('en') }) })
+
+  it('replay button speaks the Polish item name under the pl locale', async () => {
+    await act(async () => { render(<FruitVeggieIdGame onGameEnd={onGameEnd} />) })
+    mockSpeak.mockClear()
+    const replay = screen.getByLabelText(/powiedz ponownie/i)
+    await act(async () => { await userEvent.click(replay) })
+    const correctId = screen.getByTestId('correct-food-id').textContent
+    const polishNameById = {
+      apple: 'Jabłko', banana: 'Banan', orange: 'Pomarańcza', strawberry: 'Truskawka',
+      grapes: 'Winogrona', watermelon: 'Arbuz', carrot: 'Marchewka', tomato: 'Pomidor',
+      corn: 'Kukurydza', broccoli: 'Brokuł', potato: 'Ziemniak', pepper: 'Papryka',
+    }
+    expect(mockSpeak).toHaveBeenCalledWith(polishNameById[correctId])
+  })
+})
