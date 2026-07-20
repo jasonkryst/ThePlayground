@@ -4,8 +4,8 @@ import { axe } from 'jest-axe'
 import BadgeGallery from '../BadgeGallery'
 
 const manifests = [
-  { id: 'animal-sounds', name: 'Animal Sounds' },
-  { id: 'color-match', name: 'Color Match' },
+  { id: 'animal-sounds', nameKey: 'animalSounds.manifestName' },
+  { id: 'color-match', nameKey: 'colorMatch.manifestName' },
 ]
 
 describe('BadgeGallery', () => {
@@ -60,8 +60,8 @@ describe('BadgeGallery', () => {
     render(
       <BadgeGallery
         manifests={[
-          { id: 'animal-sounds', name: 'Animal Sounds' },
-          { id: 'animal-memory-match', name: 'Animal Memory Match' },
+          { id: 'animal-sounds', nameKey: 'animalSounds.manifestName' },
+          { id: 'animal-memory-match', nameKey: 'animalMemoryMatch.manifestName' },
         ]}
         badgeData={{ awards: {}, lifetimeQuestions: {}, lifetimeCounters: {} }}
       />

@@ -1,8 +1,8 @@
 import BadgeGallery from './BadgeGallery'
 
 const manifests = [
-  { id: 'animal-sounds', name: 'Animal Sounds' },
-  { id: 'color-match', name: 'Color Match' },
+  { id: 'animal-sounds', nameKey: 'animalSounds.manifestName' },
+  { id: 'color-match', nameKey: 'colorMatch.manifestName' },
 ]
 
 export default {

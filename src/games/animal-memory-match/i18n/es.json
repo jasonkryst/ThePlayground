@@ -1,0 +1,28 @@
+{
+  "animalMemoryMatch": {
+    "manifestName": "Memorama de Animales",
+    "manifestDescription": "¡Voltea las fichas y encuentra los pares de animales!",
+    "prompt": "¡Encuentra los pares!",
+    "progress": "{{found}} de {{total}} pares encontrados",
+    "howToPlay": "¡Voltea dos fichas a la vez y encuentra todos los pares de animales!",
+    "matchAnnounce": "¡Es un par! ¡{{name}}!",
+    "noMatchAnnounce": "No es un par — ¡inténtalo de nuevo!",
+    "completeAnnounce": "¡Encontraste todos los pares!",
+    "animals": {
+      "dog":  { "name": "Perro" },
+      "cat":  { "name": "Gato" },
+      "cow":  { "name": "Vaca" },
+      "duck": { "name": "Pato" },
+      "frog": { "name": "Rana" },
+      "lion": { "name": "León" }
+    },
+    "badges": {
+      "sharpMind":    { "name": "Mente aguda",       "desc": "Termina un tablero con casi ningún volteo desperdiciado." },
+      "matchStreak":  { "name": "Racha de pares",    "desc": "Empareja 3 pares seguidos sin fallar." },
+      "bigBoard":     { "name": "Tablero grande",    "desc": "Completa un tablero de 6 pares." },
+      "pairSpotter":  { "name": "Detector de pares", "desc": "Empareja 25 pares en total." },
+      "pairPro":      { "name": "Experto en pares",  "desc": "Empareja 100 pares en total." },
+      "pairChampion": { "name": "Campeón de pares",  "desc": "Empareja 500 pares en total." }
+    }
+  }
+}

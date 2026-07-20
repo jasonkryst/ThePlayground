@@ -2,7 +2,7 @@ import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import AppShell from './AppShell'
 
 const manifests = [
-  { id: 'color-match', name: 'Color Match', description: 'Match the color!', icon: '🎨', color: '#CE93D8' },
+  { id: 'color-match', nameKey: 'colorMatch.manifestName', descriptionKey: 'colorMatch.manifestDescription', icon: '🎨', color: '#CE93D8' },
 ]
 
 export default {

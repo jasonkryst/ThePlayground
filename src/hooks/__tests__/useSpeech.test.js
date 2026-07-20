@@ -1,6 +1,7 @@
-import { renderHook } from '@testing-library/react'
+import { act, renderHook } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
-import useSpeech from '../useSpeech'
+import i18n, { SUPPORTED_LOCALES } from '../../i18n'
+import useSpeech, { SPEECH_LANG_BY_LOCALE } from '../useSpeech'
 
 let speakSpy, cancelSpy
 
@@ -37,6 +38,26 @@ describe('useSpeech (supported)', () => {
     expect(speakSpy.mock.calls[0][0].lang).toBe('en-US')
   })
 
+  it('speak() sets an es-US lang when the active locale is es', async () => {
+    // changeLanguage triggers a state update in react-i18next's internal
+    // subscription on any mounted useTranslation() consumer; wrap in act()
+    // so that update (both before and after mounting the hook) isn't left
+    // dangling outside React's test render cycle.
+    await act(async () => { await i18n.changeLanguage('es') })
+    const { result } = renderHook(() => useSpeech())
+    result.current.speak('manzana')
+    expect(speakSpy.mock.calls[0][0].lang).toBe('es-US')
+    await act(async () => { await i18n.changeLanguage('en') })
+  })
+
+  it('speak() falls back to en-US for an unmapped locale instead of leaving lang unset', async () => {
+    await act(async () => { await i18n.changeLanguage('xx') })
+    const { result } = renderHook(() => useSpeech())
+    result.current.speak('hello')
+    expect(speakSpy.mock.calls[0][0].lang).toBe('en-US')
+    await act(async () => { await i18n.changeLanguage('en') })
+  })
+
   it('cancel() stops in-flight speech', () => {
     const { result } = renderHook(() => useSpeech())
     result.current.cancel()
@@ -65,5 +86,13 @@ describe('useSpeech (unsupported)', () => {
     const { result } = renderHook(() => useSpeech())
     expect(result.current.supported).toBe(false)
     expect(() => { result.current.speak('apple'); result.current.cancel() }).not.toThrow()
+  })
+})
+
+describe('SPEECH_LANG_BY_LOCALE coverage', () => {
+  it('has an entry for every locale in SUPPORTED_LOCALES', () => {
+    for (const loc of SUPPORTED_LOCALES) {
+      expect(SPEECH_LANG_BY_LOCALE[loc]).toBeDefined()
+    }
   })
 })

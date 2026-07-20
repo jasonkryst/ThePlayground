@@ -132,15 +132,17 @@ src/
 │
 ├── i18n/
 │   ├── en.json                # Core cross-cutting strings (common, dashboard, admin, ...)
-│   └── index.js               # Merges en.json + every game's i18n/en.json at startup
+│   ├── es.json                # Spanish translation, same structure as en.json
+│   └── index.js               # Merges en.json/es.json + every game's i18n/*.json at startup
 │
 └── games/                     # One folder per game — animal-sounds, color-match,
     └── animal-memory-match/   #   character-match, animal-memory-match; drop a new folder to add one
-        ├── manifest.json      # Game metadata (id, name, tags, version, optional gameType, orientation)
+        ├── manifest.json      # Game metadata (id, nameKey/descriptionKey, tags, version, optional gameType, orientation)
         ├── index.jsx          # Game component (default export accepting onGameEnd)
         ├── badges.js          # Optional per-game badge catalog (auto-discovered)
         ├── data/              # Item catalog (e.g. animals.js, colors.js)
         ├── i18n/en.json       # This game's own strings — auto-merged, no shared file to edit
+        ├── i18n/es.json       # Spanish translation of the same strings
         └── <assets>/          # Images/audio, game-specific
 ```
 
@@ -218,13 +220,13 @@ Use `var(--color-aqua)` etc. rather than hardcoding hex values, so games stay vi
 ## Adding a New Game
 
 1. Create a folder under `src/games/<your-game-id>/`
-2. Add `manifest.json` — `tags` is **required** (it places the game in a dashboard category):
+2. Add `manifest.json` — `tags` is **required** (it places the game in a dashboard category). `nameKey`/`descriptionKey` point at strings you'll add to the game's own `i18n/en.json`/`es.json` (step 4) rather than literal text:
 
 ```json
 {
   "id": "your-game-id",
-  "name": "Your Game Name",
-  "description": "One sentence description.",
+  "nameKey": "yourGame.manifestName",
+  "descriptionKey": "yourGame.manifestDescription",
   "icon": "🎮",
   "color": "#80DEEA",
   "version": "1.0.0",
@@ -298,6 +300,7 @@ Accessible from the dashboard via the gear icon (⚙).
 | Setting | Default | Options |
 |---|---|---|
 | Child's Name | *(empty)* | Any text |
+| Language | English | English, Español |
 | Answer choices | 2 | 2, 3, 4 |
 | Feedback mode | Immediate | Immediate, Parent tap |
 | Questions per session | 10 | 5, 10, 15, 20 |

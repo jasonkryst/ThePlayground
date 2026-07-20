@@ -49,8 +49,8 @@ vi.mock('../../hooks/useBadges', () => ({
 }))
 
 const manifestsFixture = [
-  { id: 'animal-sounds', name: 'Animal Sounds', tags: ['sounds', 'animals'], icon: '🐘', color: '#B39DDB' },
-  { id: 'color-match',   name: 'Color Match',   tags: ['visual', 'colors'],  icon: '🎨', color: '#CE93D8' },
+  { id: 'animal-sounds', nameKey: 'animalSounds.manifestName', tags: ['sounds', 'animals'], icon: '🐘', color: '#B39DDB' },
+  { id: 'color-match',   nameKey: 'colorMatch.manifestName',   tags: ['visual', 'colors'],  icon: '🎨', color: '#CE93D8' },
 ]
 
 function renderAdmin() {

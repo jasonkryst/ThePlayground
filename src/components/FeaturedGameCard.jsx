@@ -6,7 +6,9 @@ import './FeaturedGameCard.css'
 export default function FeaturedGameCard({ manifest }) {
   const { t } = useTranslation()
   if (!manifest) return null
-  const { id, name, description, icon, color, orientation } = manifest
+  const { id, nameKey, descriptionKey, icon, color, orientation } = manifest
+  const name = t(nameKey)
+  const description = t(descriptionKey)
   return (
     <Link
       to={`/game/${id}`}

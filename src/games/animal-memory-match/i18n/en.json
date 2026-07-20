@@ -1,5 +1,7 @@
 {
   "animalMemoryMatch": {
+    "manifestName": "Animal Memory Match",
+    "manifestDescription": "Flip the tiles and find the matching animal pairs!",
     "prompt": "Find the matching pairs!",
     "progress": "{{found}} of {{total}} pairs found",
     "howToPlay": "Flip two tiles at a time and find all the matching animal pairs!",

@@ -473,7 +473,7 @@ export default function AdminPage({ manifests = [] }) {
           {manifests.map(m => (
             <div key={m.id} className="admin__tag-row">
               <label htmlFor={`tags-${m.id}`} className="admin__tag-label">
-                {t('admin.tagsGameLabel', { name: m.name })}
+                {t('admin.tagsGameLabel', { name: t(m.nameKey) })}
               </label>
               <input
                 id={`tags-${m.id}`}
@@ -482,7 +482,7 @@ export default function AdminPage({ manifests = [] }) {
                 value={tagDraft[m.id]?.value ?? ''}
                 placeholder={t('admin.tagsInputPlaceholder')}
                 onChange={e => handleTagChange(m.id, e.target.value)}
-                aria-label={t('admin.tagsGameLabel', { name: m.name })}
+                aria-label={t('admin.tagsGameLabel', { name: t(m.nameKey) })}
                 spellCheck={false}
               />
               <div className="admin__tag-buttons">

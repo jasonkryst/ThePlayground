@@ -12,7 +12,11 @@ describe('i18n', () => {
   })
 
   it('exports SUPPORTED_LOCALES derived from what was actually discovered, not a hardcoded list', () => {
-    expect(SUPPORTED_LOCALES).toEqual(['en'])
+    expect(SUPPORTED_LOCALES).toEqual(['en', 'es'])
+  })
+
+  it('resolves a known es key to its Spanish translation', () => {
+    expect(i18n.t('common.home', { lng: 'es' })).toBe('Inicio')
   })
 
   it('pluralizes common.difficultyOfferHeading correctly for singular and plural counts', () => {
@@ -108,5 +112,23 @@ describe('buildResources', () => {
     const gameModules = { '../games/foo/i18n/fr.json': { default: { foo: { prompt: 'Choisis' } } } }
     const resources = buildResources(coreModules, gameModules)
     expect(resources.fr.translation).toEqual({ foo: { prompt: 'Choisis' } })
+  })
+})
+
+function collectLeafPaths(obj, prefix = '') {
+  const paths = []
+  for (const [key, value] of Object.entries(obj)) {
+    const path = prefix ? `${prefix}.${key}` : key
+    if (value && typeof value === 'object') paths.push(...collectLeafPaths(value, path))
+    else paths.push(path)
+  }
+  return paths
+}
+
+describe('en/es key parity', () => {
+  it('has the exact same set of translation keys in en and es across core + every game', () => {
+    const enKeys = collectLeafPaths(i18n.getResourceBundle('en', 'translation')).sort()
+    const esKeys = collectLeafPaths(i18n.getResourceBundle('es', 'translation')).sort()
+    expect(esKeys).toEqual(enKeys)
   })
 })

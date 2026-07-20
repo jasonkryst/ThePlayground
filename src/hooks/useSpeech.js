@@ -1,4 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
+
+export const SPEECH_LANG_BY_LOCALE = { en: 'en-US', es: 'es-US' }
 
 /**
  * Speaks short text aloud via the Web Speech API (SpeechSynthesis), for games
@@ -11,6 +14,7 @@ import { useCallback, useEffect, useRef } from 'react'
  *   Both functions are referentially stable and safe to call when unsupported.
  */
 export default function useSpeech() {
+  const { i18n } = useTranslation()
   const synth = typeof window !== 'undefined' ? window.speechSynthesis : undefined
   const Utterance = typeof window !== 'undefined' ? window.SpeechSynthesisUtterance : undefined
   const supported = !!(synth && Utterance)
@@ -27,10 +31,10 @@ export default function useSpeech() {
     if (!s || !Utterance || !text) return
     s.cancel()
     const utterance = new Utterance(text)
-    utterance.lang = 'en-US'
+    utterance.lang = SPEECH_LANG_BY_LOCALE[i18n.language] ?? 'en-US'
     utterance.rate = 0.9
     s.speak(utterance)
-  }, [Utterance])
+  }, [Utterance, i18n.language])
 
   useEffect(() => () => cancel(), [cancel])
 

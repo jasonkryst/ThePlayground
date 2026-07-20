@@ -1,0 +1,23 @@
+{
+  "animalSounds": {
+    "manifestName": "Sonidos de Animales",
+    "manifestDescription": "¡Empareja el animal con su sonido!",
+    "prompt": "¿Qué animal hace este sonido?",
+    "replay": "Repetir sonido",
+    "howToPlay": "¡Escucha el sonido y luego toca el animal correspondiente!"
+  },
+  "animal": {
+    "elephant": { "name": "Elefante" },
+    "lion": { "name": "León" },
+    "cow": { "name": "Vaca" },
+    "dog": { "name": "Perro" },
+    "cat": { "name": "Gato" },
+    "frog": { "name": "Rana" },
+    "duck": { "name": "Pato" },
+    "horse": { "name": "Caballo" },
+    "pig": { "name": "Cerdo" },
+    "sheep": { "name": "Oveja" },
+    "rooster": { "name": "Gallo" },
+    "owl": { "name": "Búho" }
+  }
+}

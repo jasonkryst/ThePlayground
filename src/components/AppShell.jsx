@@ -51,7 +51,7 @@ export default function AppShell({ manifests = [] }) {
   // instead of branching on isGameRoute again at render time with two
   // differently-shaped null checks.
   const title = isGameRoute
-    ? (gameManifest ? { icon: gameManifest.icon, text: gameManifest.name } : null)
+    ? (gameManifest ? { icon: gameManifest.icon, text: t(gameManifest.nameKey) } : null)
     : (pageTitleKey ? { icon: null, text: t(pageTitleKey) } : null)
 
   // setGameStatus from useState is referentially stable, so this value never changes.
@@ -208,7 +208,7 @@ export default function AppShell({ manifests = [] }) {
             <span className="shell__copyright">{t('shell.copyright', { year: new Date().getFullYear() })}</span>
             <span className="shell__footer-versions">
               {isGameRoute && gameManifest && (
-                <span className="shell__game-version">{gameManifest.name} v{gameManifest.version}</span>
+                <span className="shell__game-version">{t(gameManifest.nameKey)} v{gameManifest.version}</span>
               )}
               <span className="shell__version">v{version}</span>
             </span>

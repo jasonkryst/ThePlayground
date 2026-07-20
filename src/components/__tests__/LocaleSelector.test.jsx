@@ -23,6 +23,18 @@ describe('LocaleSelector', () => {
     expect(onChange).toHaveBeenCalledWith('es')
   })
 
+  it('renders friendly display names for known locale codes', () => {
+    render(<LocaleSelector locales={['en', 'es']} value="en" onChange={vi.fn()} />)
+    const options = screen.getAllByRole('option')
+    expect(options.map(o => o.textContent)).toEqual(['English', 'Español'])
+  })
+
+  it('falls back to the raw code for an unmapped locale', () => {
+    render(<LocaleSelector locales={['en', 'fr']} value="en" onChange={vi.fn()} />)
+    const options = screen.getAllByRole('option')
+    expect(options.map(o => o.textContent)).toEqual(['English', 'fr'])
+  })
+
   it('has no accessibility violations when visible', async () => {
     const { container } = render(<LocaleSelector locales={['en', 'es']} value="en" onChange={vi.fn()} />)
     expect(await axe(container)).toHaveNoViolations()

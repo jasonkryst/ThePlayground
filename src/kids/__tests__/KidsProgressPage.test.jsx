@@ -25,8 +25,8 @@ vi.mock('../../hooks/useBadges', () => ({
 }))
 
 const manifestsFixture = [
-  { id: 'animal-sounds', name: 'Animal Sounds', icon: '🐘', color: '#B39DDB' },
-  { id: 'color-match',   name: 'Color Match',   icon: '🎨', color: '#CE93D8' },
+  { id: 'animal-sounds', nameKey: 'animalSounds.manifestName', icon: '🐘', color: '#B39DDB' },
+  { id: 'color-match',   nameKey: 'colorMatch.manifestName',   icon: '🎨', color: '#CE93D8' },
 ]
 
 async function renderPage() {
@@ -138,8 +138,8 @@ describe('KidsProgressPage — no games', () => {
 
 describe('KidsProgressPage — memory-game stat tiles', () => {
   const manifests = [
-    { id: 'animal-sounds', name: 'Animal Sounds', icon: '🐘', color: '#B39DDB' },
-    { id: 'animal-memory-match', name: 'Animal Memory Match', icon: '🧠', color: '#90CAF9', gameType: 'memory' },
+    { id: 'animal-sounds', nameKey: 'animalSounds.manifestName', icon: '🐘', color: '#B39DDB' },
+    { id: 'animal-memory-match', nameKey: 'animalMemoryMatch.manifestName', icon: '🧠', color: '#90CAF9', gameType: 'memory' },
   ]
 
   async function renderWithMemoryGame() {
@@ -201,8 +201,8 @@ describe('KidsProgressPage — memory-game stat tiles', () => {
 
 describe('KidsProgressPage — per-game badge catalogs', () => {
   const manifestsWithMemoryGame = [
-    { id: 'animal-sounds', name: 'Animal Sounds', icon: '🐘', color: '#B39DDB' },
-    { id: 'animal-memory-match', name: 'Animal Memory Match', icon: '🧠', color: '#90CAF9' },
+    { id: 'animal-sounds', nameKey: 'animalSounds.manifestName', icon: '🐘', color: '#B39DDB' },
+    { id: 'animal-memory-match', nameKey: 'animalMemoryMatch.manifestName', icon: '🧠', color: '#90CAF9' },
   ]
 
   it('shows a game-specific catalog for games that ship badges.js and the global catalog otherwise', async () => {

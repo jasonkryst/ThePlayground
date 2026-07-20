@@ -8,8 +8,8 @@ export default {
 }
 
 const manifests = [
-  { id: 'animal-sounds', name: 'Animal Sounds', description: 'Match the animal to its sound!', icon: '🐘', color: '#B39DDB' },
-  { id: 'color-match', name: 'Color Match', description: 'Match the color to its object!', icon: '🎨', color: '#CE93D8' },
+  { id: 'animal-sounds', nameKey: 'animalSounds.manifestName', descriptionKey: 'animalSounds.manifestDescription', icon: '🐘', color: '#B39DDB' },
+  { id: 'color-match', nameKey: 'colorMatch.manifestName', descriptionKey: 'colorMatch.manifestDescription', icon: '🎨', color: '#CE93D8' },
 ]
 
 export const Default = { args: { manifests } }

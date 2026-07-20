@@ -6,8 +6,8 @@ import FeaturedGameCard from '../FeaturedGameCard'
 
 const manifest = {
   id: 'animal-sounds',
-  name: 'Animal Sounds',
-  description: 'Match the animal to its sound!',
+  nameKey: 'animalSounds.manifestName',
+  descriptionKey: 'animalSounds.manifestDescription',
   icon: '🐘',
   color: '#B39DDB',
 }

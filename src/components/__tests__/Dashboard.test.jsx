@@ -39,8 +39,8 @@ vi.mock('../../hooks/useGameTags', () => ({
 }))
 
 const manifests = [
-  { id: 'animal-sounds', name: 'Animal Sounds', description: 'Sounds!', icon: '🐘', color: '#B39DDB', tags: ['sounds'] },
-  { id: 'color-match',   name: 'Color Match',   description: 'Colors!', icon: '🎨', color: '#CE93D8', tags: ['visual'] },
+  { id: 'animal-sounds', nameKey: 'animalSounds.manifestName', descriptionKey: 'animalSounds.manifestDescription', icon: '🐘', color: '#B39DDB', tags: ['sounds'] },
+  { id: 'color-match',   nameKey: 'colorMatch.manifestName',   descriptionKey: 'colorMatch.manifestDescription',   icon: '🎨', color: '#CE93D8', tags: ['visual'] },
 ]
 
 describe('Dashboard', () => {
@@ -179,13 +179,13 @@ describe('Dashboard', () => {
   })
 
   it('renders a translated label for a known tag instead of just capitalizing the slug', () => {
-    const testManifests = [{ id: 'a', name: 'A', description: '', icon: '🎈', color: '#fff', tags: ['sounds'] }]
+    const testManifests = [{ id: 'a', nameKey: 'a.name', descriptionKey: 'a.description', icon: '🎈', color: '#fff', tags: ['sounds'] }]
     render(<MemoryRouter><Dashboard manifests={testManifests} /></MemoryRouter>)
     expect(screen.getByRole('tab', { name: /sounds/i })).toBeInTheDocument()
   })
 
   it('falls back to a capitalized slug for a tag with no translation entry', () => {
-    const testManifests = [{ id: 'a', name: 'A', description: '', icon: '🎈', color: '#fff', tags: ['xyz-custom'] }]
+    const testManifests = [{ id: 'a', nameKey: 'a.name', descriptionKey: 'a.description', icon: '🎈', color: '#fff', tags: ['xyz-custom'] }]
     render(<MemoryRouter><Dashboard manifests={testManifests} /></MemoryRouter>)
     expect(screen.getByRole('tab', { name: /xyz-custom/i })).toBeInTheDocument()
   })

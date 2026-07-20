@@ -1,6 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { axe } from 'jest-axe'
+import i18n from '../../i18n'
 
 const { mockPlay } = vi.hoisted(() => ({ mockPlay: vi.fn() }))
 vi.mock('../../hooks/useSoundPlayer', () => ({
@@ -9,7 +10,13 @@ vi.mock('../../hooks/useSoundPlayer', () => ({
 
 import QuizGameShell from '../QuizGameShell'
 
-const manifest = { icon: '🎨', name: 'Test Quiz', version: '1.0.0' }
+// manifest.name/description no longer exist on real manifests (issue #105
+// follow-up: manifest name/description now route through nameKey/descriptionKey
+// + t()); register a test-local key so this fixture resolves the same literal
+// text the assertions below already expect, without touching real resources.
+i18n.addResourceBundle('en', 'translation', { quizGameShellTest: { name: 'Test Quiz' } }, true, true)
+
+const manifest = { icon: '🎨', nameKey: 'quizGameShellTest.name', version: '1.0.0' }
 
 function makeSession(overrides = {}) {
   return {

@@ -1,9 +1,9 @@
 {
   "id": "animal-sounds",
-  "name": "Animal Sounds",
-  "description": "Match the animal to its sound!",
+  "nameKey": "animalSounds.manifestName",
+  "descriptionKey": "animalSounds.manifestDescription",
   "icon": "🐘",
   "color": "#B39DDB",
-  "version": "1.6.2",
+  "version": "1.6.3",
   "tags": ["sounds", "animals"]
 }

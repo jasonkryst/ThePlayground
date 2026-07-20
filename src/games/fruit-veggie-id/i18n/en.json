@@ -1,5 +1,7 @@
 {
   "fruitVeggie": {
+    "manifestName": "Fruit & Veggie ID",
+    "manifestDescription": "Hear the name, tap the matching fruit or veggie!",
     "prompt": "Which one did you hear?",
     "promptFallback": "Find the {{name}}!",
     "replay": "Say it again",

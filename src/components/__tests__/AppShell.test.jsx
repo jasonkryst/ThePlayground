@@ -1,13 +1,14 @@
-import { render, screen, fireEvent } from '@testing-library/react'
+import { render, screen, fireEvent, act } from '@testing-library/react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, afterEach, beforeEach } from 'vitest'
 import userEvent from '@testing-library/user-event'
 import { axe } from 'jest-axe'
 import AppShell from '../AppShell'
 import { useShellGameStatus } from '../ShellContext'
+import i18n from '../../i18n'
 
 const manifests = [
-  { id: 'color-match', name: 'Color Match', description: 'Colors!', icon: '🎨', color: '#CE93D8', version: '1.6.0' },
+  { id: 'color-match', nameKey: 'colorMatch.manifestName', icon: '🎨', color: '#CE93D8', version: '1.6.0' },
 ]
 
 function FakeGame({ streak = 0, sessionActive = false }) {
@@ -195,5 +196,16 @@ describe('AppShell — background inertness while the exit dialog is open', () =
     await userEvent.click(screen.getByRole('button', { name: /keep playing/i }))
     expect(body).not.toHaveAttribute('inert')
     expect(body).not.toHaveAttribute('aria-hidden')
+  })
+})
+
+describe('AppShell — Spanish locale', () => {
+  beforeEach(async () => { await act(async () => { await i18n.changeLanguage('es') }) })
+  afterEach(async () => { await act(async () => { await i18n.changeLanguage('en') }) })
+
+  it('renders the translated Spanish game name as the in-game h1 title and footer version line', () => {
+    renderShell('/game/color-match')
+    expect(screen.getByRole('heading', { level: 1, name: /combinar colores/i })).toBeInTheDocument()
+    expect(screen.getByText('Combinar Colores v1.6.0')).toBeInTheDocument()
   })
 })

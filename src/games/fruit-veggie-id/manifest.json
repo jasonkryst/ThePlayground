@@ -1,9 +1,9 @@
 {
   "id": "fruit-veggie-id",
-  "name": "Fruit & Veggie ID",
-  "description": "Hear the name, tap the matching fruit or veggie!",
+  "nameKey": "fruitVeggie.manifestName",
+  "descriptionKey": "fruitVeggie.manifestDescription",
   "icon": "🍎",
   "color": "#AED581",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "tags": ["vocabulary", "food"]
 }

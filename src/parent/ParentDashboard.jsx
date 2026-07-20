@@ -308,8 +308,8 @@ export default function ParentDashboard({ manifests = [] }) {
   const filteredScores = useMemo(() => filterScoresByRange(scores, resolvedRange), [scores, resolvedRange])
   const gameIds = useMemo(() => [...new Set(filteredScores.map(s => s.gameId))], [filteredScores])
   const gameNames = useMemo(
-    () => Object.fromEntries(manifests.map(m => [m.id, m.name])),
-    [manifests]
+    () => Object.fromEntries(manifests.map(m => [m.id, t(m.nameKey)])),
+    [manifests, t]
   )
 
   useEffect(() => {
