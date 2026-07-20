@@ -239,7 +239,7 @@ describe('ParentDashboard — CSV export', () => {
 // ─── Game display names ──────────────────────────────────────────────────────
 
 describe('ParentDashboard — game display names', () => {
-  const manifests = [{ id: 'animal-sounds', name: 'Animal Sounds' }]
+  const manifests = [{ id: 'animal-sounds', nameKey: 'animalSounds.manifestName' }]
 
   it('shows the manifest name instead of the raw gameId in the missed-items heading', async () => {
     mockGetAllScores.mockReturnValue([makeScore()])

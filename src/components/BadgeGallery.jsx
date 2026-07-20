@@ -8,7 +8,7 @@ export default function BadgeGallery({ manifests, badgeData }) {
     <div className="badge-gallery">
       {manifests.map(game => (
         <div key={game.id} className="badge-gallery__game">
-          <h3 className="badge-gallery__game-name">{game.name}</h3>
+          <h3 className="badge-gallery__game-name">{t(game.nameKey)}</h3>
           <div className="badge-gallery__badges">
             {getBadgesForGame(game.id).map(badge => {
               const count = badgeData.awards[game.id]?.[badge.id] ?? 0
