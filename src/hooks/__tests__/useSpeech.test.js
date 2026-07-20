@@ -50,6 +50,14 @@ describe('useSpeech (supported)', () => {
     await act(async () => { await i18n.changeLanguage('en') })
   })
 
+  it('speak() sets a pl-PL lang when the active locale is pl', async () => {
+    await act(async () => { await i18n.changeLanguage('pl') })
+    const { result } = renderHook(() => useSpeech())
+    result.current.speak('jabłko')
+    expect(speakSpy.mock.calls[0][0].lang).toBe('pl-PL')
+    await act(async () => { await i18n.changeLanguage('en') })
+  })
+
   it('speak() falls back to en-US for an unmapped locale instead of leaving lang unset', async () => {
     await act(async () => { await i18n.changeLanguage('xx') })
     const { result } = renderHook(() => useSpeech())
