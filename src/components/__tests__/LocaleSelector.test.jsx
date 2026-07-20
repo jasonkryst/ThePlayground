@@ -24,9 +24,9 @@ describe('LocaleSelector', () => {
   })
 
   it('renders friendly display names for known locale codes', () => {
-    render(<LocaleSelector locales={['en', 'es']} value="en" onChange={vi.fn()} />)
+    render(<LocaleSelector locales={['en', 'es', 'pl']} value="en" onChange={vi.fn()} />)
     const options = screen.getAllByRole('option')
-    expect(options.map(o => o.textContent)).toEqual(['English', 'Español'])
+    expect(options.map(o => o.textContent)).toEqual(['English', 'Español', 'Polski'])
   })
 
   it('falls back to the raw code for an unmapped locale', () => {

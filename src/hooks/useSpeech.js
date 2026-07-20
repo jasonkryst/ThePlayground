@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 
-export const SPEECH_LANG_BY_LOCALE = { en: 'en-US', es: 'es-US' }
+export const SPEECH_LANG_BY_LOCALE = { en: 'en-US', es: 'es-US', pl: 'pl-PL' }
 
 /**
  * Speaks short text aloud via the Web Speech API (SpeechSynthesis), for games

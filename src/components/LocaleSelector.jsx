@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 
-const LOCALE_NAMES = { en: 'English', es: 'Español' }
+const LOCALE_NAMES = { en: 'English', es: 'Español', pl: 'Polski' }
 
 export default function LocaleSelector({ locales, value, onChange }) {
   const { t } = useTranslation()

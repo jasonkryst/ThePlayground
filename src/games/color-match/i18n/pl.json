@@ -1,0 +1,21 @@
+{
+  "colorMatch": {
+    "manifestName": "Dopasuj Kolory",
+    "manifestDescription": "Dopasuj kolor do przedmiotu!",
+    "prompt": "Który przedmiot ma ten kolor?",
+    "howToPlay": "Pojawia się próbka koloru — dotknij przedmiotu w tym kolorze!"
+  },
+  "color": {
+    "red": { "name": "Czerwony" },
+    "orange": { "name": "Pomarańczowy" },
+    "yellow": { "name": "Żółty" },
+    "green": { "name": "Zielony" },
+    "blue": { "name": "Niebieski" },
+    "purple": { "name": "Fioletowy" },
+    "pink": { "name": "Różowy" },
+    "brown": { "name": "Brązowy" },
+    "black": { "name": "Czarny" },
+    "white": { "name": "Biały" },
+    "gray": { "name": "Szary" }
+  }
+}

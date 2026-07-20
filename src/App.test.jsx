@@ -44,6 +44,15 @@ describe('App — locale sync', () => {
     await waitFor(() => expect(document.documentElement.lang).toBe('es'))
     storage.getSettings.mockResolvedValue({ locale: 'en' })
   })
+
+  it('drives a Polish locale end-to-end: changeLanguage + document.documentElement.lang', async () => {
+    storage.getSettings.mockResolvedValue({ locale: 'pl' })
+    const spy = vi.spyOn(i18n, 'changeLanguage')
+    render(<App />)
+    await waitFor(() => expect(spy).toHaveBeenCalledWith('pl'))
+    await waitFor(() => expect(document.documentElement.lang).toBe('pl'))
+    storage.getSettings.mockResolvedValue({ locale: 'en' })
+  })
 })
 
 describe('App — shell chrome', () => {
