@@ -137,7 +137,7 @@ src/
 │
 └── games/                     # One folder per game — animal-sounds, color-match,
     └── animal-memory-match/   #   character-match, animal-memory-match; drop a new folder to add one
-        ├── manifest.json      # Game metadata (id, name, tags, version, optional gameType, orientation)
+        ├── manifest.json      # Game metadata (id, nameKey/descriptionKey, tags, version, optional gameType, orientation)
         ├── index.jsx          # Game component (default export accepting onGameEnd)
         ├── badges.js          # Optional per-game badge catalog (auto-discovered)
         ├── data/              # Item catalog (e.g. animals.js, colors.js)
@@ -220,13 +220,13 @@ Use `var(--color-aqua)` etc. rather than hardcoding hex values, so games stay vi
 ## Adding a New Game
 
 1. Create a folder under `src/games/<your-game-id>/`
-2. Add `manifest.json` — `tags` is **required** (it places the game in a dashboard category):
+2. Add `manifest.json` — `tags` is **required** (it places the game in a dashboard category). `nameKey`/`descriptionKey` point at strings you'll add to the game's own `i18n/en.json`/`es.json` (step 4) rather than literal text:
 
 ```json
 {
   "id": "your-game-id",
-  "name": "Your Game Name",
-  "description": "One sentence description.",
+  "nameKey": "yourGame.manifestName",
+  "descriptionKey": "yourGame.manifestDescription",
   "icon": "🎮",
   "color": "#80DEEA",
   "version": "1.0.0",

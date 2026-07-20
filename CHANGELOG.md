@@ -3,6 +3,11 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.30.0] - 2026-07-19
+
+### Changed
+- Manifest `name`/`description` i18n (issue #105 follow-up): these two fields render in 6 and 2 user-facing places respectively (dashboard tile, featured card, in-game intro screen and page title, kids progress page) and were explicitly out of scope in the initial Spanish i18n work as "game-author metadata" — in practice they're clearly user-facing UI text. Every `manifest.json` now carries `nameKey`/`descriptionKey` instead of literal `name`/`description`, pointing into that game's own i18n namespace exactly like the existing item-`nameKey` pattern (e.g. `food.apple.nameKey`); the 6 consuming components resolve them via `t()`. A new test (`src/__tests__/manifestI18nKeys.test.js`) asserts every manifest's keys resolve in both locales, and the existing cross-locale parity test covers the 12 new translation keys automatically.
+
 ## [0.29.0] - 2026-07-19
 
 ### Added
