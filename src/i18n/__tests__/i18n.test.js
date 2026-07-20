@@ -164,6 +164,11 @@ function pluralSuffixesFor(locale, basePath) {
     .sort()
 }
 
+// Base-key stripping means the parity test below can't detect a locale missing
+// a plural form for a NEW pluralizable key (stripping `_one`/`_few`/... collapses
+// e.g. `foo_other`-only down to the same base key as a complete `foo_one/_few/_many/_other`
+// set). When adding a new `{{count}}`-interpolated key, add it to the explicit
+// suffix-completeness assertions below too, alongside `difficultyOfferHeading`/`playCount`.
 describe('cross-locale key parity', () => {
   it('has the exact same set of base translation keys in en, es, and pl across core + every game', () => {
     const enKeys = baseKeySet('en')
