@@ -181,10 +181,16 @@ describe('cross-locale key parity', () => {
     expect(pluralSuffixesFor('es', 'common.difficultyOfferHeading')).toEqual(['one', 'other'])
     expect(pluralSuffixesFor('en', 'gameCard.playCount')).toEqual(['one', 'other'])
     expect(pluralSuffixesFor('es', 'gameCard.playCount')).toEqual(['one', 'other'])
+    expect(pluralSuffixesFor('en', 'dashboard.moreTags')).toEqual(['one', 'other'])
+    expect(pluralSuffixesFor('es', 'dashboard.moreTags')).toEqual(['one', 'other'])
+    expect(pluralSuffixesFor('en', 'dashboard.resultsCount')).toEqual(['one', 'other'])
+    expect(pluralSuffixesFor('es', 'dashboard.resultsCount')).toEqual(['one', 'other'])
   })
 
   it('pl defines all four CLDR plural forms for pluralizable keys', () => {
     expect(pluralSuffixesFor('pl', 'common.difficultyOfferHeading')).toEqual(['few', 'many', 'one', 'other'])
     expect(pluralSuffixesFor('pl', 'gameCard.playCount')).toEqual(['few', 'many', 'one', 'other'])
+    expect(pluralSuffixesFor('pl', 'dashboard.moreTags')).toEqual(['few', 'many', 'one', 'other'])
+    expect(pluralSuffixesFor('pl', 'dashboard.resultsCount')).toEqual(['few', 'many', 'one', 'other'])
   })
 })

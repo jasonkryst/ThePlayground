@@ -1,0 +1,35 @@
+.tag-filter-bar {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  margin-bottom: 24px;
+}
+
+.tag-filter-bar__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* Same deliberate compact-secondary-control exception as
+   .dashboard__clear-filters in Dashboard.css -- see that comment. */
+.tag-filter-bar__toggle {
+  min-width: auto;
+  min-height: auto;
+  padding: 6px 12px;
+  border: none;
+  background: transparent;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--color-lavender-dark);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.tag-filter-bar__toggle:focus { outline: none; }
+
+.tag-filter-bar__toggle:focus-visible {
+  outline: 3px solid var(--color-lavender);
+  outline-offset: 3px;
+}

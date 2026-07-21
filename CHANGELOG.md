@@ -3,6 +3,16 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.32.0] - 2026-07-21
+
+### Added
+
+- Dashboard game search (issue #103): a search box above the tag strip filters games by name as you type. Tag pills switched from single-select tabs to multi-select toggles (AND logic — a game must carry every selected tag), always sorting selected tags to the front of the row so an active filter is never hidden. Once there are more tags than fit on one line, the rest collapse behind a "+N more" toggle, driven by a new `useTagRowOverflow` hook that measures real rendered pill positions (`offsetTop`) rather than a hardcoded pixel count — same "measure real DOM, don't guess" approach as issue #104's `useFitTileSize`. A "Clear filters" action replaces the old standalone "All" tab. Tag pills also switched from `role="tab"`/`"tablist"` (which requires single selection) to `role="group"` + `aria-pressed` toggle buttons, the correct ARIA pattern for independent multi-select.
+
+### Changed
+
+- `docs/ENHANCEMENTS.md`'s AU-7 entry ("dashboard tab strip tap targets") removed — verified against a live render that `.dashboard__tab` is already 64×64px via the global `button` rule (present since project scaffold), not the ~33px the 2026-07-12 audit's padding-only arithmetic estimated. No CSS change was needed.
+
 ## [0.31.2] - 2026-07-21
 
 ### Fixed

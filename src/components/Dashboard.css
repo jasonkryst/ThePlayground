@@ -21,13 +21,6 @@
 
 .dashboard__empty { opacity: 0.5; font-style: italic; }
 
-.dashboard__tabs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 24px;
-}
-
 .dashboard__tab {
   padding: 6px 16px;
   border-radius: var(--radius-button);
@@ -73,4 +66,72 @@
 .dashboard__sections {
   display: flex;
   flex-direction: column;
+}
+
+.dashboard__search { margin-bottom: 16px; }
+
+.dashboard__search-input {
+  width: 100%;
+  max-width: 360px;
+  padding: 10px 16px;
+  border-radius: var(--radius-button);
+  border: 2px solid rgb(0 0 0 / 12%);
+  font-size: 1rem;
+  font-family: var(--font-main);
+}
+
+.dashboard__search-input:focus { outline: none; }
+
+.dashboard__search-input:focus-visible {
+  outline: 3px solid var(--color-lavender);
+  outline-offset: 3px;
+}
+
+.dashboard__filter-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+
+/* Always mounted (see Dashboard.jsx) so its role="status" child is a real,
+   pre-existing live region by the time filtering starts -- screen readers
+   reliably announce *mutations* to an already-present live region, but
+   inconsistently announce a region inserted already-populated with text.
+   When there's no active filter, this modifier collapses all visual
+   footprint (no margin, no height) while keeping the node itself -- and its
+   accessibility-tree presence -- intact. */
+.dashboard__filter-status--empty {
+  margin-bottom: 0;
+  height: 0;
+  overflow: hidden;
+}
+
+/* Deliberately below the app's 64px primary-tap-target standard (the
+   global button{min-width/min-height:64px} rule is overridden here) -- this
+   is a secondary, parent-facing text action, not a child-facing game
+   control, the same category of exception already accepted for the admin
+   and parent-dashboard tab bars (docs/accessibility_usability.md's AU-7
+   finding). Still clears the WCAG 2.5.8 24px minimum. */
+.dashboard__clear-filters {
+  min-width: auto;
+  min-height: auto;
+  padding: 6px 16px;
+  border-radius: var(--radius-button);
+  border: 2px solid rgb(0 0 0 / 12%);
+  background: transparent;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-lavender-dark);
+  cursor: pointer;
+}
+
+.dashboard__clear-filters:focus { outline: none; }
+
+.dashboard__clear-filters:focus-visible {
+  outline: 3px solid var(--color-lavender);
+  outline-offset: 3px;
 }

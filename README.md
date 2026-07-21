@@ -40,9 +40,9 @@ When a game has been played, its card displays a colored glow border and a badge
 
 This visual indicator comes from your existing score history with no additional storage needed.
 
-### Game Categories & Tags
+### Game Categories & Tags, Search
 
-Games are organized under category headings ("Sounds 🔊", "Visual 👁️", "Memory 🧠", etc.) on the dashboard. A tab strip at the top of the dashboard lets parents filter by category to see only games in a particular group. The "Today's Game" featured banner is unaffected by this filter and always stays at the top.
+Games are organized under category headings ("Sounds 🔊", "Visual 👁️", "Memory 🧠", etc.) on the dashboard. A search box filters games by name, and a row of tag pills below it lets parents select one or more categories at once — a game must carry every selected tag to stay visible (e.g. "Visual" + "Colors" narrows to games tagged with both). Selected pills always sort to the front of the row so an active filter is never hidden; once there are more tags than fit on one line, the rest collapse behind a "+N more" toggle. A "Clear filters" button appears whenever search text or a tag is active, resetting both at once. The "Today's Game" featured banner is unaffected by any of this and always stays at the top.
 
 Each game's category is defined by a `"tags"` array in its `manifest.json` (required field, minimum one tag). Tags can be customized per-game in the admin panel under the **Games** tab, allowing you to reorganize games without modifying code.
 

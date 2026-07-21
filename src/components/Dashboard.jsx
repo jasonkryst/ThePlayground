@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import GameCard from './GameCard'
 import FeaturedGameCard from './FeaturedGameCard'
 import CategorySection from './CategorySection'
+import TagFilterBar from './TagFilterBar'
 import useScores from '../hooks/useScores'
 import useSettings from '../hooks/useSettings'
 import useRecentlyPlayed from '../hooks/useRecentlyPlayed'
@@ -48,19 +49,54 @@ export default function Dashboard({ manifests = [] }) {
   const recentlyPlayed = useRecentlyPlayed()
   const featured = useFeaturedGame(manifests)
   const { tagMap, allTags } = useGameTags(manifests)
-  const [activeTag, setActiveTag] = useState('all')
+  const [searchText, setSearchText] = useState('')
+  const [selectedTags, setSelectedTags] = useState(() => new Set())
   const titleRef = useFocusOnMount()
 
   const name = settings.childName?.trim()
   const title = name ? t('dashboard.titleNamed', { name }) : t('dashboard.titleDefault')
 
-  const filteredManifests = activeTag === 'all'
-    ? manifests
-    : manifests.filter(m => (tagMap.get(m.id) ?? []).includes(activeTag))
+  const normalizedSearch = searchText.trim().toLowerCase()
 
-  const sections = activeTag === 'all'
-    ? buildSections(manifests, tagMap, allTags, t)
-    : null
+  const searchMatches = useMemo(
+    () => manifests.filter(m =>
+      normalizedSearch === '' || t(m.nameKey).toLowerCase().includes(normalizedSearch)
+    ),
+    [manifests, normalizedSearch, t]
+  )
+
+  const visibleTags = useMemo(() => {
+    const tagSet = new Set()
+    for (const m of searchMatches) {
+      for (const tag of tagMap.get(m.id) ?? []) tagSet.add(tag)
+    }
+    return allTags.filter(tag => tagSet.has(tag))
+  }, [searchMatches, tagMap, allTags])
+
+  const isFiltering = normalizedSearch !== '' || selectedTags.size > 0
+
+  const filteredManifests = isFiltering
+    ? searchMatches.filter(m => {
+        const tags = tagMap.get(m.id) ?? []
+        return [...selectedTags].every(tag => tags.includes(tag))
+      })
+    : manifests
+
+  const sections = isFiltering ? null : buildSections(manifests, tagMap, allTags, t)
+
+  function toggleTag(tag) {
+    setSelectedTags(prev => {
+      const next = new Set(prev)
+      if (next.has(tag)) next.delete(tag)
+      else next.add(tag)
+      return next
+    })
+  }
+
+  function clearFilters() {
+    setSearchText('')
+    setSelectedTags(new Set())
+  }
 
   return (
     <div className="dashboard">
@@ -74,71 +110,67 @@ export default function Dashboard({ manifests = [] }) {
         <p className="dashboard__empty">{t('dashboard.empty')}</p>
       ) : (
         <>
-          {allTags.length > 0 && (
-            <div className="dashboard__tabs" role="tablist" aria-label={t('dashboard.tabsLabel')}>
-              <button
-                id="dashboard-tab-all"
-                role="tab"
-                aria-selected={activeTag === 'all'}
-                aria-controls="dashboard-panel-all"
-                className={`dashboard__tab${activeTag === 'all' ? ' dashboard__tab--active' : ''}`}
-                onClick={() => setActiveTag('all')}
-              >
-                {t('dashboard.tabAll')}
+          <div className="dashboard__search">
+            <label htmlFor="dashboard-search" className="sr-only">
+              {t('dashboard.searchLabel')}
+            </label>
+            <input
+              id="dashboard-search"
+              type="search"
+              className="dashboard__search-input"
+              placeholder={t('dashboard.searchPlaceholder')}
+              value={searchText}
+              onChange={e => setSearchText(e.target.value)}
+            />
+          </div>
+
+          <TagFilterBar
+            tags={visibleTags}
+            selectedTags={selectedTags}
+            onToggleTag={toggleTag}
+            tagLabel={tag => tagLabel(tag, t)}
+          />
+
+          <div className={`dashboard__filter-status${isFiltering ? '' : ' dashboard__filter-status--empty'}`}>
+            <span role="status">
+              {isFiltering ? t('dashboard.resultsCount', { count: filteredManifests.length }) : ''}
+            </span>
+            {isFiltering && (
+              <button type="button" className="dashboard__clear-filters" onClick={clearFilters}>
+                {t('dashboard.clearFilters')}
               </button>
-              {allTags.map(tag => (
-                <button
-                  key={tag}
-                  id={`dashboard-tab-${tag}`}
-                  role="tab"
-                  aria-selected={activeTag === tag}
-                  aria-controls={`dashboard-panel-${tag}`}
-                  className={`dashboard__tab${activeTag === tag ? ' dashboard__tab--active' : ''}`}
-                  onClick={() => setActiveTag(tag)}
-                >
-                  {tagLabel(tag, t)}
-                </button>
+            )}
+          </div>
+
+          {sections ? (
+            <div className="dashboard__sections">
+              {sections.map(({ heading, games }) => (
+                <CategorySection key={heading} heading={heading}>
+                  {games.map(m => (
+                    <GameCard
+                      key={m.id}
+                      manifest={m}
+                      bestScore={getBestScore(m.id)}
+                      recentInfo={recentlyPlayed.get(m.id) ?? null}
+                    />
+                  ))}
+                </CategorySection>
+              ))}
+            </div>
+          ) : filteredManifests.length === 0 ? (
+            <p className="dashboard__empty">{t('dashboard.noResults')}</p>
+          ) : (
+            <div className="dashboard__grid">
+              {filteredManifests.map(m => (
+                <GameCard
+                  key={m.id}
+                  manifest={m}
+                  bestScore={getBestScore(m.id)}
+                  recentInfo={recentlyPlayed.get(m.id) ?? null}
+                />
               ))}
             </div>
           )}
-
-          <div
-            {...(allTags.length > 0
-              ? {
-                  role: 'tabpanel',
-                  id: `dashboard-panel-${activeTag}`,
-                  'aria-labelledby': `dashboard-tab-${activeTag}`,
-                }
-              : {})}
-          >
-            {sections ? (
-              <div className="dashboard__sections">
-                {sections.map(({ heading, games }) => (
-                  <CategorySection key={heading} heading={heading}>
-                    {games.map(m => (
-                      <GameCard
-                        key={m.id}
-                        manifest={m}
-                        bestScore={getBestScore(m.id)}
-                        recentInfo={recentlyPlayed.get(m.id) ?? null}
-                      />
-                    ))}
-                  </CategorySection>
-                ))}
-              </div>
-            ) : (
-              <div className="dashboard__grid">
-                {filteredManifests.map(m => (
-                  <GameCard
-                    key={m.id}
-                    manifest={m}
-                    bestScore={getBestScore(m.id)}
-                    recentInfo={recentlyPlayed.get(m.id) ?? null}
-                  />
-                ))}
-              </div>
-            )}
-          </div>
         </>
       )}
     </div>
