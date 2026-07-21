@@ -86,6 +86,21 @@ test('memory match: board that used to require scrolling now fits one screen on 
   expect(fitsOneScreen).toBe(true)
 })
 
+test('memory match: board still fits one screen after the intro click leaves the page scrolled (issue #104 regression guard)', async ({ page }) => {
+  // Regression test for a real, previously-shipped bug: getBoundingClientRect().top
+  // is viewport-relative, so a scrolled page made the fit calculation think there
+  // was more available height than there really was. Simulated here by scrolling
+  // down before starting the game, mirroring what a below-the-fold intro "Start"
+  // button click does on a squeezed viewport.
+  await page.setViewportSize({ width: 900, height: 490 })
+  await page.goto('/game/animal-memory-match')
+  await page.evaluate(() => window.scrollTo(0, 200))
+  await page.getByTestId('game-intro-start').click()
+  await page.locator('[data-tile-id]').first().waitFor()
+  const fitsOneScreen = await page.evaluate(() => document.documentElement.scrollHeight <= window.innerHeight)
+  expect(fitsOneScreen).toBe(true)
+})
+
 test('memory match: tablet board still fits one screen without scrolling after the sizing change (issue #104 regression guard)', async ({ page }) => {
   await page.setViewportSize({ width: 1024, height: 768 })
   await startGame(page)

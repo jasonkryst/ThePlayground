@@ -5,6 +5,15 @@ const MAX_TILE_PX = 140
 // .game's own bottom padding (GameLayout.css) -- not visible to this hook's
 // measurements directly, so duplicated here like TILE_GAP_PX in
 // MemoryBoard.jsx.
+//
+// Note on fit precision: because tileSize is floored, a viewport right at
+// the edge of fitting can end up with only ~1px of margin (e.g. 900x490
+// with the default 5x2 board computes exactly 489px of used height against
+// 490px available -- see useFitTileSize.test.js's primary case). That's
+// deliberate, not fragile test tuning: the formula always rounds down, so
+// it never overshoots. A future flake at that specific boundary should be
+// treated as a genuine 1px rendering difference (e.g. sub-pixel snapping)
+// to investigate, not a sign the formula itself regressed.
 const GAME_BOTTOM_PADDING_PX = 24
 
 // Measures the largest square tile size that lets `columns` x `rows` tiles
@@ -42,6 +51,9 @@ const GAME_BOTTOM_PADDING_PX = 24
 // axis isn't part of the height circularity (a column flexbox's width isn't
 // content-driven the way its auto height is), and isn't scroll-dependent
 // (scrolling is vertical only).
+//
+// useLayoutEffect (not useEffect) so the first real measurement lands before
+// paint, avoiding a visible pop from the 140px CSS fallback.
 export default function useFitTileSize(ref, { columns, rows, gap }) {
   useLayoutEffect(() => {
     const el = ref.current
