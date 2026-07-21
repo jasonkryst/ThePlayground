@@ -131,14 +131,16 @@ export default function Dashboard({ manifests = [] }) {
             tagLabel={tag => tagLabel(tag, t)}
           />
 
-          {isFiltering && (
-            <div className="dashboard__filter-status">
-              <span role="status">{t('dashboard.resultsCount', { count: filteredManifests.length })}</span>
+          <div className={`dashboard__filter-status${isFiltering ? '' : ' dashboard__filter-status--empty'}`}>
+            <span role="status">
+              {isFiltering ? t('dashboard.resultsCount', { count: filteredManifests.length }) : ''}
+            </span>
+            {isFiltering && (
               <button type="button" className="dashboard__clear-filters" onClick={clearFilters}>
                 {t('dashboard.clearFilters')}
               </button>
-            </div>
-          )}
+            )}
+          </div>
 
           {sections ? (
             <div className="dashboard__sections">

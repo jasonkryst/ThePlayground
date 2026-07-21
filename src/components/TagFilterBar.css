@@ -12,6 +12,8 @@
   gap: 8px;
 }
 
+/* Same deliberate compact-secondary-control exception as
+   .dashboard__clear-filters in Dashboard.css -- see that comment. */
 .tag-filter-bar__toggle {
   min-width: auto;
   min-height: auto;

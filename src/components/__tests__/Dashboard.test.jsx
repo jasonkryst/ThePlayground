@@ -215,10 +215,14 @@ describe('Dashboard', () => {
     expect(screen.getByRole('status')).toHaveTextContent('1 game found')
   })
 
-  it('negative: does not show a Clear filters button or result count in the unfiltered view', () => {
+  it('negative: does not show a Clear filters button in the unfiltered view, and the result-count live region is present but empty', () => {
     render(<MemoryRouter><Dashboard manifests={manifests} /></MemoryRouter>)
     expect(screen.queryByRole('button', { name: 'Clear filters' })).not.toBeInTheDocument()
-    expect(screen.queryByRole('status')).not.toBeInTheDocument()
+    // The role="status" live region stays mounted at all times (just empty)
+    // so screen readers reliably announce it the first time a filter is
+    // applied -- see the comment on .dashboard__filter-status--empty in
+    // Dashboard.css.
+    expect(screen.getByRole('status')).toHaveTextContent('')
   })
 
   it('keeps the featured banner visible on a filtered tag', async () => {
