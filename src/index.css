@@ -49,6 +49,17 @@ body {
   font-size: 1.125rem;
 }
 
+/* `overflow-wrap: anywhere` (not `break-word`) is deliberate: `break-word`
+   is ignored by the intrinsic min-content-size calculation, so a flex item
+   sized via `flex: 1` (equal-width tab/toggle rows) still reports its
+   unbroken text width as its minimum size and forces the row -- and every
+   block-level ancestor up to the page -- wider than the viewport. `anywhere`
+   is honored by that calculation, letting the item actually shrink and wrap
+   a single unbreakable word (e.g. a long untranslated-with-spaces locale
+   string like Spanish "Configuración") instead of overflowing the pill
+   (issue #115). `hyphens: auto` is a same-cost visual improvement on top --
+   inserts a hyphen at the break when the browser/lang dictionary supports
+   it, silently falls back to a plain break otherwise. */
 button {
   cursor: pointer;
   font-family: var(--font-main);
@@ -57,6 +68,8 @@ button {
   border-radius: var(--radius-button);
   min-width: 64px;
   min-height: 64px;
+  overflow-wrap: anywhere;
+  hyphens: auto;
 }
 
 @keyframes pulse-green {

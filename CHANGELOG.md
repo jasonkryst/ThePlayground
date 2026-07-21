@@ -3,6 +3,14 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.31.2] - 2026-07-21
+
+### Fixed
+
+- Long translated text no longer overflows past the edge of its container on narrow (phone-width) viewports (issue #115). Two distinct root causes, same class of bug:
+  - Every button in the app is pill-shaped and 64px-minimum-tap-target-sized (`button` rule in `src/index.css`). Equal-width button rows (`.admin__tab` — the Settings/Games/Badges/History tabs — and every `.admin__toggle-btn` On/Off control) use `flex: 1`; a single unbreakable word that doesn't fit (Spanish "Configuración", Polish "Odznaki") has no space to wrap at, so with `overflow-wrap` unset, the browser let it overflow visibly instead of shrinking the row — pushing the whole Settings page up to 105px past the viewport edge rather than wrapping inside its own pill. Fixed globally on the base `button` rule with `overflow-wrap: anywhere` (not `break-word`, which is ignored by the min-content-size calculation that was the actual culprit) plus `hyphens: auto` for a cleaner break where the browser supports it. This also covers the `.date-range-filter__tab` pills on the parent dashboard, which share the same base rule.
+  - The Streak History table (`.parent__streak-table`) used the default `table-layout: auto`, which is still allowed to grow a table past its own `width: 100%` to fit a column's content-based minimum width — a long translated header ("Mejor de todos los tiempos", "Najlepszy wynik w historii") pushed the table, and every block-level ancestor up to the page, past the viewport at phone width. Fixed with `table-layout: fixed` (columns split the 100% evenly up front and never grow for content) plus the same `overflow-wrap`/`hyphens` treatment on `th`/`td`.
+
 ## [0.31.1] - 2026-07-20
 
 ### Fixed

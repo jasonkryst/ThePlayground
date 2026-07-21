@@ -60,8 +60,19 @@
 }
 
 /* ── Streak table ── */
+
+/* `table-layout: fixed` (not the default `auto`) is the fix for issue #115
+   on this surface: an `auto`-layout table with `width: 100%` is still allowed
+   to grow *past* that 100% to fit each column's own content-based minimum
+   width (CSS2.1's CAPMIN) -- on a narrow phone with a long translated header
+   ("Mejor de todos los tiempos", "Najlepszy wynik w historii"), that pushed
+   the table (and every block-level ancestor up to the page) past the
+   viewport. `fixed` layout instead splits the 100% evenly across columns
+   up front and never grows for content, so overflow-wrap below just wraps
+   the game name / long header inside its assigned column. */
 .parent__streak-table {
   width: 100%;
+  table-layout: fixed;
   border-collapse: collapse;
   font-size: 0.9375rem;
 }
@@ -69,6 +80,8 @@
 .parent__streak-table th,
 .parent__streak-table td {
   padding: 10px 14px;
+  overflow-wrap: anywhere;
+  hyphens: auto;
   text-align: center;
   border-bottom: 1px solid rgb(0 0 0 / 7%);
 }
