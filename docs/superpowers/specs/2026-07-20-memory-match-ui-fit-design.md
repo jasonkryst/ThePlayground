@@ -68,6 +68,36 @@ used in this codebase:
 - No-ops (leaves the CSS fallback in place) if the measured box is zero-sized
   (e.g. jsdom, or before first layout) or `columns`/`rows` is invalid.
 
+> **Superseded during implementation — height can't come from the wrapper's
+> own box.** The `height` term above assumes the board's flex-filling
+> wrapper actually gets handed a shrunk box by its ancestors. Verified via
+> live Playwright against the running app (not visible from a diff or
+> jsdom, which is why this wasn't caught until real e2e testing in the
+> implementation phase): `.shell` uses `min-height: 100vh` (not `height`,
+> deliberately, so legitimately long content can still scroll — issue #55),
+> so nothing in the ancestor chain has a hard height ceiling. A flex:1
+> wrapper's own box always grows to match its content's natural size in
+> that architecture — confirmed by adding `min-height: 0` to every ancestor
+> in the chain, which made no difference. Measuring "my own box" is
+> circular and can never produce a number smaller than whatever the tiles
+> already want to be; `--memory-board-tile-size` was silently stuck at its
+> 140px fallback on every viewport tested.
+>
+> The shipped hook instead reconstructs `heightPerTile`'s input from
+> `window.innerHeight`, the board's own **document-relative** position
+> (`getBoundingClientRect().top + window.scrollY` — the `+ scrollY` matters:
+> a real scroll-offset scenario was found where clicking a below-the-fold
+> intro "Start" button leaves the page scrolled once the view switches to
+> the board, and plain viewport-relative `top` would otherwise be read as
+> extra available height), and the shell footer's own rendered height
+> (`document.querySelector('.shell__footer')`) — see
+> `src/hooks/useFitTileSize.js`'s header comment for the full reasoning.
+> `widthPerTile` is unaffected (a column flexbox's width isn't
+> content-driven the way its auto height is, and width doesn't move with
+> scroll). The clamp formula, [48, 140] range, and width-safety guarantee
+> below are all unchanged by this correction — only how `heightPerTile`'s
+> input is measured changed.
+
 **Why this formula, and why [48, 140] (revised from an initial [120, 140]
 draft — see below):**
 

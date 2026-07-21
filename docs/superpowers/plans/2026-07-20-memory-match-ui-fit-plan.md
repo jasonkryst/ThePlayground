@@ -27,6 +27,25 @@
 **Interfaces:**
 - Produces: `useFitTileSize(ref: RefObject<HTMLElement>, { columns: number, rows: number, gap: number }): void` — side-effect only, sets `--memory-board-tile-size` (a `px` string) directly on `ref.current.style` via `ResizeObserver`. No return value. Later tasks (Task 2) call this from `MemoryBoard.jsx` with a ref to the board wrapper element.
 
+> **Superseded during implementation.** The code and tests below measure the
+> wrapper's own `getBoundingClientRect().height` for the height term —
+> real Playwright verification against the running app (done during Task 5,
+> not visible from a diff or jsdom) found this is circular in this
+> codebase's shell architecture (`.shell` uses `min-height: 100vh`, not
+> `height`, so nothing in the ancestor chain has a hard ceiling — see the
+> design doc's matching superseded-note in Fix §1, and
+> `src/hooks/useFitTileSize.js`'s header comment, for the full reasoning).
+> The shipped hook instead derives the height term from
+> `window.innerHeight`, the board's scroll-corrected document-relative
+> position, and the shell footer's own height. Two more real bugs were
+> found and fixed along the way: a global `button { min-width/height: 64px
+> }` rule (`src/index.css`) silently overriding sub-64px tile sizes, and a
+> font-size regression against issue #83's rem-relative large-text support.
+> None of this changes the [48, 140] clamp range or the width-safety
+> guarantee described below — only how the height input is measured. Treat
+> the code blocks in this task as the *first draft*; the actual shipped
+> hook and its tests differ as described above.
+
 - [ ] **Step 1: Write the failing tests**
 
 ```js
