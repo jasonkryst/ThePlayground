@@ -43,6 +43,7 @@ beforeEach(() => {
 
 afterEach(() => {
   delete global.ResizeObserver
+  Object.defineProperty(window, 'scrollY', { value: 0, configurable: true })
   document.body.innerHTML = ''
   setInnerHeight(ORIGINAL_INNER_HEIGHT)
 })
@@ -55,6 +56,21 @@ describe('useFitTileSize', () => {
     setInnerHeight(490)
     installFooter(43)
     const ref = makeBoardRef({ width: 853, top: 222 })
+    renderHook(() => useFitTileSize(ref, { columns: 5, rows: 2, gap: 12 }))
+    expect(ref.current.style.getPropertyValue('--memory-board-tile-size')).toBe('94px')
+  })
+
+  it('produces the same result regardless of the page\'s current scroll position (issue #104: getBoundingClientRect().top is viewport-relative, so a scrolled page must not be read as extra available height)', () => {
+    // Same inputs as the primary case above, but as if the page were
+    // scrolled 91px (matches a real scenario found via Playwright: clicking
+    // a below-the-fold intro "Start" button leaves the page scrolled after
+    // the view switches to the board). The board's rect.top the browser
+    // reports drops by the scroll amount even though its true position
+    // relative to the (sticky, viewport-pinned) header hasn't changed.
+    setInnerHeight(490)
+    installFooter(43)
+    Object.defineProperty(window, 'scrollY', { value: 91, configurable: true })
+    const ref = makeBoardRef({ width: 853, top: 222 - 91 })
     renderHook(() => useFitTileSize(ref, { columns: 5, rows: 2, gap: 12 }))
     expect(ref.current.style.getPropertyValue('--memory-board-tile-size')).toBe('94px')
   })

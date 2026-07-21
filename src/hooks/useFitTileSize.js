@@ -23,15 +23,25 @@ const GAME_BOTTOM_PADDING_PX = 24
 //
 // Instead, available height is reconstructed from landmarks that don't
 // depend on the board's own size: window.innerHeight (the true viewport),
-// the board's own top position (driven only by content ABOVE it -- header +
+// the board's own position (driven only by content ABOVE it -- header +
 // prompt/timer -- never by the board itself), and the shell footer's own
 // rendered height (its own content, not the board's). None of these change
 // as a side effect of setting a new tile size, so this converges in at most
 // one extra ResizeObserver tick, not an infinite loop.
 //
+// `getBoundingClientRect().top` is viewport-relative, so it shifts with the
+// page's current scroll position -- confirmed to actually happen: clicking
+// a below-the-fold "Start" button (e.g. on a squeezed intro screen) leaves
+// the page scrolled after the view switches to the board, with the sticky
+// header still pinned at viewport y=0 but everything else shifted up by
+// however much the page had scrolled. Adding window.scrollY back converts
+// `top` into a document-relative (scroll-independent) position, which is
+// what "how far below the header does the board sit" actually means.
+//
 // Available WIDTH is still read from the board wrapper's own box -- that
 // axis isn't part of the height circularity (a column flexbox's width isn't
-// content-driven the way its auto height is).
+// content-driven the way its auto height is), and isn't scroll-dependent
+// (scrolling is vertical only).
 export default function useFitTileSize(ref, { columns, rows, gap }) {
   useLayoutEffect(() => {
     const el = ref.current
@@ -40,9 +50,10 @@ export default function useFitTileSize(ref, { columns, rows, gap }) {
     const updateVar = () => {
       const { width, top } = el.getBoundingClientRect()
       if (width <= 0) return
+      const documentRelativeTop = top + window.scrollY
       const footerEl = document.querySelector('.shell__footer')
       const footerHeight = footerEl ? footerEl.getBoundingClientRect().height : 0
-      const availableHeight = window.innerHeight - top - GAME_BOTTOM_PADDING_PX - footerHeight
+      const availableHeight = window.innerHeight - documentRelativeTop - GAME_BOTTOM_PADDING_PX - footerHeight
       if (availableHeight <= 0) return
       const widthPerTile = (width - gap * (columns - 1)) / columns
       const heightPerTile = (availableHeight - gap * (rows - 1)) / rows
