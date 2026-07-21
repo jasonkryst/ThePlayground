@@ -170,3 +170,69 @@ test('active admin tab has no accessibility violations while hovered', async ({ 
   const results = await new AxeBuilder({ page }).analyze()
   expect(results.violations).toEqual([])
 })
+
+test.describe('pill text overfill regression (issue #115)', () => {
+  // 390x844 matches the "phone" reference viewport used in e2e/zoom-large-text.spec.js.
+  const PHONE_VIEWPORT = { width: 390, height: 844 }
+
+  function seedLocale(page, locale) {
+    return page.addInitScript((loc) => {
+      localStorage.setItem('playground_settings', JSON.stringify({ locale: loc }))
+    }, locale)
+  }
+
+  async function noHorizontalOverflow(page) {
+    return page.evaluate(() => {
+      const de = document.documentElement
+      return de.scrollWidth <= de.clientWidth + 1
+    })
+  }
+
+  // Every button in this app is pill-shaped (`button { border-radius:
+  // var(--radius-button) }` in src/index.css) and a11y-sized to a 64px
+  // minimum tap target. `.admin__tab` (the Settings/Games/Badges/History
+  // row) and `.admin__toggle-btn` (every On/Off control) are both `flex: 1`
+  // siblings sharing equal width -- a single unbreakable word that doesn't
+  // fit (Spanish "Configuración", Polish "Odznaki") used to blow the whole
+  // Settings page 105px past the viewport edge instead of wrapping inside
+  // its own pill, because `overflow-wrap` was unset. Checking overall page
+  // scrollWidth on the default (Settings) tab panel exercises both surfaces
+  // at once, since both render in that one panel.
+  for (const locale of ['es', 'pl']) {
+    test(`settings tab row + On/Off toggles: no horizontal page overflow at phone width (${locale} locale)`, async ({ page }) => {
+      await seedLocale(page, locale)
+      await page.setViewportSize(PHONE_VIEWPORT)
+      await page.goto('/admin')
+      await expect(page.getByRole('tablist')).toBeVisible()
+      expect(await noHorizontalOverflow(page)).toBe(true)
+    })
+  }
+
+  test('negative (baseline): English locale at the same phone width has no horizontal overflow either', async ({ page }) => {
+    await page.setViewportSize(PHONE_VIEWPORT)
+    await page.goto('/admin')
+    await expect(page.getByRole('tablist')).toBeVisible()
+    expect(await noHorizontalOverflow(page)).toBe(true)
+  })
+
+  test('negative: the long Spanish tab label stays fully present, not truncated, once it wraps', async ({ page }) => {
+    await seedLocale(page, 'es')
+    await page.setViewportSize(PHONE_VIEWPORT)
+    await page.goto('/admin')
+    // "Configuración" is the longest, single-word (no space to wrap at) tab
+    // label -- the exact string that overflowed before the fix. A "fix" that
+    // truncated with an ellipsis instead of wrapping would still pass the
+    // no-overflow check above but fail this accessible-name check, since the
+    // full word would no longer be present in the accessible name.
+    await expect(page.getByRole('tab', { name: 'Configuración' })).toBeVisible()
+  })
+
+  test('settings page has no accessibility violations once its pills wrap to two lines (Spanish, phone width)', async ({ page }) => {
+    await seedLocale(page, 'es')
+    await page.setViewportSize(PHONE_VIEWPORT)
+    await page.goto('/admin')
+    await expect(page.getByRole('tablist')).toBeVisible()
+    const results = await new AxeBuilder({ page }).analyze()
+    expect(results.violations).toEqual([])
+  })
+})

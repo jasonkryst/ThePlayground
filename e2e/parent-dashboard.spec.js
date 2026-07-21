@@ -115,3 +115,55 @@ test('active date-range tab has no accessibility violations while hovered', asyn
   const results = await new AxeBuilder({ page }).analyze()
   expect(results.violations).toEqual([])
 })
+
+test.describe('text overfill regression (issue #115)', () => {
+  // 390x844 matches the "phone" reference viewport used in e2e/zoom-large-text.spec.js.
+  const PHONE_VIEWPORT = { width: 390, height: 844 }
+
+  async function noHorizontalOverflow(page) {
+    return page.evaluate(() => {
+      const de = document.documentElement
+      return de.scrollWidth <= de.clientWidth + 1
+    })
+  }
+
+  // The file-level beforeEach above seeds scores, so this exercises the
+  // *full*, realistic dashboard -- date-range pills, plus the Streak History
+  // table whose translated headers ("Mejor de todos los tiempos", "Najlepszy
+  // wynik w historii") used to push the whole page past the viewport at
+  // phone width (a `table-layout: auto` table is still allowed to grow past
+  // its own `width: 100%` to fit a column's content-based minimum width).
+  for (const locale of ['es', 'pl']) {
+    test(`full dashboard (date-range pills + streak table): no horizontal page overflow at phone width (${locale} locale)`, async ({ page }) => {
+      await page.addInitScript((loc) => {
+        localStorage.setItem('playground_settings', JSON.stringify({ locale: loc }))
+      }, locale)
+      await page.setViewportSize(PHONE_VIEWPORT)
+      await page.goto('/parent')
+      await expect(page.getByRole('tablist')).toBeVisible()
+      await expect(page.locator('.parent__streak-table')).toBeVisible()
+      expect(await noHorizontalOverflow(page)).toBe(true)
+    })
+  }
+
+  test('negative (baseline): English locale at the same phone width has no horizontal overflow either', async ({ page }) => {
+    await page.setViewportSize(PHONE_VIEWPORT)
+    await page.goto('/parent')
+    await expect(page.getByRole('tablist')).toBeVisible()
+    expect(await noHorizontalOverflow(page)).toBe(true)
+  })
+
+  test('negative: the long Spanish streak-table header stays fully present, not truncated, once it wraps', async ({ page }) => {
+    await page.addInitScript(() => {
+      localStorage.setItem('playground_settings', JSON.stringify({ locale: 'es' }))
+    })
+    await page.setViewportSize(PHONE_VIEWPORT)
+    await page.goto('/parent')
+    // "Mejor de todos los tiempos" is the longest streak-table header -- the
+    // exact string that overflowed before the fix. A "fix" that truncated
+    // with an ellipsis instead of wrapping would still pass the no-overflow
+    // check above but fail this one, since the full text would no longer be
+    // in the DOM/accessible name.
+    await expect(page.getByRole('columnheader', { name: 'Mejor de todos los tiempos' })).toBeVisible()
+  })
+})
