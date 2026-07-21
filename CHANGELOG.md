@@ -3,6 +3,13 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.31.1] - 2026-07-20
+
+### Fixed
+
+- Memory Match tiles now size themselves from both available width *and* height (issue #104), not width alone — on short/landscape viewports where the old fixed-width sizing produced a board taller than the screen, tiles shrink (down to a 48px sanity floor, revised down from issue #58's 120px tap-target floor specifically to prioritize showing the whole board over tile size when the two conflict) so more of the board fits without scrolling; tablet/desktop are unaffected, where the existing 140px cap still applies.
+- The rotation-required overlay ("Turn it sideways!") no longer gets cut off on portrait phones. The still-mounted (but `inert`) game content underneath was contributing to the overlay container's layout height, due to flexbox's default `min-height: auto` — this could push the overlay's centered message below the visible viewport when the hidden content's own layout didn't fit the current orientation. The inert content is now fully collapsed (`display: none`) instead.
+
 ## [0.31.0] - 2026-07-19
 
 ### Added
