@@ -173,7 +173,7 @@ git commit -m "feat(103): add i18n keys for dashboard search and tag filter rede
 - Test: `src/hooks/__tests__/useTagRowOverflow.test.js`
 
 **Interfaces:**
-- Produces: `useTagRowOverflow(ref: RefObject<HTMLElement>, deps: any[] = []) => { visibleCount: number, rowHeight: number | null }`. `visibleCount` is `Infinity` and `rowHeight` is `null` until the first real measurement (no children, or ref not yet attached). Consumed by Task 3's `TagFilterBar`.
+- Produces: `useTagRowOverflow(ref: RefObject<HTMLElement>, dep: any) => { visibleCount: number, rowHeight: number | null }`. `dep` is a single scalar value (not an array — see the note after Step 1 for why) that changes whenever the measured row's content changes. `visibleCount` is `Infinity` and `rowHeight` is `null` until the first real measurement (no children, or ref not yet attached). Consumed by Task 3's `TagFilterBar`.
 
 - [ ] **Step 1: Write the failing test**
 
@@ -221,7 +221,7 @@ describe('useTagRowOverflow', () => {
       makePill({ offsetTop: 0, height: 44 }),
       makePill({ offsetTop: 0, height: 44 }),
     ])
-    const { result } = renderHook(() => useTagRowOverflow(ref, []))
+    const { result } = renderHook(() => useTagRowOverflow(ref, 'a'))
     expect(result.current.visibleCount).toBe(3)
     expect(result.current.rowHeight).toBe(44)
   })
@@ -232,18 +232,18 @@ describe('useTagRowOverflow', () => {
       makePill({ offsetTop: 0, height: 44 }),
       makePill({ offsetTop: 52, height: 44 }),
     ])
-    const { result } = renderHook(() => useTagRowOverflow(ref, []))
+    const { result } = renderHook(() => useTagRowOverflow(ref, 'a'))
     expect(result.current.visibleCount).toBe(2)
   })
 
   it('negative: does nothing when ref.current is null', () => {
     const ref = { current: null }
-    expect(() => renderHook(() => useTagRowOverflow(ref, []))).not.toThrow()
+    expect(() => renderHook(() => useTagRowOverflow(ref, 'a'))).not.toThrow()
   })
 
   it('negative: keeps the Infinity/null defaults when the row has no children yet', () => {
     const ref = makeRow([])
-    const { result } = renderHook(() => useTagRowOverflow(ref, []))
+    const { result } = renderHook(() => useTagRowOverflow(ref, 'a'))
     expect(result.current.visibleCount).toBe(Infinity)
     expect(result.current.rowHeight).toBe(null)
   })
@@ -253,32 +253,34 @@ describe('useTagRowOverflow', () => {
       makePill({ offsetTop: 0, height: 44 }),
       makePill({ offsetTop: 52, height: 44 }),
     ])
-    const { result } = renderHook(() => useTagRowOverflow(ref, []))
+    const { result } = renderHook(() => useTagRowOverflow(ref, 'a'))
     expect(result.current.visibleCount).toBe(1)
     Object.defineProperty(ref.current.children[1], 'offsetTop', { value: 0, configurable: true })
     act(() => { MockResizeObserver.instances[0].callback() })
     expect(result.current.visibleCount).toBe(2)
   })
 
-  it('recomputes when deps change', () => {
+  it('recomputes when dep changes', () => {
     const ref = makeRow([makePill({ offsetTop: 0, height: 44 })])
-    const { result, rerender } = renderHook(({ deps }) => useTagRowOverflow(ref, deps), {
-      initialProps: { deps: ['a'] },
+    const { result, rerender } = renderHook(({ dep }) => useTagRowOverflow(ref, dep), {
+      initialProps: { dep: 'a' },
     })
     expect(result.current.visibleCount).toBe(1)
     ref.current.appendChild(makePill({ offsetTop: 0, height: 44 }))
-    rerender({ deps: ['a', 'b'] })
+    rerender({ dep: 'b' })
     expect(result.current.visibleCount).toBe(2)
   })
 
   it('negative: disconnects the observer on unmount (no further recompute)', () => {
     const ref = makeRow([makePill({ offsetTop: 0, height: 44 })])
-    const { unmount } = renderHook(() => useTagRowOverflow(ref, []))
+    const { unmount } = renderHook(() => useTagRowOverflow(ref, 'a'))
     unmount()
     expect(MockResizeObserver.instances[0].disconnected).toBe(true)
   })
 })
 ```
+
+**Note on the `dep` parameter (single scalar, not an array):** the plan originally specified `useTagRowOverflow(ref, deps = [])` with `[ref, ...deps]` as the effect's own dependency array. That's a real bug, not just a style choice — React's dependency comparison only checks indices up to `min(prevDeps.length, nextDeps.length)`, so a *spread, variable-length* array silently skips re-running the effect whenever the caller's `deps` array grows between renders (confirmed against `react-dom`'s `areHookInputsEqual` source during Task 2 implementation). The signature above (single scalar `dep`, effect deps always `[ref, dep]`) avoids the footgun entirely. If you are implementing from an older copy of this plan, use the signature in this note, not one with a spread array.
 
 - [ ] **Step 2: Run the test to verify it fails**
 
@@ -299,7 +301,7 @@ import { useLayoutEffect, useState } from 'react'
 // stay correct across pill label length, locale, or OS/browser large-text
 // scaling -- same "measure real DOM, don't guess" approach as
 // useFitTileSize (issue #104), applied to counting instead of sizing.
-export default function useTagRowOverflow(ref, deps = []) {
+export default function useTagRowOverflow(ref, dep) {
   const [state, setState] = useState({ visibleCount: Infinity, rowHeight: null })
 
   useLayoutEffect(() => {
@@ -319,12 +321,13 @@ export default function useTagRowOverflow(ref, deps = []) {
     const observer = new ResizeObserver(update)
     observer.observe(el)
     return () => observer.disconnect()
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- deps is the caller-supplied dependency list by design
-  }, [ref, ...deps])
+  }, [ref, dep])
 
   return state
 }
 ```
+
+`dep` is a single caller-supplied value (not an array) that should change whenever the row's content changes — e.g. a joined string of the current tag list. **This is deliberate, not a simplification:** React's dependency-array comparison (`areHookInputsEqual`) only checks indices up to `min(prevDeps.length, nextDeps.length)`, so a *spread, variable-length* array (`[ref, ...deps]`) silently skips re-running the effect whenever `deps` grows between renders — a real bug, not a hypothetical. A single scalar dependency avoids it entirely since the effect's own deps array is always exactly `[ref, dep]`, constant length. Task 3's `TagFilterBar` must call this as `useTagRowOverflow(rowRef, orderedTags.join('|'))` — a single string, not `[orderedTags.join('|')]`.
 
 - [ ] **Step 4: Run the test to verify it passes**
 
@@ -500,7 +503,7 @@ export default function TagFilterBar({ tags, selectedTags, onToggleTag, tagLabel
     [tags, selectedTags]
   )
 
-  const { visibleCount, rowHeight } = useTagRowOverflow(rowRef, [orderedTags.join('|')])
+  const { visibleCount, rowHeight } = useTagRowOverflow(rowRef, orderedTags.join('|'))
   const hiddenCount = Math.max(0, orderedTags.length - visibleCount)
 
   if (tags.length === 0) return null
