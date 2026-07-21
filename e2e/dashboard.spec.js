@@ -34,28 +34,43 @@ test('featured hero card navigates to the game on click', async ({ page }) => {
   await expect(page).toHaveURL(href)
 })
 
-test('category tabs appear and filter the grid', async ({ page }) => {
+test('tag pills appear and filter the grid', async ({ page }) => {
   await page.goto('/')
-  await expect(page.getByRole('tab', { name: 'All' })).toBeVisible()
-  // Click "Sounds" tab
-  await page.getByRole('tab', { name: 'Sounds' }).click()
-  await expect(page.getByRole('tab', { name: 'Sounds' })).toHaveAttribute('aria-selected', 'true')
+  await expect(page.getByRole('button', { name: 'Sounds' })).toBeVisible()
+  await page.getByRole('button', { name: 'Sounds' }).click()
+  await expect(page.getByRole('button', { name: 'Sounds' })).toHaveAttribute('aria-pressed', 'true')
   // Scope to the grid (not the always-visible featured banner, which may show
-  // either game regardless of the active tag) to check what the filter actually did.
+  // either game regardless of the active filter) to check what the filter actually did.
   const grid = page.locator('.dashboard__grid')
   await expect(grid.getByText('Animal Sounds')).toBeVisible()
   await expect(grid.getByText('Color Match')).not.toBeVisible()
 })
 
-test('clicking All tab restores full grid', async ({ page }) => {
+test('deselecting the only active tag pill restores the full sectioned view', async ({ page }) => {
   await page.goto('/')
-  await page.getByRole('tab', { name: 'Sounds' }).click()
-  await page.getByRole('tab', { name: 'All' }).click()
-  // Color Match carries two tags ("visual" and "colors"), so in the "All" view it
+  await page.getByRole('button', { name: 'Sounds' }).click()
+  await page.getByRole('button', { name: 'Sounds' }).click()
+  // Color Match carries two tags ("visual" and "colors"), so in the unfiltered view it
   // legitimately renders once per matching category section (see Dashboard.jsx's
-  // buildSections). .first() just confirms the grid is restored, not that there's
-  // exactly one card.
+  // buildSections). .first() just confirms the sectioned view is restored, not that
+  // there's exactly one card.
   await expect(page.getByText('Color Match').first()).toBeVisible()
+})
+
+test('Clear filters resets search text and selected tags', async ({ page }) => {
+  await page.goto('/')
+  await page.getByRole('searchbox').fill('animal')
+  await page.getByRole('button', { name: 'Clear filters' }).click()
+  await expect(page.getByRole('searchbox')).toHaveValue('')
+  await expect(page.getByText('Color Match').first()).toBeVisible()
+})
+
+test('searching by name filters the grid to matching games', async ({ page }) => {
+  await page.goto('/')
+  await page.getByRole('searchbox').fill('animal')
+  const grid = page.locator('.dashboard__grid')
+  await expect(grid.getByText('Animal Sounds')).toBeVisible()
+  await expect(grid.getByText('Color Match')).not.toBeVisible()
 })
 
 test('recently-played badge appears for a game with seeded scores', async ({ page }) => {
@@ -88,38 +103,30 @@ test('dashboard has no accessibility violations after enhancements', async ({ pa
   expect(results.violations).toEqual([])
 })
 
-test('active tab keeps its solid background when hovered', async ({ page }) => {
+test('an active tag pill keeps its solid background when hovered', async ({ page }) => {
   await page.goto('/')
-  const allTab = page.getByRole('tab', { name: 'All' })
-  await allTab.hover()
+  const soundsPill = page.getByRole('button', { name: 'Sounds' })
+  await soundsPill.click()
+  await soundsPill.hover()
   await page.waitForTimeout(200)
-  await expect(allTab).toHaveCSS('background-color', 'rgb(106, 79, 163)')
-  await expect(allTab).toHaveCSS('color', 'rgb(255, 255, 255)')
+  await expect(soundsPill).toHaveCSS('background-color', 'rgb(106, 79, 163)')
+  await expect(soundsPill).toHaveCSS('color', 'rgb(255, 255, 255)')
 })
 
-test('a tab keeps its solid background when hovered right after being clicked active', async ({ page }) => {
+test('an inactive tag pill still shows the light hover tint, not the active color', async ({ page }) => {
   await page.goto('/')
-  const soundsTab = page.getByRole('tab', { name: 'Sounds' })
-  await soundsTab.click()
-  await soundsTab.hover()
+  const animalsPill = page.getByRole('button', { name: 'Animals' })
+  await animalsPill.hover()
   await page.waitForTimeout(200)
-  await expect(soundsTab).toHaveCSS('background-color', 'rgb(106, 79, 163)')
-  await expect(soundsTab).toHaveCSS('color', 'rgb(255, 255, 255)')
+  await expect(animalsPill).toHaveCSS('background-color', 'rgba(0, 0, 0, 0.05)')
 })
 
-test('an inactive tab still shows the light hover tint, not the active color', async ({ page }) => {
-  await page.goto('/')
-  const animalsTab = page.getByRole('tab', { name: 'Animals' })
-  await animalsTab.hover()
-  await page.waitForTimeout(200)
-  await expect(animalsTab).toHaveCSS('background-color', 'rgba(0, 0, 0, 0.05)')
-})
-
-test('active tab has no accessibility violations while hovered', async ({ page }) => {
+test('active tag pill has no accessibility violations while hovered', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' })
   await page.goto('/')
-  const allTab = page.getByRole('tab', { name: 'All' })
-  await allTab.hover()
+  const soundsPill = page.getByRole('button', { name: 'Sounds' })
+  await soundsPill.click()
+  await soundsPill.hover()
   await page.waitForTimeout(200)
   const results = await new AxeBuilder({ page }).analyze()
   expect(results.violations).toEqual([])
