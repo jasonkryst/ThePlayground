@@ -106,9 +106,14 @@ improving code you're already working in):
   pattern *requires* single selection, so it was already the wrong pattern
   once multiple pills can be active; `role="group"` + `aria-pressed` is the
   correct pattern for independent multi-select toggles.
-- Closes `docs/ENHANCEMENTS.md`'s open **AU-7**: `.dashboard__tab` is ~33px
-  tall, under the README's 44×44px tap-target claim. Bumping to ≥44px is a
-  one-line CSS change alongside the rest of this work.
+- `docs/ENHANCEMENTS.md`'s open **AU-7** ("`.dashboard__tab` is ~33px tall")
+  turns out to be stale: verified in a real browser against the running dev
+  server, tabs are already 64×64px — the global `button { min-height: 64px;
+  min-width: 64px }` rule (present since project scaffold) already applies,
+  which the audit's padding+font-size arithmetic didn't account for. No CSS
+  change needed for tap target size; this work just removes the stale
+  ENHANCEMENTS.md entry (see Docs section) since the pill markup is being
+  restructured here anyway.
 - Search input gets a real (visually-hidden) `<label>`, not just `aria-label`,
   matching how the rest of the app labels form controls.
 - A polite `aria-live` region (living in `Dashboard.jsx`, next to the grid)
@@ -152,6 +157,7 @@ this work and flagged for native-speaker review.
 
 - `README.md`'s "Game Categories & Tags" section — rewrite for search,
   multi-select, and the collapse behavior.
-- `docs/ENHANCEMENTS.md` — remove the now-resolved AU-7 entry.
+- `docs/ENHANCEMENTS.md` — remove the AU-7 entry (verified already
+  satisfied, not fixed by this work — see Accessibility above).
 - `CHANGELOG.md` — new entry; bump `package.json` version per repo
   versioning convention.
