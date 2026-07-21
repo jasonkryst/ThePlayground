@@ -55,25 +55,65 @@ used in this codebase:
 - Takes a ref to the board's flex-filling wrapper, plus `{ columns, rows,
   gap }`.
 - On mount and on every resize, reads the wrapper's rendered `width`/`height`
-  and computes `tileSize = floor(min((width - gap*(cols-1))/cols, (height -
-  gap*(rows-1))/rows))`.
-- Clamps to **[120, 140]** and publishes it as `--memory-board-tile-size` on
-  the wrapper element directly (same direct-DOM-write approach as
-  `useHeaderHeightVar`, avoiding an extra React re-render per resize tick).
+  and computes:
+  ```
+  widthPerTile  = (width  - gap * (columns - 1)) / columns
+  heightPerTile = (height - gap * (rows - 1)) / rows
+  rawSize       = min(widthPerTile, heightPerTile)
+  tileSize      = min(MAX_TILE_PX, widthPerTile, max(MIN_TILE_PX, floor(rawSize)))
+  ```
+- Publishes `tileSize` as `--memory-board-tile-size` on the wrapper element
+  directly (same direct-DOM-write approach as `useHeaderHeightVar`, avoiding
+  an extra React re-render per resize tick).
 - No-ops (leaves the CSS fallback in place) if the measured box is zero-sized
   (e.g. jsdom, or before first layout) or `columns`/`rows` is invalid.
 
-**Why [120, 140]:** 120px is an *existing* requirement — an e2e test in
-`e2e/animal-memory-match.spec.js` (issue #58) already asserts tiles must be
-≥120px on a landscape phone, as a toddler tap-target minimum. 140px is
-today's desktop/tablet default (issue #58's cap). This fix shrinks tiles only
-when there's genuinely not enough room, never below the established tap
-target, and never grows them past today's look on generously large screens.
-If a viewport is so constrained that even 120px tiles don't fit, the page
-scrolls — the same accepted fallback already used for long results screens
-(issue #55/#61, `intro-results-height.spec.js`). This is a deliberate
-non-goal: the fix caps the *avoidable* overflow case, it does not force
-content into a space too small for safe tap targets.
+**Why this formula, and why [48, 140] (revised from an initial [120, 140]
+draft — see below):**
+
+Real measurement against the running app (Playwright at 844×390, a landscape
+phone — the same class of device as the reporter's screenshot) showed that
+chrome alone (header 102px + footer 42px + prompt text 72px + `.game`
+padding/gaps 96px ≈ 289px) leaves only **~101px** for a 2-row board. Two rows
+even at a 120px floor need 252px — 2.5× more than available. **Keeping a
+120px tap-target floor would make this fix a no-op for phone-sized landscape
+viewports specifically** — the exact device in the bug report — only helping
+larger tablet/laptop windows. Confirmed with the reporter: the priority is
+"do the best we can between preventing a scroll and showing all the tiles on
+screen without scrolling," i.e. full-board visibility outranks the
+120px tap-target guarantee when they conflict.
+
+So the floor is revised down to **48px** — a sanity guard against a
+degenerate render (matches this app's *other* existing minimum-size
+convention, `.shell__back`/`.shell__nav-link`'s `min-width/height: 48px`,
+used for lower-stakes repeated UI elements — distinct from issue #58's 120px
+"toddler tap target for the main play surface" number, which this fix
+intentionally supersedes at the tightest viewports). 140px remains the
+existing desktop/tablet cap (issue #58), so generously large screens are
+visually unchanged.
+
+`Math.min(MAX_TILE_PX, widthPerTile, ...)` — with `widthPerTile` always
+present as an explicit outer clamp — makes horizontal overflow mathematically
+impossible regardless of the 48px floor: `tileSize` can never exceed
+`widthPerTile`, and board width is `columns × tileSize + gaps ≤ columns ×
+widthPerTile + gaps = width` by construction. This is what lets column
+selection stay a fixed, simple `idealColumns(total)` (unchanged from today)
+rather than needing a width-responsive column-count search — width safety is
+structural, not a search outcome.
+
+**Verified outcomes (real numbers, 5×2 board, gap 12px):**
+- 844×390 (landscape phone): available height ~101px for 2 rows →
+  `rawSize` ≈44 → floored to the 48px guard → board height 108px, fits within
+  ~101px with only ~7px residual (vs. ~191px of scroll today) — not a
+  perfect fit, but a ~96% reduction in overflow.
+- 667×375 (the existing, tighter issue #58 e2e viewport): `rawSize` ≈37 →
+  floored to 48px → board height 108px vs. ~86px available, ~22px residual
+  (vs. today's much larger overflow at fixed 140px tiles). **This drops
+  below the existing test's `≥120px` assertion** — see Test plan below for
+  the corresponding, disclosed test update.
+- 1024×768 (tablet, issue #58's own test viewport): available height ~479px
+  for 2 rows → `rawSize` ≈233, clamped down to the 140px cap — **identical
+  to today's behavior**, confirming desktop/tablet is unaffected.
 
 **Component/CSS changes:**
 
@@ -127,15 +167,22 @@ coverage is Playwright e2e, per the precedent set by
 
 **Unit — `src/hooks/__tests__/useFitTileSize.test.js`** (mirrors
 `useHeaderHeightVar.test.js`'s `MockResizeObserver` pattern):
-- Positive: computes and publishes the expected clamped tile size for a
-  measured box (e.g. a box that would compute to 100px → clamped to 120px; a
-  box that would compute to 300px → clamped to 140px; a box that computes to
-  130px → published as-is).
+- Positive: a generously large box (e.g. 2000×1000) clamps to the 140px cap.
+- Positive: a tight box (e.g. 500×200, 5×2) floors to 48px rather than the
+  raw computed value.
+- Positive: a mid-range box (e.g. 700×300, 5×2 → raw ≈130px) publishes the
+  computed value as-is, unclamped.
+- Negative: a box tight enough on *width* that `widthPerTile` itself is below
+  48px (e.g. 200×300, 5×2 → widthPerTile ≈30px) publishes the smaller
+  width-derived value, not the 48px floor — proves the floor never overrides
+  the width-safety clamp (no horizontal overflow, ever).
 - Positive: updates the property when the observed element resizes (via the
   mock's captured callback).
 - Negative: does nothing (leaves any existing property untouched, doesn't
   throw) when the measured box is zero-sized.
 - Negative: does nothing when `ref.current` is null (no crash before mount).
+- Negative: does nothing when `columns`/`rows` is invalid (e.g. 0) — guards
+  the divide-by-zero shape.
 - Negative: disconnects the observer on unmount — no further writes after.
 
 **Unit — `src/components/__tests__/MemoryBoard.test.jsx`:**
@@ -152,17 +199,31 @@ change; no new jsdom-observable assertion is possible here (CSS isn't
 computed in jsdom) — coverage for the actual layout fix lives in e2e below.
 
 **E2E — new assertions in `e2e/animal-memory-match.spec.js`:**
-- Positive: at a representative landscape-phone viewport, the full board (all
-  tiles) fits without page scroll (`document.documentElement.scrollHeight <=
-  window.innerHeight`), mirroring `intro-results-height.spec.js`'s
-  `fitsOneScreen` helper.
-- Negative: confirm the *existing* issue #58 test (tiles ≥120px on a
-  landscape phone) still passes unchanged — proves the shrink logic respects
-  the tap-target floor rather than regressing it.
+- Positive: at a viewport tall enough for the fit formula to land at or
+  under the 140px cap without hitting the floor (e.g. a modest landscape
+  laptop window, ~900×600 — comfortably above the ~580px height needed for
+  the default 5×2 board at 140px tiles), the full board fits without page
+  scroll
+  (`document.documentElement.scrollHeight <= window.innerHeight`), mirroring
+  `intro-results-height.spec.js`'s `fitsOneScreen` helper.
+- Positive: at the landscape-phone viewport from the original bug report
+  (~844×390), page overflow (`scrollHeight - innerHeight`) is dramatically
+  smaller than before the fix (assert it's under some small bound, e.g.
+  ≤30px, rather than the ~191px it is today) — proves the fix meaningfully
+  helps even where it can't achieve a perfect fit.
 - Existing "cards grow to fill more of a tablet screen" and "board stays
   centered" tests continue to pass unchanged (confirms desktop/tablet sizing
-  is unaffected by the new clamp, since 140px is still the effective cap
-  there).
+  is unaffected, since 140px is still the effective cap there).
+
+**Updated existing test in `e2e/animal-memory-match.spec.js` (disclosed
+behavior change):** the issue #58 test asserting tiles are ≥120px at
+667×375 no longer holds — at that viewport height, fitting the board without
+scrolling requires tiles below 120px (see "Verified outcomes" above). Update
+that assertion to the new, lower sanity floor (48px) and add a code comment
+noting issue #104 revises the 120px guarantee specifically at this extreme
+aspect ratio, in favor of full-board visibility. The "no horizontal overflow"
+half of that same test is kept as-is and must still pass (width-safety is
+structural per the formula, not just a floor increase).
 
 **E2E — new assertions in `e2e/orientation-gate.spec.js`:**
 - Positive: at a portrait-phone viewport (landscape-required game), the
@@ -179,11 +240,15 @@ baselines in `e2e/visual.spec.js-snapshots/` will change (Storybook has no
 sizing falls back to the `140px` CSS default) — regenerate with
 `npx playwright test visual.spec.js --update-snapshots` and review the diff.
 
-**Manual/dev-server verification:** re-screenshot the memory match game at a
-landscape-phone viewport (confirm no scroll, tiles still comfortably tappable)
-and the orientation overlay at a portrait-phone viewport (confirm the full
-"Turn it sideways!" message is visible), matching the two screenshots from
-the original issue report.
+**Manual/dev-server verification:** re-screenshot the memory match game at the
+landscape-phone viewport from the report (confirm the board is fully visible
+or nearly so, a large improvement over today's scroll — tiles will be
+noticeably smaller than 120px at this exact size, which is the accepted
+trade-off) and at a more generous landscape window (confirm tiles stay at a
+comfortable size, unchanged from today). Also re-screenshot the orientation
+overlay at a portrait-phone viewport (confirm the full "Turn it sideways!"
+message is visible), matching the two screenshots from the original issue
+report.
 
 ## Docs
 
