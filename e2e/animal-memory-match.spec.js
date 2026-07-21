@@ -58,7 +58,7 @@ test('memory match game screen has no accessibility violations', async ({ page }
   expect(results.violations).toEqual([])
 })
 
-test('memory match: cards are large tap targets with breathing room from the screen edge on phone (issue #58)', async ({ page }) => {
+test('memory match: cards keep breathing room from the screen edge and never overflow horizontally on phone (issue #58, floor revised by #104)', async ({ page }) => {
   await page.setViewportSize({ width: 667, height: 375 }) // landscape phone — the game now requires landscape (#62)
   await startGame(page)
   const boxes = await page.locator('[data-tile-id]').evaluateAll(els =>
@@ -68,12 +68,29 @@ test('memory match: cards are large tap targets with breathing room from the scr
     })
   )
   for (const box of boxes) {
-    expect(box.width).toBeGreaterThanOrEqual(120)
-    expect(box.height).toBeGreaterThanOrEqual(120)
+    // 120px was issue #58's toddler tap-target floor. At this specific tight
+    // viewport height, issue #104 revises it down to a 48px sanity floor so
+    // the whole board can still fit -- see the design doc for the trade-off.
+    expect(box.width).toBeGreaterThanOrEqual(48)
+    expect(box.height).toBeGreaterThanOrEqual(48)
     expect(box.left).toBeGreaterThan(0)
   }
   const overflowsHorizontally = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth)
   expect(overflowsHorizontally).toBe(false)
+})
+
+test('memory match: board that used to require scrolling now fits one screen on a modest landscape window (issue #104)', async ({ page }) => {
+  await page.setViewportSize({ width: 900, height: 490 })
+  await startGame(page)
+  const fitsOneScreen = await page.evaluate(() => document.documentElement.scrollHeight <= window.innerHeight)
+  expect(fitsOneScreen).toBe(true)
+})
+
+test('memory match: tablet board still fits one screen without scrolling after the sizing change (issue #104 regression guard)', async ({ page }) => {
+  await page.setViewportSize({ width: 1024, height: 768 })
+  await startGame(page)
+  const fitsOneScreen = await page.evaluate(() => document.documentElement.scrollHeight <= window.innerHeight)
+  expect(fitsOneScreen).toBe(true)
 })
 
 test('memory match: cards grow to fill more of a tablet screen instead of staying tiny (issue #58)', async ({ page }) => {
