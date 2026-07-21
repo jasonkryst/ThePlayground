@@ -33,7 +33,15 @@
   padding: 0;
   cursor: pointer;
   perspective: 600px;
-  font-size: calc(var(--memory-board-tile-size, 140px) * 0.34);
+
+  /* rem-based, not a flat px-per-tile-size ratio: the emoji glyph must keep
+     responding to OS/browser large-text settings (issue #83 "Fix 1" --
+     rem is root-font-size-relative, px is not) *and* scale with the
+     JS-computed tile size (issue #104). 3rem matches this tile's size
+     exactly at the 140px desktop default and default 16px root font, same
+     as the plain `3rem` this replaces; the ratio term scales it the same
+     amount the tile itself scales. */
+  font-size: calc(3rem * var(--memory-board-tile-size, 140px) / 140px);
 }
 
 .memory-board__tile-inner {
