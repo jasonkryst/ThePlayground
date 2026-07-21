@@ -28,13 +28,7 @@ function tagLabel(tag, t) {
 function buildSections(manifests, tagMap, allTags, t) {
   const sections = []
   for (const tag of allTags) {
-    // Primary-tag membership (first tag in the manifest's own tags array),
-    // not "any matching tag" -- a game with multiple tags (the common case
-    // in production manifests, e.g. animal-sounds: ["sounds", "animals"])
-    // would otherwise render into every one of its tag sections at once in
-    // this unfiltered browse view, duplicating its card (and any per-card
-    // state, like the recently-played badge) on the page.
-    const games = manifests.filter(m => (tagMap.get(m.id) ?? [])[0] === tag)
+    const games = manifests.filter(m => (tagMap.get(m.id) ?? []).includes(tag))
     if (games.length > 0) {
       const icon = TAG_ICONS[tag] ?? ''
       const label = `${icon} ${tagLabel(tag, t)}`.trim()
