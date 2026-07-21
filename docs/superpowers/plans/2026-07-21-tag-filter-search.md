@@ -687,8 +687,15 @@ describe('Dashboard', () => {
   it('shows recently-played badge for a game with recent play data', () => {
     mockRecentlyPlayed.set('color-match', { lastPlayed: TODAY, playCount: 3 })
     render(<MemoryRouter><Dashboard manifests={manifests} /></MemoryRouter>)
-    expect(screen.getByTestId('recently-played-badge')).toBeInTheDocument()
-    expect(screen.getByTestId('recently-played-badge')).toHaveTextContent('Today')
+    // color-match carries two tags (visual, colors), so in the unfiltered
+    // sections view it legitimately renders once per matching category
+    // section (buildSections membership is "any matching tag", by design --
+    // browsing "Colors" or "Visual" should both surface it). Its badge
+    // renders on each occurrence, so this asserts at least one rather than
+    // exactly one.
+    const badges = screen.getAllByTestId('recently-played-badge')
+    expect(badges.length).toBeGreaterThan(0)
+    expect(badges[0]).toHaveTextContent('Today')
     mockRecentlyPlayed.clear()
   })
 
@@ -762,7 +769,11 @@ describe('Dashboard', () => {
     await user.click(screen.getByRole('button', { name: 'Sounds' }))
     await user.click(screen.getByRole('button', { name: 'Sounds' }))
     expect(screen.getByRole('button', { name: 'Sounds' })).toHaveAttribute('aria-pressed', 'false')
-    expect(screen.getByText('Color Match')).toBeInTheDocument()
+    // Back in the unfiltered sections view -- color-match legitimately
+    // appears in both its "visual" and "colors" sections (see the note on
+    // the recently-played-badge test above), so assert presence, not a
+    // singular match.
+    expect(screen.getAllByText('Color Match').length).toBeGreaterThan(0)
   })
 
   it('searching by name filters the grid (positive match)', async () => {
@@ -805,7 +816,8 @@ describe('Dashboard', () => {
     await user.click(screen.getByRole('button', { name: 'Clear filters' }))
     expect(screen.getByRole('searchbox')).toHaveValue('')
     expect(screen.getByRole('button', { name: 'Sounds' })).toHaveAttribute('aria-pressed', 'false')
-    expect(screen.getByText('Color Match')).toBeInTheDocument()
+    // Same legitimate multi-section duplication as the two tests above.
+    expect(screen.getAllByText('Color Match').length).toBeGreaterThan(0)
     expect(screen.getByRole('heading', { name: /visual/i })).toBeInTheDocument()
   })
 
