@@ -49,6 +49,21 @@ test('overlay state has no accessibility violations', async ({ page }) => {
   expect(results.violations).toEqual([])
 })
 
+test('overlay message is fully visible, not cut off, when the inert board underneath is taller than the viewport (issue #104)', async ({ page }) => {
+  await page.setViewportSize(PORTRAIT)
+  await page.goto('/game/animal-memory-match')
+  await expect(page.getByTestId('orientation-overlay')).toBeVisible()
+  await expect(page.getByRole('heading', { name: /turn it sideways/i })).toBeInViewport()
+  await expect(page.getByText(/this game needs a wide screen/i)).toBeInViewport()
+})
+
+test('negative: inert content is visually collapsed, not just non-interactive, while blocked (issue #104)', async ({ page }) => {
+  await page.setViewportSize(PORTRAIT)
+  await page.goto('/game/animal-memory-match')
+  await expect(page.getByTestId('orientation-overlay')).toBeVisible()
+  await expect(page.locator('.orientation-gate__content')).toBeHidden()
+})
+
 test('negative: a game without the manifest flag never shows the overlay in portrait', async ({ page }) => {
   await page.setViewportSize(PORTRAIT)
   await page.goto('/game/animal-sounds')

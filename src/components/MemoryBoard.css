@@ -1,33 +1,47 @@
 .memory-board {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  align-items: center;
+  justify-content: center;
   width: 100%;
 }
 
 .memory-board__grid {
-  --memory-board-gap: 0.75rem;
-
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: var(--memory-board-gap);
-
-  /* 140px is kept deliberately close to the 120px auto-fit floor above.
-     auto-fit always packs as many columns as fit at the floor size
-     regardless of this cap, so a target much larger than the floor would
-     let auto-fit sneak an extra floor-sized column into the cap instead of
-     respecting the intended near-square column count. */
-  width: min(100%, calc(var(--memory-board-columns) * 140px + (var(--memory-board-columns) - 1) * var(--memory-board-gap)));
-  margin: 0 auto;
+  grid-template-columns: repeat(var(--memory-board-columns), var(--memory-board-tile-size, 140px));
+  grid-template-rows: repeat(var(--memory-board-rows), var(--memory-board-tile-size, 140px));
+  gap: 0.75rem;
 }
 
+/* min-width/min-height: 0 overrides the global `button { min-width: 64px;
+   min-height: 64px }` baseline (src/index.css) -- that's a sensible default
+   for ordinary buttons, but this tile's size is already deliberately
+   computed by useFitTileSize (down to a 48px floor, see MemoryBoard.jsx),
+   and letting the browser silently re-inflate it to 64px would both fight
+   that floor and break the grid's width-safety guarantee (a forced 64px
+   minimum can grow a grid track past the size useFitTileSize computed to
+   fit the viewport, causing the horizontal overflow that guarantee exists
+   to prevent). */
 .memory-board__tile {
   position: relative;
-  aspect-ratio: 1;
+  min-width: 0;
+  min-height: 0;
   border: none;
   border-radius: var(--radius-card);
   background: transparent;
   padding: 0;
   cursor: pointer;
   perspective: 600px;
-  font-size: 3rem;
+
+  /* rem-based, not a flat px-per-tile-size ratio: the emoji glyph must keep
+     responding to OS/browser large-text settings (issue #83 "Fix 1" --
+     rem is root-font-size-relative, px is not) *and* scale with the
+     JS-computed tile size (issue #104). 3rem matches this tile's size
+     exactly at the 140px desktop default and default 16px root font, same
+     as the plain `3rem` this replaces; the ratio term scales it the same
+     amount the tile itself scales. */
+  font-size: calc(3rem * var(--memory-board-tile-size, 140px) / 140px);
 }
 
 .memory-board__tile-inner {

@@ -1,17 +1,26 @@
+import { useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import idealColumns from '../utils/idealColumns'
+import useFitTileSize from '../hooks/useFitTileSize'
 import './MemoryBoard.css'
+
+// Must match the `gap` in .memory-board__grid (MemoryBoard.css, 0.75rem at
+// the default 16px root font size).
+const TILE_GAP_PX = 12
 
 export default function MemoryBoard({ tiles, onFlip, renderFace, getFaceLabel, animationsEnabled = true, liveMessage = '' }) {
   const { t } = useTranslation()
   const total = tiles.length
   const columns = idealColumns(total)
+  const rows = total > 0 ? Math.ceil(total / columns) : 1
+  const boardRef = useRef(null)
+  useFitTileSize(boardRef, { columns, rows, gap: TILE_GAP_PX })
 
   return (
-    <div className="memory-board">
+    <div className="memory-board" ref={boardRef}>
       <div
         className={`memory-board__grid${animationsEnabled ? '' : ' memory-board__grid--no-anim'}`}
-        style={{ '--memory-board-columns': columns }}
+        style={{ '--memory-board-columns': columns, '--memory-board-rows': rows }}
       >
         {tiles.map((tile, i) => {
           const faceUp = tile.state !== 'down'
