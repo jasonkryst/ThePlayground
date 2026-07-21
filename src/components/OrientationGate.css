@@ -16,3 +16,16 @@
   flex-direction: column;
   width: 100%;
 }
+
+/* `inert` is set via JS (OrientationGate.jsx) whenever this content is
+   blocked by the overlay above it. It must not contribute to this box's
+   layout height -- flexbox's default min-height:auto means a flex item
+   won't shrink below its content's size, so the still-rendered (just
+   hidden) game markup can inflate `.orientation-gate` far past one screen
+   when its layout (built for the *other*, required orientation) doesn't
+   fit the current one, which then mis-centers the overlay itself
+   (issue #104). display:none still keeps the component mounted (state
+   preserved), it just removes it from flex sizing. */
+.orientation-gate__content[inert] {
+  display: none;
+}
