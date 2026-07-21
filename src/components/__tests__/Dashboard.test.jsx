@@ -39,14 +39,14 @@ vi.mock('../../hooks/useGameTags', () => ({
 }))
 
 const manifests = [
-  { id: 'animal-sounds', nameKey: 'animalSounds.manifestName', descriptionKey: 'animalSounds.manifestDescription', icon: '🐘', color: '#B39DDB', tags: ['sounds'] },
-  { id: 'color-match',   nameKey: 'colorMatch.manifestName',   descriptionKey: 'colorMatch.manifestDescription',   icon: '🎨', color: '#CE93D8', tags: ['visual'] },
+  { id: 'animal-sounds', nameKey: 'animalSounds.manifestName', descriptionKey: 'animalSounds.manifestDescription', icon: '🐘', color: '#B39DDB', tags: ['sounds', 'animals'] },
+  { id: 'color-match',   nameKey: 'colorMatch.manifestName',   descriptionKey: 'colorMatch.manifestDescription',   icon: '🎨', color: '#CE93D8', tags: ['visual', 'colors'] },
+  { id: 'character-match', nameKey: 'characterMatch.manifestName', descriptionKey: 'characterMatch.manifestDescription', icon: '🎭', color: '#90CAF9', tags: ['visual', 'characters'] },
 ]
 
 describe('Dashboard', () => {
   it('renders one card per manifest', () => {
     render(<MemoryRouter><Dashboard manifests={manifests} /></MemoryRouter>)
-    // Query for game cards in the grid (not the featured card)
     const animalSoundsCards = screen.getAllByRole('link', { name: /animal sounds/i })
     const colorMatchCards = screen.getAllByRole('link', { name: /color match/i })
     expect(animalSoundsCards.length).toBeGreaterThan(0)
@@ -68,6 +68,7 @@ describe('Dashboard', () => {
     mockSettings.childName = 'Mia'
     render(<MemoryRouter><Dashboard manifests={manifests} /></MemoryRouter>)
     expect(screen.getByText("🌊 Mia's Playground")).toBeInTheDocument()
+    mockSettings.childName = ''
   })
 
   it('shows recently-played badge for a game with recent play data', () => {
@@ -83,26 +84,6 @@ describe('Dashboard', () => {
     expect(screen.getByText(/Today's Game/i)).toBeInTheDocument()
   })
 
-  it('links each tab to its tabpanel via aria-controls/id, labeled back via aria-labelledby', () => {
-    render(<MemoryRouter><Dashboard manifests={manifests} /></MemoryRouter>)
-    const allTab = screen.getByRole('tab', { name: 'All' })
-    expect(allTab.id).toBeTruthy()
-    const controlsId = allTab.getAttribute('aria-controls')
-    expect(controlsId).toBeTruthy()
-    const panel = document.getElementById(controlsId)
-    expect(panel).toHaveAttribute('role', 'tabpanel')
-    expect(panel).toHaveAttribute('aria-labelledby', allTab.id)
-  })
-
-  it('featured game appears both in the banner and in the filtered grid', async () => {
-    const user = userEvent.setup()
-    render(<MemoryRouter><Dashboard manifests={manifests} /></MemoryRouter>)
-    // useFeaturedGame is mocked to return manifests[0] (animal-sounds)
-    await user.click(screen.getByRole('tab', { name: 'Sounds' }))
-    const links = screen.getAllByRole('link', { name: /animal sounds/i })
-    expect(links.length).toBe(2) // banner card + grid card, no dedupe
-  })
-
   it('does not render FeaturedGameCard when manifests is empty', () => {
     render(<MemoryRouter><Dashboard manifests={[]} /></MemoryRouter>)
     expect(screen.queryByText(/Today's Game/i)).not.toBeInTheDocument()
@@ -113,81 +94,151 @@ describe('Dashboard', () => {
     expect(await axe(container)).toHaveNoViolations()
   })
 
-  it('renders filter tabs for each tag when allTags is non-empty', () => {
+  it('renders a labeled search input', () => {
     render(<MemoryRouter><Dashboard manifests={manifests} /></MemoryRouter>)
-    expect(screen.getByRole('tab', { name: 'All' })).toBeInTheDocument()
-    expect(screen.getByRole('tab', { name: 'Sounds' })).toBeInTheDocument()
-    expect(screen.getByRole('tab', { name: 'Visual' })).toBeInTheDocument()
+    expect(screen.getByRole('searchbox', { name: 'Search games' })).toBeInTheDocument()
   })
 
-  it('"All" tab is selected by default', () => {
+  it('renders a toggle pill for each tag when allTags is non-empty, with no "All" pill', () => {
     render(<MemoryRouter><Dashboard manifests={manifests} /></MemoryRouter>)
-    expect(screen.getByRole('tab', { name: 'All' })).toHaveAttribute('aria-selected', 'true')
+    expect(screen.getByRole('button', { name: 'Sounds' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Visual' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'All' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('tab')).not.toBeInTheDocument()
   })
 
-  it('renders CategorySection headings in All view', () => {
+  it('no tags are selected by default', () => {
+    render(<MemoryRouter><Dashboard manifests={manifests} /></MemoryRouter>)
+    expect(screen.getByRole('button', { name: 'Sounds' })).toHaveAttribute('aria-pressed', 'false')
+  })
+
+  it('renders CategorySection headings in the unfiltered view', () => {
     render(<MemoryRouter><Dashboard manifests={manifests} /></MemoryRouter>)
     expect(screen.getByRole('heading', { name: /visual/i })).toBeInTheDocument()
   })
 
-  it('clicking a tag tab filters the grid to matching games', async () => {
-    const user = userEvent.setup()
-    render(<MemoryRouter><Dashboard manifests={manifests} /></MemoryRouter>)
-    await user.click(screen.getByRole('tab', { name: 'Sounds' }))
-    expect(screen.getByRole('tab', { name: 'Sounds' })).toHaveAttribute('aria-selected', 'true')
-    expect(screen.getAllByText('Animal Sounds')).toHaveLength(2) // banner + grid card, no dedupe
-    expect(screen.queryByText('Color Match')).not.toBeInTheDocument()
-  })
-
-  it('clicking All tab restores full view', async () => {
-    const user = userEvent.setup()
-    render(<MemoryRouter><Dashboard manifests={manifests} /></MemoryRouter>)
-    await user.click(screen.getByRole('tab', { name: 'Sounds' }))
-    await user.click(screen.getByRole('tab', { name: 'All' }))
-    expect(screen.getAllByText('Animal Sounds').length).toBeGreaterThan(0)
-    expect(screen.getByText('Color Match')).toBeInTheDocument()
-  })
-
-  it('keeps the featured banner visible on a filtered tab', async () => {
-    const user = userEvent.setup()
-    render(<MemoryRouter><Dashboard manifests={manifests} /></MemoryRouter>)
-    await user.click(screen.getByRole('tab', { name: 'Sounds' }))
-    expect(screen.getByText(/Today's Game/i)).toBeInTheDocument()
-  })
-
-  it('keeps the featured banner visible even on a tab that does not match the featured game', async () => {
-    const user = userEvent.setup()
-    render(<MemoryRouter><Dashboard manifests={manifests} /></MemoryRouter>)
-    // useFeaturedGame mock returns manifests[0] (animal-sounds, tag 'sounds') — filter to 'Visual' instead
-    await user.click(screen.getByRole('tab', { name: 'Visual' }))
-    expect(screen.getByText(/Today's Game/i)).toBeInTheDocument()
-    // "Animal Sounds" still appears once, from the banner's own name text — just not duplicated into the (non-matching) grid
-    expect(screen.getAllByText('Animal Sounds')).toHaveLength(1)
-  })
-
-  it('does not render the featured banner on any tab when manifests is empty', () => {
-    render(<MemoryRouter><Dashboard manifests={[]} /></MemoryRouter>)
-    expect(screen.queryByText(/Today's Game/i)).not.toBeInTheDocument()
-  })
-
-  it('includes the featured game inside its own category section in the All view (no longer excluded)', () => {
-    // useFeaturedGame mock returns manifests[0] (animal-sounds, tag 'sounds')
+  it('includes the featured game inside its own category section in the unfiltered view', () => {
     render(<MemoryRouter><Dashboard manifests={manifests} /></MemoryRouter>)
     const soundsSection = screen.getByRole('heading', { name: /sounds/i }).closest('section')
     expect(soundsSection).not.toBeNull()
     expect(within(soundsSection).getByText('Animal Sounds')).toBeInTheDocument()
   })
 
+  it('clicking a tag pill filters the grid to matching games (leaves sections view)', async () => {
+    const user = userEvent.setup()
+    render(<MemoryRouter><Dashboard manifests={manifests} /></MemoryRouter>)
+    await user.click(screen.getByRole('button', { name: 'Sounds' }))
+    expect(screen.getByRole('button', { name: 'Sounds' })).toHaveAttribute('aria-pressed', 'true')
+    expect(screen.getAllByText('Animal Sounds')).toHaveLength(2) // banner + grid card
+    expect(screen.queryByText('Color Match')).not.toBeInTheDocument()
+    expect(screen.queryByRole('heading', { name: /visual/i })).not.toBeInTheDocument()
+  })
+
+  it('selecting two tags combines with AND (game must carry both)', async () => {
+    const user = userEvent.setup()
+    render(<MemoryRouter><Dashboard manifests={manifests} /></MemoryRouter>)
+    await user.click(screen.getByRole('button', { name: 'Visual' }))
+    await user.click(screen.getByRole('button', { name: 'Colors' }))
+    expect(screen.getByText('Color Match')).toBeInTheDocument()
+    expect(screen.queryByText('Character Match')).not.toBeInTheDocument()
+  })
+
+  it('clicking a selected tag pill again deselects it', async () => {
+    const user = userEvent.setup()
+    render(<MemoryRouter><Dashboard manifests={manifests} /></MemoryRouter>)
+    await user.click(screen.getByRole('button', { name: 'Sounds' }))
+    await user.click(screen.getByRole('button', { name: 'Sounds' }))
+    expect(screen.getByRole('button', { name: 'Sounds' })).toHaveAttribute('aria-pressed', 'false')
+    expect(screen.getByText('Color Match')).toBeInTheDocument()
+  })
+
+  it('searching by name filters the grid (positive match)', async () => {
+    const user = userEvent.setup()
+    render(<MemoryRouter><Dashboard manifests={manifests} /></MemoryRouter>)
+    await user.type(screen.getByRole('searchbox'), 'animal')
+    expect(screen.getAllByText('Animal Sounds').length).toBeGreaterThan(0)
+    expect(screen.queryByText('Color Match')).not.toBeInTheDocument()
+  })
+
+  it('searching with no match shows the no-results empty state (negative)', async () => {
+    const user = userEvent.setup()
+    render(<MemoryRouter><Dashboard manifests={manifests} /></MemoryRouter>)
+    await user.type(screen.getByRole('searchbox'), 'zzz-nonexistent')
+    expect(screen.getByText(/no games match your filters/i)).toBeInTheDocument()
+  })
+
+  it('search narrows which tag pills are shown to tags present among matches', async () => {
+    const user = userEvent.setup()
+    render(<MemoryRouter><Dashboard manifests={manifests} /></MemoryRouter>)
+    await user.type(screen.getByRole('searchbox'), 'animal')
+    expect(screen.getByRole('button', { name: 'Sounds' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Colors' })).not.toBeInTheDocument()
+  })
+
+  it('search text and a selected tag combine with AND', async () => {
+    const user = userEvent.setup()
+    render(<MemoryRouter><Dashboard manifests={manifests} /></MemoryRouter>)
+    await user.type(screen.getByRole('searchbox'), 'match')
+    await user.click(screen.getByRole('button', { name: 'Colors' }))
+    expect(screen.getByText('Color Match')).toBeInTheDocument()
+    expect(screen.queryByText('Character Match')).not.toBeInTheDocument()
+  })
+
+  it('Clear filters resets both search text and selected tags', async () => {
+    const user = userEvent.setup()
+    render(<MemoryRouter><Dashboard manifests={manifests} /></MemoryRouter>)
+    await user.type(screen.getByRole('searchbox'), 'animal')
+    await user.click(screen.getByRole('button', { name: 'Sounds' }))
+    await user.click(screen.getByRole('button', { name: 'Clear filters' }))
+    expect(screen.getByRole('searchbox')).toHaveValue('')
+    expect(screen.getByRole('button', { name: 'Sounds' })).toHaveAttribute('aria-pressed', 'false')
+    expect(screen.getByText('Color Match')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /visual/i })).toBeInTheDocument()
+  })
+
+  it('announces the result count while a filter is active', async () => {
+    const user = userEvent.setup()
+    render(<MemoryRouter><Dashboard manifests={manifests} /></MemoryRouter>)
+    await user.click(screen.getByRole('button', { name: 'Sounds' }))
+    expect(screen.getByRole('status')).toHaveTextContent('1 game found')
+  })
+
+  it('negative: does not show a Clear filters button or result count in the unfiltered view', () => {
+    render(<MemoryRouter><Dashboard manifests={manifests} /></MemoryRouter>)
+    expect(screen.queryByRole('button', { name: 'Clear filters' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('status')).not.toBeInTheDocument()
+  })
+
+  it('keeps the featured banner visible on a filtered tag', async () => {
+    const user = userEvent.setup()
+    render(<MemoryRouter><Dashboard manifests={manifests} /></MemoryRouter>)
+    await user.click(screen.getByRole('button', { name: 'Sounds' }))
+    expect(screen.getByText(/Today's Game/i)).toBeInTheDocument()
+  })
+
+  it('keeps the featured banner visible even on a tag that does not match the featured game', async () => {
+    const user = userEvent.setup()
+    render(<MemoryRouter><Dashboard manifests={manifests} /></MemoryRouter>)
+    await user.click(screen.getByRole('button', { name: 'Colors' }))
+    expect(screen.getByText(/Today's Game/i)).toBeInTheDocument()
+    expect(screen.getAllByText('Animal Sounds')).toHaveLength(1)
+  })
+
+  it('does not render the featured banner on any filter state when manifests is empty', () => {
+    render(<MemoryRouter><Dashboard manifests={[]} /></MemoryRouter>)
+    expect(screen.queryByText(/Today's Game/i)).not.toBeInTheDocument()
+  })
+
   it('renders a translated label for a known tag instead of just capitalizing the slug', () => {
     const testManifests = [{ id: 'a', nameKey: 'a.name', descriptionKey: 'a.description', icon: '🎈', color: '#fff', tags: ['sounds'] }]
     render(<MemoryRouter><Dashboard manifests={testManifests} /></MemoryRouter>)
-    expect(screen.getByRole('tab', { name: /sounds/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /sounds/i })).toBeInTheDocument()
   })
 
   it('falls back to a capitalized slug for a tag with no translation entry', () => {
     const testManifests = [{ id: 'a', nameKey: 'a.name', descriptionKey: 'a.description', icon: '🎈', color: '#fff', tags: ['xyz-custom'] }]
     render(<MemoryRouter><Dashboard manifests={testManifests} /></MemoryRouter>)
-    expect(screen.getByRole('tab', { name: /xyz-custom/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /xyz-custom/i })).toBeInTheDocument()
   })
 
   it('moves focus to the page title on mount', () => {

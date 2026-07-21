@@ -54,8 +54,6 @@
     "empty": "Nie znaleziono gier. Dodaj folder gry do src/games/.",
     "todaysGame": "Gra dnia",
     "categoryOther": "Inne",
-    "tabAll": "Wszystkie",
-    "tabsLabel": "Filtruj gry według kategorii",
     "tagsGroupLabel": "Filtruj gry według kategorii",
     "searchLabel": "Szukaj gier",
     "searchPlaceholder": "Szukaj gier...",

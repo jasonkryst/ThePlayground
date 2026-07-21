@@ -52,8 +52,6 @@
     "empty": "No se encontraron juegos. Agrega una carpeta de juego en src/games/.",
     "todaysGame": "Juego de hoy",
     "categoryOther": "Otros",
-    "tabAll": "Todos",
-    "tabsLabel": "Filtrar juegos por categoría",
     "tagsGroupLabel": "Filtrar juegos por categoría",
     "searchLabel": "Buscar juegos",
     "searchPlaceholder": "Buscar juegos...",

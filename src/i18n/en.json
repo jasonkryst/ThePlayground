@@ -52,8 +52,6 @@
     "empty": "No games found. Drop a game folder into src/games/.",
     "todaysGame": "Today's Game",
     "categoryOther": "Other",
-    "tabAll": "All",
-    "tabsLabel": "Filter games by category",
     "tagsGroupLabel": "Filter games by category",
     "searchLabel": "Search games",
     "searchPlaceholder": "Search games...",
