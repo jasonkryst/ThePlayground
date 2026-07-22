@@ -48,4 +48,8 @@ describe('gameIconMap (live filesystem)', () => {
   it('has no icon for a game with no icon file', () => {
     expect(gameIconMap['animal-sounds']).toBeUndefined()
   })
+
+  it('resolves an image url for a game with an icon file', () => {
+    expect(gameIconMap['character-match']).toMatch(/\.png$/)
+  })
 })

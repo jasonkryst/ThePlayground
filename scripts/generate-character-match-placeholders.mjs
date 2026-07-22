@@ -84,7 +84,7 @@ function solidColorPng(width, height, [r, g, b]) {
 }
 
 const imagesDir = join(root, 'src/games/character-match/images')
-const tileIconDir = join(root, 'public/games/character-match')
+const tileIconDir = join(root, 'src/games/character-match')
 mkdirSync(imagesDir, { recursive: true })
 mkdirSync(tileIconDir, { recursive: true })
 
