@@ -4,7 +4,7 @@
 
 **Goal:** Close out issue #91 by proving (with a real-browser regression test) that the dashboard tag-filter pills already meet the app's 64×64px tap-target standard, and make that fact discoverable so it stops being re-reported.
 
-**Architecture:** No production CSS sizing changes — `.dashboard__tab` already inherits a 64×64px floor from the global `button` rule in `src/index.css`. This plan adds a Playwright e2e spec that measures real rendered box sizes (positive: dashboard pills ≥ 64px; negative: the documented smaller parent-only/secondary controls stay below 64px but above the WCAG 24px floor), a clarifying code comment, and doc/changelog updates.
+**Architecture:** No production CSS sizing changes — `.dashboard__tab` and `.date-range-filter__tab` both already inherit a 64×64px floor from the global `button` rule in `src/index.css` (only `.admin__tab` genuinely overrides it smaller). This plan adds a Playwright e2e spec that measures real rendered box sizes (positive: dashboard pills and parent date-range tabs ≥ 64px; negative: the dashboard's own smaller secondary controls and the admin tab bar stay below 64px but above the WCAG 24px floor), a clarifying code comment, and doc/changelog updates.
 
 **Tech Stack:** Playwright (`@playwright/test`), existing CSS/i18n conventions.
 
@@ -102,19 +102,38 @@ test.describe('negative: deliberate secondary/parent-only controls stay below 64
     expect(box.height).toBeGreaterThanOrEqual(WCAG_MIN_TAP_TARGET)
   })
 
-  test('parent date-range tab bar is a deliberately smaller parent-only surface, not held to the 64px standard', async ({ page }) => {
-    await page.goto('/parent')
-    const box = await page.getByRole('tab', { name: 'All time' }).boundingBox()
+  test('admin tab bar is a deliberately smaller parent-only surface, not held to the 64px standard', async ({ page }) => {
+    await page.goto('/admin')
+    const box = await page.getByRole('tab', { name: 'Settings' }).boundingBox()
     expect(box.height).toBeLessThan(PRIMARY_TAP_TARGET)
     expect(box.height).toBeGreaterThanOrEqual(WCAG_MIN_TAP_TARGET)
   })
 })
 ```
 
+**Correction found during implementation (not in the original design):** the
+audit's AU-7 finding claims "the admin and parent-dashboard tab bars share
+the same compact sizing," but `.date-range-filter__tab`
+(`src/parent/DateRangeFilter.css:10-20`) carries no `min-height` override
+of its own — unlike `.admin__tab`, which genuinely does (`min-height:
+56px`). The parent date-range tab therefore inherits the same 64px floor
+as the dashboard tab strip. Add this as a **fourth positive test**, not a
+negative one, appended inside the first `test.describe` block above (after
+the phone-width test, before its closing `})`):
+
+```javascript
+  test('the parent date-range tab bar also meets the 64px floor (it has no min-height override, unlike .admin__tab)', async ({ page }) => {
+    await page.goto('/parent')
+    const box = await page.getByRole('tab', { name: 'All time' }).boundingBox()
+    expect(box.width).toBeGreaterThanOrEqual(PRIMARY_TAP_TARGET)
+    expect(box.height).toBeGreaterThanOrEqual(PRIMARY_TAP_TARGET)
+  })
+```
+
 - [ ] **Step 2: Run the new spec in isolation**
 
 Run: `npx playwright test tap-target-standard.spec.js`
-Expected: `7 passed` (3 positive + 4 negative), no failures. If any test fails, stop and re-verify the underlying CSS assumption in this plan's Global Constraints against the live-rendered page before touching the test — a failure here means the codebase state has changed since this plan was written, not that the test is wrong.
+Expected: `7 passed` (4 positive + 3 negative), no failures. If any test fails, stop and re-verify the underlying CSS assumption in this plan's Global Constraints against the live-rendered page before touching the test — a failure here means the codebase state has changed since this plan was written, not that the test is wrong.
 
 - [ ] **Step 3: Commit**
 
@@ -123,12 +142,14 @@ git add e2e/tap-target-standard.spec.js
 git commit -m "$(cat <<'EOF'
 test(91): add tap-target regression spec for dashboard tab strip
 
-Reconfirms .dashboard__tab already meets the app's 64x64px primary
-tap-target standard via the global button rule (issue #91 restates
-the AU-7 finding already closed in CHANGELOG [0.32.0]), and locks in
-the documented smaller-by-design exceptions (dashboard secondary
-controls, admin tabs, parent date-range tabs) so a future change
-can't silently regress either direction.
+Reconfirms .dashboard__tab and .date-range-filter__tab already meet
+the app's 64x64px primary tap-target standard via the global button
+rule (issue #91 restates the AU-7 finding already closed in CHANGELOG
+[0.32.0]); corrects AU-7's own claim that the parent date-range tab
+bar shares the admin tab bar's smaller sizing -- it doesn't, it has
+no min-height override. Locks in the one real exception (.admin__tab)
+plus the dashboard's own smaller secondary controls so a future
+change can't silently regress either direction.
 EOF
 )"
 ```
@@ -226,7 +247,7 @@ EOF
 In `docs/TESTING.md`, in the table under "Layer 3: End-to-end tests (Playwright)" (currently ending with the `visual.spec.js` / `html-validity.spec.js` / `css-validity.spec.js` rows around line 84-86), add a new row directly above the `visual.spec.js` row:
 
 ```markdown
-| `tap-target-standard.spec.js` | Real-rendered tap-target sizes (issue #91): dashboard tag pills meet the app's 64px primary standard at desktop and phone widths, while the documented smaller-by-design controls (dashboard secondary actions, admin tabs, parent date-range tabs) stay below 64px but above the WCAG 2.5.8 24px minimum |
+| `tap-target-standard.spec.js` | Real-rendered tap-target sizes (issue #91): dashboard tag pills and the parent date-range tabs meet the app's 64px primary standard, while the dashboard's own secondary controls and the admin tab bar — the one genuine smaller-by-design exception — stay below 64px but above the WCAG 2.5.8 24px minimum |
 ```
 
 - [ ] **Step 2: Reword the README tap-target claim**
@@ -240,7 +261,7 @@ In `README.md`, change line 7 from:
 to:
 
 ```markdown
-- **Ocean & Dream design** — soft aquas, teals, lavenders, and lilacs; 64×64 px minimum tap targets on primary/child-facing controls (compact secondary controls in parent-only surfaces, like the admin and parent-dashboard tab bars, are a deliberate exception — see `docs/accessibility_usability.md`)
+- **Ocean & Dream design** — soft aquas, teals, lavenders, and lilacs; 64×64 px minimum tap targets on primary/child-facing controls (compact secondary controls in parent-only surfaces, like the admin tab bar, are a deliberate exception — see `docs/accessibility_usability.md`)
 ```
 
 - [ ] **Step 3: Bump the app version**
@@ -266,7 +287,7 @@ In `CHANGELOG.md`, add a new section immediately below the `# Changelog` header/
 
 ### Changed
 
-- Issue #91 ("UX - TAP SIZE") investigated and reconfirmed already-compliant: `.dashboard__tab` still meets the app's 64×64px primary tap-target standard via the global `button` rule in `src/index.css` (the padding-only arithmetic issue #91 used, like the original AU-7 finding it restates, undercounts the rendered size because `min-height` wins over content-driven height). No CSS sizing change was needed. Locked in with `e2e/tap-target-standard.spec.js` (positive checks on the dashboard pills, negative checks proving the documented smaller-by-design exceptions — dashboard secondary controls, admin tabs, parent date-range tabs — stay correctly unaffected) and a clarifying comment on `.dashboard__tab` in `Dashboard.css`. README's tap-target claim reworded to scope "throughout" to primary/child-facing controls, since the admin/parent tab bar exceptions already meant it overclaimed independently of this issue.
+- Issue #91 ("UX - TAP SIZE") investigated and reconfirmed already-compliant: `.dashboard__tab` still meets the app's 64×64px primary tap-target standard via the global `button` rule in `src/index.css` (the padding-only arithmetic issue #91 used, like the original AU-7 finding it restates, undercounts the rendered size because `min-height` wins over content-driven height). No CSS sizing change was needed. While implementing, also found AU-7 itself was wrong about `.date-range-filter__tab` (the parent-dashboard date-range tabs): it has no `min-height` override and meets the same 64px floor, unlike `.admin__tab`, which is a genuine smaller-by-design exception (`min-height: 56px`). Locked in with `e2e/tap-target-standard.spec.js` (positive checks on the dashboard pills and the parent date-range tabs; negative checks proving the dashboard's own secondary controls and the admin tab bar correctly stay below 64px) and a clarifying comment on `.dashboard__tab` in `Dashboard.css`. README's tap-target claim reworded to scope "throughout" to primary/child-facing controls, since the admin tab bar exception already meant it overclaimed independently of this issue.
 ```
 
 - [ ] **Step 5: Verify the full suite still passes**
@@ -283,9 +304,9 @@ docs(91): document tap-target verification and scope the README claim
 
 Adds the new e2e spec to TESTING.md's layer table, scopes README's
 "64x64 px minimum tap targets throughout" claim to primary/child-facing
-controls (the admin/parent tab bars were already deliberate smaller
-exceptions), and records the issue #91 investigation in CHANGELOG
-[0.32.3].
+controls (the admin tab bar was already a deliberate smaller exception),
+and records the issue #91 investigation -- including the AU-7 correction
+about the parent date-range tabs -- in CHANGELOG [0.32.3].
 EOF
 )"
 ```
@@ -297,3 +318,4 @@ EOF
 - **Spec coverage:** all five design-doc changes (Dashboard.css comment, new e2e spec with the specified positive/negative cases, TESTING.md row, README wording, CHANGELOG+version bump) map onto Task 1–3. The design doc's "explicitly out of scope" items (`docs/accessibility_usability.md`, `docs/ENHANCEMENTS.md`, visual baselines, admin/parent CSS sizing) have no corresponding task, as intended.
 - **Placeholder scan:** no TBD/TODO; every step has literal file paths, exact code, and exact commands.
 - **Type/name consistency:** the e2e spec file name (`e2e/tap-target-standard.spec.js`) is identical across Task 1's creation, Task 2's comment reference, and Task 3's TESTING.md row and CHANGELOG entry. Constant names (`PRIMARY_TAP_TARGET`, `WCAG_MIN_TAP_TARGET`, `PHONE_VIEWPORT`) are defined once in Task 1 and not referenced elsewhere as code (only described in prose), so no cross-task drift risk.
+- **Correction (post-initial-write):** the first implementer run of Task 1 found live that `.date-range-filter__tab` does not carry a smaller `min-height` override (contrary to this plan's and the design doc's original text, which mis-attributed a neighboring rule's `min-height: 40px` to it) — it meets the 64px floor same as `.dashboard__tab`. Task 1's spec, and Task 3's TESTING.md/README/CHANGELOG text, were updated in place above to reflect this; `.admin__tab` remains the one genuine smaller-by-design exception. The design doc (`docs/superpowers/specs/2026-07-22-dashboard-tap-target-design.md`) was corrected to match.
