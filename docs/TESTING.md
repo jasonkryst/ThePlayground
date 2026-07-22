@@ -137,6 +137,24 @@ Mutation testing is a diagnostic developer tool, not a pass/fail CI layer — it
 
 **Handling a surviving mutant:** open `reports/mutation/mutation.html` (or read the `clear-text` output) for the exact mutation and which tests ran against it, then either add/strengthen a unit test that fails against the mutant, or — if the mutant is truly behaviorally unobservable — mark it `// Stryker disable next-line <MutatorName>: <reason>` directly above the line, with the reasoning written out (see `src/utils/buildQueue.js` and `buildDeck.js` for examples: e.g., a Fisher-Yates loop's `i > 0` vs `i >= 0` bound is equivalent because the `i === 0` iteration is always a self-swap no-op). Don't disable a mutant just because writing the killing test is inconvenient — an unexplained disable defeats the point of running this at all.
 
+## Continuous Integration
+
+`.github/workflows/ci.yml` runs on every push to `main` and every pull request targeting `main`, as 8 independent parallel jobs (no job waits on another):
+
+- **`lint`** / **`lint-css`** — `npm run lint`, `npm run lint:css`.
+- **`unit-tests`** — `npm run coverage`; uploads the `coverage/` report as a build artifact on every run.
+- **`build`** — `npm run build`, proving the production Vite bundle still compiles.
+- **`e2e`** — installs Playwright's Chromium browser, then `npm run e2e` (all six local layers that live under `e2e/`, including the live Docker-based nginx header checks, since GitHub-hosted runners ship Docker). Uploads `playwright-report/` and `test-results/` only when something fails.
+- **`docker-build`** — `docker build` against the repo's `Dockerfile` (build-only, no push, no registry login — publishing an image on release is `.github/workflows/docker-image.yml`'s job, not CI's).
+- **`npm-audit`** — two-tier `npm audit` gate, see below.
+- **`lighthouse`** — Lighthouse CI budgets, see below.
+
+**`npm audit` gate:** `npm audit --omit=dev --audit-level=moderate` fails the job (and therefore the PR check) on moderate/high/critical findings in the *production* dependency tree. A separate `npm audit --omit=prod` step always runs (even if the gate step failed) and never fails the job itself — its output is appended to the workflow run's own step summary, so *dev*-tree findings (like the 3 moderate Storybook-chain advisories noted in `SECURITY.md`) stay visible without blocking a merge.
+
+**Lighthouse budgets:** `lighthouserc.json` (repo root) drives `@lhci/cli` against a real production build — `npm run build` then `vite preview` (not the dev server, so scores reflect the minified/bundled app that actually ships). Four routes are scored: the dashboard (`/`), a representative game (`/game/animal-sounds`), the parent analytics dashboard (`/parent`), and the kid-facing progress page (`/my-progress`). All four Lighthouse categories — performance, accessibility, best-practices, SEO — must score at least 0.8 or the job fails; each run's actual report is uploaded to Lighthouse's temporary public storage (link printed in the job log), so a score drifting down toward 0.8 is visible before it ever crosses the line.
+
+Both new workflow-adjacent config files have their own static structure tests — `.github/__tests__/ci.test.js` parses `ci.yml` and asserts its trigger scope, job set, and the audit gate's exact flags; `.github/__tests__/lighthouserc.test.js` asserts the 4 routes and 4 category thresholds. Like the nginx security-header tests, these prove the *configuration's shape* — the configuration's real behavior is proven every time the workflow actually runs in Actions.
+
 ## i18n string convention
 
 All user-facing UI strings live in i18n JSON, organized by feature namespace (`dashboard.*`, `admin.*`, `animalSounds.*`, etc.). When adding a new game:
