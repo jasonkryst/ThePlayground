@@ -1,4 +1,17 @@
-import confetti from 'canvas-confetti'
+import { create } from 'canvas-confetti'
+
+// canvas-confetti's default export lazily builds a *shared* cannon with
+// `useWorker: true`, which loads its animation loop from a `blob:` Worker.
+// This app's CSP has no `worker-src`, so it falls back to `script-src`,
+// which doesn't allow `blob:` — the Worker fails silently (Chrome fires an
+// error event, not a thrown exception, so canvas-confetti's own try/catch
+// never sees it), and nothing ever renders (issue #109). `create()` with
+// `useWorker: false` builds our own cannon that always animates on the main
+// thread, sidestepping the Worker (and the CSP mismatch) entirely. Don't
+// swap this back to the bare default import — it silently breaks under any
+// CSP that doesn't explicitly allow `blob:` workers, and dev (`npm run dev`)
+// sends no CSP header, so the regression won't show up there.
+const confetti = create(null, { resize: true, useWorker: false })
 
 export function fireConfetti() {
   confetti({

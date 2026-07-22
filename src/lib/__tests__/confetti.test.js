@@ -1,9 +1,20 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 
 const confettiMock = vi.fn()
-vi.mock('canvas-confetti', () => ({ default: confettiMock }))
+const defaultExportMock = vi.fn()
+const createMock = vi.fn(() => confettiMock)
 
-beforeEach(() => { confettiMock.mockClear() })
+vi.mock('canvas-confetti', () => ({
+  default: defaultExportMock,
+  create: createMock,
+}))
+
+beforeEach(() => {
+  vi.resetModules()
+  confettiMock.mockClear()
+  defaultExportMock.mockClear()
+  createMock.mockClear()
+})
 
 describe('fireConfetti', () => {
   it('calls the canvas-confetti library', async () => {
@@ -52,5 +63,34 @@ describe('fireFireworks', () => {
       expect(call[0].origin.y).toBeLessThanOrEqual(0.6)
     }
     vi.useRealTimers()
+  })
+})
+
+// Regression coverage for issue #109: confetti/fireworks rendered nothing in
+// production because the library's bare default export lazily builds a
+// shared cannon with `useWorker: true`, which loads a `blob:` Worker — and
+// this app's CSP has no `worker-src`, so it falls back to `script-src`,
+// which disallows `blob:`. The Worker fails silently (no console error,
+// no thrown exception) and the transferred canvas never has anything drawn
+// to it. See e2e/confetti-csp.spec.js for a live-CSP reproduction of the
+// actual bug; these are the fast unit-level guards against regressing the
+// fix in src/lib/confetti.js.
+describe('CSP-safe cannon construction (issue #109 regression guard)', () => {
+  it('builds its own cannon via create() with useWorker disabled, so it never depends on a blob: Worker', async () => {
+    await import('../confetti')
+    expect(createMock).toHaveBeenCalledTimes(1)
+    const [canvasArg, options] = createMock.mock.calls[0]
+    expect(canvasArg).toBeNull()
+    expect(options.useWorker).toBe(false)
+  })
+
+  it('never falls back to the bare default export (which would still be CSP-unsafe)', async () => {
+    const { fireConfetti, fireFireworks, FIREWORKS_BURSTS, FIREWORKS_INTERVAL_MS } = await import('../confetti')
+    vi.useFakeTimers()
+    fireConfetti()
+    fireFireworks()
+    vi.advanceTimersByTime(FIREWORKS_BURSTS * FIREWORKS_INTERVAL_MS)
+    vi.useRealTimers()
+    expect(defaultExportMock).not.toHaveBeenCalled()
   })
 })
