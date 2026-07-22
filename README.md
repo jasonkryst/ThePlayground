@@ -237,7 +237,7 @@ Use `var(--color-aqua)` etc. rather than hardcoding hex values, so games stay vi
    }
    ```
 
-   The `icon` can also be an image path (see Character Match). Memory-type games add `"gameType": "memory"`, which switches the My Progress page to memory-appropriate stat tiles.
+   The `icon` value is normally an emoji, rendered as text — it's always required, even for games using an image icon (it's the fallback if the image is ever removed). To use an image instead, drop an `icon.png`/`icon.gif`/`icon.jpg`/`icon.jpeg`/`icon.webp`/`icon.svg` file directly in the game's own folder (see Character Match) — it's auto-discovered and rendered in place of the emoji, no manifest field needed. Each game may have at most one `icon.<ext>` file. Memory-type games add `"gameType": "memory"`, which switches the My Progress page to memory-appropriate stat tiles.
 
    Games that only lay out well in one orientation can add `"orientation": "landscape"` or `"orientation": "portrait"`. The engine then enforces it for that game's whole route: a full-screen rotate prompt blocks play (and pauses the memory-session/quiz-session timer) whenever the device/viewport is in the wrong orientation, the intro slide announces the requirement, and the dashboard card shows a ↔️ *Landscape only* badge (or a ↕️ *Portrait only* badge). Detection is hybrid — physical device orientation on touch devices, viewport aspect ratio on desktop. No game code is needed beyond the manifest field (pass `manifest.orientation` to `GameIntro` if the game renders its own intro).
 
