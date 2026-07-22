@@ -3,6 +3,12 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.32.2] - 2026-07-21
+
+### Fixed
+
+- Game dashboard icons no longer have to live in `public/`, outside a game's own folder (issue #39). Root cause: `manifest.json` is loaded as plain JSON via `import.meta.glob('./games/*/manifest.json', { eager: true })`, and plain JSON imports have no way to resolve a bundled asset URL — the only previous option for an image icon was a root-absolute path (`/games/<id>/<file>`) pointing at a real file physically placed in `public/games/<id>/`. A game can now drop an `icon.png`/`icon.gif`/`icon.jpg`/`icon.jpeg`/`icon.webp`/`icon.svg` file directly inside its own `src/games/<id>/` folder instead; a new `src/lib/gameIcons.js` resolves it via `import.meta.glob` (the same asset-resolution pattern `character-match`'s content images already used) and `src/App.jsx` substitutes it for the manifest's emoji `icon` automatically, with no manifest schema change and no changes needed in any of the five components that render an icon. `character-match` and `character-match-bluey` — the only two games using image icons — were migrated to the new convention; `public/games/` no longer exists.
+
 ## [0.32.1] - 2026-07-21
 
 ### Fixed

@@ -2,8 +2,8 @@
   "id": "character-match",
   "nameKey": "characterMatch.manifestName",
   "descriptionKey": "characterMatch.manifestDescription",
-  "icon": "/games/character-match/character-match.png",
+  "icon": "🎭",
   "color": "#FFB74D",
-  "version": "1.4.4",
+  "version": "1.4.5",
   "tags": ["visual", "characters"]
 }

@@ -7,13 +7,16 @@ import KidsProgressPage from './kids/KidsProgressPage'
 import AppShell from './components/AppShell'
 import OrientationGate from './components/OrientationGate'
 import useSettings from './hooks/useSettings'
+import { gameIconMap, resolveIcon } from './lib/gameIcons'
 import i18n from './i18n'
 import './components/GameLayout.css'
 
 const manifestModules = import.meta.glob('./games/*/manifest.json', { eager: true })
 const gameModules     = import.meta.glob('./games/*/index.jsx')
 
-const manifests = Object.values(manifestModules).map(m => m.default ?? m)
+const manifests = Object.values(manifestModules)
+  .map(m => m.default ?? m)
+  .map(manifest => ({ ...manifest, icon: resolveIcon(manifest, gameIconMap) }))
 
 const gameComponents = Object.fromEntries(
   Object.entries(gameModules).map(([path, loader]) => {

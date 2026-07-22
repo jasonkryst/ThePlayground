@@ -42,4 +42,15 @@ describe('ManifestIcon', () => {
     const { container: webpContainer } = render(<ManifestIcon icon="/a/b.webp" />)
     expect(webpContainer.querySelector('img')).not.toBeNull()
   })
+
+  it('renders an image for .svg paths too', () => {
+    const { container } = render(<ManifestIcon icon="/a/b.svg" />)
+    expect(container.querySelector('img')).not.toBeNull()
+  })
+
+  it('renders an unsupported-extension path as text, not an image', () => {
+    render(<ManifestIcon icon="/a/b.bmp" />)
+    const el = screen.getByText('/a/b.bmp')
+    expect(el.tagName).toBe('SPAN')
+  })
 })
