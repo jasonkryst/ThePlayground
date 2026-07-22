@@ -3,6 +3,14 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.33.0] - 2026-07-22
+
+### Added
+
+- A GitHub Actions CI workflow (`.github/workflows/ci.yml`, issue #88) that runs all six local testing layers (lint, lint:css, unit tests with coverage, the production build, and the full Playwright e2e suite) plus a Docker build check, on every push to `main` and every pull request — previously these only protected a developer who remembered to run them locally before pushing. Runs as 8 independent parallel jobs so one failing check (e.g. lint) doesn't block feedback from the others.
+- An `npm audit` gate in CI (issue #87): `npm audit --omit=dev --audit-level=moderate` fails the build on moderate+ findings in the production dependency tree, while a separate `--omit=prod` step reports dev-tree findings (e.g. the Storybook 8 chain's 3 moderate advisories, SEC-6) to the run's step summary without ever blocking a merge — matching the audit posture already documented in `SECURITY.md`.
+- Lighthouse CI budgets (issue #88): `lighthouserc.json` scores the dashboard, a representative game (`/game/animal-sounds`), the parent analytics dashboard, and the kid-facing progress page against a real production build (`vite preview`, not the dev server), failing the job if performance, accessibility, best-practices, or SEO drops below 0.8 on any route.
+
 ## [0.32.4] - 2026-07-22
 
 ### Fixed
