@@ -21,6 +21,14 @@
 
 .dashboard__empty { opacity: 0.5; font-style: italic; }
 
+/* No explicit min-width/min-height here -- this inherits its 64x64px
+   floor from the global `button` rule in src/index.css, which wins over
+   whatever height this rule's own padding (6px 16px) + font-size would
+   otherwise produce. Padding-only arithmetic undercounts this (it looks
+   like ~33px), which is exactly the mistake that produced audit finding
+   AU-7 and its duplicate, issue #91 -- both closed as no-CSS-change-needed
+   (see CHANGELOG.md). If you add an explicit min-height/min-width
+   override here, update e2e/tap-target-standard.spec.js accordingly. */
 .dashboard__tab {
   padding: 6px 16px;
   border-radius: var(--radius-button);

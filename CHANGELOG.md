@@ -3,6 +3,12 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.32.3] - 2026-07-22
+
+### Changed
+
+- Issue #91 ("UX - TAP SIZE") investigated and reconfirmed already-compliant: `.dashboard__tab` still meets the app's 64×64px primary tap-target standard via the global `button` rule in `src/index.css` (the padding-only arithmetic issue #91 used, like the original AU-7 finding it restates, undercounts the rendered size because `min-height` wins over content-driven height). No CSS sizing change was needed. While implementing, also found AU-7 itself was wrong about `.date-range-filter__tab` (the parent-dashboard date-range tabs): it has no `min-height` override and meets the same 64px floor, unlike `.admin__tab`, which is a genuine smaller-by-design exception (`min-height: 56px`). Locked in with `e2e/tap-target-standard.spec.js` (positive checks on the dashboard pills and the parent date-range tabs; negative checks proving the dashboard's own secondary controls and the admin tab bar correctly stay below 64px) and a clarifying comment on `.dashboard__tab` in `Dashboard.css`. README's tap-target claim reworded to scope "throughout" to primary/child-facing controls, since the admin tab bar exception already meant it overclaimed independently of this issue.
+
 ## [0.32.2] - 2026-07-21
 
 ### Fixed

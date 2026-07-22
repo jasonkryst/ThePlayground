@@ -4,7 +4,7 @@ A browser-based game dashboard designed for infants and toddlers. Games are disp
 
 ## Features
 
-- **Ocean & Dream design** — soft aquas, teals, lavenders, and lilacs; 64×64 px minimum tap targets throughout
+- **Ocean & Dream design** — soft aquas, teals, lavenders, and lilacs; 64×64 px minimum tap targets on primary/child-facing controls (compact secondary controls in parent-only surfaces, like the admin tab bar, are a deliberate exception — see `docs/accessibility_usability.md`)
 - **Auto-discovered games** — drop a folder into `src/games/` and it appears on the dashboard automatically
 - **Two game types** — *quiz games* (a prompt is shown or played; the child picks the matching answer from picture buttons) and *memory games* (face-down tiles flipped two at a time to find pairs)
 - **Animal Sounds** (quiz) — an animal sound plays automatically; the child picks the matching animal from picture buttons
