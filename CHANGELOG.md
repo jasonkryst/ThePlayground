@@ -3,6 +3,12 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.32.1] - 2026-07-21
+
+### Fixed
+
+- Confetti and fireworks celebration animations, which had never actually rendered in any production deployment despite `animationsEnabled` being on (issue #109). Root cause: `canvas-confetti`'s bare default export lazily builds a *shared* cannon with `useWorker: true`, which loads its animation loop from a `blob:` Web Worker. This app's CSP has no `worker-src` directive, so per spec it falls back to `script-src`, which doesn't allow `blob:` — the Worker is silently killed by the browser (an error event, not a thrown exception, so `canvas-confetti`'s own try/catch around `new Worker(...)` never sees it), and since `transferControlToOffscreen()` had already handed the canvas's rendering context to that dead worker, nothing was ever drawn. It never reproduced in `npm run dev`, which sends no CSP header at all, so the regression shipped unnoticed. `src/lib/confetti.js` now builds its own cannon via `canvas-confetti`'s `create(null, { useWorker: false })`, forcing main-thread rendering so it never depends on a `blob:` Worker — no CSP change needed, keeping the CSP hardening from SEC-2/SEC-3 (issue #86) exactly as-is. Verified against the real, live production CSP: `e2e/confetti-csp.spec.js` boots the same pinned nginx image the Dockerfile ships, serving a real `npm run build` output, and samples the confetti canvas's own pixels (not just its presence — the canvas still got appended to the DOM before the worker handoff, so existence alone wouldn't have caught this) to prove particles actually render.
+
 ## [0.32.0] - 2026-07-21
 
 ### Added
