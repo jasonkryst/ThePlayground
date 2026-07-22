@@ -22,3 +22,11 @@ export function buildIconMap(entries) {
 export function resolveIcon(manifest, iconMap) {
   return iconMap[manifest.id] ?? manifest.icon
 }
+
+const iconModules = import.meta.glob('../games/*/icon.{png,gif,jpg,jpeg,webp,svg}', {
+  eager: true,
+  query: '?url',
+  import: 'default',
+})
+
+export const gameIconMap = buildIconMap(Object.entries(iconModules))

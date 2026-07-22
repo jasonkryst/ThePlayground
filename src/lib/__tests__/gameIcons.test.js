@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { buildIconMap, resolveIcon } from '../gameIcons'
+import { buildIconMap, resolveIcon, gameIconMap } from '../gameIcons'
 
 describe('buildIconMap', () => {
   it('maps a game id to its resolved icon url', () => {
@@ -41,5 +41,11 @@ describe('resolveIcon', () => {
 
   it('falls back to the manifest emoji when the game has no icon file', () => {
     expect(resolveIcon({ id: 'animal-sounds', icon: '🐘' }, {})).toBe('🐘')
+  })
+})
+
+describe('gameIconMap (live filesystem)', () => {
+  it('has no icon for a game with no icon file', () => {
+    expect(gameIconMap['animal-sounds']).toBeUndefined()
   })
 })
