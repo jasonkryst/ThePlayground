@@ -52,4 +52,8 @@ describe('gameIconMap (live filesystem)', () => {
   it('resolves an image url for a game with an icon file', () => {
     expect(gameIconMap['character-match']).toMatch(/\.png$/)
   })
+
+  it('resolves an image url for a second game with an icon file', () => {
+    expect(gameIconMap['character-match-bluey']).toMatch(/\.webp$/)
+  })
 })

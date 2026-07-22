@@ -2,8 +2,8 @@
   "id": "character-match-bluey",
   "nameKey": "characterMatchGameBluey.manifestName",
   "descriptionKey": "characterMatchGameBluey.manifestDescription",
-  "icon": "/games/character-match-bluey/bluey.webp",
+  "icon": "🐶",
   "color": "#FFB74D",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "tags": ["visual", "characters", "bluey"]
 }
