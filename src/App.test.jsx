@@ -1,4 +1,4 @@
-import { render, waitFor, screen } from '@testing-library/react'
+import { render, waitFor, screen, fireEvent } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import i18n from './i18n'
 import App from './App'
@@ -52,6 +52,30 @@ describe('App — locale sync', () => {
     await waitFor(() => expect(spy).toHaveBeenCalledWith('pl'))
     await waitFor(() => expect(document.documentElement.lang).toBe('pl'))
     storage.getSettings.mockResolvedValue({ locale: 'en' })
+  })
+
+  it('syncs the whole app to a new locale after changing it in Admin, without a remount (issue #117)', async () => {
+    const spy = vi.spyOn(i18n, 'changeLanguage')
+    render(<App />)
+    await waitFor(() => expect(spy).toHaveBeenCalledWith('en'))
+
+    fireEvent.click(await screen.findByRole('link', { name: /settings/i }))
+    fireEvent.change(await screen.findByLabelText(/language/i), { target: { value: 'es' } })
+
+    await waitFor(() => expect(spy).toHaveBeenCalledWith('es'))
+    await waitFor(() => expect(document.documentElement.lang).toBe('es'))
+  })
+
+  it('does not re-invoke changeLanguage when the selector is set to the locale already active', async () => {
+    const spy = vi.spyOn(i18n, 'changeLanguage')
+    render(<App />)
+    await waitFor(() => expect(spy).toHaveBeenCalledWith('en'))
+    spy.mockClear()
+
+    fireEvent.click(await screen.findByRole('link', { name: /settings/i }))
+    fireEvent.change(await screen.findByLabelText(/language/i), { target: { value: 'en' } })
+
+    expect(spy).not.toHaveBeenCalled()
   })
 })
 

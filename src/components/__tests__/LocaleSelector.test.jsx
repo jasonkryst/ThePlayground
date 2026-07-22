@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent, act } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, it, expect, vi } from 'vitest'
 import { axe } from 'jest-axe'
@@ -38,5 +38,25 @@ describe('LocaleSelector', () => {
   it('has no accessibility violations when visible', async () => {
     const { container } = render(<LocaleSelector locales={['en', 'es']} value="en" onChange={vi.fn()} />)
     expect(await axe(container)).toHaveNoViolations()
+  })
+
+  it('shows a confirmation message after selecting a new locale', () => {
+    render(<LocaleSelector locales={['en', 'es']} value="en" onChange={vi.fn()} />)
+    expect(screen.queryByRole('status')).not.toBeInTheDocument()
+    fireEvent.change(screen.getByLabelText(/language/i), { target: { value: 'es' } })
+    expect(screen.getByRole('status')).toBeInTheDocument()
+  })
+
+  it('hides the confirmation message after the timeout elapses', async () => {
+    vi.useFakeTimers()
+    try {
+      render(<LocaleSelector locales={['en', 'es']} value="en" onChange={vi.fn()} />)
+      fireEvent.change(screen.getByLabelText(/language/i), { target: { value: 'es' } })
+      expect(screen.getByRole('status')).toBeInTheDocument()
+      await act(async () => { vi.advanceTimersByTime(3000) })
+      expect(screen.queryByRole('status')).not.toBeInTheDocument()
+    } finally {
+      vi.useRealTimers()
+    }
   })
 })

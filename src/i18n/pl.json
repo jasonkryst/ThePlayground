@@ -127,6 +127,7 @@
   },
   "admin": {
     "localeHeading": "Język",
+    "localeUpdated": "Zaktualizowano język",
     "title": "⚙️ Ustawienia",
     "childNameHeading": "Imię dziecka",
     "childNameHint": "Spersonalizuj tytuł strony głównej.",

@@ -119,6 +119,7 @@
   },
   "admin": {
     "localeHeading": "Idioma",
+    "localeUpdated": "Idioma actualizado",
     "title": "⚙️ Configuración",
     "childNameHeading": "Nombre del niño/a",
     "childNameHint": "Personaliza el título de la página de inicio.",
