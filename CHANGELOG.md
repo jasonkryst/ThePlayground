@@ -3,6 +3,12 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.32.4] - 2026-07-22
+
+### Fixed
+
+- A language change in Admin's `LocaleSelector` no longer requires a page refresh to take effect app-wide (issue #117). Root cause: `src/hooks/useSettings.js` gave every call site its own independent `useState` copy of settings, populated by a single `adapter.getSettings()` call on mount, with no shared state or event bus between instances. Invisible for most consumers, which live inside `<Routes>` and remount (and therefore refetch) on every navigation — it broke specifically for the two consumers mounted as permanent siblings of `<Routes>` that never remount for the life of the tab: `LocaleSync` (which actually calls `i18n.changeLanguage()`) and `GoogleAnalytics`. Fixed with a module-scoped pub/sub: `updateSetting`/`resetSettings` now broadcast the new settings object to every mounted `useSettings()` instance's listener, so `LocaleSync`'s existing `useEffect` re-runs immediately instead of waiting for a remount. Generic to all settings, not locale-specific, so `GoogleAnalytics` gets the same live-update fix for free. `LocaleSelector` also gained a brief, self-contained `role="status"` confirmation message ("Language updated") shown after a change, reusing the same dual-purpose visible-text/screen-reader-announcement convention `QuizGameShell`'s timeout message already uses.
+
 ## [0.32.3] - 2026-07-22
 
 ### Changed
