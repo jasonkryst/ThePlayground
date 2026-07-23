@@ -1,9 +1,6 @@
 import { BrowserRouter, Routes, Route, useParams, useNavigate, useLocation } from 'react-router-dom'
 import { Suspense, lazy, useEffect } from 'react'
 import Dashboard from './components/Dashboard'
-import AdminPage from './admin/AdminPage'
-import ParentDashboard from './parent/ParentDashboard'
-import KidsProgressPage from './kids/KidsProgressPage'
 import AppShell from './components/AppShell'
 import OrientationGate from './components/OrientationGate'
 import useSettings from './hooks/useSettings'
@@ -13,6 +10,18 @@ import './components/GameLayout.css'
 
 const manifestModules = import.meta.glob('./games/*/manifest.json', { eager: true })
 const gameModules     = import.meta.glob('./games/*/index.jsx')
+
+// Lazy — none of these three are needed to render the dashboard ('/'), so
+// keeping them out of the main bundle (rather than a static import) removes
+// their dependencies from the dashboard's critical rendering path. In
+// particular ParentDashboard pulls in recharts, a large charting library
+// only ever used on /parent; before this change it shipped in the same
+// chunk the dashboard needed just to paint its own title (confirmed via
+// Lighthouse CI: LCP element was the dashboard's <h1>, scoring 0.16/1 at
+// 5.7s, well before this fix).
+const AdminPage        = lazy(() => import('./admin/AdminPage'))
+const ParentDashboard  = lazy(() => import('./parent/ParentDashboard'))
+const KidsProgressPage = lazy(() => import('./kids/KidsProgressPage'))
 
 const manifests = Object.values(manifestModules)
   .map(m => m.default ?? m)
@@ -96,9 +105,9 @@ export default function App() {
       <Routes>
         <Route element={<AppShell manifests={manifests} />}>
           <Route path="/"             element={<Dashboard manifests={manifests} />} />
-          <Route path="/admin"        element={<AdminPage manifests={manifests} />} />
-          <Route path="/parent"       element={<ParentDashboard manifests={manifests} />} />
-          <Route path="/my-progress" element={<KidsProgressPage manifests={manifests} />} />
+          <Route path="/admin"        element={<Suspense fallback={<div style={{ padding: 24 }}>Loading...</div>}><AdminPage manifests={manifests} /></Suspense>} />
+          <Route path="/parent"       element={<Suspense fallback={<div style={{ padding: 24 }}>Loading...</div>}><ParentDashboard manifests={manifests} /></Suspense>} />
+          <Route path="/my-progress" element={<Suspense fallback={<div style={{ padding: 24 }}>Loading...</div>}><KidsProgressPage manifests={manifests} /></Suspense>} />
           <Route path="/game/:gameId" element={<GameRoute />} />
         </Route>
       </Routes>
