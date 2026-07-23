@@ -146,7 +146,7 @@ all — nothing to recover into, unchanged).
 | `AnimalSoundsGame.test.jsx` | Positive: forcing `window.HTMLMediaElement.prototype.play` to reject shows the hint text. Negative: normal (resolved) playback never shows it. axe scan in the blocked state specifically. |
 | `FruitVeggieIdGame.test.jsx` | Positive: mocked `useSpeech` returning `blocked: true` shows the hint. Negative: `blocked: false` (default) never shows it. axe scan in the blocked state. |
 | `e2e/animal-sounds.spec.js` | New spec: force `HTMLMediaElement.prototype.play` to reject in a real browser and assert the visible hint renders — closes the audit's explicit "worth an e2e assertion" recommendation. |
-| `ReplayButton.stories.jsx` (new) | `Default` and `Blocked` stories, feeding Layer 4 visual regression automatically (existing Storybook-screenshot mechanism, no new config). |
+| `ReplayButton.stories.jsx` (new) | `Default` and `Blocked` stories. Layer 4 visual regression (`e2e/visual.spec.js`) uses a **hardcoded** `stories` id array, not auto-discovery — both new story ids must be added there, and fresh baseline PNGs generated (`--update-snapshots`), or the new stories simply won't be screenshot-tested at all. |
 | Not needed | `lint:css`/`validate:css` — new rules are static classes, not dynamic inline styles; no changes to `useQuestionAudio` (already source-agnostic, untouched by this design). |
 
 ## Docs
