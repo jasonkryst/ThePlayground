@@ -1,5 +1,7 @@
 # The Playground
 
+[![CI](https://github.com/jasonkryst/ThePlayground/actions/workflows/ci.yml/badge.svg)](https://github.com/jasonkryst/ThePlayground/actions/workflows/ci.yml)
+
 A browser-based game dashboard designed for infants and toddlers. Games are displayed as large, tappable cards. Each game is self-contained in its own folder — adding a new game requires no changes to the core application.
 
 ## Features
@@ -284,7 +286,7 @@ The full guide — annotated nginx configuration, cache tiers, HTTPS/reverse-pro
 
 ## Testing
 
-The Playground has six layers of automated testing — unit/component (Vitest + RTL), accessibility audits (jest-axe + axe-core/playwright), end-to-end (Playwright), visual regression (Storybook + Playwright screenshots), HTML5 validation against the rendered DOM (html-validate), and CSS validation of dynamic inline styles (Stylelint against the live DOM) — all runnable locally with no external accounts. Static linting (ESLint with `eslint-plugin-jsx-a11y`, Stylelint against every `.css` source file) catches most CSS3/accessibility conformance issues at edit time, before any of the above run. See [`docs/TESTING.md`](docs/TESTING.md) for the full reference, including how to run each layer and update visual baselines.
+The Playground has six layers of automated testing — unit/component (Vitest + RTL), accessibility audits (jest-axe + axe-core/playwright), end-to-end (Playwright), visual regression (Storybook + Playwright screenshots), HTML5 validation against the rendered DOM (html-validate), and CSS validation of dynamic inline styles (Stylelint against the live DOM) — all runnable locally with no external accounts. Static linting (ESLint with `eslint-plugin-jsx-a11y`, Stylelint against every `.css` source file) catches most CSS3/accessibility conformance issues at edit time, before any of the above run. All six layers, plus a Docker build check, a two-tier `npm audit` gate, and Lighthouse performance/accessibility budgets, also run in CI on every push and pull request (`.github/workflows/ci.yml`) — see [`docs/TESTING.md`](docs/TESTING.md) for the full reference, including how to run each layer and update visual baselines.
 
 ```bash
 npm test           # unit/component tests, watch mode

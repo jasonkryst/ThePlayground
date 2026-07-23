@@ -77,12 +77,12 @@ Stated plainly rather than papered over (each is tracked in [`docs/ENHANCEMENTS.
 - **Non-root runtime:** nginx runs as its image's built-in non-root `nginx` user (uid 101), not root — a container-escape or nginx RCE chain starts with less privilege (issue #85).
 - **Multi-stage build:** node, npm, `node_modules`, and the source tree never enter the runtime image — a compromise of the running container yields a static file server and public assets, not a toolchain.
 - **Stateless runtime:** no volumes, no secrets, no env vars in the image; nothing sensitive to exfiltrate server-side.
-- **Hardening backlog** (tracked in [`docs/ENHANCEMENTS.md`](docs/ENHANCEMENTS.md#security)): automated image vulnerability scanning (Trivy), once a CI pipeline exists to run it.
+- **Hardening backlog** (tracked in [`docs/ENHANCEMENTS.md`](docs/ENHANCEMENTS.md#security)): automated image vulnerability scanning (Trivy) — the CI pipeline this was blocked on now exists (issue #88), but the scan itself isn't implemented yet.
 
 ## Dependency policy
 
 - Installs are pinned by the committed `package-lock.json` and built with `npm ci`, so the artifact is reproducible and not subject to install-time version drift.
-- `npm audit` is run manually today; wiring it (and the rest of the test suite) into CI is a tracked enhancement.
+- **`npm audit` runs in CI on every push/PR (issue #87):** `.github/workflows/ci.yml`'s `npm-audit` job fails on moderate+ severity findings in the production dependency tree (`--omit=dev --audit-level=moderate`); findings in the dev-only tree (e.g. the Storybook 8 chain's 3 moderate advisories, SEC-6) are reported to the run's step summary but never block a merge.
 - Runtime dependency surface is deliberately small (React, React Router, i18next, Recharts, canvas-confetti); the larger dev-dependency tree never ships to users.
 - **`canvas-confetti` is deliberately kept off its own default Worker path.** Its bare default export lazily builds a shared cannon with `useWorker: true`, which loads its animation loop from a `blob:` Web Worker — this app's CSP has no `worker-src`, so per spec that falls back to `script-src`, which doesn't allow `blob:`, silently killing the worker and the celebration animation with it (issue #109). `src/lib/confetti.js` builds its own cannon via `create(null, { useWorker: false })` instead, forcing main-thread rendering. Don't add `worker-src blob:` to the CSP to "fix" this a different way without removing that `useWorker: false` — the two are redundant, and loosening the CSP is the wider-attack-surface option of the two (see the issue #109 fix notes in `CHANGELOG.md`).
 

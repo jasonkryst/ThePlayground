@@ -58,6 +58,15 @@ function assertSecurityHeaders(headers) {
 }
 
 test.describe('nginx security headers (live container)', () => {
+  // Forced serial: this describe's 11 tests share one docker container from
+  // a single beforeAll. Without this, fullyParallel (playwright.config.js)
+  // can shard those tests across multiple workers, and beforeAll runs once
+  // per worker -- so up to N redundant containers get created/started
+  // concurrently for what is semantically one shared fixture, needlessly
+  // multiplying CPU/Docker load on constrained CI runners (observed
+  // contributing to "container did not become ready in time" under a 2-CPU
+  // constraint locally). Serial mode guarantees exactly one container.
+  test.describe.configure({ mode: 'serial' })
   test.skip(!dockerAvailable(), 'Docker is not available in this environment')
 
   let fixtureDir
@@ -65,6 +74,15 @@ test.describe('nginx security headers (live container)', () => {
 
   test.beforeAll(() => {
     fixtureDir = fs.mkdtempSync(path.join(os.tmpdir(), 'playground-nginx-fixture-'))
+    // mkdtempSync creates its directory with mode 0700 (owner-only) by
+    // Node's design -- fine for a host-side temp dir, but nginx-unprivileged
+    // runs as its own uid (101) inside the container, which a real Linux
+    // Docker host enforces strictly against a bind-mounted 0700 directory it
+    // doesn't own (403 Forbidden on every request, confirmed via the real
+    // nginx access log on a GitHub Actions run). Never surfaced locally on
+    // Docker Desktop for Windows, which doesn't enforce POSIX bind-mount
+    // permissions the same way a native Linux host does.
+    fs.chmodSync(fixtureDir, 0o755)
     fs.writeFileSync(path.join(fixtureDir, 'index.html'), '<!doctype html><title>fixture</title>')
     fs.mkdirSync(path.join(fixtureDir, 'assets'))
     fs.writeFileSync(path.join(fixtureDir, 'assets', 'app.js'), 'console.log(1)')
@@ -101,16 +119,40 @@ test.describe('nginx security headers (live container)', () => {
   })
 
   async function waitUntilReady(request) {
-    for (let attempt = 0; attempt < 40; attempt++) {
+    // 200 attempts * 250ms = 50s. Even after eliminating redundant
+    // container creation (serial mode, above), pre-pulling the image in
+    // CI, and targeting 127.0.0.1 explicitly (matching the -p bind exactly,
+    // ruling out an IPv6 "localhost" resolution mismatch), a real GitHub
+    // Actions run still exhausted this same window every time. Since a
+    // separate test that needs no HTTP at all (`docker exec ... whoami`)
+    // reliably passes first, the container itself is confirmed running the
+    // whole time -- so this is not a slow-start problem. Capturing the
+    // last connection error plus live `docker ps`/`docker logs`/`docker
+    // port` output on final failure, so the *next* CI failure (if any)
+    // carries real diagnostic evidence instead of another blind guess.
+    let lastError = null
+    for (let attempt = 0; attempt < 200; attempt++) {
       try {
-        const res = await request.get(`http://localhost:${containerPort}/`)
+        const res = await request.get(`http://127.0.0.1:${containerPort}/`)
         if (res.ok()) return
-      } catch {
-        // not up yet
+      } catch (err) {
+        lastError = err
       }
       await new Promise(resolve => setTimeout(resolve, 250))
     }
-    throw new Error('nginx container did not become ready in time')
+    const ps = spawnSync('docker', ['ps', '-a', '--filter', `name=${CONTAINER_NAME}`], { encoding: 'utf8' })
+    const logs = spawnSync('docker', ['logs', CONTAINER_NAME], { encoding: 'utf8' })
+    const port = spawnSync('docker', ['port', CONTAINER_NAME], { encoding: 'utf8' })
+    throw new Error(
+      [
+        'nginx container did not become ready in time',
+        `containerPort=${containerPort}`,
+        `last connection error: ${lastError?.message ?? '(none captured)'}`,
+        `docker ps -a: ${ps.stdout}${ps.stderr}`,
+        `docker logs: ${logs.stdout}${logs.stderr}`,
+        `docker port: ${port.stdout}${port.stderr}`,
+      ].join('\n')
+    )
   }
 
   test('nginx worker process runs as a non-root user (SEC-4)', () => {
@@ -120,14 +162,14 @@ test.describe('nginx security headers (live container)', () => {
 
   test('HTML document response carries all three security headers', async ({ request }) => {
     await waitUntilReady(request)
-    const res = await request.get(`http://localhost:${containerPort}/`)
+    const res = await request.get(`http://127.0.0.1:${containerPort}/`)
     expect(res.status()).toBe(200)
     assertSecurityHeaders(res.headers())
   })
 
   test('Server header discloses no version (server_tokens off, SEC-3)', async ({ request }) => {
     await waitUntilReady(request)
-    const res = await request.get(`http://localhost:${containerPort}/`)
+    const res = await request.get(`http://127.0.0.1:${containerPort}/`)
     expect(res.headers()['server']).toBe('nginx')
   })
 
@@ -140,7 +182,7 @@ test.describe('nginx security headers (live container)', () => {
   ]) {
     test(`${label} response carries all three security headers`, async ({ request }) => {
       await waitUntilReady(request)
-      const res = await request.get(`http://localhost:${containerPort}${urlPath}`)
+      const res = await request.get(`http://127.0.0.1:${containerPort}${urlPath}`)
       expect(res.status()).toBe(200)
       assertSecurityHeaders(res.headers())
     })
@@ -148,19 +190,19 @@ test.describe('nginx security headers (live container)', () => {
 
   test('hashed/immutable asset tier still sends its Cache-Control (fix did not remove caching)', async ({ request }) => {
     await waitUntilReady(request)
-    const res = await request.get(`http://localhost:${containerPort}/assets/app.js`)
+    const res = await request.get(`http://127.0.0.1:${containerPort}/assets/app.js`)
     expect(res.headers()['cache-control']).toBe('max-age=31536000, public, immutable')
   })
 
   test('mp3 tier still sends its own shorter Cache-Control (fix did not remove caching)', async ({ request }) => {
     await waitUntilReady(request)
-    const res = await request.get(`http://localhost:${containerPort}/sounds/test.mp3`)
+    const res = await request.get(`http://127.0.0.1:${containerPort}/sounds/test.mp3`)
     expect(res.headers()['cache-control']).toBe('max-age=604800, public')
   })
 
   test('a 404 for a missing asset still carries the security headers (add_header ... always)', async ({ request }) => {
     await waitUntilReady(request)
-    const res = await request.get(`http://localhost:${containerPort}/assets/does-not-exist.js`)
+    const res = await request.get(`http://127.0.0.1:${containerPort}/assets/does-not-exist.js`)
     expect(res.status()).toBe(404)
     assertSecurityHeaders(res.headers())
   })
