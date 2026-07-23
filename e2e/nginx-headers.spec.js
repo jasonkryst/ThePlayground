@@ -110,11 +110,16 @@ test.describe('nginx security headers (live container)', () => {
   })
 
   async function waitUntilReady(request) {
-    // 80 attempts * 250ms = 20s (doubled from the original 10s): a
-    // constrained CI runner under load from concurrently running e2e specs
-    // needs more headroom than a local dev machine for the container to
-    // actually start responding.
-    for (let attempt = 0; attempt < 80; attempt++) {
+    // 200 attempts * 250ms = 50s. Even after eliminating redundant
+    // container creation (serial mode, above) and pre-pulling the image
+    // in CI, a real GitHub Actions run still hit the previous 20s ceiling
+    // once while ~15 other e2e tests ran concurrently in the same job --
+    // container startup itself (not the pull) can take longer than a
+    // local dev machine under that much real CPU contention. Generous
+    // margin here costs nothing in the common case (the container is
+    // normally ready in well under a second) and only matters for this
+    // worst case.
+    for (let attempt = 0; attempt < 200; attempt++) {
       try {
         const res = await request.get(`http://localhost:${containerPort}/`)
         if (res.ok()) return
