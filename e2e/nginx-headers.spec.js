@@ -58,6 +58,15 @@ function assertSecurityHeaders(headers) {
 }
 
 test.describe('nginx security headers (live container)', () => {
+  // Forced serial: this describe's 11 tests share one docker container from
+  // a single beforeAll. Without this, fullyParallel (playwright.config.js)
+  // can shard those tests across multiple workers, and beforeAll runs once
+  // per worker -- so up to N redundant containers get created/started
+  // concurrently for what is semantically one shared fixture, needlessly
+  // multiplying CPU/Docker load on constrained CI runners (observed
+  // contributing to "container did not become ready in time" under a 2-CPU
+  // constraint locally). Serial mode guarantees exactly one container.
+  test.describe.configure({ mode: 'serial' })
   test.skip(!dockerAvailable(), 'Docker is not available in this environment')
 
   let fixtureDir
@@ -101,7 +110,11 @@ test.describe('nginx security headers (live container)', () => {
   })
 
   async function waitUntilReady(request) {
-    for (let attempt = 0; attempt < 40; attempt++) {
+    // 80 attempts * 250ms = 20s (doubled from the original 10s): a
+    // constrained CI runner under load from concurrently running e2e specs
+    // needs more headroom than a local dev machine for the container to
+    // actually start responding.
+    for (let attempt = 0; attempt < 80; attempt++) {
       try {
         const res = await request.get(`http://localhost:${containerPort}/`)
         if (res.ok()) return
