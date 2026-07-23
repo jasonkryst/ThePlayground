@@ -121,7 +121,7 @@ test.describe('nginx security headers (live container)', () => {
     // worst case.
     for (let attempt = 0; attempt < 200; attempt++) {
       try {
-        const res = await request.get(`http://localhost:${containerPort}/`)
+        const res = await request.get(`http://127.0.0.1:${containerPort}/`)
         if (res.ok()) return
       } catch {
         // not up yet
@@ -138,14 +138,14 @@ test.describe('nginx security headers (live container)', () => {
 
   test('HTML document response carries all three security headers', async ({ request }) => {
     await waitUntilReady(request)
-    const res = await request.get(`http://localhost:${containerPort}/`)
+    const res = await request.get(`http://127.0.0.1:${containerPort}/`)
     expect(res.status()).toBe(200)
     assertSecurityHeaders(res.headers())
   })
 
   test('Server header discloses no version (server_tokens off, SEC-3)', async ({ request }) => {
     await waitUntilReady(request)
-    const res = await request.get(`http://localhost:${containerPort}/`)
+    const res = await request.get(`http://127.0.0.1:${containerPort}/`)
     expect(res.headers()['server']).toBe('nginx')
   })
 
@@ -158,7 +158,7 @@ test.describe('nginx security headers (live container)', () => {
   ]) {
     test(`${label} response carries all three security headers`, async ({ request }) => {
       await waitUntilReady(request)
-      const res = await request.get(`http://localhost:${containerPort}${urlPath}`)
+      const res = await request.get(`http://127.0.0.1:${containerPort}${urlPath}`)
       expect(res.status()).toBe(200)
       assertSecurityHeaders(res.headers())
     })
@@ -166,19 +166,19 @@ test.describe('nginx security headers (live container)', () => {
 
   test('hashed/immutable asset tier still sends its Cache-Control (fix did not remove caching)', async ({ request }) => {
     await waitUntilReady(request)
-    const res = await request.get(`http://localhost:${containerPort}/assets/app.js`)
+    const res = await request.get(`http://127.0.0.1:${containerPort}/assets/app.js`)
     expect(res.headers()['cache-control']).toBe('max-age=31536000, public, immutable')
   })
 
   test('mp3 tier still sends its own shorter Cache-Control (fix did not remove caching)', async ({ request }) => {
     await waitUntilReady(request)
-    const res = await request.get(`http://localhost:${containerPort}/sounds/test.mp3`)
+    const res = await request.get(`http://127.0.0.1:${containerPort}/sounds/test.mp3`)
     expect(res.headers()['cache-control']).toBe('max-age=604800, public')
   })
 
   test('a 404 for a missing asset still carries the security headers (add_header ... always)', async ({ request }) => {
     await waitUntilReady(request)
-    const res = await request.get(`http://localhost:${containerPort}/assets/does-not-exist.js`)
+    const res = await request.get(`http://127.0.0.1:${containerPort}/assets/does-not-exist.js`)
     expect(res.status()).toBe(404)
     assertSecurityHeaders(res.headers())
   })
