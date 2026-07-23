@@ -36,7 +36,20 @@ test('intro screen exits immediately without a confirm overlay', async ({ page }
 
 test('the browser back button shows the confirm overlay instead of leaving mid-game, and re-arms after Keep Playing', async ({ page }) => {
   await page.goto('/game/color-match')
+  const historyLengthBeforeStart = await page.evaluate(() => window.history.length)
   await page.getByTestId('game-intro-start').click()
+
+  // AppShell's sentinel-history-push effect (which arms the back-button
+  // guard) runs asynchronously, two effect-hops after the intro click:
+  // QuizGameShell's own effect calls useShellGameStatus, which itself
+  // updates gameStatus in a further effect, which AppShell's pushState
+  // effect then reacts to. A bare .click() only waits for the click itself,
+  // not for that chain to land -- under real CPU contention (this raced
+  // reliably under a 2-CPU constraint locally) goBack() can fire before the
+  // sentinel is pushed, so the browser navigates for real instead of being
+  // intercepted, and no dialog ever appears. Wait for the sentinel's
+  // pushState (history.length increasing) before calling goBack().
+  await expect.poll(() => page.evaluate(() => window.history.length)).toBeGreaterThan(historyLengthBeforeStart)
 
   await page.goBack()
   const dialog = page.getByRole('dialog')
