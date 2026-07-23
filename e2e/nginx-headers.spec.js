@@ -74,6 +74,15 @@ test.describe('nginx security headers (live container)', () => {
 
   test.beforeAll(() => {
     fixtureDir = fs.mkdtempSync(path.join(os.tmpdir(), 'playground-nginx-fixture-'))
+    // mkdtempSync creates its directory with mode 0700 (owner-only) by
+    // Node's design -- fine for a host-side temp dir, but nginx-unprivileged
+    // runs as its own uid (101) inside the container, which a real Linux
+    // Docker host enforces strictly against a bind-mounted 0700 directory it
+    // doesn't own (403 Forbidden on every request, confirmed via the real
+    // nginx access log on a GitHub Actions run). Never surfaced locally on
+    // Docker Desktop for Windows, which doesn't enforce POSIX bind-mount
+    // permissions the same way a native Linux host does.
+    fs.chmodSync(fixtureDir, 0o755)
     fs.writeFileSync(path.join(fixtureDir, 'index.html'), '<!doctype html><title>fixture</title>')
     fs.mkdirSync(path.join(fixtureDir, 'assets'))
     fs.writeFileSync(path.join(fixtureDir, 'assets', 'app.js'), 'console.log(1)')
