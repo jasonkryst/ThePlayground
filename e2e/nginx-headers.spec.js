@@ -111,24 +111,39 @@ test.describe('nginx security headers (live container)', () => {
 
   async function waitUntilReady(request) {
     // 200 attempts * 250ms = 50s. Even after eliminating redundant
-    // container creation (serial mode, above) and pre-pulling the image
-    // in CI, a real GitHub Actions run still hit the previous 20s ceiling
-    // once while ~15 other e2e tests ran concurrently in the same job --
-    // container startup itself (not the pull) can take longer than a
-    // local dev machine under that much real CPU contention. Generous
-    // margin here costs nothing in the common case (the container is
-    // normally ready in well under a second) and only matters for this
-    // worst case.
+    // container creation (serial mode, above), pre-pulling the image in
+    // CI, and targeting 127.0.0.1 explicitly (matching the -p bind exactly,
+    // ruling out an IPv6 "localhost" resolution mismatch), a real GitHub
+    // Actions run still exhausted this same window every time. Since a
+    // separate test that needs no HTTP at all (`docker exec ... whoami`)
+    // reliably passes first, the container itself is confirmed running the
+    // whole time -- so this is not a slow-start problem. Capturing the
+    // last connection error plus live `docker ps`/`docker logs`/`docker
+    // port` output on final failure, so the *next* CI failure (if any)
+    // carries real diagnostic evidence instead of another blind guess.
+    let lastError = null
     for (let attempt = 0; attempt < 200; attempt++) {
       try {
         const res = await request.get(`http://127.0.0.1:${containerPort}/`)
         if (res.ok()) return
-      } catch {
-        // not up yet
+      } catch (err) {
+        lastError = err
       }
       await new Promise(resolve => setTimeout(resolve, 250))
     }
-    throw new Error('nginx container did not become ready in time')
+    const ps = spawnSync('docker', ['ps', '-a', '--filter', `name=${CONTAINER_NAME}`], { encoding: 'utf8' })
+    const logs = spawnSync('docker', ['logs', CONTAINER_NAME], { encoding: 'utf8' })
+    const port = spawnSync('docker', ['port', CONTAINER_NAME], { encoding: 'utf8' })
+    throw new Error(
+      [
+        'nginx container did not become ready in time',
+        `containerPort=${containerPort}`,
+        `last connection error: ${lastError?.message ?? '(none captured)'}`,
+        `docker ps -a: ${ps.stdout}${ps.stderr}`,
+        `docker logs: ${logs.stdout}${logs.stderr}`,
+        `docker port: ${port.stdout}${port.stderr}`,
+      ].join('\n')
+    )
   }
 
   test('nginx worker process runs as a non-root user (SEC-4)', () => {
