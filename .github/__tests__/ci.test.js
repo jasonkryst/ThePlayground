@@ -8,7 +8,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const REPO_ROOT = path.resolve(__dirname, '..', '..')
 const CI_YML_PATH = path.join(REPO_ROOT, '.github', 'workflows', 'ci.yml')
 
-const EXPECTED_JOBS = ['lint', 'lint-css', 'unit-tests', 'build', 'e2e', 'docker-build', 'npm-audit', 'lighthouse']
+const EXPECTED_JOBS = ['lint', 'lint-css', 'unit-tests', 'build', 'e2e', 'docker-build', 'npm-audit', 'lighthouse', 'trivy']
 const NODE_JOBS = ['lint', 'lint-css', 'unit-tests', 'build', 'e2e', 'npm-audit', 'lighthouse']
 
 let workflow
@@ -40,7 +40,7 @@ describe('.github/workflows/ci.yml', () => {
     expect(workflow.on.push.branches.length).toBeGreaterThan(0)
   })
 
-  it('defines exactly the 8 expected jobs', () => {
+  it('defines exactly the 9 expected jobs', () => {
     expect(Object.keys(workflow.jobs).sort()).toEqual([...EXPECTED_JOBS].sort())
   })
 
@@ -133,5 +133,70 @@ describe('.github/workflows/ci.yml', () => {
     const runs = stepRuns('lighthouse')
     expect(runs.some(r => r.includes('npm run build'))).toBe(true)
     expect(runs.some(r => r.includes('lhci autorun'))).toBe(true)
+  })
+
+  it('negative: trivy job does not set up Node (it only needs Docker)', () => {
+    expect(stepUses('trivy').some(u => u.startsWith('actions/setup-node'))).toBe(false)
+  })
+
+  it('trivy job builds the image without pushing', () => {
+    const runs = stepRuns('trivy')
+    expect(runs.some(r => r.includes('docker build'))).toBe(true)
+    expect(runs.some(r => r.includes('docker push'))).toBe(false)
+  })
+
+  it('negative: trivy job never logs into a registry', () => {
+    expect(stepUses('trivy').some(u => u.includes('login-action'))).toBe(false)
+  })
+
+  it('trivy job declares contents:read and security-events:write permissions', () => {
+    expect(workflow.jobs['trivy'].permissions).toEqual({ contents: 'read', 'security-events': 'write' })
+  })
+
+  it('negative: no other job declares security-events:write', () => {
+    for (const [jobName, job] of Object.entries(workflow.jobs)) {
+      if (jobName === 'trivy') continue
+      expect(job.permissions?.['security-events'], `${jobName} should not have security-events permission`).toBeUndefined()
+    }
+  })
+
+  it('trivy gate step fails on fixable CRITICAL/HIGH findings, unsilenced', () => {
+    const steps = workflow.jobs['trivy'].steps
+    const gate = steps.find(s => s.uses && s.uses.startsWith('aquasecurity/trivy-action') && s.with.format === 'table')
+    expect(gate).toBeDefined()
+    expect(gate.with['image-ref']).toBe('playground:ci')
+    expect(gate.with.severity).toBe('CRITICAL,HIGH')
+    expect(gate.with['ignore-unfixed']).toBe(true)
+    expect(String(gate.with['exit-code'])).toBe('1')
+    expect(gate['continue-on-error']).toBeUndefined()
+    expect(gate.if).toBeUndefined()
+  })
+
+  it('negative: trivy gate step severity does not include non-actionable noise', () => {
+    const steps = workflow.jobs['trivy'].steps
+    const gate = steps.find(s => s.uses && s.uses.startsWith('aquasecurity/trivy-action') && s.with.format === 'table')
+    expect(gate.with.severity).not.toMatch(/LOW|MEDIUM|UNKNOWN/)
+  })
+
+  it('trivy report step runs always, produces a SARIF file the upload step consumes', () => {
+    const steps = workflow.jobs['trivy'].steps
+    const report = steps.find(s => s.uses && s.uses.startsWith('aquasecurity/trivy-action') && s.with.format === 'sarif')
+    expect(report).toBeDefined()
+    expect(report.if).toBe('always()')
+    expect(report.with['image-ref']).toBe('playground:ci')
+    expect(typeof report.with.output).toBe('string')
+    expect(report.with.output.length).toBeGreaterThan(0)
+
+    const upload = steps.find(s => s.uses && s.uses.startsWith('github/codeql-action/upload-sarif'))
+    expect(upload).toBeDefined()
+    expect(upload.if).toBe('always()')
+    expect(upload.with.sarif_file).toBe(report.with.output)
+  })
+
+  it('negative: trivy report step does not accidentally narrow severity or skip unfixed findings', () => {
+    const steps = workflow.jobs['trivy'].steps
+    const report = steps.find(s => s.uses && s.uses.startsWith('aquasecurity/trivy-action') && s.with.format === 'sarif')
+    expect(report.with.severity).toBeUndefined()
+    expect(report.with['ignore-unfixed']).toBeUndefined()
   })
 })
