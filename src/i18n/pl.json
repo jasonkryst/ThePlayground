@@ -32,7 +32,8 @@
     "orientationOverlayBodyPortrait": "Ta gra wymaga wysokiego ekranu. Obróć urządzenie, aby kontynuować grę!",
     "gameIntroPortrait": "Zagraj, trzymając ekran pionowo!",
     "answerCorrectAnnounce": "Poprawnie!",
-    "answerWrongAnnounce": "Prawie!"
+    "answerWrongAnnounce": "Prawie!",
+    "tapToHear": "Dotknij 🔊, aby usłyszeć!"
   },
   "shell": {
     "brand": "The Playground",
