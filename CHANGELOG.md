@@ -3,6 +3,12 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.33.1] - 2026-07-22
+
+### Fixed
+
+- Blocked audio autoplay and blocked speech synthesis no longer fail silently (issue #123, AU-8). Root cause: `useSoundPlayer.play()` deliberately swallowed `audio.play()` rejections as a crash guard, and `useSpeech.speak()` had no failure signal at all — so a browser blocking either without a qualifying user gesture left Animal Sounds or Fruit & Veggie ID showing answer choices with no prompt and no cue anything had failed. Both hooks now expose a `blocked` flag (from `audio.play()`'s rejection and the Web Speech API's utterance `onerror` event respectively, guarded against false positives from the routine `stop()`/`cancel()` calls that fire on every question change), and a new shared `ReplayButton` component (`src/components/ReplayButton.jsx`, replacing the duplicated inline button in both games) pulses the 🔊 button with a localized "tap to hear" hint until the next successful playback.
+
 ## [0.33.0] - 2026-07-22
 
 ### Added
