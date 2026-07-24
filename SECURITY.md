@@ -77,7 +77,7 @@ Stated plainly rather than papered over (each is tracked in [`docs/ENHANCEMENTS.
 - **Non-root runtime:** nginx runs as its image's built-in non-root `nginx` user (uid 101), not root — a container-escape or nginx RCE chain starts with less privilege (issue #85).
 - **Multi-stage build:** node, npm, `node_modules`, and the source tree never enter the runtime image — a compromise of the running container yields a static file server and public assets, not a toolchain.
 - **Stateless runtime:** no volumes, no secrets, no env vars in the image; nothing sensitive to exfiltrate server-side.
-- **Hardening backlog** (tracked in [`docs/ENHANCEMENTS.md`](docs/ENHANCEMENTS.md#security)): automated image vulnerability scanning (Trivy) — the CI pipeline this was blocked on now exists (issue #88), but the scan itself isn't implemented yet.
+- **Automated image vulnerability scanning (SEC-4 remainder, issue #132):** the `trivy` job in `.github/workflows/ci.yml` scans the built image with Trivy on every push/PR. A gate step fails the job on CRITICAL/HIGH findings with an available fix (`ignore-unfixed: true` skips upstream OS-package CVEs with no patch yet, so the gate only trips on actionable findings). A second step, which runs even if the gate failed, scans every severity including unfixed findings and uploads the result as SARIF to this repository's Security tab, so lower-severity or currently-unfixable findings stay visible for tracking without ever blocking a merge — the same posture `npm audit`'s dev-tree report already uses below.
 
 ## Dependency policy
 
