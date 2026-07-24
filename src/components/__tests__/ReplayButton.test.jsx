@@ -20,12 +20,8 @@ describe('ReplayButton', () => {
     render(<ReplayButton labelKey="animalSounds.replay" blocked={true} onClick={() => {}} />)
     const button = screen.getByRole('button')
     expect(button).toHaveClass('game__replay--blocked')
-    expect(button.getAttribute('aria-label')).toMatch(/replay sound/i)
-    // common.tapToHear is added in Task 4 (not yet complete), so i18next
-    // falls back to rendering the raw key here — assert on the augmented
-    // label and the hint element's presence/role, not its exact copy.
-    expect(button.getAttribute('aria-label')).not.toBe('Replay sound')
-    expect(screen.getByRole('status')).toBeInTheDocument()
+    expect(button.getAttribute('aria-label')).toMatch(/tap.*to hear/i)
+    expect(screen.getByRole('status')).toHaveTextContent(/tap.*to hear/i)
   })
 
   it('calls onClick when clicked, in both states', () => {
