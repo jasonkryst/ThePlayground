@@ -23,7 +23,7 @@ trivy:
     - uses: actions/checkout@v4
     - run: docker build -t playground:ci .
     - name: Vulnerability gate (fixable CRITICAL/HIGH findings)
-      uses: aquasecurity/trivy-action@0.36.0
+      uses: aquasecurity/trivy-action@v0.36.0
       with:
         image-ref: playground:ci
         format: table
@@ -32,7 +32,7 @@ trivy:
         exit-code: 1
     - name: Full vulnerability report (all severities, including unfixed)
       if: always()
-      uses: aquasecurity/trivy-action@0.36.0
+      uses: aquasecurity/trivy-action@v0.36.0
       with:
         image-ref: playground:ci
         format: sarif
@@ -63,7 +63,7 @@ trivy:
 
 **Permissions:** this is the first job in the workflow to need anything beyond the default `contents: read` — `security-events: write` is required specifically for `upload-sarif`. Declared only on this job (not workflow-wide), keeping every other job at its existing default, least-privilege scope.
 
-**Versions pinned:** `aquasecurity/trivy-action@0.36.0` is exact-pinned (no floating major tag exists for this action — 0.x releases aren't guaranteed backward-compatible, confirmed against the action's actual git tags), matching this repo's existing Docker base-image pinning philosophy (`SECURITY.md`'s Docker posture section). `github/codeql-action/upload-sarif@v4` uses the floating major tag, matching `actions/checkout@v4`'s style, since GitHub does publish and maintain that tag with backward compatibility.
+**Versions pinned:** `aquasecurity/trivy-action@v0.36.0` is exact-pinned (no floating major tag exists for this action — 0.x releases aren't guaranteed backward-compatible, confirmed against the action's actual git tags), matching this repo's existing Docker base-image pinning philosophy (`SECURITY.md`'s Docker posture section). `github/codeql-action/upload-sarif@v4` uses the floating major tag, matching `actions/checkout@v4`'s style, since GitHub does publish and maintain that tag with backward compatibility.
 
 ## 2. Testing plan
 

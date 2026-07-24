@@ -115,7 +115,7 @@ jobs:
       - uses: actions/checkout@v4
       - run: docker build -t playground:ci .
       - name: Vulnerability gate (fixable CRITICAL/HIGH findings)
-        uses: aquasecurity/trivy-action@0.36.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: playground:ci
           format: table
@@ -124,7 +124,7 @@ jobs:
           exit-code: 1
       - name: Full vulnerability report (all severities, including unfixed)
         if: always()
-        uses: aquasecurity/trivy-action@0.36.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: playground:ci
           format: sarif
