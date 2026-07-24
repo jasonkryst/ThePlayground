@@ -7,7 +7,13 @@ Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
-- Automated Docker image vulnerability scanning in CI (issue #132, the SEC-4 remainder left open by issue #85's container hardening): a new `trivy` job in `.github/workflows/ci.yml` scans the built image with [Trivy](https://trivy.dev/), failing the build on CRITICAL/HIGH findings that have an available fix (`ignore-unfixed: true`, so unpatched upstream Alpine CVEs with no available patch don't block merges). A second step, which runs even if the gate failed, reports every severity — including unfixed findings — as a SARIF upload to the repository's Security tab, matching the report-without-blocking posture the `npm-audit` job's dev-tree step already established.
+- Automated Docker image vulnerability scanning in CI (issue #132, the SEC-4 remainder left open by issue #85's container hardening): a new `trivy` job in `.github/workflows/ci.yml` scans the built image with [Trivy](https://trivy.dev/), failing the build on CRITICAL/HIGH findings that have an available fix (`ignore-unfixed: true`, so unpatched upstream Alpine CVEs with no available patch don't block merges). A second step, which runs even if the gate failed, reports every severity — including unfixed findings — as a SARIF upload to the repository's Security tab, matching the report-without-blocking posture the `npm-audit` job's dev-tree step already established. The first real CI run against this scan also caught a stale `nginx-unprivileged:1.27-alpine` base image (2 CRITICAL + 33 HIGH fixable vulnerabilities, unrebuilt since 2025-06-23); bumped to `1.30-alpine` (rebuilt 2026-07-20) to resolve them.
+
+## [0.33.2] - 2026-07-24
+
+### Fixed
+
+- `react-router`/`react-router-dom` bumped `7.17.0` → `7.18.1` (non-breaking, same major) to clear two moderate-severity advisories (`GHSA-wrjc-x8rr-h8h6` open redirect via backslash in `<Link>`/`useNavigate`, `GHSA-h8fp-f39c-q6mh` XSS via missing protocol validation, `GHSA-337j-9hxr-rhxg` arbitrary constructor injection via SSR hydration error deserialization) flagged by CI's `npm-audit` gate (`npm audit --omit=dev --audit-level=moderate`), which was failing on `main`. No API changes needed — the app doesn't use any of the affected code paths directly, but the gate correctly blocks on the dependency regardless.
 
 ## [0.33.1] - 2026-07-22
 
