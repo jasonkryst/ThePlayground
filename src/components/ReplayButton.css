@@ -1,0 +1,29 @@
+.replay-button {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+.game__replay    { font-size: 2.25rem; background: rgb(255 255 255 / 30%); border-radius: 50%; width: 72px; height: 72px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: none; transition: background 0.15s; }
+.game__replay:hover { background: rgb(255 255 255 / 50%); }
+.game__replay:focus         { outline: none; }
+.game__replay:focus-visible { outline: 3px solid var(--color-lavender); outline-offset: 3px; }
+
+/* AU-8: blocked-autoplay recovery hint. Amber/gold is deliberately distinct
+   from the app's correct-green/wrong-red feedback vocabulary — this isn't a
+   right/wrong signal, it's a "look here" cue. The static ring (below) is
+   visible under reduced motion too; only the looping pulse is motion-gated. */
+.game__replay--blocked { box-shadow: 0 0 0 4px rgb(255 193 7 / 70%); }
+
+@keyframes pulse-replay {
+  0%   { box-shadow: 0 0 0 4px rgb(255 193 7 / 70%); }
+  70%  { box-shadow: 0 0 0 20px rgb(255 193 7 / 0%); }
+  100% { box-shadow: 0 0 0 4px rgb(255 193 7 / 70%); }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .game__replay--blocked { animation: pulse-replay 1.2s ease-in-out infinite; }
+}
+
+.replay-button__hint { color: white; font-size: 0.9375rem; font-weight: 700; text-align: center; }

@@ -30,7 +30,8 @@
     "orientationOverlayBodyPortrait": "This game needs a tall screen. Turn your device to keep playing!",
     "gameIntroPortrait": "Play this game with your screen upright!",
     "answerCorrectAnnounce": "Correct!",
-    "answerWrongAnnounce": "Not quite!"
+    "answerWrongAnnounce": "Not quite!",
+    "tapToHear": "Tap 🔊 to hear it!"
   },
   "shell": {
     "brand": "The Playground",

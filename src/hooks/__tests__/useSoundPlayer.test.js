@@ -86,4 +86,49 @@ describe('useSoundPlayer', () => {
     // Flush the microtask queue; an unhandled rejection would fail the run.
     await act(async () => {})
   })
+
+  it('blocked is initially false', () => {
+    const { result } = renderHook(() => useSoundPlayer())
+    expect(result.current.blocked).toBe(false)
+  })
+
+  it('play() sets blocked to true when audio.play() rejects', async () => {
+    playImpl = () => Promise.reject(new Error('NotAllowedError'))
+    const { result } = renderHook(() => useSoundPlayer())
+    act(() => result.current.play('blob:clip-1'))
+    await act(async () => {})
+    expect(result.current.blocked).toBe(true)
+  })
+
+  it('play() keeps blocked false when audio.play() resolves', async () => {
+    const { result } = renderHook(() => useSoundPlayer())
+    act(() => result.current.play('blob:clip-1'))
+    await act(async () => {})
+    expect(result.current.blocked).toBe(false)
+  })
+
+  it('a stop()-interrupted clip does not set blocked when its rejection arrives later (negative/race)', async () => {
+    let rejectClip1
+    playImpl = () => new Promise((_, reject) => { rejectClip1 = reject })
+    const { result } = renderHook(() => useSoundPlayer())
+    act(() => result.current.play('blob:clip-1'))
+    act(() => result.current.stop())
+    await act(async () => { rejectClip1(new Error('AbortError')) })
+    expect(result.current.blocked).toBe(false)
+  })
+
+  it('a fresh play() clears a stale blocked=true before the new attempt settles (no flash)', async () => {
+    playImpl = () => Promise.reject(new Error('NotAllowedError'))
+    const { result } = renderHook(() => useSoundPlayer())
+    act(() => result.current.play('blob:clip-1'))
+    await act(async () => {})
+    expect(result.current.blocked).toBe(true)
+
+    let resolveClip2
+    playImpl = () => new Promise(resolve => { resolveClip2 = resolve })
+    act(() => result.current.play('blob:clip-2'))
+    expect(result.current.blocked).toBe(false)
+    await act(async () => { resolveClip2() })
+    expect(result.current.blocked).toBe(false)
+  })
 })

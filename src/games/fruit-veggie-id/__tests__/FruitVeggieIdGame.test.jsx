@@ -10,10 +10,11 @@ vi.mock('../../../lib/confetti', () => ({ fireConfetti: vi.fn() }))
 
 // Mock the speech hook (per the "mock the hook, not the browser primitive" rule).
 let mockSupported = true
+let mockBlocked = false
 const mockSpeak = vi.fn()
 const mockCancel = vi.fn()
 vi.mock('../../../hooks/useSpeech', () => ({
-  default: () => ({ speak: mockSpeak, cancel: mockCancel, supported: mockSupported }),
+  default: () => ({ speak: mockSpeak, cancel: mockCancel, supported: mockSupported, blocked: mockBlocked }),
 }))
 
 let mockSettings = {
@@ -53,6 +54,7 @@ beforeEach(() => {
   vi.clearAllMocks()
   mockLoaded = true
   mockSupported = true
+  mockBlocked = false
   mockSettings = {
     numChoices: 2, feedbackMode: 'immediate', questionsPerSession: 3,
     maxTries: 'none', hintsEnabled: false, hintAfterWrongTaps: 2, retryCountsAsStreak: true,
@@ -206,6 +208,32 @@ describe('FruitVeggieIdGame', () => {
     mockSettings = { ...mockSettings, introDismissed: {} }
     await act(async () => { render(<FruitVeggieIdGame onGameEnd={onGameEnd} />) })
     expect(mockSpeak).not.toHaveBeenCalled()
+  })
+
+  it('shows the tap-to-hear recovery hint when speech is blocked', async () => {
+    mockBlocked = true
+    await act(async () => { render(<FruitVeggieIdGame onGameEnd={onGameEnd} />) })
+    expect(screen.getByText(/tap.*to hear/i)).toBeInTheDocument()
+  })
+
+  it('does not show the tap-to-hear hint when speech is not blocked', async () => {
+    await act(async () => { render(<FruitVeggieIdGame onGameEnd={onGameEnd} />) })
+    expect(screen.queryByText(/tap.*to hear/i)).not.toBeInTheDocument()
+  })
+
+  it('does not show the recovery hint when speech is unsupported (no replay button at all)', async () => {
+    mockSupported = false
+    mockBlocked = true
+    await act(async () => { render(<FruitVeggieIdGame onGameEnd={onGameEnd} />) })
+    expect(screen.queryByText(/tap.*to hear/i)).not.toBeInTheDocument()
+  })
+
+  it('has no accessibility violations while the recovery hint is showing', async () => {
+    mockBlocked = true
+    let container
+    await act(async () => { container = render(<FruitVeggieIdGame onGameEnd={onGameEnd} />).container })
+    expect(screen.getByText(/tap.*to hear/i)).toBeInTheDocument()
+    expect(await axe(container)).toHaveNoViolations()
   })
 
   // Negative: no-TTS fallback

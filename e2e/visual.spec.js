@@ -29,6 +29,8 @@ const stories = [
   'components-gameintro--portrait-required',
   'components-orientationoverlay--default',
   'components-orientationoverlay--portrait-required',
+  'components-replaybutton--default',
+  'components-replaybutton--blocked',
   'components-badgegallery--all-locked',
   'components-badgegallery--mixed-progress',
   'pages-adminpage--default',

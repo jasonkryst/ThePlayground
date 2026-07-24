@@ -87,6 +87,50 @@ describe('useSpeech (supported)', () => {
   })
 })
 
+describe('useSpeech blocked state', () => {
+  beforeEach(installSynth)
+
+  it('blocked is initially false', () => {
+    const { result } = renderHook(() => useSpeech())
+    expect(result.current.blocked).toBe(false)
+  })
+
+  it('blocked stays false when the utterance starts successfully', () => {
+    const { result } = renderHook(() => useSpeech())
+    act(() => { result.current.speak('apple') })
+    act(() => { speakSpy.mock.calls[0][0].onstart() })
+    expect(result.current.blocked).toBe(false)
+  })
+
+  it('blocked becomes true when the utterance errors', () => {
+    const { result } = renderHook(() => useSpeech())
+    act(() => { result.current.speak('apple') })
+    act(() => { speakSpy.mock.calls[0][0].onerror() })
+    expect(result.current.blocked).toBe(true)
+  })
+
+  it('cancel() firing the interrupted utterance\'s error does NOT set blocked (negative/race)', () => {
+    const { result } = renderHook(() => useSpeech())
+    act(() => { result.current.speak('apple') })
+    const utterance = speakSpy.mock.calls[0][0]
+    act(() => { result.current.cancel() })
+    // Simulate the browser firing the cancelled utterance's error event
+    // after cancel() has already nulled the ref.
+    act(() => { utterance.onerror() })
+    expect(result.current.blocked).toBe(false)
+  })
+
+  it('a fresh speak() clears a stale blocked=true immediately', () => {
+    const { result } = renderHook(() => useSpeech())
+    act(() => { result.current.speak('apple') })
+    act(() => { speakSpy.mock.calls[0][0].onerror() })
+    expect(result.current.blocked).toBe(true)
+
+    act(() => { result.current.speak('banana') })
+    expect(result.current.blocked).toBe(false)
+  })
+})
+
 describe('useSpeech (unsupported)', () => {
   beforeEach(removeSynth)
 

@@ -122,3 +122,23 @@ test('animal sounds: a countdown timeout auto-advances to the next question', as
   await page.goto('/admin')
   await timerSection.getByRole('radio', { name: '⏱️ Show timer' }).check()
 })
+
+test('animal sounds: blocked audio autoplay shows the tap-to-hear recovery hint', async ({ page }) => {
+  await page.addInitScript(() => {
+    window.HTMLMediaElement.prototype.play = () => Promise.reject(new DOMException('blocked', 'NotAllowedError'))
+  })
+  await page.goto('/game/animal-sounds')
+  await page.getByTestId('game-intro-start').click()
+  await page.locator('[data-animal-id]').first().waitFor()
+
+  await expect(page.getByText('Tap 🔊 to hear it!')).toBeVisible()
+  await expect(page.getByRole('button', { name: /tap 🔊 to hear it/i })).toBeVisible()
+})
+
+test('animal sounds: no recovery hint appears when audio plays normally', async ({ page }) => {
+  await page.goto('/game/animal-sounds')
+  await page.getByTestId('game-intro-start').click()
+  await page.locator('[data-animal-id]').first().waitFor()
+
+  await expect(page.getByText('Tap 🔊 to hear it!')).not.toBeVisible()
+})

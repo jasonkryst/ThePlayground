@@ -257,6 +257,28 @@ describe('AnimalSoundsGame', () => {
 
     expect(screen.getByText(/perfect session/i)).toBeInTheDocument()
   })
+
+  it('shows the tap-to-hear recovery hint when audio.play() is blocked', async () => {
+    window.HTMLMediaElement.prototype.play.mockRejectedValueOnce(new Error('NotAllowedError'))
+    await act(async () => { render(<AnimalSoundsGame onGameEnd={onGameEnd} />) })
+    await act(async () => {})
+    expect(screen.getByText(/tap.*to hear/i)).toBeInTheDocument()
+  })
+
+  it('does not show the tap-to-hear hint when audio plays normally', async () => {
+    await act(async () => { render(<AnimalSoundsGame onGameEnd={onGameEnd} />) })
+    await act(async () => {})
+    expect(screen.queryByText(/tap.*to hear/i)).not.toBeInTheDocument()
+  })
+
+  it('has no accessibility violations while the recovery hint is showing', async () => {
+    window.HTMLMediaElement.prototype.play.mockRejectedValueOnce(new Error('NotAllowedError'))
+    let container
+    await act(async () => { container = render(<AnimalSoundsGame onGameEnd={onGameEnd} />).container })
+    await act(async () => {})
+    expect(screen.getByText(/tap.*to hear/i)).toBeInTheDocument()
+    expect(await axe(container)).toHaveNoViolations()
+  })
 })
 
 describe('AnimalSoundsGame — how-to-play intro', () => {
