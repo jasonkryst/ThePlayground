@@ -10,7 +10,7 @@ import { fileURLToPath } from 'node:url'
 // nginx/__tests__/securityHeaders.test.js catches the config-text pattern,
 // but only a live request proves nginx actually sends the headers. Spins up
 // the same pinned, non-root image the Dockerfile ships
-// (nginxinc/nginx-unprivileged:1.27-alpine) directly (not the full
+// (nginxinc/nginx-unprivileged:1.30-alpine) directly (not the full
 // Dockerfile build, which requires `npm run build` first and is slow),
 // mounting this repo's nginx.conf/security-headers.conf plus minimal
 // fixture assets. Also asserts the nginx process itself is non-root
@@ -101,7 +101,7 @@ test.describe('nginx security headers (live container)', () => {
         '-v', `${fixtureDir}:/usr/share/nginx/html:ro`,
         '-v', `${path.join(REPO_ROOT, 'nginx.conf')}:/etc/nginx/conf.d/default.conf:ro`,
         '-v', `${path.join(REPO_ROOT, 'nginx', 'security-headers.conf')}:/etc/nginx/security-headers.conf:ro`,
-        'nginxinc/nginx-unprivileged:1.27-alpine',
+        'nginxinc/nginx-unprivileged:1.30-alpine',
       ],
       { encoding: 'utf8' }
     )

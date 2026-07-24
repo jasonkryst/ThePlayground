@@ -79,10 +79,10 @@ RUN npm run build
 
 `package*.json` is copied and `npm ci` run *before* the rest of the source is copied. Docker caches layers by input: as long as the lockfile hasn't changed, rebuilds skip dependency installation entirely and only re-run `vite build`. `npm ci` (rather than `npm install`) installs exactly what `package-lock.json` pins — reproducible builds, no surprise version drift.
 
-**Stage 2 — serve (`nginxinc/nginx-unprivileged:1.27-alpine`):**
+**Stage 2 — serve (`nginxinc/nginx-unprivileged:1.30-alpine`):**
 
 ```dockerfile
-FROM nginxinc/nginx-unprivileged:1.27-alpine
+FROM nginxinc/nginx-unprivileged:1.30-alpine
 COPY --from=build /app/dist /usr/share/nginx/html
 COPY nginx/security-headers.conf /etc/nginx/security-headers.conf
 COPY nginx.conf /etc/nginx/conf.d/default.conf
