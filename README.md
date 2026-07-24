@@ -278,7 +278,7 @@ New quiz games should render their answer choices via `GameChoiceGrid` (render-p
 Two supported paths:
 
 - **Static hosting:** `npm run build` produces a fully static `dist/` — serve it from any web server that can fall back to `index.html` for unmatched routes.
-- **Docker:** a two-stage build (Node compiles, `nginxinc/nginx-unprivileged:1.27-alpine` serves as a non-root user, ~25 MB image). `docker compose up --build`, then open [http://localhost:8080](http://localhost:8080).
+- **Docker:** a two-stage build (Node compiles, `nginxinc/nginx-unprivileged:1.30-alpine` serves as a non-root user, ~25 MB image). `docker compose up --build`, then open [http://localhost:8080](http://localhost:8080).
 
 The full guide — annotated nginx configuration, cache tiers, HTTPS/reverse-proxy setup, data persistence and backup, troubleshooting — is in [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
 

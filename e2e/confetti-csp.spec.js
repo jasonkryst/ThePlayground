@@ -21,7 +21,7 @@ import { fileURLToPath } from 'node:url'
 // (not a mock) can prove.
 //
 // Boots the same pinned nginx image the Dockerfile ships
-// (nginxinc/nginx-unprivileged:1.27-alpine), serving a real `npm run build`
+// (nginxinc/nginx-unprivileged:1.30-alpine), serving a real `npm run build`
 // output with the real nginx.conf/security-headers.conf — same pattern as
 // e2e/nginx-headers.spec.js, but driving actual page interactions instead of
 // just asserting response headers. Requires Docker; skips (not fails) when
@@ -87,7 +87,7 @@ test.describe('confetti renders under the real production CSP (issue #109)', () 
         '-v', `${path.join(REPO_ROOT, 'dist')}:/usr/share/nginx/html:ro`,
         '-v', `${path.join(REPO_ROOT, 'nginx.conf')}:/etc/nginx/conf.d/default.conf:ro`,
         '-v', `${path.join(REPO_ROOT, 'nginx', 'security-headers.conf')}:/etc/nginx/security-headers.conf:ro`,
-        'nginxinc/nginx-unprivileged:1.27-alpine',
+        'nginxinc/nginx-unprivileged:1.30-alpine',
       ],
       { encoding: 'utf8' }
     )
