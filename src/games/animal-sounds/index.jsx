@@ -4,6 +4,7 @@ import useGameSession from '../../hooks/useGameSession'
 import useSoundPlayer from '../../hooks/useSoundPlayer'
 import useQuestionAudio from '../../hooks/useQuestionAudio'
 import QuizGameShell from '../../components/QuizGameShell'
+import ReplayButton from '../../components/ReplayButton'
 import animals from './data/animals'
 import { getSoundUrl } from './data/sounds'
 import manifest from './manifest.json'
@@ -22,7 +23,7 @@ export default function AnimalSoundsGame({ onGameEnd }) {
 
   // Game-owned question audio: its own player instance, independent of the
   // shell's chime layer. The announce/stop lifecycle lives in useQuestionAudio.
-  const { play, stop } = useSoundPlayer()
+  const { play, stop, blocked } = useSoundPlayer()
   const announce = useCallback(animal => play(getSoundUrl(animal.correct.sound)), [play])
   const replay = useQuestionAudio({ index, current, showIntro, introResolved, done, announce, stop })
 
@@ -35,7 +36,7 @@ export default function AnimalSoundsGame({ onGameEnd }) {
       correctTestId="correct-animal-id"
       prompt={t('animalSounds.prompt')}
       renderPromptExtra={() => (
-        <button className="game__replay" aria-label={t('animalSounds.replay')} onClick={replay}>🔊</button>
+        <ReplayButton labelKey="animalSounds.replay" blocked={blocked} onClick={replay} />
       )}
       getChoiceProps={(animal, i) => ({
         style: { background: CHOICE_COLORS[i % CHOICE_COLORS.length] },
