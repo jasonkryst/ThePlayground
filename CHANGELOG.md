@@ -3,6 +3,12 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.33.2] - 2026-07-24
+
+### Fixed
+
+- `react-router`/`react-router-dom` bumped `7.17.0` → `7.18.1` (non-breaking, same major) to clear two moderate-severity advisories (`GHSA-wrjc-x8rr-h8h6` open redirect via backslash in `<Link>`/`useNavigate`, `GHSA-h8fp-f39c-q6mh` XSS via missing protocol validation, `GHSA-337j-9hxr-rhxg` arbitrary constructor injection via SSR hydration error deserialization) flagged by CI's `npm-audit` gate (`npm audit --omit=dev --audit-level=moderate`), which was failing on `main`. No API changes needed — the app doesn't use any of the affected code paths directly, but the gate correctly blocks on the dependency regardless.
+
 ## [0.33.1] - 2026-07-22
 
 ### Fixed

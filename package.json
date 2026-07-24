@@ -1,7 +1,7 @@
 {
   "name": "the-playground",
   "private": true,
-  "version": "0.33.1",
+  "version": "0.33.2",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -24,7 +24,7 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-i18next": "^17.0.8",
-    "react-router-dom": "^7.6.2",
+    "react-router-dom": "^7.18.1",
     "recharts": "^3.9.0"
   },
   "devDependencies": {
