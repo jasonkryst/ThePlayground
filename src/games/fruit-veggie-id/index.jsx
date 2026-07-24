@@ -4,6 +4,7 @@ import useGameSession from '../../hooks/useGameSession'
 import useSpeech from '../../hooks/useSpeech'
 import useQuestionAudio from '../../hooks/useQuestionAudio'
 import QuizGameShell from '../../components/QuizGameShell'
+import ReplayButton from '../../components/ReplayButton'
 import foods from './data/foods'
 import manifest from './manifest.json'
 
@@ -22,7 +23,7 @@ export default function FruitVeggieIdGame({ onGameEnd }) {
   // The spoken name is the question itself, so it plays regardless of the
   // shell's soundEffectsEnabled chime setting. useQuestionAudio owns the
   // announce/stop lifecycle; useSpeech is the audio source.
-  const { speak, cancel, supported } = useSpeech()
+  const { speak, cancel, supported, blocked } = useSpeech()
   // Only attempt speech when the browser supports it; the fallback path names
   // the target in the prompt instead, so there is nothing to announce.
   const announce = useCallback(food => {
@@ -41,7 +42,7 @@ export default function FruitVeggieIdGame({ onGameEnd }) {
       // text. When speech is unavailable, name the target so a parent can guide.
       prompt={q => supported ? t('fruitVeggie.prompt') : t('fruitVeggie.promptFallback', { name: t(q.correct.nameKey) })}
       renderPromptExtra={() => supported
-        ? <button className="game__replay" aria-label={t('fruitVeggie.replay')} onClick={replay}>🔊</button>
+        ? <ReplayButton labelKey="fruitVeggie.replay" blocked={blocked} onClick={replay} />
         : null}
       getChoiceProps={(food, i) => ({
         style: { background: CHOICE_COLORS[i % CHOICE_COLORS.length] },
