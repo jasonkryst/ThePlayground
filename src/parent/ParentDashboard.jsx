@@ -54,7 +54,7 @@ function formatMs(ms) {
 function ChartDataTable({ caption, data, gameIds, gameNames, formatValue }) {
   const { t } = useTranslation()
   return (
-    <table className="sr-only">
+    <table className="sr-only parent__chart-data-table">
       <caption>{caption}</caption>
       <thead>
         <tr>
@@ -87,10 +87,10 @@ function ScoreTrendChart({ data, gameIds, gameNames }) {
         formatValue={v => `${v}%`}
       />
       <ResponsiveContainer width="100%" height={220}>
-        <LineChart data={data} margin={{ top: 4, right: 8, left: 0, bottom: 4 }}>
+        <LineChart data={data} margin={{ top: 4, right: 24, left: 0, bottom: 4 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.08)" />
-          <XAxis dataKey="date" tickFormatter={formatDate} tick={{ fontSize: 12 }} />
-          <YAxis domain={[0, 100]} tickFormatter={v => `${v}%`} tick={{ fontSize: 12 }} width={42} />
+          <XAxis dataKey="date" tickFormatter={formatDate} tick={{ fontSize: '0.75rem' }} />
+          <YAxis domain={[0, 100]} tickFormatter={v => `${v}%`} tick={{ fontSize: '0.75rem' }} width="auto" />
           <Tooltip formatter={v => `${v}%`} labelFormatter={formatDate} />
           <Legend />
           {gameIds.map((id, i) => (
@@ -126,10 +126,10 @@ function ResponseTimeChart({ data, gameIds, gameNames }) {
         formatValue={formatMs}
       />
       <ResponsiveContainer width="100%" height={220}>
-        <LineChart data={data} margin={{ top: 4, right: 8, left: 0, bottom: 4 }}>
+        <LineChart data={data} margin={{ top: 4, right: 24, left: 0, bottom: 4 }}>
           <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.08)" />
-          <XAxis dataKey="date" tickFormatter={formatDate} tick={{ fontSize: 12 }} />
-          <YAxis tickFormatter={formatMs} tick={{ fontSize: 12 }} width={48} />
+          <XAxis dataKey="date" tickFormatter={formatDate} tick={{ fontSize: '0.75rem' }} />
+          <YAxis tickFormatter={formatMs} tick={{ fontSize: '0.75rem' }} width="auto" />
           <Tooltip formatter={formatMs} labelFormatter={formatDate} />
           <Legend />
           {gameIds.map((id, i) => (

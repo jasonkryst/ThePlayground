@@ -3,6 +3,12 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.34.1] - 2026-07-24
+
+### Fixed
+
+- Parent Dashboard chart-axis labels and heatmap row alignment now scale under OS/browser large-text settings (issue #130), closing the last two residual gaps from the wave-2 px→rem conversion (issue #83). Recharts' `tick={{ fontSize: 12 }}` on `ScoreTrendChart`/`ResponseTimeChart`'s `XAxis`/`YAxis` was a raw JS number forwarded straight to an SVG `<text>` attribute, not a CSS rule, so it never scaled; it's now `'0.75rem'`, and the DOM-based text measurement Recharts uses to size its own axis gutter (`src/parent/ParentDashboard.jsx`) resolves that unit correctly. The heatmap's `.heatmap__day-label` boxes were already `rem`-sized (from issue #83's clipping fix) but `.heatmap__grid`'s row track, `.heatmap__cell`, and the month-label row were still fixed `px`, so the two desynced under large text; `src/parent/ParentDashboard.css` converts every heatmap dimension that has to track the day-label column to the same `rem` scale so both grow in lockstep. Verifying the fix at a simulated 2x text scale surfaced two more issues from the same font-size-now-actually-scales change, fixed alongside it: the chart's fixed-`px` `YAxis` gutter width and 8px right margin were tuned for a 12px-frozen label and started clipping the rightmost x-axis tick once the label could grow, so `YAxis` now sizes its gutter as `width="auto"` and the chart's right margin widened to accommodate a scaled label; and the visually-hidden per-chart data table (an `.sr-only`, `width: 1px` `<table>` for screen readers) hit the same CSS2.1 CAPMIN `auto`-table-layout bug already fixed for the streak table under issue #115, pushing the page into horizontal overflow at large text on narrow viewports — fixed with the same `table-layout: fixed` treatment via a new `.parent__chart-data-table` class.
+
 ## [0.34.0] - 2026-07-24
 
 ### Added
