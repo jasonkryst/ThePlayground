@@ -24,9 +24,9 @@ export const DEFAULT_SETTINGS = {
 }
 
 /**
- * Storage adapter interface. Every adapter must implement all ten async
- * methods below: the score, settings, best-streak, personal-best, and
- * badge-data get/save pairs.
+ * Storage adapter interface. Every adapter must implement all methods
+ * below: the score, settings, best-streak, personal-best, badge-data,
+ * and item-stats get/save pairs.
  *
  * getScores()              → Promise<Score[]>
  * addScore(score)          → Promise<void>
