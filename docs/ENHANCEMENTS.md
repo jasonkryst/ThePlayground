@@ -43,7 +43,6 @@ Items marked **AU-n** come from the 2026-07-12 a11y/i18n/UX audit (`docs/accessi
 - **Show the item name after a correct answer** — reinforces early reading (originally an Animal Sounds idea; applies to all quiz games).
 - **Expand the animal roster beyond 12** — zebra, bear, penguin, monkey, etc.; more variety per session at the cost of sourcing CC0 sounds.
 - **Per-game settings overrides** — e.g. run Character Match at 4 choices while Animal Sounds stays at 2; today all quiz games share one `numChoices`, which forces the difficulty to the weakest game.
-- **Cross-session adaptive item selection** — weight item queues toward items missed in *previous* sessions; today's spaced repetition (v0.6.0) only re-asks within the same session, so a consistently confused item gets no long-term reinforcement.
 
 ## New Games
 

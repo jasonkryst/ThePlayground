@@ -317,6 +317,7 @@ Accessible from the dashboard via the gear icon (⚙).
 | Show hint after | 2 | 1, 2, 3, 4, 5 (only shown when Hints is On) |
 | Retry counts toward streak | On | On, Off |
 | Spaced repetition | Off | On, Off |
+| Adaptive item selection | Off | On, Off |
 | Difficulty auto-progression | Off | On, Off |
 | Pairs per board | 5 | 3, 4, 5, 6 |
 | Sound effects | On | On, Off |
@@ -345,6 +346,8 @@ Accessible from the dashboard via the gear icon (⚙).
 **Retry counts toward streak** — when on, getting a question right after 1+ wrong taps still counts toward the answer streak. When off, a correct-after-retry still scores as correct but resets the streak to 0.
 
 **Spaced repetition** — when on, a missed item reappears a few questions later in the same session (replacing one of the not-yet-asked items, so the session length stays the same).
+
+**Adaptive item selection** — when on, future sessions weight their queue toward items your child has missed before (weighted more heavily the more recently they were missed), on top of — and independent from — same-session spaced repetition.
 
 **Difficulty auto-progression** — when on, finishing a session with a perfect score offers to raise Answer Choices by 1 (up to the maximum of 4) on the results screen.
 
