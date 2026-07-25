@@ -5,6 +5,7 @@ const SETTINGS_KEY = 'playground_settings'
 const STREAKS_KEY = 'playground_best_streaks'
 const PERSONAL_BESTS_KEY = 'playground_personal_bests'
 const BADGES_KEY = 'playground_badges'
+const ITEM_STATS_KEY = 'playground_item_stats'
 
 const localStorageAdapter = {
   async getScores() {
@@ -82,6 +83,19 @@ const localStorageAdapter = {
 
   async saveBadgeData(data) {
     localStorage.setItem(BADGES_KEY, JSON.stringify(data))
+  },
+
+  async getItemStats() {
+    try {
+      const parsed = JSON.parse(localStorage.getItem(ITEM_STATS_KEY) || '{}')
+      return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {}
+    } catch {
+      return {}
+    }
+  },
+
+  async saveItemStats(data) {
+    localStorage.setItem(ITEM_STATS_KEY, JSON.stringify(data))
   },
 }
 
