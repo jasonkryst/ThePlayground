@@ -7,13 +7,18 @@ import ParentDashboard from '../ParentDashboard'
 
 // Recharts uses ResizeObserver and SVG APIs not available in jsdom.
 // Replace with minimal stubs so component tests stay fast and deterministic.
+// XAxis/YAxis record the props they were called with (axis-label fontSize,
+// YAxis width) so issue #130's large-text regression tests below can inspect
+// them without needing a real SVG render.
+const { capturedAxisProps } = vi.hoisted(() => ({ capturedAxisProps: [] }))
+
 vi.mock('recharts', () => ({
   ResponsiveContainer: ({ children }) => <div data-testid="chart-container">{children}</div>,
   LineChart:           ({ children }) => <div>{children}</div>,
   Line:                () => null,
   CartesianGrid:       () => null,
-  XAxis:               () => null,
-  YAxis:               () => null,
+  XAxis:               (props) => { capturedAxisProps.push({ axis: 'x', ...props }); return null },
+  YAxis:               (props) => { capturedAxisProps.push({ axis: 'y', ...props }); return null },
   Tooltip:             () => null,
   Legend:              () => null,
 }))
@@ -110,6 +115,7 @@ async function renderDashboard(manifests = []) {
 
 beforeEach(() => {
   vi.clearAllMocks()
+  capturedAxisProps.length = 0
   mockGetBestStreaks.mockResolvedValue({ 'animal-sounds': 5 })
   mockSettings.parentDateRange = { preset: 'all', start: null, end: null }
 })
@@ -358,5 +364,95 @@ describe('ParentDashboard — heatmap month labels', () => {
     const labels = [...container.querySelectorAll('.heatmap__month-label')]
     expect(labels.length).toBeGreaterThan(0)
     expect(labels.some(el => el.textContent.trim() !== '')).toBe(true)
+  })
+})
+
+// ─── Chart axis large-text scaling (issue #130) ──────────────────────────────
+// Recharts' `tick` prop is a JS object forwarded straight to an SVG `<text>`
+// element, not a CSS rule -- a bare number like `12` renders as a frozen
+// 12px regardless of the OS/browser large-text setting the rest of the app's
+// rem-based CSS already respects (see ParentDashboard.css's heatmap rules).
+// A `'0.75rem'` string renders as the equivalent CSS length instead, which
+// *does* scale. These tests guard against silently reverting to a number.
+
+describe('ParentDashboard — chart axis tick fontSize scales with text size (issue #130)', () => {
+  beforeEach(() => {
+    mockGetAllScores.mockReturnValue([makeScore(), makeScore({ date: new Date(NOW - 2 * DAY).toISOString().split('T')[0], timestamp: NOW - 2 * DAY })])
+  })
+
+  it('passes a rem-based tick fontSize to every XAxis/YAxis in both charts', async () => {
+    await renderDashboard()
+    // 2 charts (score trend, response time) x 2 axes (X, Y) each = 4 renders
+    // per commit; the best-streaks fetch in renderDashboard's act() causes a
+    // second full render pass, so the mock sees a multiple of 4, not exactly 4.
+    expect(capturedAxisProps.length).toBeGreaterThan(0)
+    expect(capturedAxisProps.length % 4).toBe(0)
+    for (const props of capturedAxisProps) {
+      expect(props.tick.fontSize).toMatch(/^\d*\.?\d+rem$/)
+    }
+  })
+
+  it('does not pass a bare unitless number as the tick fontSize (regression guard)', async () => {
+    await renderDashboard()
+    expect(capturedAxisProps.length).toBeGreaterThan(0)
+    for (const props of capturedAxisProps) {
+      expect(typeof props.tick.fontSize).not.toBe('number')
+    }
+  })
+
+  it('sizes the YAxis width as "auto" so its gutter grows with the now-scalable tick text', async () => {
+    await renderDashboard()
+    const yAxisProps = capturedAxisProps.filter(p => p.axis === 'y')
+    // 2 charts x 1 YAxis each = 2 renders per commit; see the multiple-of-4
+    // note above for why this is a multiple of 2, not exactly 2.
+    expect(yAxisProps.length).toBeGreaterThan(0)
+    expect(yAxisProps.length % 2).toBe(0)
+    for (const props of yAxisProps) {
+      expect(props.width).toBe('auto')
+    }
+  })
+
+  it('does not pin the YAxis width to a fixed pixel number (regression guard)', async () => {
+    await renderDashboard()
+    const yAxisProps = capturedAxisProps.filter(p => p.axis === 'y')
+    expect(yAxisProps.length).toBeGreaterThan(0)
+    for (const props of yAxisProps) {
+      expect(typeof props.width).not.toBe('number')
+    }
+  })
+
+  it('does not render any chart axes when there is not enough data (negative)', async () => {
+    mockGetAllScores.mockReturnValue([makeScore()])
+    await renderDashboard()
+    expect(capturedAxisProps.length).toBe(0)
+  })
+})
+
+// ─── Hidden chart data table doesn't overflow its 1px sr-only box (issue #130) ──
+// Found while manually verifying the large-text fix above: this table's columns
+// (date + one per game) are wide enough that a default `auto` table layout grows
+// the table past its `.sr-only` 1px width to fit that content (the same CAPMIN
+// behavior fixed for `.parent__streak-table` under issue #115), which pushed
+// `document.documentElement.scrollWidth` past the viewport. `table-layout: fixed`
+// on `.parent__chart-data-table` is the fix; these tests guard the DOM contract
+// the CSS fix depends on (jsdom doesn't compute layout, so the actual no-overflow
+// behavior itself is covered by e2e/zoom-large-text.spec.js instead).
+
+describe('ParentDashboard — hidden chart data table CAPMIN fix (issue #130)', () => {
+  it('applies the fixed-layout class to the score-trend and response-time data tables', async () => {
+    mockGetAllScores.mockReturnValue([makeScore(), makeScore({ date: new Date(NOW - 2 * DAY).toISOString().split('T')[0], timestamp: NOW - 2 * DAY })])
+    const { container } = await renderDashboard()
+    const tables = container.querySelectorAll('table.parent__chart-data-table')
+    expect(tables.length).toBe(2)
+    for (const table of tables) {
+      expect(table).toHaveClass('sr-only')
+    }
+  })
+
+  it('does not apply the fixed-layout class to the visible streak-history table (negative)', async () => {
+    mockGetAllScores.mockReturnValue([makeScore(), makeScore({ date: new Date(NOW - 2 * DAY).toISOString().split('T')[0], timestamp: NOW - 2 * DAY })])
+    const { container } = await renderDashboard()
+    const streakTable = container.querySelector('.parent__streak-table')
+    expect(streakTable).not.toHaveClass('parent__chart-data-table')
   })
 })

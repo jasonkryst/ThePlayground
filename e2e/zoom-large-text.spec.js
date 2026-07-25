@@ -7,6 +7,7 @@ import { test, expect } from '@playwright/test'
 // a 1280px baseline == a 640 CSS-px viewport). Large-text settings scale
 // only rem-relative font-size, simulated here by forcing the root font-size.
 
+const DAY = 86_400_000
 const ZOOM_DESKTOP = { width: 683, height: 384 }   // 200% zoom on the 1366x768 desktop reference
 const ZOOM_TABLET_LANDSCAPE = { width: 512, height: 384 } // 200% zoom on 1024x768 tablet landscape (memory game requires landscape)
 const REFERENCE_VIEWPORTS = [
@@ -30,6 +31,40 @@ async function startMemoryBoard(page) {
   await page.goto('/game/animal-memory-match')
   await page.getByTestId('game-intro-start').click()
   await page.locator('[data-tile-id]').first().waitFor()
+}
+
+// Mirrors ParentDashboard.jsx's own date formatting so tick-label assertions
+// below can compute an exact expected value instead of a fragile length check.
+function formatDate(dateStr) {
+  const [, m, d] = dateStr.split('-')
+  return `${parseInt(m)}/${parseInt(d)}`
+}
+
+function seedParentScores(daysAgoList) {
+  const now = Date.now()
+  return daysAgoList.map((daysAgo, i) => ({
+    gameId: i % 2 === 0 ? 'animal-sounds' : 'color-match',
+    score: 8,
+    total: 10,
+    date: new Date(now - daysAgo * DAY).toISOString().split('T')[0],
+    timestamp: now - daysAgo * DAY,
+    peakStreak: 4,
+    timings: [{ questionIndex: 0, itemId: `item-${i}`, correct: true, durationMs: 1000 + i * 100 }],
+  }))
+}
+
+async function heatmapAlignmentDeltas(page) {
+  return page.evaluate(() => {
+    const dayLabels = [...document.querySelectorAll('.heatmap__day-label')]
+    const grid = document.querySelector('.heatmap__grid')
+    // grid-auto-flow: column -- the first N children (N = day-label count) are column 0's rows.
+    const firstColumnCells = [...grid.children].slice(0, dayLabels.length)
+    return dayLabels.map((label, i) => {
+      const lr = label.getBoundingClientRect()
+      const cr = firstColumnCells[i].getBoundingClientRect()
+      return Math.round(((lr.top + lr.bottom) / 2) - ((cr.top + cr.bottom) / 2))
+    })
+  })
 }
 
 test.describe('200%-zoom-equivalent viewports', () => {
@@ -128,4 +163,81 @@ test.describe('OS/browser large-text settings', () => {
       expect(await noHorizontalOverflow(page)).toBe(true)
     })
   }
+})
+
+// Parent Dashboard chart-axis labels and heatmap row alignment (issue #130).
+// The two residual gaps left by the wave-2 px->rem conversion (issue #83):
+// Recharts' tick={{ fontSize: 12 }} is a JS prop, not CSS, so it didn't scale;
+// and the heatmap's day-label boxes (already rem) desynced from its grid rows
+// (still px). See ParentDashboard.jsx/.css for the fix.
+test.describe('parent dashboard: chart-axis labels and heatmap alignment under large text (issue #130)', () => {
+  test.beforeEach(async ({ page }) => {
+    await page.addInitScript((scores) => {
+      localStorage.setItem('playground_scores', JSON.stringify(scores))
+    }, seedParentScores([1, 2, 3, 10, 45]))
+  })
+
+  test('chart axis tick text actually scales under a large-text setting (Fix 1 regression guard)', async ({ page }) => {
+    await page.goto('/parent')
+    const tick = page.locator('.recharts-cartesian-axis-tick-value').first()
+    await tick.waitFor()
+    const baseline = await tick.evaluate(el => parseFloat(getComputedStyle(el).fontSize))
+
+    await simulateLargeText(page, 2)
+    await page.waitForTimeout(100)
+    const scaled = await tick.evaluate(el => parseFloat(getComputedStyle(el).fontSize))
+
+    expect(scaled).toBeGreaterThan(baseline * 1.8)
+  })
+
+  test('the most-recent score-trend x-axis tick is not clipped under a large-text setting (negative)', async ({ page }) => {
+    await page.goto('/parent')
+    await page.getByRole('heading', { name: 'Score Trend' }).waitFor()
+    await simulateLargeText(page, 2)
+    await page.waitForTimeout(100)
+
+    const expectedLastTick = formatDate(new Date(Date.now() - 1 * DAY).toISOString().split('T')[0])
+    // Scope to the score-trend chart's own x-axis -- the page has two charts,
+    // and .last() over an unscoped selector can land on the response-time
+    // chart's y-axis tick ("1.4s") instead.
+    const scoreTrendSection = page.locator('.parent__section:has(#score-trend-heading)')
+    const lastTickText = await scoreTrendSection.locator('.recharts-xAxis-tick-labels .recharts-cartesian-axis-tick-value').last().textContent()
+    expect(lastTickText).toBe(expectedLastTick)
+  })
+
+  test('heatmap day-label rows stay aligned with their grid rows under a large-text setting (Fix 2 regression guard)', async ({ page }) => {
+    await page.goto('/parent')
+    await page.locator('.heatmap__grid').waitFor()
+    await simulateLargeText(page, 2)
+    await page.waitForTimeout(100)
+
+    for (const delta of await heatmapAlignmentDeltas(page)) {
+      expect(Math.abs(delta)).toBeLessThanOrEqual(1)
+    }
+  })
+
+  test('negative (baseline): heatmap day-label rows are already aligned with their grid rows without a large-text setting', async ({ page }) => {
+    await page.goto('/parent')
+    await page.locator('.heatmap__grid').waitFor()
+
+    for (const delta of await heatmapAlignmentDeltas(page)) {
+      expect(Math.abs(delta)).toBeLessThanOrEqual(1)
+    }
+  })
+
+  test('the hidden chart data table does not push the page into horizontal overflow at phone width under a large-text setting (CAPMIN fix found while verifying issue #130)', async ({ page }) => {
+    await page.setViewportSize({ width: 390, height: 844 })
+    await page.goto('/parent')
+    await simulateLargeText(page, 2)
+    await page.waitForTimeout(100)
+    expect(await noHorizontalOverflow(page)).toBe(true)
+  })
+
+  test('negative: the fixed-layout hidden data table still exposes every game column to screen readers', async ({ page }) => {
+    await page.goto('/parent')
+    await page.getByRole('heading', { name: 'Score Trend' }).waitFor()
+    const headers = await page.locator('.parent__chart-data-table').first().locator('th').allTextContents()
+    // date column + one column per game (two games seeded: animal-sounds, color-match)
+    expect(headers.length).toBe(3)
+  })
 })
