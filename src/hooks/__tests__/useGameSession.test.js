@@ -19,7 +19,7 @@ let mockSettings = {
   timerMode: 'countUp', timeLimitSeconds: 10, speedRecordMinAccuracy: 70,
   maxTries: 'none', hintsEnabled: false, hintAfterWrongTaps: 2, retryCountsAsStreak: true,
   spacedRepetitionEnabled: false, difficultyAutoProgressionEnabled: false,
-  soundEffectsEnabled: true,
+  soundEffectsEnabled: true, adaptiveItemSelectionEnabled: false,
   introDismissed: {},
 }
 let mockLoaded = true
@@ -44,6 +44,13 @@ vi.mock('../useBadges', () => ({
   default: () => ({ badgeData: { awards: {}, lifetimeQuestions: {} }, awardSession: mockAwardSession }),
 }))
 
+const mockRecordMisses = vi.fn().mockResolvedValue(undefined)
+let mockItemStats = {}
+
+vi.mock('../useItemStats', () => ({
+  default: () => ({ itemStats: mockItemStats, recordMisses: mockRecordMisses }),
+}))
+
 vi.mock('../../lib/confetti', () => ({
   fireConfetti: mockFireConfetti,
 }))
@@ -61,6 +68,7 @@ function setSettings(overrides) {
 beforeEach(() => {
   vi.clearAllMocks()
   mockLoaded = true
+  mockItemStats = {}
   mockRecordSession.mockResolvedValue({
     accuracy: { isNewRecord: false, value: 0, previous: null },
     speed: { isNewRecord: false, value: null, previous: null },
@@ -71,7 +79,7 @@ beforeEach(() => {
     timerMode: 'countUp', timeLimitSeconds: 10, speedRecordMinAccuracy: 70,
     maxTries: 'none', hintsEnabled: false, hintAfterWrongTaps: 2, retryCountsAsStreak: true,
     spacedRepetitionEnabled: false, difficultyAutoProgressionEnabled: false,
-    soundEffectsEnabled: true,
+    soundEffectsEnabled: true, adaptiveItemSelectionEnabled: false,
     introDismissed: {},
   }
 })
@@ -1049,5 +1057,49 @@ describe('useGameSession — lastEvent', () => {
     expect(result.current.lastEvent).not.toBeNull()
     await act(async () => { result.current.restart() })
     expect(result.current.lastEvent).toBeNull()
+  })
+})
+
+describe('useGameSession — adaptive item selection', () => {
+  it('calls recordMisses with the ids of items missed this session, on finish', async () => {
+    setSettings({ questionsPerSession: 2 })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.current).toBeDefined())
+
+    const wrongItem = result.current.current.choices.find(c => c.id !== result.current.current.correct.id)
+    const missedId = result.current.current.correct.id
+    await act(async () => { result.current.handleChoice(wrongItem) })
+    await act(async () => { result.current.advance() })
+    await act(async () => { result.current.handleChoice(result.current.current.correct) })
+    await act(async () => { result.current.advance() })
+
+    expect(mockRecordMisses).toHaveBeenCalledWith([missedId])
+  })
+
+  it('calls recordMisses with an empty array when nothing was missed', async () => {
+    setSettings({ questionsPerSession: 2 })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.current).toBeDefined())
+
+    for (let i = 0; i < 2; i++) {
+      await act(async () => { result.current.handleChoice(result.current.current.correct) })
+      await act(async () => { result.current.advance() })
+    }
+
+    expect(mockRecordMisses).toHaveBeenCalledWith([])
+  })
+
+  it('does not throw and builds a full queue when adaptiveItemSelectionEnabled is on with existing stats', async () => {
+    mockItemStats = { a: { missCount: 3, lastMissedAt: Date.now() } }
+    setSettings({ adaptiveItemSelectionEnabled: true, questionsPerSession: 4 })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.total).toBe(4))
+  })
+
+  it('builds an identical-shaped queue when adaptiveItemSelectionEnabled is off, regardless of stats', async () => {
+    mockItemStats = { a: { missCount: 3, lastMissedAt: Date.now() } }
+    setSettings({ adaptiveItemSelectionEnabled: false, questionsPerSession: 4 })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.total).toBe(4))
   })
 })

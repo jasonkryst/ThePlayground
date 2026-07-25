@@ -5,6 +5,8 @@ import useScores from './useScores'
 import useBestStreak from './useBestStreak'
 import usePersonalBest from './usePersonalBest'
 import useBadges from './useBadges'
+import useItemStats from './useItemStats'
+import computeItemWeight from '../utils/computeItemWeight'
 import { fireConfetti } from '../lib/confetti'
 import buildQueue from '../utils/buildQueue'
 import reinsertMissed from '../utils/reinsertMissed'
@@ -26,13 +28,14 @@ export default function useGameSession({ gameId, items }) {
   const { bestStreak, recordStreak } = useBestStreak(gameId)
   const { personalBest, recordSession: recordPersonalBestSession } = usePersonalBest(gameId)
   const { awardSession } = useBadges()
+  const { itemStats, recordMisses } = useItemStats(gameId)
   const { blocked } = useOrientationGate()
 
   const {
     numChoices, feedbackMode, questionsPerSession, animationsEnabled,
     timerMode, timeLimitSeconds, maxTries, hintsEnabled, hintAfterWrongTaps,
     retryCountsAsStreak, spacedRepetitionEnabled, difficultyAutoProgressionEnabled,
-    speedRecordMinAccuracy, soundEffectsEnabled,
+    speedRecordMinAccuracy, soundEffectsEnabled, adaptiveItemSelectionEnabled,
   } = settings
 
   const timeLimitMs = timerMode === 'countdown' ? timeLimitSeconds * 1000 : undefined
@@ -77,6 +80,7 @@ export default function useGameSession({ gameId, items }) {
   const blockedRef       = useRef(false)
   const pausedAtRef      = useRef(null)
   const remainingMsRef   = useRef(null)
+  const itemStatsRef     = useRef({})
 
   // Runs once, when settings finish their initial async load. The ref guard
   // prevents later introDismissed writes (including this hook's own
@@ -95,13 +99,19 @@ export default function useGameSession({ gameId, items }) {
     setShowIntro(!settings.introDismissed?.[gameId])
   }, [loaded, settings.introDismissed, gameId])
 
+  useEffect(() => { itemStatsRef.current = itemStats }, [itemStats])
+
+  function selectionWeightFn() {
+    return adaptiveItemSelectionEnabled ? id => computeItemWeight(itemStatsRef.current, id) : null
+  }
+
   useEffect(() => {
     if (numChoices && questionsPerSession) {
-      const q = buildQueue(items, numChoices, questionsPerSession)
+      const q = buildQueue(items, numChoices, questionsPerSession, selectionWeightFn())
       queueRef.current = q
       setQueue(q)
     }
-  }, [numChoices, questionsPerSession, items])
+  }, [numChoices, questionsPerSession, items, adaptiveItemSelectionEnabled])
 
   // Per-question state reset; also seeds the countdown budget the timer
   // effect below draws down across block/unblock segments.
@@ -324,6 +334,7 @@ export default function useGameSession({ gameId, items }) {
       peakStreak: peakStreakRef.current,
     }
     await addScore(result)
+    await recordMisses(missedRef.current.map(m => m.id))
 
     const bestResult = await recordPersonalBestSession({
       score: scoreRef.current, total, timings: timingsRef.current, minAccuracyPct: speedRecordMinAccuracy,
@@ -363,7 +374,7 @@ export default function useGameSession({ gameId, items }) {
     wrongAttemptsRef.current = 0
     disabledChoiceIdsRef.current = []
     eventSeqRef.current = 0
-    const q = buildQueue(items, numChoices, questionsPerSession)
+    const q = buildQueue(items, numChoices, questionsPerSession, selectionWeightFn())
     queueRef.current = q
     setQueue(q)
     setIndex(0)
