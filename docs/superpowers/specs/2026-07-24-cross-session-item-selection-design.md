@@ -69,7 +69,7 @@ const { itemStats, recordMisses } = useItemStats(gameId)
 
 In `useGameSession.js`:
 - `finishGame()` calls `recordMisses(missedRef.current.map(m => m.id))` alongside its existing `addScore`/`recordPersonalBestSession`/`awardSession` calls.
-- The queue-build effect (and `restart()`) construct a weight function only when `adaptiveItemSelectionEnabled` is true: `id => computeItemWeight(itemStatsRef.current, id)` (a `itemStatsRef` mirrors the hook's `itemStats` state so the queue-build effect's dependency array — `[numChoices, questionsPerSession, items]` — doesn't need to change and doesn't risk rebuilding an in-progress queue when stats update after a session ends).
+- The queue-build effect (and `restart()`) construct a weight function only when `adaptiveItemSelectionEnabled` is true: `item => computeItemWeight(itemStatsRef.current, item.id)` (a `itemStatsRef` mirrors the hook's `itemStats` state so the queue-build effect's dependency array — `[numChoices, questionsPerSession, items]` — doesn't need to change and doesn't risk rebuilding an in-progress queue when stats update after a session ends).
 - **Known edge case:** on a session's very first mount in a fresh browser tab, `itemStats` may not have finished loading from storage yet when the initial queue builds. That one session degrades gracefully to uniform weighting (identical to the setting being off) rather than blocking game start on a storage read — consistent with the app never gating session start on anything but `settings.loaded` today.
 
 ## 5. Settings & Admin

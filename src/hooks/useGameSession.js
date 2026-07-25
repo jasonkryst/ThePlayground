@@ -102,7 +102,7 @@ export default function useGameSession({ gameId, items }) {
   useEffect(() => { itemStatsRef.current = itemStats }, [itemStats])
 
   function selectionWeightFn() {
-    return adaptiveItemSelectionEnabled ? id => computeItemWeight(itemStatsRef.current, id) : null
+    return adaptiveItemSelectionEnabled ? item => computeItemWeight(itemStatsRef.current, item.id) : null
   }
 
   useEffect(() => {

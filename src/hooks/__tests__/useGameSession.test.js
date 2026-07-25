@@ -1102,4 +1102,41 @@ describe('useGameSession — adaptive item selection', () => {
     const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
     await waitFor(() => expect(result.current.total).toBe(4))
   })
+
+  it('actually weights a heavily-missed item higher through the real selectionWeightFn/computeItemWeight path', async () => {
+    mockItemStats = { a: { missCount: 4, lastMissedAt: Date.now() } } // recent miss, near-max weight (3x, per computeItemWeight's cap)
+    setSettings({ adaptiveItemSelectionEnabled: true, questionsPerSession: 2 })
+
+    // With a 4-item pool, 2-per-session, and weights [3,1,1,1] (sum 6), the
+    // weighted-shuffle math (Efraimidis-Spirakis, equivalent to sequential
+    // weighted sampling without replacement) puts 'a' in the 2-item queue
+    // with probability 0.8 per session vs 0.4 for each of b/c/d — so over
+    // 150 sessions 'a' should land around ~120 hits against ~60 apiece for
+    // the others. A fixed margin of 30 sits comfortably outside the noise
+    // band on both sides: under the pre-fix bug (weightOf always sees the
+    // full item object, coerces to "[object Object]", and computeItemWeight
+    // falls back to a uniform weight of 1 for every item) all four items
+    // are drawn uniformly at ~0.5 probability apiece, so any single
+    // comparison against a fixed +30 margin has a false-pass chance under
+    // 0.2% — this is not a "just don't throw" check, it is a real
+    // statistical assertion that the bug would have failed.
+    const SESSIONS = 150
+    const MARGIN = 30
+    const counts = { a: 0, b: 0, c: 0, d: 0 }
+    for (let i = 0; i < SESSIONS; i++) {
+      const { result, unmount } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+      await waitFor(() => expect(result.current.total).toBe(2))
+
+      for (let q = 0; q < 2; q++) {
+        counts[result.current.current.correct.id] += 1
+        await act(async () => { result.current.advance() })
+      }
+
+      unmount()
+    }
+
+    expect(counts.a).toBeGreaterThan(counts.b + MARGIN)
+    expect(counts.a).toBeGreaterThan(counts.c + MARGIN)
+    expect(counts.a).toBeGreaterThan(counts.d + MARGIN)
+  })
 })
