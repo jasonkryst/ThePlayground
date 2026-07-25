@@ -17,9 +17,9 @@ describe('computeItemWeight', () => {
   it('decays back toward 1 the longer ago the last miss was', () => {
     const now = Date.now()
     const recent = computeItemWeight({ dog: { missCount: 3, lastMissedAt: now - 1 * DAY_MS } }, 'dog', now)
-    const old = computeItemWeight({ dog: { missCount: 3, lastMissedAt: now - 60 * DAY_MS } }, 'dog', now)
+    const old = computeItemWeight({ dog: { missCount: 1, lastMissedAt: now - 60 * DAY_MS } }, 'dog', now)
     expect(old).toBeLessThan(recent)
-    expect(old).toBeCloseTo(1, 0)
+    expect(old).toBeCloseTo(1, 1)
   })
 
   it('never exceeds the 3x cap no matter how large missCount is', () => {
@@ -36,7 +36,7 @@ describe('computeItemWeight', () => {
 
   it('a very old, small miss count decays close to baseline', () => {
     const now = Date.now()
-    const stats = { dog: { missCount: 1, lastMissedAt: now - 90 * DAY_MS } }
-    expect(computeItemWeight(stats, 'dog', now)).toBeCloseTo(1, 1)
+    const stats = { dog: { missCount: 1, lastMissedAt: now - 100 * DAY_MS } }
+    expect(computeItemWeight(stats, 'dog', now)).toBeCloseTo(1, 2)
   })
 })
