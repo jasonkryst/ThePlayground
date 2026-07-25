@@ -52,6 +52,14 @@ vi.mock('../../../hooks/useItemStats', () => ({
   default: () => ({ itemStats: {}, recordMisses: vi.fn().mockResolvedValue(undefined) }),
 }))
 
+vi.mock('../../../storage/index', () => ({
+  default: {
+    getSessionResume: vi.fn().mockResolvedValue(null),
+    saveSessionResume: vi.fn(),
+    clearSessionResume: vi.fn(),
+  },
+}))
+
 const onGameEnd = vi.fn()
 
 beforeEach(() => {

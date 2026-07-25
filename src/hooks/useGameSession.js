@@ -10,6 +10,8 @@ import computeItemWeight from '../utils/computeItemWeight'
 import { fireConfetti } from '../lib/confetti'
 import buildQueue from '../utils/buildQueue'
 import reinsertMissed from '../utils/reinsertMissed'
+import adapter from '../storage/index'
+import { isResumeValid } from '../utils/sessionResume'
 
 function resolveMaxTries(maxTries) {
   if (maxTries === 'unlimited') return Infinity
@@ -60,6 +62,8 @@ export default function useGameSession({ gameId, items }) {
   const [introResolved,        setIntroResolved]       = useState(false)
   const [dontShowAgain,        setDontShowAgain]       = useState(false)
   const [lastEvent,            setLastEvent]           = useState(null)
+  const [resumeAvailable, setResumeAvailable] = useState(false)
+  const [sessionReady,    setSessionReady]    = useState(false)
 
   // Refs avoid stale closures in setTimeout/setInterval callbacks
   const scoreRef        = useRef(0)
@@ -76,6 +80,9 @@ export default function useGameSession({ gameId, items }) {
   const handleTimeoutRef = useRef(null)
   const pendingReinsertRef = useRef(null)
   const introInitializedRef = useRef(false)
+  const resumeCheckedRef    = useRef(false)
+  const resumeSnapshotRef    = useRef(null)
+  const suppressNextBuildRef = useRef(false)
   const eventSeqRef     = useRef(0)
   const blockedRef       = useRef(false)
   const pausedAtRef      = useRef(null)
@@ -92,12 +99,75 @@ export default function useGameSession({ gameId, items }) {
   // stale initial `false` on the render where `loaded` first flips true but
   // this effect hasn't run yet (effects always commit one render after the
   // state change that triggered them).
+  //
+  // Deliberately independent of the resume-check effect below: this effect
+  // must resolve showIntro/introResolved synchronously, in the same tick
+  // `loaded` flips true, with no dependency on any async round trip (see the
+  // "introResolved becomes true in the same tick showIntro resolves"
+  // regression test) — folding the (genuinely async, storage-backed)
+  // resume-check into this effect would reintroduce exactly the one-render-
+  // behind staleness that test guards against. acceptResume() still forces
+  // showIntro closed afterward when a resumed session should skip the intro.
   useEffect(() => {
     if (!loaded || introInitializedRef.current) return
     introInitializedRef.current = true
     setIntroResolved(true)
     setShowIntro(!settings.introDismissed?.[gameId])
   }, [loaded, settings.introDismissed, gameId])
+
+  function acceptResume() {
+    const saved = resumeSnapshotRef.current
+    queueRef.current = saved.queue
+    setQueue(saved.queue)
+    indexRef.current = saved.index
+    setIndex(saved.index)
+    scoreRef.current = saved.score
+    setScore(saved.score)
+    streakRef.current = saved.streak
+    setStreak(saved.streak)
+    peakStreakRef.current = saved.peakStreak
+    missedRef.current = saved.missed
+    setMissed(saved.missed)
+    timingsRef.current = saved.timings
+    setTimings(saved.timings)
+
+    resumeSnapshotRef.current = null
+    setResumeAvailable(false)
+    suppressNextBuildRef.current = true
+    setIntroResolved(true)
+    setShowIntro(false)
+    setSessionReady(true)
+  }
+
+  function declineResume() {
+    adapter.clearSessionResume()
+    resumeSnapshotRef.current = null
+    setResumeAvailable(false)
+    setSessionReady(true)
+  }
+
+  // Resume-check: a separate effect/ref from intro-init above (see the
+  // comment there for why), gating only `sessionReady` — and, through it,
+  // the queue-build effect below. A valid same-game snapshot within the
+  // 4-hour TTL (isResumeValid) holds the queue-build effect at bay
+  // (resumeAvailable stays true, sessionReady stays false) until
+  // acceptResume()/declineResume() (above) decide how to proceed;
+  // otherwise sessionReady flips true directly once the check comes back
+  // empty/invalid, letting the queue-build effect run its normal
+  // fresh-queue path.
+  useEffect(() => {
+    if (!loaded || resumeCheckedRef.current) return
+    resumeCheckedRef.current = true
+    adapter.getSessionResume().then(saved => {
+      if (isResumeValid(saved, gameId)) {
+        resumeSnapshotRef.current = saved
+        setResumeAvailable(true)
+      } else {
+        if (saved && saved.gameId === gameId) adapter.clearSessionResume()
+        setSessionReady(true)
+      }
+    })
+  }, [loaded, gameId])
 
   useEffect(() => { itemStatsRef.current = itemStats }, [itemStats])
 
@@ -106,12 +176,28 @@ export default function useGameSession({ gameId, items }) {
   }
 
   useEffect(() => {
-    if (numChoices && questionsPerSession) {
-      const q = buildQueue(items, numChoices, questionsPerSession, selectionWeightFn())
-      queueRef.current = q
-      setQueue(q)
-    }
-  }, [numChoices, questionsPerSession, items, adaptiveItemSelectionEnabled])
+    if (!sessionReady || !numChoices || !questionsPerSession) return
+    if (suppressNextBuildRef.current) { suppressNextBuildRef.current = false; return }
+    const q = buildQueue(items, numChoices, questionsPerSession, selectionWeightFn())
+    queueRef.current = q
+    setQueue(q)
+  }, [sessionReady, numChoices, questionsPerSession, items, adaptiveItemSelectionEnabled])
+
+  // Persists a resumable snapshot once per question transition (not
+  // per-tap): score/streak/missed/timings all finish updating, synchronously,
+  // before index ever advances (advance() runs only after the scoring
+  // effects of the just-answered question have already committed), so by
+  // the time this effect re-runs, the snapshot it captures is always fully
+  // settled — never a half-answered question where index still points at
+  // the old one. Cleared the moment the session finishes.
+  useEffect(() => {
+    if (done) { adapter.clearSessionResume(); return }
+    if (!queue.length) return
+    adapter.saveSessionResume({
+      gameId, queue, index, score, streak, missed, timings,
+      peakStreak: peakStreakRef.current, savedAt: Date.now(),
+    })
+  }, [gameId, queue, index, done])
 
   // Per-question state reset; also seeds the countdown budget the timer
   // effect below draws down across block/unblock segments.
@@ -409,6 +495,7 @@ export default function useGameSession({ gameId, items }) {
     personalBestResult, newBadges,
     showIntro, introResolved, settingsLoaded: loaded, dontShowAgain, setDontShowAgain,
     lastEvent, soundEffectsEnabled,
+    resumeAvailable, acceptResume, declineResume,
     handleChoice, advance, restart, acceptDifficultyBump, dismissDifficultyBump, dismissIntro,
   }
 }
