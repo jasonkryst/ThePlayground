@@ -6,6 +6,7 @@ const STREAKS_KEY = 'playground_best_streaks'
 const PERSONAL_BESTS_KEY = 'playground_personal_bests'
 const BADGES_KEY = 'playground_badges'
 const ITEM_STATS_KEY = 'playground_item_stats'
+const SESSION_RESUME_KEY = 'playground_session_resume'
 
 const localStorageAdapter = {
   async getScores() {
@@ -96,6 +97,23 @@ const localStorageAdapter = {
 
   async saveItemStats(data) {
     localStorage.setItem(ITEM_STATS_KEY, JSON.stringify(data))
+  },
+
+  async getSessionResume() {
+    try {
+      const parsed = JSON.parse(localStorage.getItem(SESSION_RESUME_KEY) || 'null')
+      return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : null
+    } catch {
+      return null
+    }
+  },
+
+  async saveSessionResume(state) {
+    localStorage.setItem(SESSION_RESUME_KEY, JSON.stringify(state))
+  },
+
+  async clearSessionResume() {
+    localStorage.removeItem(SESSION_RESUME_KEY)
   },
 }
 

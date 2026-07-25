@@ -85,4 +85,16 @@ export const DEFAULT_SETTINGS = {
  * Item-stats adapter methods (added v0.35.0, for cross-session adaptive item selection):
  * getItemStats()      → Promise<{ [gameId]: { [itemId]: { missCount: number, lastMissedAt: number } } }>
  * saveItemStats(data) → Promise<void>
+ *
+ * Session-resume adapter methods (added v0.36.0, issue #128):
+ * getSessionResume()       → Promise<SessionResumeState | null>
+ * saveSessionResume(state) → Promise<void>
+ * clearSessionResume()     → Promise<void>
+ *
+ * SessionResumeState = {
+ *   gameId: string, queue: QueueEntry[] (buildQueue's own output shape), index: number,
+ *   score: number, streak: number, missed: Item[], timings: TimingEntry[],
+ *   peakStreak: number, savedAt: number (epoch ms)
+ * }
+ * A single global slot, not per-game — only one game is ever actively played at a time.
  */
