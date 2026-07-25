@@ -110,3 +110,39 @@ describe('buildQueue — pinned shuffle formula', () => {
     expect(queue.map(entry => entry.correct.id)).toEqual(['a', 'b', 'a'])
   })
 })
+
+describe('buildQueue — itemWeights', () => {
+  it('omitting itemWeights behaves identically to today (regression guard)', () => {
+    const queue = buildQueue(items, 2, 8)
+    expect(queue).toHaveLength(8)
+  })
+
+  it('a heavily-weighted item appears more often than an equal-weight item across many sessions', () => {
+    const itemWeights = item => (item.id === 'a' ? 5 : 1)
+    const counts = { a: 0, b: 0, c: 0, d: 0 }
+    for (let i = 0; i < 100; i++) {
+      const queue = buildQueue(items, 2, 2, itemWeights) // 2 of 4 items per session
+      for (const entry of queue) counts[entry.correct.id] += 1
+    }
+    expect(counts.a).toBeGreaterThan(counts.b)
+  })
+
+  it('weighting never creates more occurrences of one item in a session than the existing multi-pass ceiling allows', () => {
+    const itemWeights = item => (item.id === 'a' ? 5 : 1)
+    // 4 items, 9 questions -> ceil(9/4) = 3 is the existing structural ceiling
+    for (let i = 0; i < 20; i++) {
+      const queue = buildQueue(items, 2, 9, itemWeights)
+      const counts = {}
+      for (const entry of queue) counts[entry.correct.id] = (counts[entry.correct.id] || 0) + 1
+      expect(Math.max(...Object.values(counts))).toBeLessThanOrEqual(3)
+    }
+  })
+
+  it('still never repeats the same item on two consecutive questions with weighting applied', () => {
+    const itemWeights = item => (item.id === 'a' ? 5 : 1)
+    const queue = buildQueue(items, 2, 40, itemWeights)
+    for (let i = 1; i < queue.length; i++) {
+      expect(queue[i].correct.id).not.toBe(queue[i - 1].correct.id)
+    }
+  })
+})

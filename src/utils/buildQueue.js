@@ -1,3 +1,5 @@
+import weightedShuffle from './weightedShuffle'
+
 function shuffle(arr) {
   const a = [...arr]
   // Stryker disable next-line EqualityOperator: i>0 vs i>=0 is behaviorally
@@ -10,7 +12,7 @@ function shuffle(arr) {
   return a
 }
 
-function buildCorrectSequence(items, questionsPerSession) {
+function buildCorrectSequence(items, questionsPerSession, itemWeights) {
   // Stryker disable next-line EqualityOperator,ConditionalExpression: the
   // `questionsPerSession <= 0` half of this guard is redundant defense —
   // the while loop below never executes when questionsPerSession <= 0
@@ -23,7 +25,7 @@ function buildCorrectSequence(items, questionsPerSession) {
   let lastId = null
 
   while (sequence.length < questionsPerSession) {
-    const pass = shuffle(items)
+    const pass = itemWeights ? weightedShuffle(items, itemWeights) : shuffle(items)
 
     // Stryker disable next-line ConditionalExpression: forcing this branch
     // to always run is still equivalent — when pass[0].id !== lastId,
@@ -45,8 +47,8 @@ function buildCorrectSequence(items, questionsPerSession) {
   return sequence
 }
 
-export default function buildQueue(items, numChoices, questionsPerSession) {
-  const sequence = buildCorrectSequence(items, questionsPerSession)
+export default function buildQueue(items, numChoices, questionsPerSession, itemWeights) {
+  const sequence = buildCorrectSequence(items, questionsPerSession, itemWeights)
   return sequence.map(correct => {
     const wrongPool = items.filter(item => item.id !== correct.id)
     const wrongCount = Math.min(numChoices - 1, wrongPool.length)
