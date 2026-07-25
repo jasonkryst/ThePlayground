@@ -414,6 +414,24 @@ export default function AdminPage({ manifests = [] }) {
             </div>
 
             <div className="admin__section">
+              <h3>{t('admin.adaptiveItemSelectionHeading')}</h3>
+              <div className="admin__toggle">
+                <button
+                  className={`admin__toggle-btn${settings.adaptiveItemSelectionEnabled ? ' active' : ''}`}
+                  onClick={() => updateSetting('adaptiveItemSelectionEnabled', true)}
+                >
+                  {t('admin.adaptiveItemSelectionOn')}
+                </button>
+                <button
+                  className={`admin__toggle-btn${!settings.adaptiveItemSelectionEnabled ? ' active' : ''}`}
+                  onClick={() => updateSetting('adaptiveItemSelectionEnabled', false)}
+                >
+                  {t('admin.adaptiveItemSelectionOff')}
+                </button>
+              </div>
+            </div>
+
+            <div className="admin__section">
               <h3>{t('admin.difficultyAutoProgressionHeading')}</h3>
               <div className="admin__toggle">
                 <button

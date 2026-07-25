@@ -9,7 +9,7 @@ const mockSettingsDefaults = {
   numChoices: 2, feedbackMode: 'immediate', questionsPerSession: 10, childName: '', animationsEnabled: true,
   timerMode: 'countUp', timeLimitSeconds: 10, speedRecordMinAccuracy: 70,
   maxTries: 'none', hintsEnabled: false, hintAfterWrongTaps: 2,
-  retryCountsAsStreak: true, spacedRepetitionEnabled: false, difficultyAutoProgressionEnabled: false,
+  retryCountsAsStreak: true, spacedRepetitionEnabled: false, adaptiveItemSelectionEnabled: false, difficultyAutoProgressionEnabled: false,
   memoryPairs: 5, soundEffectsEnabled: true,
 }
 const mockUpdateSetting = vi.fn()
@@ -191,6 +191,14 @@ describe('AdminPage', () => {
     const { getByRole } = within(spacedRepSection)
     await userEvent.click(getByRole('button', { name: /^on$/i }))
     expect(mockUpdateSetting).toHaveBeenCalledWith('spacedRepetitionEnabled', true)
+  })
+
+  it('renders the adaptive item selection toggle and calls updateSetting when turned on', async () => {
+    render(<MemoryRouter><AdminPage /></MemoryRouter>)
+    const section = screen.getByText(/adaptive item selection/i).closest('.admin__section')
+    const { getByRole } = within(section)
+    await userEvent.click(getByRole('button', { name: /^on$/i }))
+    expect(mockUpdateSetting).toHaveBeenCalledWith('adaptiveItemSelectionEnabled', true)
   })
 
   it('renders the difficulty auto-progression toggle and calls updateSetting when turned on', async () => {
