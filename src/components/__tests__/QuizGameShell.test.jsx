@@ -2,6 +2,7 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { axe } from 'jest-axe'
 import i18n from '../../i18n'
+import { ShellContext } from '../ShellContext'
 
 const { mockPlay } = vi.hoisted(() => ({ mockPlay: vi.fn() }))
 vi.mock('../../hooks/useSoundPlayer', () => ({
@@ -27,6 +28,7 @@ function makeSession(overrides = {}) {
     offerDifficultyBump: false, numChoices: 2, personalBestResult: null, newBadges: [],
     lastEvent: null, soundEffectsEnabled: true,
     showIntro: false, introResolved: true, settingsLoaded: true,
+    resumeAvailable: false, acceptResume: vi.fn(), declineResume: vi.fn(),
     dontShowAgain: false, setDontShowAgain: vi.fn(),
     handleChoice: vi.fn(), advance: vi.fn(), restart: vi.fn(),
     acceptDifficultyBump: vi.fn(), dismissDifficultyBump: vi.fn(), dismissIntro: vi.fn(),
@@ -112,6 +114,19 @@ describe('QuizGameShell — screens', () => {
     expect(session.restart).toHaveBeenCalled()
     fireEvent.click(screen.getByRole('button', { name: /home/i }))
     expect(onGameEnd).toHaveBeenCalledWith(2, 3)
+  })
+
+  it('shows the resume prompt instead of the intro when resumeAvailable is true, and defers to it over everything else', () => {
+    renderShell(makeSession({ resumeAvailable: true, showIntro: true, introResolved: false, index: 2, total: 10, score: 4 }))
+    expect(screen.getByTestId('resume-prompt-resume')).toBeInTheDocument()
+    expect(screen.queryByTestId('game-intro-start')).not.toBeInTheDocument()
+  })
+
+  it('calls session.acceptResume when the resume action is tapped', () => {
+    const session = makeSession({ resumeAvailable: true, index: 2, total: 10, score: 4 })
+    renderShell(session)
+    fireEvent.click(screen.getByTestId('resume-prompt-resume'))
+    expect(session.acceptResume).toHaveBeenCalled()
   })
 })
 
@@ -211,5 +226,36 @@ describe('QuizGameShell — AU-2 live region', () => {
   it('question screen has no accessibility violations', async () => {
     const { container } = renderShell(makeSession())
     expect(await axe(container)).toHaveNoViolations()
+  })
+})
+
+describe('QuizGameShell — shell game status', () => {
+  function renderShellWithStatusSpy(session) {
+    const setGameStatus = vi.fn()
+    render(
+      <ShellContext.Provider value={{ setGameStatus }}>
+        <QuizGameShell
+          session={session} manifest={manifest} onGameEnd={vi.fn()}
+          instructions="How to play" correctTestId="correct-test-id" prompt="Which one?"
+          renderChoiceContent={item => item.id.toUpperCase()}
+          renderMissedItem={item => item.id}
+        />
+      </ShellContext.Provider>
+    )
+    return setGameStatus
+  }
+
+  it('sessionActive is false while resumeAvailable is true, even though intro/done gating would otherwise allow it', () => {
+    const setGameStatus = renderShellWithStatusSpy(
+      makeSession({ resumeAvailable: true, showIntro: false, introResolved: true, done: false, streak: 4 })
+    )
+    expect(setGameStatus).toHaveBeenLastCalledWith({ streak: 4, sessionActive: false })
+  })
+
+  it('sessionActive is true on the normal question screen (resumeAvailable false)', () => {
+    const setGameStatus = renderShellWithStatusSpy(
+      makeSession({ resumeAvailable: false, showIntro: false, introResolved: true, done: false, streak: 2 })
+    )
+    expect(setGameStatus).toHaveBeenLastCalledWith({ streak: 2, sessionActive: true })
   })
 })

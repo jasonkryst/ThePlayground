@@ -1,11 +1,15 @@
 import { renderHook, act, waitFor } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
 
-const { mockAddScore, mockFireConfetti, mockRecordStreak, mockUpdateSetting } = vi.hoisted(() => ({
+const { mockAddScore, mockFireConfetti, mockRecordStreak, mockUpdateSetting,
+        mockGetSessionResume, mockSaveSessionResume, mockClearSessionResume } = vi.hoisted(() => ({
   mockAddScore: vi.fn().mockResolvedValue(undefined),
   mockFireConfetti: vi.fn(),
   mockRecordStreak: vi.fn().mockResolvedValue(undefined),
   mockUpdateSetting: vi.fn().mockResolvedValue(undefined),
+  mockGetSessionResume: vi.fn(),
+  mockSaveSessionResume: vi.fn(),
+  mockClearSessionResume: vi.fn(),
 }))
 
 const mockRecordSession = vi.fn().mockResolvedValue({
@@ -19,7 +23,7 @@ let mockSettings = {
   timerMode: 'countUp', timeLimitSeconds: 10, speedRecordMinAccuracy: 70,
   maxTries: 'none', hintsEnabled: false, hintAfterWrongTaps: 2, retryCountsAsStreak: true,
   spacedRepetitionEnabled: false, difficultyAutoProgressionEnabled: false,
-  soundEffectsEnabled: true,
+  soundEffectsEnabled: true, adaptiveItemSelectionEnabled: false,
   introDismissed: {},
 }
 let mockLoaded = true
@@ -44,6 +48,21 @@ vi.mock('../useBadges', () => ({
   default: () => ({ badgeData: { awards: {}, lifetimeQuestions: {} }, awardSession: mockAwardSession }),
 }))
 
+const mockRecordMisses = vi.fn().mockResolvedValue(undefined)
+let mockItemStats = {}
+
+vi.mock('../useItemStats', () => ({
+  default: () => ({ itemStats: mockItemStats, recordMisses: mockRecordMisses }),
+}))
+
+vi.mock('../../storage/index', () => ({
+  default: {
+    getSessionResume: mockGetSessionResume,
+    saveSessionResume: mockSaveSessionResume,
+    clearSessionResume: mockClearSessionResume,
+  },
+}))
+
 vi.mock('../../lib/confetti', () => ({
   fireConfetti: mockFireConfetti,
 }))
@@ -61,6 +80,8 @@ function setSettings(overrides) {
 beforeEach(() => {
   vi.clearAllMocks()
   mockLoaded = true
+  mockItemStats = {}
+  mockGetSessionResume.mockResolvedValue(null)
   mockRecordSession.mockResolvedValue({
     accuracy: { isNewRecord: false, value: 0, previous: null },
     speed: { isNewRecord: false, value: null, previous: null },
@@ -71,7 +92,7 @@ beforeEach(() => {
     timerMode: 'countUp', timeLimitSeconds: 10, speedRecordMinAccuracy: 70,
     maxTries: 'none', hintsEnabled: false, hintAfterWrongTaps: 2, retryCountsAsStreak: true,
     spacedRepetitionEnabled: false, difficultyAutoProgressionEnabled: false,
-    soundEffectsEnabled: true,
+    soundEffectsEnabled: true, adaptiveItemSelectionEnabled: false,
     introDismissed: {},
   }
 })
@@ -225,10 +246,10 @@ describe('useGameSession — existing behavior', () => {
     )
   })
 
-  it('currentElapsedMs ticks up in countUp mode', () => {
+  it('currentElapsedMs ticks up in countUp mode', async () => {
     vi.useFakeTimers()
     const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
-    act(() => {})
+    await act(async () => {})
     expect(result.current.currentElapsedMs).toBe(0)
 
     act(() => { vi.advanceTimersByTime(300) })
@@ -789,15 +810,17 @@ describe('useGameSession — how-to-play intro', () => {
 })
 
 describe('useGameSession — countdown timer', () => {
-  it('does not enforce a limit or expose timeLimitMs when timerMode is "countUp"', () => {
+  it('does not enforce a limit or expose timeLimitMs when timerMode is "countUp"', async () => {
     setSettings({ timerMode: 'countUp' })
     const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await act(async () => {})
     expect(result.current.timeLimitMs).toBeUndefined()
   })
 
-  it('exposes timeLimitMs derived from timeLimitSeconds when timerMode is "countdown"', () => {
+  it('exposes timeLimitMs derived from timeLimitSeconds when timerMode is "countdown"', async () => {
     setSettings({ timerMode: 'countdown', timeLimitSeconds: 5 })
     const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await act(async () => {})
     expect(result.current.timeLimitMs).toBe(5000)
   })
 
@@ -805,7 +828,7 @@ describe('useGameSession — countdown timer', () => {
     vi.useFakeTimers()
     setSettings({ timerMode: 'countdown', timeLimitSeconds: 5 })
     const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
-    act(() => {})
+    await act(async () => {})
     expect(result.current.current).toBeDefined()
 
     act(() => { vi.advanceTimersByTime(5001) })
@@ -823,7 +846,7 @@ describe('useGameSession — countdown timer', () => {
     vi.useFakeTimers()
     setSettings({ timerMode: 'countdown', timeLimitSeconds: 5 })
     const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
-    act(() => {})
+    await act(async () => {})
 
     act(() => { result.current.handleChoice(result.current.current.correct) })
     act(() => { vi.advanceTimersByTime(5001) })
@@ -837,7 +860,7 @@ describe('useGameSession — countdown timer', () => {
     vi.useFakeTimers()
     setSettings({ timerMode: 'countdown', timeLimitSeconds: 5, feedbackMode: 'parent-tap', questionsPerSession: 3 })
     const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
-    act(() => {})
+    await act(async () => {})
 
     act(() => { vi.advanceTimersByTime(5001) }) // triggers timeout
     expect(result.current.index).toBe(0)
@@ -864,7 +887,7 @@ describe('useGameSession — countdown timer', () => {
     vi.useFakeTimers()
     setSettings({ timerMode: 'countdown', timeLimitSeconds: 5, questionsPerSession: 3 })
     const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
-    act(() => {})
+    await act(async () => {})
 
     act(() => { vi.advanceTimersByTime(5001) })
     expect(result.current.timedOut).toBe(true)
@@ -877,7 +900,7 @@ describe('useGameSession — countdown timer', () => {
     vi.useFakeTimers()
     setSettings({ timerMode: 'countdown', timeLimitSeconds: 5, spacedRepetitionEnabled: true, questionsPerSession: 4 })
     const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
-    act(() => {})
+    await act(async () => {})
     const missedCorrectId = result.current.current.correct.id
 
     act(() => { vi.advanceTimersByTime(5001) }) // timeout
@@ -893,11 +916,11 @@ describe('useGameSession — countdown timer', () => {
     vi.useRealTimers()
   })
 
-  it('currentElapsedMs still ticks up when timerMode is "off"', () => {
+  it('currentElapsedMs still ticks up when timerMode is "off"', async () => {
     vi.useFakeTimers()
     setSettings({ timerMode: 'off' })
     const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
-    act(() => {})
+    await act(async () => {})
     expect(result.current.currentElapsedMs).toBe(0)
 
     act(() => { vi.advanceTimersByTime(300) })
@@ -972,8 +995,9 @@ describe('useGameSession — personal best and badges on finish', () => {
     expect(result.current.newBadges.map(b => b.id)).toEqual(['perfectSession'])
   })
 
-  it('newBadges defaults to an empty array before any session has finished', () => {
+  it('newBadges defaults to an empty array before any session has finished', async () => {
     const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await act(async () => {})
     expect(result.current.newBadges).toEqual([])
   })
 
@@ -1025,11 +1049,11 @@ describe('useGameSession — lastEvent', () => {
     expect(result.current.lastEvent).toEqual({ seq: 1, type: 'wrong' })
   })
 
-  it('emits timeout when the countdown expires', () => {
+  it('emits timeout when the countdown expires', async () => {
     vi.useFakeTimers()
     setSettings({ timerMode: 'countdown', timeLimitSeconds: 5 })
     const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
-    act(() => {})
+    await act(async () => {})
     act(() => { vi.advanceTimersByTime(5001) })
     expect(result.current.lastEvent).toEqual({ seq: 1, type: 'timeout' })
     vi.useRealTimers()
@@ -1049,5 +1073,320 @@ describe('useGameSession — lastEvent', () => {
     expect(result.current.lastEvent).not.toBeNull()
     await act(async () => { result.current.restart() })
     expect(result.current.lastEvent).toBeNull()
+  })
+})
+
+describe('useGameSession — adaptive item selection', () => {
+  it('calls recordMisses with the ids of items missed this session, on finish', async () => {
+    setSettings({ questionsPerSession: 2 })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.current).toBeDefined())
+
+    const wrongItem = result.current.current.choices.find(c => c.id !== result.current.current.correct.id)
+    const missedId = result.current.current.correct.id
+    await act(async () => { result.current.handleChoice(wrongItem) })
+    await act(async () => { result.current.advance() })
+    await act(async () => { result.current.handleChoice(result.current.current.correct) })
+    await act(async () => { result.current.advance() })
+
+    expect(mockRecordMisses).toHaveBeenCalledWith([missedId])
+  })
+
+  it('calls recordMisses with an empty array when nothing was missed', async () => {
+    setSettings({ questionsPerSession: 2 })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.current).toBeDefined())
+
+    for (let i = 0; i < 2; i++) {
+      await act(async () => { result.current.handleChoice(result.current.current.correct) })
+      await act(async () => { result.current.advance() })
+    }
+
+    expect(mockRecordMisses).toHaveBeenCalledWith([])
+  })
+
+  it('does not throw and builds a full queue when adaptiveItemSelectionEnabled is on with existing stats', async () => {
+    mockItemStats = { a: { missCount: 3, lastMissedAt: Date.now() } }
+    setSettings({ adaptiveItemSelectionEnabled: true, questionsPerSession: 4 })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.total).toBe(4))
+  })
+
+  it('builds an identical-shaped queue when adaptiveItemSelectionEnabled is off, regardless of stats', async () => {
+    mockItemStats = { a: { missCount: 3, lastMissedAt: Date.now() } }
+    setSettings({ adaptiveItemSelectionEnabled: false, questionsPerSession: 4 })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.total).toBe(4))
+  })
+
+  it('actually weights a heavily-missed item higher through the real selectionWeightFn/computeItemWeight path', async () => {
+    mockItemStats = { a: { missCount: 4, lastMissedAt: Date.now() } } // recent miss, near-max weight (3x, per computeItemWeight's cap)
+    setSettings({ adaptiveItemSelectionEnabled: true, questionsPerSession: 2 })
+
+    // With a 4-item pool, 2-per-session, and weights [3,1,1,1] (sum 6), the
+    // weighted-shuffle math (Efraimidis-Spirakis, equivalent to sequential
+    // weighted sampling without replacement) puts 'a' in the 2-item queue
+    // with probability 0.8 per session vs 0.4 for each of b/c/d — so over
+    // 150 sessions 'a' should land around ~120 hits against ~60 apiece for
+    // the others. A fixed margin of 30 sits comfortably outside the noise
+    // band on both sides: under the pre-fix bug (weightOf always sees the
+    // full item object, coerces to "[object Object]", and computeItemWeight
+    // falls back to a uniform weight of 1 for every item) all four items
+    // are drawn uniformly at ~0.5 probability apiece, so any single
+    // comparison against a fixed +30 margin has a false-pass chance under
+    // 0.2% — this is not a "just don't throw" check, it is a real
+    // statistical assertion that the bug would have failed.
+    const SESSIONS = 150
+    const MARGIN = 30
+    const counts = { a: 0, b: 0, c: 0, d: 0 }
+    for (let i = 0; i < SESSIONS; i++) {
+      const { result, unmount } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+      await waitFor(() => expect(result.current.total).toBe(2))
+
+      for (let q = 0; q < 2; q++) {
+        counts[result.current.current.correct.id] += 1
+        await act(async () => { result.current.advance() })
+      }
+
+      unmount()
+    }
+
+    expect(counts.a).toBeGreaterThan(counts.b + MARGIN)
+    expect(counts.a).toBeGreaterThan(counts.c + MARGIN)
+    expect(counts.a).toBeGreaterThan(counts.d + MARGIN)
+  }, 15000) // 150 fresh mounts, each now with one extra real async round trip
+            // through the (mocked) storage-backed resume-check before its
+            // queue builds — pushes this past the default 5000ms test timeout
+            // on its own, with no change to the statistical assertion itself.
+})
+
+describe('useGameSession — session resume', () => {
+  it('offers to resume a valid same-game snapshot within the TTL', async () => {
+    mockGetSessionResume.mockResolvedValue({
+      gameId: 'test-game',
+      queue: [{ correct: items[0], choices: [items[0], items[1]] }],
+      index: 0, score: 2, streak: 1, missed: [], timings: [], peakStreak: 1, savedAt: Date.now(),
+    })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.resumeAvailable).toBe(true))
+  })
+
+  // Regression guard: QuizGameShell renders the resume prompt's progress
+  // text ("question X of Y, score Z") from these same session fields, and it
+  // does so for the entire awaiting-resume-choice window -- i.e. before
+  // acceptResume() has ever run. If index/score/total only became correct
+  // once acceptResume() ran, the prompt would show the still-fresh initial
+  // state (0/0/0) instead of the saved progress.
+  it('exposes the saved index/score/total for the resume prompt to display before the user decides', async () => {
+    const savedQueue = [
+      { correct: items[0], choices: [items[0], items[1]] },
+      { correct: items[1], choices: [items[0], items[1]] },
+      { correct: items[2], choices: [items[1], items[2]] },
+    ]
+    mockGetSessionResume.mockResolvedValue({
+      gameId: 'test-game', queue: savedQueue, index: 1, score: 5, streak: 2,
+      missed: [], timings: [], peakStreak: 2, savedAt: Date.now(),
+    })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.resumeAvailable).toBe(true))
+    expect(result.current.index).toBe(1)
+    expect(result.current.score).toBe(5)
+    expect(result.current.total).toBe(3)
+  })
+
+  it('suppresses the intro for the entire awaiting-resume-choice window, and restores it on decline', async () => {
+    // introDismissed is {} in the default mock settings (see beforeEach), so
+    // 'test-game' has no entry — the intro-init effect would otherwise show
+    // the intro. A valid resume snapshot must suppress it regardless.
+    mockGetSessionResume.mockResolvedValue({
+      gameId: 'test-game',
+      queue: [{ correct: items[0], choices: [items[0], items[1]] }],
+      index: 0, score: 2, streak: 1, missed: [], timings: [], peakStreak: 1, savedAt: Date.now(),
+    })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.resumeAvailable).toBe(true))
+    expect(result.current.showIntro).toBe(false)
+
+    await act(async () => { result.current.declineResume() })
+
+    expect(result.current.resumeAvailable).toBe(false)
+    expect(result.current.showIntro).toBe(true)
+  })
+
+  it('does not offer resume, and leaves storage untouched, when the snapshot is for a different gameId', async () => {
+    mockGetSessionResume.mockResolvedValue({
+      gameId: 'other-game', queue: [], index: 0, score: 0, streak: 0, missed: [], timings: [], peakStreak: 0, savedAt: Date.now(),
+    })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.current).toBeDefined())
+    expect(result.current.resumeAvailable).toBe(false)
+    expect(mockClearSessionResume).not.toHaveBeenCalled()
+  })
+
+  it('does not offer resume, and clears it, when the snapshot is older than 4 hours', async () => {
+    mockGetSessionResume.mockResolvedValue({
+      gameId: 'test-game', queue: [], index: 0, score: 0, streak: 0, missed: [], timings: [], peakStreak: 0,
+      savedAt: Date.now() - 5 * 60 * 60 * 1000,
+    })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.current).toBeDefined())
+    expect(result.current.resumeAvailable).toBe(false)
+    expect(mockClearSessionResume).toHaveBeenCalled()
+  })
+
+  it('treats a missing/undefined saved state as no snapshot', async () => {
+    mockGetSessionResume.mockResolvedValue(undefined)
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.current).toBeDefined())
+    expect(result.current.resumeAvailable).toBe(false)
+  })
+
+  it('acceptResume restores score, streak, index, queue, and timings, and skips the intro', async () => {
+    const savedQueue = [
+      { correct: items[0], choices: [items[0], items[1]] },
+      { correct: items[1], choices: [items[0], items[1]] },
+      { correct: items[2], choices: [items[1], items[2]] },
+    ]
+    mockGetSessionResume.mockResolvedValue({
+      gameId: 'test-game', queue: savedQueue, index: 1, score: 1, streak: 1,
+      missed: [], timings: [{ questionIndex: 0, itemId: items[0].id, correct: true, durationMs: 500, attemptNumber: 1 }],
+      peakStreak: 1, savedAt: Date.now(),
+    })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.resumeAvailable).toBe(true))
+
+    await act(async () => { result.current.acceptResume() })
+
+    expect(result.current.resumeAvailable).toBe(false)
+    expect(result.current.index).toBe(1)
+    expect(result.current.score).toBe(1)
+    expect(result.current.streak).toBe(1)
+    expect(result.current.total).toBe(3)
+    expect(result.current.timings).toHaveLength(1)
+    expect(result.current.showIntro).toBe(false)
+    expect(result.current.introResolved).toBe(true)
+  })
+
+  it('declineResume clears storage and proceeds through the normal fresh-queue flow', async () => {
+    mockGetSessionResume.mockResolvedValue({
+      gameId: 'test-game',
+      queue: [{ correct: items[0], choices: [items[0], items[1]] }],
+      index: 0, score: 5, streak: 2, missed: [], timings: [], peakStreak: 2, savedAt: Date.now(),
+    })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.resumeAvailable).toBe(true))
+
+    await act(async () => { result.current.declineResume() })
+
+    expect(mockClearSessionResume).toHaveBeenCalled()
+    expect(result.current.resumeAvailable).toBe(false)
+    await waitFor(() => expect(result.current.current).toBeDefined())
+    expect(result.current.score).toBe(0)
+    expect(result.current.total).toBe(3)
+  })
+
+  // Regression guard: the resume-check effect now eagerly copies the saved
+  // index/score/etc. into state as soon as a valid snapshot is found (so the
+  // resume prompt can preview real progress -- see the "exposes the saved
+  // index/score/total" test above). declineResume() must undo that preview,
+  // not just the score, or a declined resume would silently keep starting
+  // mid-queue at the old saved index instead of genuinely at question 1.
+  it('declineResume resets a previewed non-zero index back to 0', async () => {
+    mockGetSessionResume.mockResolvedValue({
+      gameId: 'test-game',
+      queue: [
+        { correct: items[0], choices: [items[0], items[1]] },
+        { correct: items[1], choices: [items[0], items[1]] },
+      ],
+      index: 1, score: 1, streak: 1, missed: [], timings: [], peakStreak: 1, savedAt: Date.now(),
+    })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.resumeAvailable).toBe(true))
+    expect(result.current.index).toBe(1) // sanity: preview did populate it
+
+    await act(async () => { result.current.declineResume() })
+
+    await waitFor(() => expect(result.current.current).toBeDefined())
+    expect(result.current.index).toBe(0)
+  })
+
+  it('saves a snapshot after each question transition', async () => {
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.current).toBeDefined())
+
+    await act(async () => { result.current.handleChoice(result.current.current.correct) })
+    await act(async () => { result.current.advance() })
+
+    expect(mockSaveSessionResume).toHaveBeenCalledWith(
+      expect.objectContaining({ gameId: 'test-game', index: 1, score: 1 })
+    )
+  })
+
+  it('clears the snapshot once the session finishes', async () => {
+    setSettings({ questionsPerSession: 1 })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.current).toBeDefined())
+
+    await act(async () => { result.current.handleChoice(result.current.current.correct) })
+    await act(async () => { result.current.advance() })
+
+    expect(result.current.done).toBe(true)
+    expect(mockClearSessionResume).toHaveBeenCalled()
+  })
+
+  // Regression guard for fb3aaa4: that commit moved real state population
+  // (queue/index/score/streak/peakStreak/missed/timings) from acceptResume()
+  // into the resume-check effect itself, so the resume prompt could preview
+  // real progress. But two other pre-existing effects (the per-question
+  // reset effect and the question-timers effect) were gated only on
+  // `queueRef.current[indexRef.current]` being truthy -- not on
+  // `sessionReady` -- so as soon as the resume-check effect populated the
+  // queue/index ref, both effects fired for the entire awaiting-resume-
+  // choice window, before the user ever decided anything. In countdown mode
+  // this armed a real timeout that could lock the resumed question as missed
+  // (resetting streak, pushing into missed, marking timedOut) and even
+  // auto-advance into finishGame() -- silently corrupting/finalizing a
+  // resumed session's real persisted data behind a screen the user hadn't
+  // acted on. Fake timers are installed *before* render (not after) so that,
+  // if the regression were reintroduced, the errant timer would be
+  // registered against the very same fake clock this test advances --
+  // installing fake timers only after the resume prompt appears would let a
+  // real (unfaked) errant timer slip past this test undetected.
+  it('does not fire per-question timers/reset while a resume prompt is pending, and arms them once accepted', async () => {
+    vi.useFakeTimers()
+    setSettings({ timerMode: 'countdown', timeLimitSeconds: 5 })
+    mockGetSessionResume.mockResolvedValue({
+      gameId: 'test-game',
+      queue: [{ correct: items[0], choices: [items[0], items[1]] }],
+      index: 0, score: 2, streak: 1, missed: [], timings: [], peakStreak: 1, savedAt: Date.now(),
+    })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await act(async () => {}) // flushes the mocked getSessionResume() promise
+
+    expect(result.current.resumeAvailable).toBe(true)
+
+    const preTimedOut = result.current.timedOut
+    const preDone = result.current.done
+    const preStreak = result.current.streak
+    const preMissedLength = result.current.missed.length
+
+    act(() => { vi.advanceTimersByTime(5001) }) // past the snapshot's time limit
+
+    // The resume prompt is still up -- acceptResume()/declineResume() were
+    // never called -- so nothing should have fired.
+    expect(result.current.resumeAvailable).toBe(true)
+    expect(result.current.timedOut).toBe(preTimedOut)
+    expect(result.current.done).toBe(preDone)
+    expect(result.current.streak).toBe(preStreak)
+    expect(result.current.missed).toHaveLength(preMissedLength)
+
+    // Positive-path check: the fix must not just suppress the timer forever
+    // -- once the user actually accepts, it arms correctly.
+    await act(async () => { result.current.acceptResume() })
+    act(() => { vi.advanceTimersByTime(5001) })
+
+    expect(result.current.timedOut || result.current.done).toBe(true)
+
+    vi.useRealTimers()
   })
 })

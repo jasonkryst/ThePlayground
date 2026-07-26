@@ -21,6 +21,7 @@ A browser-based game dashboard designed for infants and toddlers. Games are disp
 - **Personal bests** — quiz games track best accuracy and average answer speed; memory games track fewest flips and fastest board time per board size; new records are announced on the results screen
 - **Milestone badges** — repeatable per-game achievements (streak tiers, perfect sessions, lifetime totals); memory games ship their own badge catalog via per-game `badges.js` files
 - **Kid-safe exit guard** — leaving a game mid-session requires a deliberate second tap, so a stray toddler tap can't kill a session
+- **Session resume** — a browser crash, tab close, reload, or even a deliberate exit mid-session leaves a resumable snapshot; reopening that game within 4 hours offers to continue where the child left off, or start fresh
 - **Version display** — app version shown in the dashboard footer; game version shown alongside it on game routes
 - **Google Analytics** — optional GA4 tracking configured at runtime via the admin page; fires page view events on every React Router navigation (off by default — see [`SECURITY.md`](SECURITY.md))
 
@@ -317,6 +318,7 @@ Accessible from the dashboard via the gear icon (⚙).
 | Show hint after | 2 | 1, 2, 3, 4, 5 (only shown when Hints is On) |
 | Retry counts toward streak | On | On, Off |
 | Spaced repetition | Off | On, Off |
+| Adaptive item selection | Off | On, Off |
 | Difficulty auto-progression | Off | On, Off |
 | Pairs per board | 5 | 3, 4, 5, 6 |
 | Sound effects | On | On, Off |
@@ -345,6 +347,8 @@ Accessible from the dashboard via the gear icon (⚙).
 **Retry counts toward streak** — when on, getting a question right after 1+ wrong taps still counts toward the answer streak. When off, a correct-after-retry still scores as correct but resets the streak to 0.
 
 **Spaced repetition** — when on, a missed item reappears a few questions later in the same session (replacing one of the not-yet-asked items, so the session length stays the same).
+
+**Adaptive item selection** — when on, future sessions weight their queue toward items your child has missed before (weighted more heavily the more recently they were missed), on top of — and independent from — same-session spaced repetition.
 
 **Difficulty auto-progression** — when on, finishing a session with a perfect score offers to raise Answer Choices by 1 (up to the maximum of 4) on the results screen.
 

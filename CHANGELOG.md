@@ -3,6 +3,18 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.36.0] - 2026-07-26
+
+### Added
+
+- Session resume after interruption (issue #128): a browser crash, tab close, reload, or a deliberate exit via the exit guard's "Leave Game" button no longer loses an in-progress quiz session. `useGameSession` now persists a minimal snapshot (`gameId`, `queue`, `index`, `score`, `streak`, `missed`, `timings`, `peakStreak`) after every question transition via three new adapter methods (`getSessionResume`/`saveSessionResume`/`clearSessionResume`, a single global localStorage slot since only one game is ever active at a time). Reopening that same game within 4 hours shows a new `ResumePrompt` screen ("Welcome back!") offering to continue exactly where the child left off or start fresh; the saved queue embeds full item data, so resuming never depends on the current state of the game's content catalog. Scoped to quiz games; memory games are unaffected.
+
+## [0.35.0] - 2026-07-25
+
+### Added
+
+- Cross-session adaptive item selection (issue #121): a new `adaptiveItemSelectionEnabled` setting (default off, independent of `spacedRepetitionEnabled`) weights future sessions' queues toward items a child has missed in *previous* sessions. Per-item miss history (`missCount`, `lastMissedAt`) is tracked unconditionally after every session via a new `useItemStats` hook and adapter methods (`getItemStats`/`saveItemStats`); when the setting is on, `buildQueue` uses a new weighted-random ordering (`weightedShuffle`, Efraimidis-Spirakis sampling) instead of a plain shuffle, with weight decaying by recency (14-day half-life) and capped at 3x a fresh item's baseline so no single hard item can dominate a session. Omitting the new `buildQueue` parameter — every existing call site, and the setting-off path — is byte-for-byte identical to prior behavior.
+
 ## [0.34.1] - 2026-07-24
 
 ### Fixed

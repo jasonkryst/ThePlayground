@@ -4,6 +4,7 @@ import useSoundPlayer from '../hooks/useSoundPlayer'
 import { useShellGameStatus } from './ShellContext'
 import GameIntro from './GameIntro'
 import GameResults from './GameResults'
+import ResumePrompt from './ResumePrompt'
 import GameChoiceGrid from './GameChoiceGrid'
 import Timer from './Timer'
 import { getSoundUrl } from '../lib/soundLibrary'
@@ -28,9 +29,10 @@ export default function QuizGameShell({
     personalBestResult, newBadges, lastEvent, soundEffectsEnabled,
     acceptDifficultyBump, dismissDifficultyBump,
     showIntro, introResolved, settingsLoaded, dontShowAgain, setDontShowAgain, dismissIntro,
+    resumeAvailable, acceptResume, declineResume,
   } = session
 
-  useShellGameStatus({ streak, sessionActive: introResolved && !showIntro && !done })
+  useShellGameStatus({ streak, sessionActive: introResolved && !showIntro && !done && !resumeAvailable })
 
   // Chime layer: engine-level audio feedback on the session's semantic
   // events, on its own player instance so it can't cut off game-owned audio
@@ -46,7 +48,13 @@ export default function QuizGameShell({
     : lastEvent?.type === 'wrong' ? t('common.answerWrongAnnounce')
     : ''
 
-  if (!settingsLoaded || !introResolved) return null
+  if (!settingsLoaded) return null
+
+  if (resumeAvailable) {
+    return <ResumePrompt index={index} total={total} score={score} onResume={acceptResume} onStartFresh={declineResume} />
+  }
+
+  if (!introResolved) return null
 
   if (showIntro) {
     return (

@@ -27,7 +27,6 @@ Everything from the 2026-07-05 standards audit is resolved (shipped across v0.13
 - **Sound replay on wrong answer** — auto-replay the sound when the child picks incorrectly (Animal Sounds); a child who mis-taps often never re-hears the prompt they were matching against.
 - **Practice mode** — wrong answers repeat the question rather than moving on; removes session pressure for the youngest users who are still learning the mechanic itself.
 - **Parental lock on settings** — require a simple PIN or gesture to open the admin page; a toddler exploring the screen can currently reach and change settings. (Cross-listed under Security.)
-- **Session resume after interruption** — the exit guard (v0.18.0) stops accidental exits, but a browser crash, tab close, or reload still loses an in-progress session; persisting minimal session state would let it offer "pick up where you left off."
 
 ## Accessibility
 
@@ -43,7 +42,6 @@ Items marked **AU-n** come from the 2026-07-12 a11y/i18n/UX audit (`docs/accessi
 - **Show the item name after a correct answer** — reinforces early reading (originally an Animal Sounds idea; applies to all quiz games).
 - **Expand the animal roster beyond 12** — zebra, bear, penguin, monkey, etc.; more variety per session at the cost of sourcing CC0 sounds.
 - **Per-game settings overrides** — e.g. run Character Match at 4 choices while Animal Sounds stays at 2; today all quiz games share one `numChoices`, which forces the difficulty to the weakest game.
-- **Cross-session adaptive item selection** — weight item queues toward items missed in *previous* sessions; today's spaced repetition (v0.6.0) only re-asks within the same session, so a consistently confused item gets no long-term reinforcement.
 
 ## New Games
 

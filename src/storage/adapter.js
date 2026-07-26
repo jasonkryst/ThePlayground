@@ -13,6 +13,7 @@ export const DEFAULT_SETTINGS = {
   hintAfterWrongTaps: 2,
   retryCountsAsStreak: true,
   spacedRepetitionEnabled: false,
+  adaptiveItemSelectionEnabled: false,
   difficultyAutoProgressionEnabled: false,
   introDismissed: {},
   speedRecordMinAccuracy: 70,
@@ -23,9 +24,9 @@ export const DEFAULT_SETTINGS = {
 }
 
 /**
- * Storage adapter interface. Every adapter must implement all ten async
- * methods below: the score, settings, best-streak, personal-best, and
- * badge-data get/save pairs.
+ * Storage adapter interface. Every adapter must implement all methods
+ * below: the score, settings, best-streak, personal-best, badge-data,
+ * and item-stats get/save pairs.
  *
  * getScores()              → Promise<Score[]>
  * addScore(score)          → Promise<void>
@@ -49,7 +50,7 @@ export const DEFAULT_SETTINGS = {
  *     orientation overlay; added v0.24.0)
  * Settings shape: { numChoices, feedbackMode, questionsPerSession, gaId, childName, animationsEnabled, tagOverrides,
  *                    timerMode, timeLimitSeconds, maxTries, hintsEnabled, hintAfterWrongTaps, retryCountsAsStreak,
- *                    spacedRepetitionEnabled, difficultyAutoProgressionEnabled, introDismissed, speedRecordMinAccuracy, locale,
+ *                    spacedRepetitionEnabled, adaptiveItemSelectionEnabled, difficultyAutoProgressionEnabled, introDismissed, speedRecordMinAccuracy, locale,
  *                    parentDateRange, memoryPairs, soundEffectsEnabled }
  *   maxTries: 'none' | 1 | 2 | 3 | 4 | 5 | 'unlimited' — 'none' reproduces pre-v0.6.0 behavior (locks on first wrong tap)
  *   introDismissed: { [gameId: string]: true } — gameIds present here permanently suppress that game's how-to-play intro
@@ -62,6 +63,9 @@ export const DEFAULT_SETTINGS = {
  *     strings, only meaningful when preset === 'custom'. Added v0.21.0.
  *   memoryPairs: 3 | 4 | 5 | 6 — pairs per board for memory-type games (added v0.23.0)
  *   soundEffectsEnabled: boolean — gates game sound effects: memory match sounds and quiz correct/wrong chimes (added v0.23.0; quiz chimes v0.26.0)
+ *   adaptiveItemSelectionEnabled: boolean — when true, future sessions' queues are weighted toward
+ *     items missed in *previous* sessions (decayed by recency, capped at 3x baseline). Independent of
+ *     spacedRepetitionEnabled, which only reinserts a missed item within the *same* session. (added v0.35.0)
  *
  * Best-streak adapter methods (added for per-game streak tracking):
  * getBestStreaks()            → Promise<{ [gameId: string]: number }>
@@ -77,4 +81,20 @@ export const DEFAULT_SETTINGS = {
  * getBadgeData()  → Promise<{ awards: { [gameId]: { [badgeId]: number } }, lifetimeQuestions: { [gameId]: number }, lifetimeCounters: { [gameId]: { [counter: string]: number } } }>
  *   lifetimeCounters added v0.23.0 for per-game badge catalogs (e.g. pairsMatched for memory games)
  * saveBadgeData(data) → Promise<void>
+ *
+ * Item-stats adapter methods (added v0.35.0, for cross-session adaptive item selection):
+ * getItemStats()      → Promise<{ [gameId]: { [itemId]: { missCount: number, lastMissedAt: number } } }>
+ * saveItemStats(data) → Promise<void>
+ *
+ * Session-resume adapter methods (added v0.36.0, issue #128):
+ * getSessionResume()       → Promise<SessionResumeState | null>
+ * saveSessionResume(state) → Promise<void>
+ * clearSessionResume()     → Promise<void>
+ *
+ * SessionResumeState = {
+ *   gameId: string, queue: QueueEntry[] (buildQueue's own output shape), index: number,
+ *   score: number, streak: number, missed: Item[], timings: TimingEntry[],
+ *   peakStreak: number, savedAt: number (epoch ms)
+ * }
+ * A single global slot, not per-game — only one game is ever actively played at a time.
  */

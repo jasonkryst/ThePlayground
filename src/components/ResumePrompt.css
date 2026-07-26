@@ -1,0 +1,61 @@
+/* Mirrors .game-intro in GameIntro.css: fills the shell's content area
+   rather than demanding a full extra viewport height. */
+.resume-prompt {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  gap: 20px;
+  padding: 24px;
+  text-align: center;
+}
+
+.resume-prompt__heading {
+  font-size: 1.75rem;
+  font-weight: 800;
+  margin: 0;
+}
+
+.resume-prompt__progress {
+  font-size: 1.25rem;
+  opacity: 0.8;
+  max-width: 480px;
+  margin: 0;
+}
+
+.resume-prompt__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  max-width: 320px;
+}
+
+.resume-prompt__resume,
+.resume-prompt__start-fresh {
+  padding: 16px 36px;
+  font-size: 1.25rem;
+  font-weight: 700;
+  border-radius: var(--radius-button);
+  min-height: 64px;
+  border: none;
+}
+
+.resume-prompt__resume {
+  background: var(--color-lavender-dark);
+  color: white;
+}
+
+.resume-prompt__start-fresh {
+  background: transparent;
+  color: var(--color-text-muted);
+  border: 2px solid var(--color-text-muted);
+}
+
+.resume-prompt__resume:focus         { outline: none; }
+.resume-prompt__resume:focus-visible { outline: 3px solid var(--color-lavender); outline-offset: 3px; }
+
+.resume-prompt__start-fresh:focus         { outline: none; }
+.resume-prompt__start-fresh:focus-visible { outline: 3px solid var(--color-lavender); outline-offset: 3px; }

@@ -14,7 +14,7 @@ vi.mock('../../../hooks/useSoundPlayer', () => ({
 let mockSettings = {
   numChoices: 2, feedbackMode: 'immediate', questionsPerSession: 3,
   maxTries: 'none', hintsEnabled: false, hintAfterWrongTaps: 2, retryCountsAsStreak: true,
-  spacedRepetitionEnabled: false, difficultyAutoProgressionEnabled: false, timerMode: 'countUp',
+  spacedRepetitionEnabled: false, difficultyAutoProgressionEnabled: false, adaptiveItemSelectionEnabled: false, timerMode: 'countUp',
   introDismissed: { 'character-match': true },
 }
 const mockUpdateSetting = vi.fn()
@@ -45,6 +45,18 @@ vi.mock('../../../hooks/useBadges', () => ({
   default: () => ({ badgeData: { awards: {}, lifetimeQuestions: {} }, awardSession: vi.fn().mockResolvedValue([]) }),
 }))
 
+vi.mock('../../../hooks/useItemStats', () => ({
+  default: () => ({ itemStats: {}, recordMisses: vi.fn().mockResolvedValue(undefined) }),
+}))
+
+vi.mock('../../../storage/index', () => ({
+  default: {
+    getSessionResume: vi.fn().mockResolvedValue(null),
+    saveSessionResume: vi.fn(),
+    clearSessionResume: vi.fn(),
+  },
+}))
+
 const onGameEnd = vi.fn()
 
 beforeEach(() => {
@@ -52,7 +64,7 @@ beforeEach(() => {
   mockSettings = {
     numChoices: 2, feedbackMode: 'immediate', questionsPerSession: 3,
     maxTries: 'none', hintsEnabled: false, hintAfterWrongTaps: 2, retryCountsAsStreak: true,
-    spacedRepetitionEnabled: false, difficultyAutoProgressionEnabled: false, timerMode: 'countUp',
+    spacedRepetitionEnabled: false, difficultyAutoProgressionEnabled: false, adaptiveItemSelectionEnabled: false, timerMode: 'countUp',
     introDismissed: { 'character-match': true },
   }
 })

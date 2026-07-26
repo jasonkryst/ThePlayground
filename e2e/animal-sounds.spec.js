@@ -19,6 +19,13 @@ test('animal sounds: "don\'t show again" suppresses the intro on the next visit'
 
   await page.goto('/game/animal-sounds')
   await expect(page.getByTestId('game-intro-start')).not.toBeVisible()
+
+  // Starting the session above also persisted a resumable snapshot (issue
+  // #128: autosaved from the first queue build, not only after answering),
+  // so this immediate revisit lands on the resume prompt instead of the game
+  // grid directly. Continuing that same (untouched, 0-answered) session is
+  // what "don't show again" is actually asserting here.
+  await page.getByTestId('resume-prompt-resume').click()
   await expect(page.locator('[data-animal-id]').first()).toBeVisible()
 })
 

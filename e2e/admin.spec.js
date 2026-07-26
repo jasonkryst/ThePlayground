@@ -103,12 +103,25 @@ test('replay intro brings back a dismissed game intro', async ({ page }) => {
   await page.goto('/game/animal-sounds')
   await expect(page.getByTestId('game-intro-start')).not.toBeVisible()
 
+  // Starting the session above also persisted a resumable snapshot (issue
+  // #128: autosaved from the first queue build, not only after answering).
+  // Dismiss it via Start Fresh so this test's own navigations don't get
+  // stuck offering to resume an untouched, 0-answered session instead of
+  // reaching the intro/game views it's actually asserting on below.
+  await page.getByTestId('resume-prompt-start-fresh').click()
+
   await page.goto('/admin')
   await page.getByRole('tab', { name: /games/i }).click()
   const soundsRow = page.locator('.admin__tag-row', { has: page.getByLabel('Tags for Animal Sounds') })
   await soundsRow.getByRole('button', { name: 'Replay Intro' }).click()
 
   await page.goto('/game/animal-sounds')
+  // The Start Fresh above began yet another untouched session, which was
+  // itself immediately autosaved as a resumable snapshot -- so this revisit
+  // offers to resume it too, taking priority over the just-reset intro
+  // (resumeAvailable always wins over showIntro). Dismiss it the same way to
+  // reach the intro this test actually asserts on.
+  await page.getByTestId('resume-prompt-start-fresh').click()
   await expect(page.getByTestId('game-intro-start')).toBeVisible()
 })
 
