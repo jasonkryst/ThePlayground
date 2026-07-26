@@ -11,6 +11,7 @@ const mockSettingsDefaults = {
   maxTries: 'none', hintsEnabled: false, hintAfterWrongTaps: 2,
   retryCountsAsStreak: true, spacedRepetitionEnabled: false, adaptiveItemSelectionEnabled: false, difficultyAutoProgressionEnabled: false,
   memoryPairs: 5, soundEffectsEnabled: true,
+  parentalLock: { enabled: false, pin: '' },
 }
 const mockUpdateSetting = vi.fn()
 const mockResetSettings = vi.fn()
@@ -386,5 +387,75 @@ describe('settings groups', () => {
     renderAdmin()
     fireEvent.click(screen.getByLabelText('4', { selector: 'input[name="numChoices"]' }))
     expect(mockUpdateSetting).toHaveBeenCalledWith('numChoices', 4)
+  })
+
+  it('renders the parental lock toggle', () => {
+    render(<MemoryRouter><AdminPage /></MemoryRouter>)
+    expect(screen.getByText(/parental lock/i)).toBeInTheDocument()
+  })
+
+  it('calls updateSetting with the lock enabled when turned on', async () => {
+    render(<MemoryRouter><AdminPage /></MemoryRouter>)
+    const lockSection = screen.getByRole('heading', { name: /parental lock/i }).closest('.admin__section')
+    await userEvent.click(within(lockSection).getByRole('button', { name: /^on$/i }))
+    expect(mockUpdateSetting).toHaveBeenCalledWith('parentalLock', { enabled: true, pin: '' })
+  })
+
+  it('does not show PIN fields when the lock is off (negative)', () => {
+    render(<MemoryRouter><AdminPage /></MemoryRouter>)
+    expect(screen.queryByLabelText(/set a pin/i)).not.toBeInTheDocument()
+  })
+
+  it('shows PIN fields when the lock is on', () => {
+    mockSettingsDefaults.parentalLock = { enabled: true, pin: '' }
+    render(<MemoryRouter><AdminPage /></MemoryRouter>)
+    expect(screen.getByLabelText(/set a pin/i)).toBeInTheDocument()
+    mockSettingsDefaults.parentalLock = { enabled: false, pin: '' }
+  })
+
+  it('saves a PIN when the confirmation matches', async () => {
+    mockSettingsDefaults.parentalLock = { enabled: true, pin: '' }
+    render(<MemoryRouter><AdminPage /></MemoryRouter>)
+    await userEvent.type(screen.getByLabelText(/set a pin/i), '1234')
+    await userEvent.type(screen.getByLabelText(/confirm pin/i), '1234')
+    await userEvent.click(screen.getByRole('button', { name: /save pin/i }))
+    expect(mockUpdateSetting).toHaveBeenCalledWith('parentalLock', { enabled: true, pin: '1234' })
+    mockSettingsDefaults.parentalLock = { enabled: false, pin: '' }
+  })
+
+  it('rejects a mismatched PIN confirmation and does not save (negative)', async () => {
+    mockSettingsDefaults.parentalLock = { enabled: true, pin: '' }
+    render(<MemoryRouter><AdminPage /></MemoryRouter>)
+    await userEvent.type(screen.getByLabelText(/set a pin/i), '1234')
+    await userEvent.type(screen.getByLabelText(/confirm pin/i), '5678')
+    await userEvent.click(screen.getByRole('button', { name: /save pin/i }))
+    expect(screen.getByText(/pins don't match/i)).toBeInTheDocument()
+    expect(mockUpdateSetting).not.toHaveBeenCalledWith('parentalLock', expect.anything())
+    mockSettingsDefaults.parentalLock = { enabled: false, pin: '' }
+  })
+
+  it('rejects a PIN that is not exactly 4 digits (negative)', async () => {
+    mockSettingsDefaults.parentalLock = { enabled: true, pin: '' }
+    render(<MemoryRouter><AdminPage /></MemoryRouter>)
+    await userEvent.type(screen.getByLabelText(/set a pin/i), '12')
+    await userEvent.type(screen.getByLabelText(/confirm pin/i), '12')
+    await userEvent.click(screen.getByRole('button', { name: /save pin/i }))
+    expect(screen.getByText(/must be exactly 4 digits/i)).toBeInTheDocument()
+    mockSettingsDefaults.parentalLock = { enabled: false, pin: '' }
+  })
+
+  it('removes an existing PIN, reverting to math-challenge mode', async () => {
+    mockSettingsDefaults.parentalLock = { enabled: true, pin: '1234' }
+    render(<MemoryRouter><AdminPage /></MemoryRouter>)
+    await userEvent.click(screen.getByRole('button', { name: /remove pin/i }))
+    expect(mockUpdateSetting).toHaveBeenCalledWith('parentalLock', { enabled: true, pin: '' })
+    mockSettingsDefaults.parentalLock = { enabled: false, pin: '' }
+  })
+
+  it('does not show the Remove PIN button when no PIN is set (negative)', () => {
+    mockSettingsDefaults.parentalLock = { enabled: true, pin: '' }
+    render(<MemoryRouter><AdminPage /></MemoryRouter>)
+    expect(screen.queryByRole('button', { name: /remove pin/i })).not.toBeInTheDocument()
+    mockSettingsDefaults.parentalLock = { enabled: false, pin: '' }
   })
 })
