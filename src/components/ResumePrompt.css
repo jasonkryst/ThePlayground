@@ -54,7 +54,8 @@
   border: 2px solid var(--color-text-muted);
 }
 
-.resume-prompt__resume:focus,
+.resume-prompt__resume:focus         { outline: none; }
+.resume-prompt__resume:focus-visible { outline: 3px solid var(--color-lavender); outline-offset: 3px; }
+
 .resume-prompt__start-fresh:focus         { outline: none; }
-.resume-prompt__resume:focus-visible,
 .resume-prompt__start-fresh:focus-visible { outline: 3px solid var(--color-lavender); outline-offset: 3px; }

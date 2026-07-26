@@ -34,8 +34,8 @@
     "tapToHear": "¡Toca 🔊 para escucharlo!",
     "resumeHeading": "¡Bienvenido de vuelta!",
     "resumeProgress": "Estabas en la pregunta {{current}} de {{total}}, con una puntuación de {{score}}.",
-    "resumeAction": "Continuar Donde Lo Dejé",
-    "resumeStartFreshAction": "Empezar de Cero"
+    "resumeAction": "Continuar donde lo dejé",
+    "resumeStartFreshAction": "Empezar de cero"
   },
   "shell": {
     "brand": "The Playground",
