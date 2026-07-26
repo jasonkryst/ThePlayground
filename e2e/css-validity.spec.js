@@ -25,6 +25,11 @@ import stylelint from 'stylelint'
 // the source authored it. That's a browser-serialization detail, not a
 // defect, so it would fail here unconditionally and prove nothing.
 const INLINE_STYLE_CONFIG = { extends: 'stylelint-config-recommended' }
+
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => sessionStorage.setItem('pg-parental-lock-unlocked', '1'))
+})
+
 const routes = [
   { name: 'dashboard', path: '/' },
   { name: 'admin', path: '/admin' },

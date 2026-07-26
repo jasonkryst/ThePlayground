@@ -1,5 +1,9 @@
 import { test, expect } from '@playwright/test'
 
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => sessionStorage.setItem('pg-parental-lock-unlocked', '1'))
+})
+
 // Regression coverage for issue #55: the intro/results screens must fit
 // within one device screen's height (no page scroll needed to reach the
 // primary action button), while legitimately long content is still allowed

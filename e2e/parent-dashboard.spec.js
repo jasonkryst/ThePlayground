@@ -17,6 +17,7 @@ function seedScores(daysAgoList) {
 }
 
 test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => sessionStorage.setItem('pg-parental-lock-unlocked', '1'))
   // Seed scores before any app script runs so the very first render sees them.
   await page.addInitScript((scores) => {
     localStorage.setItem('playground_scores', JSON.stringify(scores))
