@@ -33,7 +33,11 @@
     "gameIntroPortrait": "Zagraj, trzymając ekran pionowo!",
     "answerCorrectAnnounce": "Poprawnie!",
     "answerWrongAnnounce": "Prawie!",
-    "tapToHear": "Dotknij 🔊, aby usłyszeć!"
+    "tapToHear": "Dotknij 🔊, aby usłyszeć!",
+    "resumeHeading": "Witaj ponownie!",
+    "resumeProgress": "Byłeś na pytaniu {{current}} z {{total}}, z wynikiem {{score}}.",
+    "resumeAction": "Kontynuuj od Miejsca, W Którym Się Zatrzymałem",
+    "resumeStartFreshAction": "Zacznij od Nowa"
   },
   "shell": {
     "brand": "The Playground",

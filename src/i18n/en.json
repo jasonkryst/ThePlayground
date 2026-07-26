@@ -31,7 +31,11 @@
     "gameIntroPortrait": "Play this game with your screen upright!",
     "answerCorrectAnnounce": "Correct!",
     "answerWrongAnnounce": "Not quite!",
-    "tapToHear": "Tap 🔊 to hear it!"
+    "tapToHear": "Tap 🔊 to hear it!",
+    "resumeHeading": "Welcome back!",
+    "resumeProgress": "You were on question {{current}} of {{total}}, with a score of {{score}}.",
+    "resumeAction": "Continue Where I Left Off",
+    "resumeStartFreshAction": "Start Fresh"
   },
   "shell": {
     "brand": "The Playground",
