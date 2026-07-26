@@ -27,6 +27,7 @@ function makeSession(overrides = {}) {
     offerDifficultyBump: false, numChoices: 2, personalBestResult: null, newBadges: [],
     lastEvent: null, soundEffectsEnabled: true,
     showIntro: false, introResolved: true, settingsLoaded: true,
+    resumeAvailable: false, acceptResume: vi.fn(), declineResume: vi.fn(),
     dontShowAgain: false, setDontShowAgain: vi.fn(),
     handleChoice: vi.fn(), advance: vi.fn(), restart: vi.fn(),
     acceptDifficultyBump: vi.fn(), dismissDifficultyBump: vi.fn(), dismissIntro: vi.fn(),
@@ -112,6 +113,19 @@ describe('QuizGameShell — screens', () => {
     expect(session.restart).toHaveBeenCalled()
     fireEvent.click(screen.getByRole('button', { name: /home/i }))
     expect(onGameEnd).toHaveBeenCalledWith(2, 3)
+  })
+
+  it('shows the resume prompt instead of the intro when resumeAvailable is true, and defers to it over everything else', () => {
+    renderShell(makeSession({ resumeAvailable: true, showIntro: true, introResolved: false, index: 2, total: 10, score: 4 }))
+    expect(screen.getByTestId('resume-prompt-resume')).toBeInTheDocument()
+    expect(screen.queryByTestId('game-intro-start')).not.toBeInTheDocument()
+  })
+
+  it('calls session.acceptResume when the resume action is tapped', () => {
+    const session = makeSession({ resumeAvailable: true, index: 2, total: 10, score: 4 })
+    renderShell(session)
+    fireEvent.click(screen.getByTestId('resume-prompt-resume'))
+    expect(session.acceptResume).toHaveBeenCalled()
   })
 })
 
