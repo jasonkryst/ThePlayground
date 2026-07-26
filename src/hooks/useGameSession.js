@@ -241,7 +241,7 @@ export default function useGameSession({ gameId, items }) {
   // Per-question state reset; also seeds the countdown budget the timer
   // effect below draws down across block/unblock segments.
   useEffect(() => {
-    if (!queueRef.current[indexRef.current]) return
+    if (!sessionReady || !queueRef.current[indexRef.current]) return
     questionStartRef.current = Date.now()
     remainingMsRef.current = timeLimitMs ?? null
     lockedRef.current = false
@@ -252,7 +252,7 @@ export default function useGameSession({ gameId, items }) {
     setDisabledChoiceIds([])
     setCurrentElapsedMs(0)
     setTimedOut(false)
-  }, [index, queue, timeLimitMs, timerMode])
+  }, [sessionReady, index, queue, timeLimitMs, timerMode])
 
   // Question timers, orientation-gate aware (issue #65, mirroring
   // useMemorySession): while the gate blocks play no timers run; on resume
@@ -268,7 +268,7 @@ export default function useGameSession({ gameId, items }) {
   // handleChoice/handleTimeout.
   useEffect(() => {
     blockedRef.current = blocked
-    if (!queueRef.current[indexRef.current]) return
+    if (!sessionReady || !queueRef.current[indexRef.current]) return
 
     if (blocked) {
       pausedAtRef.current = Date.now()
@@ -297,7 +297,7 @@ export default function useGameSession({ gameId, items }) {
         remainingMsRef.current -= Date.now() - segmentStart
       }
     }
-  }, [index, queue, timeLimitMs, timerMode, blocked])
+  }, [sessionReady, index, queue, timeLimitMs, timerMode, blocked])
 
   const current = queue[index]
   const hintActive = hintsEnabled && !locked && wrongAttempts >= hintAfterWrongTaps

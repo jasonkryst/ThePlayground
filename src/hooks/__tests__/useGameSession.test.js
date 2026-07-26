@@ -1333,4 +1333,60 @@ describe('useGameSession — session resume', () => {
     expect(result.current.done).toBe(true)
     expect(mockClearSessionResume).toHaveBeenCalled()
   })
+
+  // Regression guard for fb3aaa4: that commit moved real state population
+  // (queue/index/score/streak/peakStreak/missed/timings) from acceptResume()
+  // into the resume-check effect itself, so the resume prompt could preview
+  // real progress. But two other pre-existing effects (the per-question
+  // reset effect and the question-timers effect) were gated only on
+  // `queueRef.current[indexRef.current]` being truthy -- not on
+  // `sessionReady` -- so as soon as the resume-check effect populated the
+  // queue/index ref, both effects fired for the entire awaiting-resume-
+  // choice window, before the user ever decided anything. In countdown mode
+  // this armed a real timeout that could lock the resumed question as missed
+  // (resetting streak, pushing into missed, marking timedOut) and even
+  // auto-advance into finishGame() -- silently corrupting/finalizing a
+  // resumed session's real persisted data behind a screen the user hadn't
+  // acted on. Fake timers are installed *before* render (not after) so that,
+  // if the regression were reintroduced, the errant timer would be
+  // registered against the very same fake clock this test advances --
+  // installing fake timers only after the resume prompt appears would let a
+  // real (unfaked) errant timer slip past this test undetected.
+  it('does not fire per-question timers/reset while a resume prompt is pending, and arms them once accepted', async () => {
+    vi.useFakeTimers()
+    setSettings({ timerMode: 'countdown', timeLimitSeconds: 5 })
+    mockGetSessionResume.mockResolvedValue({
+      gameId: 'test-game',
+      queue: [{ correct: items[0], choices: [items[0], items[1]] }],
+      index: 0, score: 2, streak: 1, missed: [], timings: [], peakStreak: 1, savedAt: Date.now(),
+    })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await act(async () => {}) // flushes the mocked getSessionResume() promise
+
+    expect(result.current.resumeAvailable).toBe(true)
+
+    const preTimedOut = result.current.timedOut
+    const preDone = result.current.done
+    const preStreak = result.current.streak
+    const preMissedLength = result.current.missed.length
+
+    act(() => { vi.advanceTimersByTime(5001) }) // past the snapshot's time limit
+
+    // The resume prompt is still up -- acceptResume()/declineResume() were
+    // never called -- so nothing should have fired.
+    expect(result.current.resumeAvailable).toBe(true)
+    expect(result.current.timedOut).toBe(preTimedOut)
+    expect(result.current.done).toBe(preDone)
+    expect(result.current.streak).toBe(preStreak)
+    expect(result.current.missed).toHaveLength(preMissedLength)
+
+    // Positive-path check: the fix must not just suppress the timer forever
+    // -- once the user actually accepts, it arms correctly.
+    await act(async () => { result.current.acceptResume() })
+    act(() => { vi.advanceTimersByTime(5001) })
+
+    expect(result.current.timedOut || result.current.done).toBe(true)
+
+    vi.useRealTimers()
+  })
 })
