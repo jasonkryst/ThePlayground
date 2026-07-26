@@ -81,7 +81,6 @@ export default function useGameSession({ gameId, items }) {
   const pendingReinsertRef = useRef(null)
   const introInitializedRef = useRef(false)
   const resumeCheckedRef    = useRef(false)
-  const resumeSnapshotRef    = useRef(null)
   const suppressNextBuildRef = useRef(false)
   const eventSeqRef     = useRef(0)
   const blockedRef       = useRef(false)
@@ -119,7 +118,6 @@ export default function useGameSession({ gameId, items }) {
     // index/score/queue/etc. were already populated from the snapshot by the
     // resume-check effect below (so the resume prompt could show real
     // progress) — this just finalizes the transition into the game view.
-    resumeSnapshotRef.current = null
     setResumeAvailable(false)
     suppressNextBuildRef.current = true
     setIntroResolved(true)
@@ -129,7 +127,6 @@ export default function useGameSession({ gameId, items }) {
 
   function declineResume() {
     adapter.clearSessionResume()
-    resumeSnapshotRef.current = null
     setResumeAvailable(false)
 
     // The resume-check effect eagerly populated index/score/streak/missed/
@@ -171,7 +168,6 @@ export default function useGameSession({ gameId, items }) {
     resumeCheckedRef.current = true
     adapter.getSessionResume().then(saved => {
       if (isResumeValid(saved, gameId)) {
-        resumeSnapshotRef.current = saved
         // Populate index/score/queue/etc. from the snapshot now, not only in
         // acceptResume(): QuizGameShell reads these same session fields to
         // render the resume prompt's progress text ("question X of Y, score

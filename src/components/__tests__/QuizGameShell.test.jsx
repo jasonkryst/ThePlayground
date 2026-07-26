@@ -2,6 +2,7 @@ import { render, screen, fireEvent } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { axe } from 'jest-axe'
 import i18n from '../../i18n'
+import { ShellContext } from '../ShellContext'
 
 const { mockPlay } = vi.hoisted(() => ({ mockPlay: vi.fn() }))
 vi.mock('../../hooks/useSoundPlayer', () => ({
@@ -225,5 +226,36 @@ describe('QuizGameShell — AU-2 live region', () => {
   it('question screen has no accessibility violations', async () => {
     const { container } = renderShell(makeSession())
     expect(await axe(container)).toHaveNoViolations()
+  })
+})
+
+describe('QuizGameShell — shell game status', () => {
+  function renderShellWithStatusSpy(session) {
+    const setGameStatus = vi.fn()
+    render(
+      <ShellContext.Provider value={{ setGameStatus }}>
+        <QuizGameShell
+          session={session} manifest={manifest} onGameEnd={vi.fn()}
+          instructions="How to play" correctTestId="correct-test-id" prompt="Which one?"
+          renderChoiceContent={item => item.id.toUpperCase()}
+          renderMissedItem={item => item.id}
+        />
+      </ShellContext.Provider>
+    )
+    return setGameStatus
+  }
+
+  it('sessionActive is false while resumeAvailable is true, even though intro/done gating would otherwise allow it', () => {
+    const setGameStatus = renderShellWithStatusSpy(
+      makeSession({ resumeAvailable: true, showIntro: false, introResolved: true, done: false, streak: 4 })
+    )
+    expect(setGameStatus).toHaveBeenLastCalledWith({ streak: 4, sessionActive: false })
+  })
+
+  it('sessionActive is true on the normal question screen (resumeAvailable false)', () => {
+    const setGameStatus = renderShellWithStatusSpy(
+      makeSession({ resumeAvailable: false, showIntro: false, introResolved: true, done: false, streak: 2 })
+    )
+    expect(setGameStatus).toHaveBeenLastCalledWith({ streak: 2, sessionActive: true })
   })
 })

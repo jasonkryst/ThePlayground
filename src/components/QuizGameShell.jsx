@@ -32,7 +32,7 @@ export default function QuizGameShell({
     resumeAvailable, acceptResume, declineResume,
   } = session
 
-  useShellGameStatus({ streak, sessionActive: introResolved && !showIntro && !done })
+  useShellGameStatus({ streak, sessionActive: introResolved && !showIntro && !done && !resumeAvailable })
 
   // Chime layer: engine-level audio feedback on the session's semantic
   // events, on its own player instance so it can't cut off game-owned audio
