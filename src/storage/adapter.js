@@ -21,6 +21,11 @@ export const DEFAULT_SETTINGS = {
   parentDateRange: { preset: 'all', start: null, end: null },
   memoryPairs: 5,
   soundEffectsEnabled: true,
+  // parentalLock.enabled gates /admin and /parent behind a challenge (issue
+  // #127); parentalLock.pin === '' means "use a generated math challenge",
+  // a 4-digit string switches the gate to PIN mode. See
+  // src/lib/parentalLock.js and src/components/ParentalLockGate.jsx.
+  parentalLock: { enabled: true, pin: '' },
 }
 
 /**
