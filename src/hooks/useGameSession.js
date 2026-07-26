@@ -143,6 +143,9 @@ export default function useGameSession({ gameId, items }) {
     adapter.clearSessionResume()
     resumeSnapshotRef.current = null
     setResumeAvailable(false)
+    // Falls through to the normal intro-or-not behavior instead of leaving
+    // the intro permanently suppressed by the resume-check effect above.
+    setShowIntro(!settings.introDismissed?.[gameId])
     setSessionReady(true)
   }
 
@@ -162,6 +165,13 @@ export default function useGameSession({ gameId, items }) {
       if (isResumeValid(saved, gameId)) {
         resumeSnapshotRef.current = saved
         setResumeAvailable(true)
+        // The intro-init effect above runs independently and unconditionally
+        // (it can't know a resume decision is pending), so it may have already
+        // set showIntro=true for this game. Force it closed here so the
+        // resume prompt always takes priority over the intro for the entire
+        // awaiting-resume-choice window, not just a one-tick flash.
+        // declineResume() restores showIntro to its correct value afterward.
+        setShowIntro(false)
       } else {
         if (saved && saved.gameId === gameId) adapter.clearSessionResume()
         setSessionReady(true)

@@ -810,15 +810,17 @@ describe('useGameSession — how-to-play intro', () => {
 })
 
 describe('useGameSession — countdown timer', () => {
-  it('does not enforce a limit or expose timeLimitMs when timerMode is "countUp"', () => {
+  it('does not enforce a limit or expose timeLimitMs when timerMode is "countUp"', async () => {
     setSettings({ timerMode: 'countUp' })
     const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await act(async () => {})
     expect(result.current.timeLimitMs).toBeUndefined()
   })
 
-  it('exposes timeLimitMs derived from timeLimitSeconds when timerMode is "countdown"', () => {
+  it('exposes timeLimitMs derived from timeLimitSeconds when timerMode is "countdown"', async () => {
     setSettings({ timerMode: 'countdown', timeLimitSeconds: 5 })
     const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await act(async () => {})
     expect(result.current.timeLimitMs).toBe(5000)
   })
 
@@ -993,8 +995,9 @@ describe('useGameSession — personal best and badges on finish', () => {
     expect(result.current.newBadges.map(b => b.id)).toEqual(['perfectSession'])
   })
 
-  it('newBadges defaults to an empty array before any session has finished', () => {
+  it('newBadges defaults to an empty array before any session has finished', async () => {
     const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await act(async () => {})
     expect(result.current.newBadges).toEqual([])
   })
 
@@ -1166,6 +1169,25 @@ describe('useGameSession — session resume', () => {
     })
     const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
     await waitFor(() => expect(result.current.resumeAvailable).toBe(true))
+  })
+
+  it('suppresses the intro for the entire awaiting-resume-choice window, and restores it on decline', async () => {
+    // introDismissed is {} in the default mock settings (see beforeEach), so
+    // 'test-game' has no entry — the intro-init effect would otherwise show
+    // the intro. A valid resume snapshot must suppress it regardless.
+    mockGetSessionResume.mockResolvedValue({
+      gameId: 'test-game',
+      queue: [{ correct: items[0], choices: [items[0], items[1]] }],
+      index: 0, score: 2, streak: 1, missed: [], timings: [], peakStreak: 1, savedAt: Date.now(),
+    })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.resumeAvailable).toBe(true))
+    expect(result.current.showIntro).toBe(false)
+
+    await act(async () => { result.current.declineResume() })
+
+    expect(result.current.resumeAvailable).toBe(false)
+    expect(result.current.showIntro).toBe(true)
   })
 
   it('does not offer resume, and leaves storage untouched, when the snapshot is for a different gameId', async () => {
