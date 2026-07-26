@@ -116,21 +116,9 @@ export default function useGameSession({ gameId, items }) {
   }, [loaded, settings.introDismissed, gameId])
 
   function acceptResume() {
-    const saved = resumeSnapshotRef.current
-    queueRef.current = saved.queue
-    setQueue(saved.queue)
-    indexRef.current = saved.index
-    setIndex(saved.index)
-    scoreRef.current = saved.score
-    setScore(saved.score)
-    streakRef.current = saved.streak
-    setStreak(saved.streak)
-    peakStreakRef.current = saved.peakStreak
-    missedRef.current = saved.missed
-    setMissed(saved.missed)
-    timingsRef.current = saved.timings
-    setTimings(saved.timings)
-
+    // index/score/queue/etc. were already populated from the snapshot by the
+    // resume-check effect below (so the resume prompt could show real
+    // progress) — this just finalizes the transition into the game view.
     resumeSnapshotRef.current = null
     setResumeAvailable(false)
     suppressNextBuildRef.current = true
@@ -143,6 +131,26 @@ export default function useGameSession({ gameId, items }) {
     adapter.clearSessionResume()
     resumeSnapshotRef.current = null
     setResumeAvailable(false)
+
+    // The resume-check effect eagerly populated index/score/streak/missed/
+    // timings/queue from the snapshot so the prompt could preview real
+    // progress before the user chose. Undo that here so a declined resume
+    // starts genuinely fresh (mirrors restart()); the queue-build effect
+    // below supplies a brand-new queue once sessionReady flips true.
+    scoreRef.current = 0
+    setScore(0)
+    streakRef.current = 0
+    setStreak(0)
+    peakStreakRef.current = 0
+    missedRef.current = []
+    setMissed([])
+    timingsRef.current = []
+    setTimings([])
+    indexRef.current = 0
+    setIndex(0)
+    queueRef.current = []
+    setQueue([])
+
     // Falls through to the normal intro-or-not behavior instead of leaving
     // the intro permanently suppressed by the resume-check effect above.
     setShowIntro(!settings.introDismissed?.[gameId])
@@ -164,6 +172,27 @@ export default function useGameSession({ gameId, items }) {
     adapter.getSessionResume().then(saved => {
       if (isResumeValid(saved, gameId)) {
         resumeSnapshotRef.current = saved
+        // Populate index/score/queue/etc. from the snapshot now, not only in
+        // acceptResume(): QuizGameShell reads these same session fields to
+        // render the resume prompt's progress text ("question X of Y, score
+        // Z"), and that prompt is shown for the entire awaiting-resume-choice
+        // window below, before the user has decided anything. Without this,
+        // the prompt would display the still-fresh initial state (0/0/0)
+        // instead of the saved progress. declineResume() resets these back to
+        // fresh-session defaults if the user opts not to resume.
+        queueRef.current = saved.queue
+        setQueue(saved.queue)
+        indexRef.current = saved.index
+        setIndex(saved.index)
+        scoreRef.current = saved.score
+        setScore(saved.score)
+        streakRef.current = saved.streak
+        setStreak(saved.streak)
+        peakStreakRef.current = saved.peakStreak
+        missedRef.current = saved.missed
+        setMissed(saved.missed)
+        timingsRef.current = saved.timings
+        setTimings(saved.timings)
         setResumeAvailable(true)
         // The intro-init effect above runs independently and unconditionally
         // (it can't know a resume decision is pending), so it may have already

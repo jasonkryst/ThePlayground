@@ -1171,6 +1171,29 @@ describe('useGameSession — session resume', () => {
     await waitFor(() => expect(result.current.resumeAvailable).toBe(true))
   })
 
+  // Regression guard: QuizGameShell renders the resume prompt's progress
+  // text ("question X of Y, score Z") from these same session fields, and it
+  // does so for the entire awaiting-resume-choice window -- i.e. before
+  // acceptResume() has ever run. If index/score/total only became correct
+  // once acceptResume() ran, the prompt would show the still-fresh initial
+  // state (0/0/0) instead of the saved progress.
+  it('exposes the saved index/score/total for the resume prompt to display before the user decides', async () => {
+    const savedQueue = [
+      { correct: items[0], choices: [items[0], items[1]] },
+      { correct: items[1], choices: [items[0], items[1]] },
+      { correct: items[2], choices: [items[1], items[2]] },
+    ]
+    mockGetSessionResume.mockResolvedValue({
+      gameId: 'test-game', queue: savedQueue, index: 1, score: 5, streak: 2,
+      missed: [], timings: [], peakStreak: 2, savedAt: Date.now(),
+    })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.resumeAvailable).toBe(true))
+    expect(result.current.index).toBe(1)
+    expect(result.current.score).toBe(5)
+    expect(result.current.total).toBe(3)
+  })
+
   it('suppresses the intro for the entire awaiting-resume-choice window, and restores it on decline', async () => {
     // introDismissed is {} in the default mock settings (see beforeEach), so
     // 'test-game' has no entry — the intro-init effect would otherwise show
@@ -1260,6 +1283,31 @@ describe('useGameSession — session resume', () => {
     await waitFor(() => expect(result.current.current).toBeDefined())
     expect(result.current.score).toBe(0)
     expect(result.current.total).toBe(3)
+  })
+
+  // Regression guard: the resume-check effect now eagerly copies the saved
+  // index/score/etc. into state as soon as a valid snapshot is found (so the
+  // resume prompt can preview real progress -- see the "exposes the saved
+  // index/score/total" test above). declineResume() must undo that preview,
+  // not just the score, or a declined resume would silently keep starting
+  // mid-queue at the old saved index instead of genuinely at question 1.
+  it('declineResume resets a previewed non-zero index back to 0', async () => {
+    mockGetSessionResume.mockResolvedValue({
+      gameId: 'test-game',
+      queue: [
+        { correct: items[0], choices: [items[0], items[1]] },
+        { correct: items[1], choices: [items[0], items[1]] },
+      ],
+      index: 1, score: 1, streak: 1, missed: [], timings: [], peakStreak: 1, savedAt: Date.now(),
+    })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.resumeAvailable).toBe(true))
+    expect(result.current.index).toBe(1) // sanity: preview did populate it
+
+    await act(async () => { result.current.declineResume() })
+
+    await waitFor(() => expect(result.current.current).toBeDefined())
+    expect(result.current.index).toBe(0)
   })
 
   it('saves a snapshot after each question transition', async () => {
