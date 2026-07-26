@@ -3,6 +3,12 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.36.0] - 2026-07-26
+
+### Added
+
+- Session resume after interruption (issue #128): a browser crash, tab close, reload, or a deliberate exit via the exit guard's "Leave Game" button no longer loses an in-progress quiz session. `useGameSession` now persists a minimal snapshot (`gameId`, `queue`, `index`, `score`, `streak`, `missed`, `timings`, `peakStreak`) after every question transition via three new adapter methods (`getSessionResume`/`saveSessionResume`/`clearSessionResume`, a single global localStorage slot since only one game is ever active at a time). Reopening that same game within 4 hours shows a new `ResumePrompt` screen ("Welcome back!") offering to continue exactly where the child left off or start fresh; the saved queue embeds full item data, so resuming never depends on the current state of the game's content catalog. Scoped to quiz games; memory games are unaffected.
+
 ## [0.35.0] - 2026-07-25
 
 ### Added

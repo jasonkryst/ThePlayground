@@ -21,6 +21,7 @@ A browser-based game dashboard designed for infants and toddlers. Games are disp
 - **Personal bests** — quiz games track best accuracy and average answer speed; memory games track fewest flips and fastest board time per board size; new records are announced on the results screen
 - **Milestone badges** — repeatable per-game achievements (streak tiers, perfect sessions, lifetime totals); memory games ship their own badge catalog via per-game `badges.js` files
 - **Kid-safe exit guard** — leaving a game mid-session requires a deliberate second tap, so a stray toddler tap can't kill a session
+- **Session resume** — a browser crash, tab close, reload, or even a deliberate exit mid-session leaves a resumable snapshot; reopening that game within 4 hours offers to continue where the child left off, or start fresh
 - **Version display** — app version shown in the dashboard footer; game version shown alongside it on game routes
 - **Google Analytics** — optional GA4 tracking configured at runtime via the admin page; fires page view events on every React Router navigation (off by default — see [`SECURITY.md`](SECURITY.md))
 
