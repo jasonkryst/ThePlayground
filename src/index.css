@@ -30,7 +30,7 @@
   /* Text color drawn on top of a solid accent fill (--color-*-dark /
      --color-error-solid). White in light/dark; flips to black in high
      contrast, where the accent fills themselves become bright. */
-  --color-on-accent: #FFFFFF;
+  --color-on-accent: #FFF;
 
   /* Parent Dashboard activity heatmap's 4-step sequential scale + the
      matching progress-bar track background (same "faint aqua" shade as
@@ -99,20 +99,20 @@
   --color-lavender-dark: #C9A9FF;
   --color-error: #FF6E6E;
   --color-error-solid: #FF6E6E;
-  --color-on-accent: #000000;
-  --color-bg: #000000;
-  --color-surface: #000000;
-  --color-text: #FFFFFF;
+  --color-on-accent: #000;
+  --color-bg: #000;
+  --color-surface: #000;
+  --color-text: #FFF;
   --color-text-muted: #C8C8C8;
   --color-lavender-text: #C9A9FF;
   --color-teal-text: #26D9B7;
-  --color-heatmap-0: #000000;
+  --color-heatmap-0: #000;
   --color-heatmap-1: #26D9B7;
   --color-heatmap-2: #4DD8E8;
   --color-heatmap-3: #C9A9FF;
-  --color-hairline: #FFFFFF;
+  --color-hairline: #FFF;
   --color-hover-tint: rgb(255 255 255 / 20%);
-  --color-surface-outline: #FFFFFF;
+  --color-surface-outline: #FFF;
 }
 
 html {
