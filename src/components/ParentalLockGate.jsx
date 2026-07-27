@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import useSettings from '../hooks/useSettings'
 import useParentalLockSession from '../hooks/useParentalLockSession'
@@ -22,6 +22,18 @@ export default function ParentalLockGate({ children }) {
   const [error, setError] = useState(false)
   const headingRef = useFocusOnMount()
   const inputRef = useRef(null)
+  const isFirstChallengeRender = useRef(true)
+
+  // Update challenge if parentalLock settings change after mount (e.g., PIN enabled).
+  // Skip the first effect run (which duplicates the useState initializer) and only
+  // recompute on genuine subsequent changes.
+  useEffect(() => {
+    if (isFirstChallengeRender.current) {
+      isFirstChallengeRender.current = false
+      return
+    }
+    setChallenge(getChallenge(settings.parentalLock))
+  }, [settings.parentalLock])
 
   if (!settings.parentalLock?.enabled || unlocked) {
     return children
