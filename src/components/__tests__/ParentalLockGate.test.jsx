@@ -89,4 +89,19 @@ describe('ParentalLockGate', () => {
     expect(screen.getByTestId('protected-content')).toBeInTheDocument()
     expect(screen.queryByRole('heading', { name: 'Parents Only' })).not.toBeInTheDocument()
   })
+
+  it('recomputes the challenge when parentalLock settings change after mount, e.g. async settings load resolving with a PIN (regression coverage for the async-recompute fix)', () => {
+    const { rerender } = renderGate()
+    expect(screen.getByRole('heading', { name: 'Parents Only' })).toBeInTheDocument()
+
+    mockGetChallenge.mockReturnValue({ mode: 'pin', pin: '4242' })
+    mockParentalLock = { enabled: true, pin: '4242' }
+    rerender(
+      <ParentalLockGate>
+        <div data-testid="protected-content">Secret</div>
+      </ParentalLockGate>
+    )
+
+    expect(screen.getByText('Enter the PIN to continue')).toBeInTheDocument()
+  })
 })

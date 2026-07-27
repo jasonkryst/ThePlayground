@@ -18,6 +18,9 @@ dist-ssr
 # Generated output
 coverage/
 
+# Lighthouse CI reports
+.lighthouseci/
+
 # Stryker mutation testing
 reports/
 .stryker-tmp/

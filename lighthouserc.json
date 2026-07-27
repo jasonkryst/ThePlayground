@@ -9,7 +9,8 @@
         "http://localhost:4173/parent",
         "http://localhost:4173/my-progress"
       ],
-      "numberOfRuns": 3
+      "numberOfRuns": 3,
+      "puppeteerScript": "./lighthouse-puppeteer.cjs"
     },
     "assert": {
       "assertions": {
