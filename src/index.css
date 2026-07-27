@@ -41,10 +41,14 @@
   --color-heatmap-3: #006C7A;
 
   /* Structural chrome tints: visible borders, hover/active washes, and the
-     exit-confirm modal backdrop dimmer. Light values below are byte-for-byte
-     what every call site already hardcoded (rgb(0 0 0 / N%)) before this
-     token existed, so switching a site over to the token is a zero-diff
-     change in light theme. */
+     exit-confirm modal backdrop dimmer. Light values below consolidate what
+     were several different hardcoded rgb(0 0 0 / N%) opacities (5-15%)
+     across call sites down to two canonical values; most call sites keep
+     their exact prior appearance, but a handful shift by 1-3 percentage
+     points of tint (imperceptible, a deliberate accepted tradeoff — see
+     Task 3's commit history / the SDD ledger for the full rationale). The
+     backdrop value (45%) is unchanged everywhere, so that one substitution
+     genuinely is zero-diff. */
   --color-hairline: rgb(0 0 0 / 12%);
   --color-hover-tint: rgb(0 0 0 / 6%);
   --color-backdrop: rgb(0 0 0 / 45%);

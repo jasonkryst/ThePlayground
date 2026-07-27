@@ -30,8 +30,17 @@ img.game-card__icon { width: 52px; height: 52px; object-fit: contain; }
 .game-card__desc  { font-size: 0.9375rem; text-align: center; opacity: 0.75; }
 .game-card__score { font-size: 0.875rem; font-weight: 700; opacity: 0.6; }
 
+/* Historically a no-op: `.game-card` itself carried no CSS border (the
+   colored top-accent-stripe for non-recent cards is an inline style applied
+   only when there's no recentInfo — see GameCard.jsx), so there was never a
+   top border here to cancel. Now that `.game-card` gets a
+   `--color-surface-outline` border on all 4 sides (see above; transparent
+   no-op in Light/Dark, a real outline in High Contrast), this modifier must
+   keep the top edge in sync with the other 3 rather than zero it out, or a
+   recently-played card would render with a broken/asymmetric 3-sided outline
+   in High Contrast. */
 .game-card--recently-played {
-  border-top: none;
+  border-top: 2px solid var(--color-surface-outline);
 }
 
 .game-card__landscape-badge {
