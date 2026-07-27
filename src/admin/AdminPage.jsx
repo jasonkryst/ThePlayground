@@ -200,6 +200,26 @@ export default function AdminPage({ manifests = [] }) {
             </div>
 
             <div className="admin__section">
+              <h3>{t('admin.themeHeading')}</h3>
+              <div className="admin__toggle">
+                {[
+                  { value: 'system', label: t('admin.themeSystem') },
+                  { value: 'light', label: t('admin.themeLight') },
+                  { value: 'dark', label: t('admin.themeDark') },
+                  { value: 'high-contrast', label: t('admin.themeHighContrast') },
+                ].map(opt => (
+                  <button
+                    key={opt.value}
+                    className={`admin__toggle-btn${settings.theme === opt.value ? ' active' : ''}`}
+                    onClick={() => updateSetting('theme', opt.value)}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="admin__section">
               <h3>{t('admin.gaHeading')}</h3>
               <p className="admin__hint">{t('admin.gaHint')}</p>
               <input

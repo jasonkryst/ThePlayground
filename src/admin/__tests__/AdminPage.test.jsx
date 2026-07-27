@@ -12,6 +12,7 @@ const mockSettingsDefaults = {
   retryCountsAsStreak: true, spacedRepetitionEnabled: false, adaptiveItemSelectionEnabled: false, difficultyAutoProgressionEnabled: false,
   memoryPairs: 5, soundEffectsEnabled: true,
   parentalLock: { enabled: false, pin: '' },
+  theme: 'system',
 }
 const mockUpdateSetting = vi.fn()
 const mockResetSettings = vi.fn()
@@ -457,5 +458,31 @@ describe('settings groups', () => {
     render(<MemoryRouter><AdminPage /></MemoryRouter>)
     expect(screen.queryByRole('button', { name: /remove pin/i })).not.toBeInTheDocument()
     mockSettingsDefaults.parentalLock = { enabled: false, pin: '' }
+  })
+})
+
+describe('AdminPage — theme', () => {
+  it('calls updateSetting with each theme option and marks it active', async () => {
+    render(<MemoryRouter><AdminPage /></MemoryRouter>)
+    const user = userEvent.setup()
+
+    await user.click(screen.getByRole('button', { name: /dark/i }))
+    expect(mockUpdateSetting).toHaveBeenCalledWith('theme', 'dark')
+
+    await user.click(screen.getByRole('button', { name: /high contrast/i }))
+    expect(mockUpdateSetting).toHaveBeenCalledWith('theme', 'high-contrast')
+  })
+
+  it('re-clicking the already-selected theme option does not throw or duplicate the active state', async () => {
+    mockSettingsDefaults.theme = 'dark'
+    render(<MemoryRouter><AdminPage /></MemoryRouter>)
+    const user = userEvent.setup()
+    const darkButton = screen.getByRole('button', { name: /dark/i })
+    expect(darkButton).toHaveClass('active')
+
+    await user.click(darkButton)
+    expect(darkButton).toHaveClass('active')
+    expect(screen.getAllByRole('button', { name: /dark/i })).toHaveLength(1)
+    mockSettingsDefaults.theme = 'system'
   })
 })
