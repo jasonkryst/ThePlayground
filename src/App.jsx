@@ -81,6 +81,23 @@ function LocaleSync() {
   return null
 }
 
+const VALID_THEMES = new Set(['light', 'dark', 'high-contrast'])
+
+function ThemeSync() {
+  const { settings, loaded } = useSettings()
+
+  useEffect(() => {
+    if (!loaded) return
+    if (VALID_THEMES.has(settings.theme)) {
+      document.documentElement.dataset.theme = settings.theme
+    } else {
+      delete document.documentElement.dataset.theme
+    }
+  }, [loaded, settings.theme])
+
+  return null
+}
+
 function GameRoute() {
   const { gameId } = useParams()
   const navigate   = useNavigate()
@@ -103,6 +120,7 @@ export default function App() {
     <BrowserRouter>
       <GoogleAnalytics />
       <LocaleSync />
+      <ThemeSync />
       <Routes>
         <Route element={<AppShell manifests={manifests} />}>
           <Route path="/"             element={<Dashboard manifests={manifests} />} />
