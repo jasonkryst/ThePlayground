@@ -753,25 +753,27 @@ Expected: FAIL — `document.documentElement.dataset.theme` never gets set (no `
 
 - [ ] **Step 3: Add `theme` to `DEFAULT_SETTINGS`**
 
-In `src/storage/adapter.js`, add to the `DEFAULT_SETTINGS` object (after `soundEffectsEnabled: true,` on line 23):
+NOTE: this worktree's `main` already has the parental-lock feature (#127) merged, so `DEFAULT_SETTINGS` already has a `parentalLock` field (and its own JSDoc block) after `soundEffectsEnabled: true,`. Add `theme` immediately after `soundEffectsEnabled: true,` and before the `parentalLock` comment/field — don't disturb the `parentalLock` entry:
 
 ```js
   soundEffectsEnabled: true,
   theme: 'system',
+  // parentalLock.enabled gates /admin and /parent behind a challenge (issue
+  // ... (existing comment + parentalLock field stay exactly as they are)
 ```
 
-And extend the JSDoc Settings-shape comment (after the `soundEffectsEnabled` line in the doc block, around line 65):
+And extend the JSDoc Settings-shape comment (find the existing `soundEffectsEnabled: boolean — ...` doc line and add this line after it — exact line number will differ from a fresh checkout, locate by content):
 
 ```js
  *   soundEffectsEnabled: boolean — gates game sound effects: memory match sounds and quiz correct/wrong chimes (added v0.23.0; quiz chimes v0.26.0)
  *   theme: 'system' | 'light' | 'dark' | 'high-contrast' — 'system' follows the OS prefers-color-scheme
  *     (light/dark only; never auto-selects high-contrast). Applied to <html data-theme> by ThemeSync in
- *     App.jsx. (added v0.37.0)
+ *     App.jsx. (added v0.38.0)
 ```
 
 - [ ] **Step 4: Add `ThemeSync` and mount it in `src/App.jsx`**
 
-Add this function after `LocaleSync` (after line 81):
+NOTE: this worktree's `App.jsx` has an extra `import ParentalLockGate from './components/ParentalLockGate'` line near the top (from the already-merged #127), shifting every line below by 1 versus a fresh checkout. Locate `LocaleSync` by content, not line number — add `ThemeSync` directly after it:
 
 ```jsx
 const VALID_THEMES = new Set(['light', 'dark', 'high-contrast'])
@@ -867,7 +869,9 @@ Expected: FAIL — no "Dark"/"High Contrast" button exists yet.
 
 - [ ] **Step 3: Add i18n strings**
 
-`src/i18n/en.json`, in the `"admin"` object, after `"soundEffectsOff": "Off",` (line 177):
+NOTE: this worktree's `main` already has the merged parental-lock feature (#127), which added its own `"parentalLockHeading"` key immediately after `"soundEffectsOff"` in each i18n file's `"admin"` object, and its own `"parentalLockHeading"`/`"parentalLockMathPrompt"` keys in the `"shell"`-adjacent area of Task 6's file too — don't confuse these with the new `theme*` keys below, and don't remove/reorder them. Locate `"soundEffectsOff": "Off",` by content (exact line number will differ from a fresh checkout) and insert the new `theme*` keys immediately after it, before `"parentalLockHeading"`:
+
+`src/i18n/en.json`, in the `"admin"` object, after `"soundEffectsOff": "Off",`:
 
 ```json
     "soundEffectsOff": "Off",
@@ -902,7 +906,7 @@ Expected: FAIL — no "Dark"/"High Contrast" button exists yet.
 
 - [ ] **Step 4: Add the Theme control to `src/admin/AdminPage.jsx`**
 
-Insert after the Sound Effects section (after the closing `</div>` on line 174, before the Google Analytics section starting line 176):
+NOTE: in this worktree, the Sound Effects section's closing `</div>` and the Google Analytics section's opening `<div className="admin__section">` are further down than a fresh checkout (the already-merged parental-lock feature added ~26 lines of PIN-related state above this point, and its own new section after Google Analytics) — locate the Sound Effects block by its `admin.soundEffectsHeading`/`admin.soundEffectsOff` content, not by line number, and insert directly after its closing `</div>`, before the Google Analytics section:
 
 ```jsx
             <div className="admin__section">
@@ -1018,7 +1022,9 @@ Expected: FAIL — no button with an accessible name matching `/theme/i` exists 
 
 - [ ] **Step 3: Add i18n strings**
 
-`src/i18n/en.json`, in `"shell"`, after `"leaveGame": "Leave game 🏠"` (line 52, note the trailing comma needed now):
+NOTE: absolute line numbers below will differ slightly from a fresh checkout (this worktree's `main` already has an unrelated parental-lock feature merged, adding content elsewhere in these files) — locate `"leaveGame"` by content within the `"shell"` object.
+
+`src/i18n/en.json`, in `"shell"`, after `"leaveGame": "Leave game 🏠"` (note the trailing comma needed now):
 
 ```json
     "leaveGame": "Leave game 🏠",
@@ -1163,6 +1169,8 @@ git commit -m "feat(11): add global header theme quick-toggle (cycles system/lig
 
 **Interfaces:**
 - Consumes: the running dev server's real `data-theme` behavior from Tasks 1-6; `playground_settings` localStorage key (from `src/storage/localStorageAdapter.js`).
+
+NOTE: this worktree's `main` already has the parental-lock feature (#127) merged, which gates `/admin` (and `/parent`) behind an unlock challenge by default. Every test below that navigates to `/admin` needs the same bypass `e2e/admin.spec.js` already uses — read that file first and copy its exact `test.beforeEach` (`page.addInitScript(() => sessionStorage.setItem('pg-parental-lock-unlocked', '1'))`) into this new spec too, or the admin test below will hit the lock-challenge screen instead of the actual Admin page. `/` (dashboard) and `/game/:id` routes are NOT gated — no bypass needed for those.
 
 - [ ] **Step 1: Write `e2e/themes.spec.js`**
 
@@ -1416,14 +1424,14 @@ Dashboard, AdminPage, GameChoiceGrid, and GameResults each get an additional Dar
 
 - [ ] **Step 3: `docs/ENHANCEMENTS.md`**
 
-Remove the "Dark mode" bullet (line 21) — it's now shipped. Add an entry to `CHANGELOG.md` instead (next step) per this file's own header convention ("entries here are removed once they ship").
+Remove the "Dark mode" bullet under `## UI` — it's now shipped (locate by content; this worktree's `main` already has an unrelated parental-lock entry nearby, so the line number has shifted from a fresh checkout — don't touch that entry). Add an entry to `CHANGELOG.md` instead (next step) per this file's own header convention ("entries here are removed once they ship").
 
 - [ ] **Step 4: `CHANGELOG.md`**
 
-Add a new top entry (above the current `## [0.36.0] - 2026-07-26`):
+NOTE: this worktree's `main` already has the parental-lock feature (#127) shipped as `## [0.37.0] - 2026-07-26` at the top of this file — that is NOT a fresh-checkout assumption error, it's real, already-merged history. This task's new entry goes **above** it, as **`0.38.0`** (the next version after what's already there), not `0.37.0`:
 
 ```markdown
-## [0.37.0] - 2026-07-27
+## [0.38.0] - 2026-07-27
 
 ### Added
 
@@ -1436,8 +1444,10 @@ Add a new top entry (above the current `## [0.36.0] - 2026-07-26`):
 
 - [ ] **Step 5: `package.json` version bump**
 
+This worktree's `main` already has `package.json` at `0.37.0` (from the already-merged parental-lock feature) — bump to `0.38.0`, not `0.37.0`:
+
 ```json
-  "version": "0.37.0",
+  "version": "0.38.0",
 ```
 
 - [ ] **Step 6: Run the full test suite one more time**
@@ -1449,7 +1459,7 @@ Expected: PASS
 
 ```bash
 git add README.md docs/TESTING.md docs/ENHANCEMENTS.md CHANGELOG.md package.json
-git commit -m "docs(11): document core themes, bump version to 0.37.0"
+git commit -m "docs(11): document core themes, bump version to 0.38.0"
 ```
 
 ---
