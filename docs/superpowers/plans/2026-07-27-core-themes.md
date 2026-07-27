@@ -1364,7 +1364,7 @@ Add to the `stories` array (Storybook derives the URL id as kebab-case `${title}
 - [ ] **Step 4: Generate the new baselines**
 
 Run: `npx playwright test visual.spec.js --update-snapshots`
-Expected: all 46 stories (38 existing + 8 new) run; the 38 existing baselines are unchanged (byte-identical, since Light's token values never changed — if `git diff --stat` shows any of the *existing* 38 PNGs as modified, that's a signal something in Tasks 1-3 leaked into Light theme and needs investigating before proceeding); the 8 new PNGs are created.
+Expected: all 46 stories (38 existing + 8 new) run. NOTE: this is a known, human-approved exception to "Light stays pixel-identical" — Task 3 consolidated several distinct hardcoded `rgb(0 0 0 / N%)` opacities (5/6/7/8/12/15%) down to two canonical token values (`--color-hairline` at 12%, `--color-hover-tint` at 6%), so any existing baseline whose component uses a hairline/hover-tint border or wash at a *different* original opacity will show a small (1-3 percentage point), expected diff — this is not a bug, do not investigate it as one. Any *other* existing baseline (one that never touched a hairline/hover-tint/backdrop/surface-outline/heatmap token) modifying is unexpected and does need investigating before proceeding.
 
 - [ ] **Step 5: Verify**
 
@@ -1372,7 +1372,7 @@ Run: `npx playwright test visual.spec.js`
 Expected: PASS, all 46
 
 Run: `git status --short e2e/visual.spec.js-snapshots/`
-Expected: only 8 new files listed (`??` or `A`), zero modified (`M`) entries among the pre-existing 38.
+Expected: the 8 new files (`??` or `A`), plus `M` entries for whichever existing baselines render a component that consumes `--color-hairline`/`--color-hover-tint` (expected, per the note above). Spot-check a couple of the modified PNGs visually if convenient — the diff should be a barely-perceptible tint shift, not a structural change.
 
 - [ ] **Step 6: Commit**
 
