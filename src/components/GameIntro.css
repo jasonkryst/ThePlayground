@@ -61,7 +61,7 @@ img.game-intro__icon { width: 96px; height: 96px; object-fit: contain; }
   border-radius: var(--radius-button);
   min-height: 64px;
   background: var(--color-lavender-dark);
-  color: white;
+  color: var(--color-on-accent);
   border: none;
 }
 

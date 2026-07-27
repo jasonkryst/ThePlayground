@@ -14,7 +14,7 @@
   font-size: 0.9375rem;
   font-weight: 700;
   background: var(--color-aqua-dark);
-  color: #fff;
+  color: var(--color-on-accent);
   border-radius: var(--radius-button);
   border: none;
   min-height: 48px;
@@ -42,7 +42,7 @@
   font-size: 1.125rem;
   font-weight: 800;
   margin-bottom: 6px;
-  color: var(--color-lavender-dark);
+  color: var(--color-lavender-text);
 }
 
 .parent__hint {

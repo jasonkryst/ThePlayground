@@ -5,7 +5,7 @@
 .category-section__heading {
   font-size: 1.125rem;
   font-weight: 700;
-  color: var(--color-lavender-dark);
+  color: var(--color-lavender-text);
   margin: 0 0 12px;
   padding-bottom: 8px;
   border-bottom: 2px solid rgb(0 0 0 / 6%);

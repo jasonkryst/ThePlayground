@@ -27,8 +27,8 @@
   min-height: 80px;
   font-size: 1.375rem;
   font-weight: 800;
-  color: var(--color-teal-dark);
-  background: var(--color-teal);
+  color: var(--color-on-accent);
+  background: var(--color-teal-dark);
 }
 
 .exit-confirm__leave {

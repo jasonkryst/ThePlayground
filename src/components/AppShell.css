@@ -37,7 +37,7 @@
   padding: 0 8px;
   font-size: 1.25rem;
   font-weight: 800;
-  color: var(--color-lavender-dark);
+  color: var(--color-lavender-text);
   text-decoration: none;
   border-radius: var(--radius-button);
 }
@@ -130,7 +130,7 @@
   overflow: hidden;
   font-size: 1.125rem;
   font-weight: 800;
-  color: var(--color-lavender-dark);
+  color: var(--color-lavender-text);
   text-overflow: ellipsis;
   white-space: nowrap;
 }

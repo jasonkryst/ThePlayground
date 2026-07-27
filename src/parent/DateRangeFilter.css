@@ -24,7 +24,7 @@
 .date-range-filter__tab--active {
   background: var(--color-lavender-dark);
   border-color: var(--color-lavender-dark);
-  color: var(--color-surface);
+  color: var(--color-on-accent);
 }
 
 /* `.date-range-filter__tab:hover` (a class + a pseudo-class) has higher specificity
@@ -37,7 +37,7 @@
 .date-range-filter__tab--active:hover {
   background: var(--color-lavender-dark);
   border-color: var(--color-lavender-dark);
-  color: var(--color-surface);
+  color: var(--color-on-accent);
 }
 
 .date-range-filter__tab:focus         { outline: none; }

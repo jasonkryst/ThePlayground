@@ -10,7 +10,7 @@
 .dashboard__title {
   font-size: 2rem;
   font-weight: 800;
-  color: var(--color-lavender-dark);
+  color: var(--color-lavender-text);
 }
 
 .dashboard__grid {
@@ -48,7 +48,7 @@
 .dashboard__tab--active {
   background: var(--color-lavender-dark);
   border-color: var(--color-lavender-dark);
-  color: var(--color-surface);
+  color: var(--color-on-accent);
 }
 
 /* `.dashboard__tab:hover` (a class + a pseudo-class) has higher specificity
@@ -65,7 +65,7 @@
 .dashboard__tab--active:hover {
   background: var(--color-lavender-dark);
   border-color: var(--color-lavender-dark);
-  color: var(--color-surface);
+  color: var(--color-on-accent);
 }
 
 .dashboard__tab:focus         { outline: none; }
@@ -133,7 +133,7 @@
   background: transparent;
   font-size: 0.875rem;
   font-weight: 600;
-  color: var(--color-lavender-dark);
+  color: var(--color-lavender-text);
   cursor: pointer;
 }
 
