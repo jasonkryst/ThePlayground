@@ -87,20 +87,32 @@
   background: transparent;
 }
 
+.shell__theme-toggle {
+  min-width: 48px;
+  min-height: 48px;
+  font-size: 1.5rem;
+  background: transparent;
+  border-radius: var(--radius-button);
+  transition: background 0.15s;
+}
+
 .shell__brand:hover,
 .shell__back:hover,
 .shell__nav-link:hover,
-.shell__home:hover { background: var(--color-hover-tint); }
+.shell__home:hover,
+.shell__theme-toggle:hover { background: var(--color-hover-tint); }
 
 .shell__brand:focus,
 .shell__back:focus,
 .shell__nav-link:focus,
-.shell__home:focus { outline: none; }
+.shell__home:focus,
+.shell__theme-toggle:focus { outline: none; }
 
 .shell__brand:focus-visible,
 .shell__back:focus-visible,
 .shell__nav-link:focus-visible,
-.shell__home:focus-visible {
+.shell__home:focus-visible,
+.shell__theme-toggle:focus-visible {
   outline: 3px solid var(--color-lavender);
   outline-offset: 3px;
 }

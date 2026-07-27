@@ -1,11 +1,20 @@
-import { render, screen, fireEvent, act } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
-import { describe, it, expect, afterEach, beforeEach } from 'vitest'
+import { describe, it, expect, afterEach, beforeEach, vi } from 'vitest'
 import userEvent from '@testing-library/user-event'
 import { axe } from 'jest-axe'
 import AppShell from '../AppShell'
 import { useShellGameStatus } from '../ShellContext'
 import i18n from '../../i18n'
+import storage from '../../storage/index'
+
+vi.mock('../../storage/index', () => ({
+  default: {
+    getSettings: vi.fn().mockResolvedValue({ theme: 'system' }),
+    saveSettings: vi.fn().mockResolvedValue(undefined),
+  },
+  DEFAULT_SETTINGS: { theme: 'system' },
+}))
 
 const manifests = [
   { id: 'color-match', nameKey: 'colorMatch.manifestName', icon: '🎨', color: '#CE93D8', version: '1.6.0' },
@@ -218,5 +227,41 @@ describe('AppShell — Polish locale', () => {
     renderShell('/game/color-match')
     expect(screen.getByRole('heading', { level: 1, name: /dopasuj kolory/i })).toBeInTheDocument()
     expect(screen.getByText('Dopasuj Kolory v1.6.0')).toBeInTheDocument()
+  })
+})
+
+describe('AppShell — theme toggle', () => {
+  beforeEach(() => {
+    storage.getSettings.mockResolvedValue({ theme: 'system' })
+  })
+
+  it('renders a theme toggle button reachable on every route', async () => {
+    renderShell('/')
+    expect(await screen.findByRole('button', { name: /theme/i })).toBeInTheDocument()
+  })
+
+  it('cycles system -> light -> dark -> high-contrast -> system on successive clicks', async () => {
+    renderShell('/')
+    const button = await screen.findByRole('button', { name: /theme/i })
+
+    fireEvent.click(button)
+    await waitFor(() => expect(storage.saveSettings).toHaveBeenLastCalledWith(expect.objectContaining({ theme: 'light' })))
+
+    fireEvent.click(button)
+    await waitFor(() => expect(storage.saveSettings).toHaveBeenLastCalledWith(expect.objectContaining({ theme: 'dark' })))
+
+    fireEvent.click(button)
+    await waitFor(() => expect(storage.saveSettings).toHaveBeenLastCalledWith(expect.objectContaining({ theme: 'high-contrast' })))
+
+    fireEvent.click(button)
+    await waitFor(() => expect(storage.saveSettings).toHaveBeenLastCalledWith(expect.objectContaining({ theme: 'system' })))
+  })
+
+  it('does not throw or run off the end when cycling from high-contrast', async () => {
+    storage.getSettings.mockResolvedValue({ theme: 'high-contrast' })
+    renderShell('/')
+    const button = await screen.findByRole('button', { name: /theme/i })
+    expect(() => fireEvent.click(button)).not.toThrow()
+    await waitFor(() => expect(storage.saveSettings).toHaveBeenLastCalledWith(expect.objectContaining({ theme: 'system' })))
   })
 })

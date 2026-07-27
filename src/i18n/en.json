@@ -54,7 +54,11 @@
     "copyright": "© {{year}} The Playground",
     "exitConfirmTitle": "Leave the game?",
     "keepPlaying": "Keep playing! ▶️",
-    "leaveGame": "Leave game 🏠"
+    "leaveGame": "Leave game 🏠",
+    "themeToggleSystem": "Theme: System. Activate to switch to Light.",
+    "themeToggleLight": "Theme: Light. Activate to switch to Dark.",
+    "themeToggleDark": "Theme: Dark. Activate to switch to High Contrast.",
+    "themeToggleHighContrast": "Theme: High Contrast. Activate to switch to System."
   },
   "dashboard": {
     "titleDefault": "My Playground",

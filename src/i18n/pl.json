@@ -56,7 +56,11 @@
     "copyright": "© {{year}} The Playground",
     "exitConfirmTitle": "Opuścić grę?",
     "keepPlaying": "Graj dalej! ▶️",
-    "leaveGame": "Opuść grę 🏠"
+    "leaveGame": "Opuść grę 🏠",
+    "themeToggleSystem": "Motyw: Systemowy. Aktywuj, aby przełączyć na Jasny.",
+    "themeToggleLight": "Motyw: Jasny. Aktywuj, aby przełączyć na Ciemny.",
+    "themeToggleDark": "Motyw: Ciemny. Aktywuj, aby przełączyć na Wysoki kontrast.",
+    "themeToggleHighContrast": "Motyw: Wysoki kontrast. Aktywuj, aby przełączyć na Systemowy."
   },
   "dashboard": {
     "titleDefault": "Mój Playground",
