@@ -15,6 +15,7 @@ A browser-based game dashboard designed for infants and toddlers. Games are disp
 - **Character Match** (quiz) — a character's name is shown; the child picks the matching character from picture buttons (real images rather than emoji)
 - **Animal Memory Match** (memory) — face-down tiles (3–6 animal pairs, parent-configurable); the child flips two at a time, hearing the animal's sound on each match, with fireworks on completing the board
 - **Admin / Settings** — tabbed settings page (Settings · Games · Badges · History); configure child's name, answer choices (2–4), feedback mode, questions per session, memory board size, Google Analytics ID, and per-game tag overrides
+- **Parental Lock** — `/admin` and `/parent` are gated behind a generated math challenge by default (or an optional 4-digit PIN a parent sets), so a toddler tapping around the dashboard can't reach settings or the parent dashboard
 - **My Progress page** — a kid-facing `/my-progress` page (🌟 link on the dashboard) showing each game's best score, best streak, total questions answered, and earned badges (memory games show fewest flips and pairs matched instead of score/questions), with locked badges shown dimmed rather than as unreadable text; separate from the parent-facing `/parent` analytics dashboard and the admin `/admin` settings page
 - **How-to-play intro screens** — each game shows a brief instructional screen before its first question; parents can permanently dismiss it per game, or bring it back from the admin Games tab
 - **Persistent scoring** — game history stored in `localStorage`; swappable for a backend without touching game code (see [Storage Adapter](#storage-adapter))
@@ -111,7 +112,7 @@ src/
 │                              #   ShellContext, Dashboard, GameCard, FeaturedGameCard, CategorySection,
 │                              #   GameIntro, GameResults, QuizGameShell, GameChoiceGrid, MemoryBoard, Timer,
 │                              #   StreakBadge, BadgeGallery, ScoreHistory, ManifestIcon, ExitConfirmDialog,
-│                              #   LocaleSelector
+│                              #   LocaleSelector, ParentalLockGate
 ├── admin/
 │   └── AdminPage.jsx          # Settings, game tags, badges, score history (tabbed)
 ├── parent/
@@ -121,8 +122,9 @@ src/
 │
 ├── hooks/                     # useGameSession (quiz loop), useMemorySession (memory loop),
 │                              #   useSettings, useScores, useBadges, useBestStreak, usePersonalBest,
-│                              #   useSoundPlayer, useFocusOnMount, useFeaturedGame, useRecentlyPlayed, useGameTags
-├── lib/                       # badges.js (quiz badge catalog), confetti.js, soundLibrary.js
+│                              #   useSoundPlayer, useFocusOnMount, useFeaturedGame, useRecentlyPlayed, useGameTags,
+│                              #   useParentalLockSession
+├── lib/                       # badges.js (quiz badge catalog), confetti.js, soundLibrary.js, parentalLock.js
 ├── utils/                     # buildQueue, buildDeck, reinsertMissed, idealColumns, kidStats,
 │                              #   dashboardUtils, dateRangeUtils, computeBadgeAwards,
 │                              #   computeGameBadgeAwards, evaluatePersonalBest, evaluateMemoryPersonalBest
@@ -323,6 +325,7 @@ Accessible from the dashboard via the gear icon (⚙).
 | Pairs per board | 5 | 3, 4, 5, 6 |
 | Sound effects | On | On, Off |
 | Google Analytics ID | *(empty)* | Any valid GA4 Measurement ID (e.g. `G-XXXXXXXXXX`) |
+| Parental Lock | On (math challenge) | On/Off; optional 4-digit PIN |
 
 **Questions per session** — if a game's item set is smaller than the selected count (for example, a 12-item game with "20" selected), items repeat to fill the session. Repeats are distributed evenly across the pool and the same item is never asked twice in a row.
 
@@ -331,6 +334,8 @@ Accessible from the dashboard via the gear icon (⚙).
 **Parent tap** — feedback shown after a parent taps "Next", giving time to discuss the answer.
 
 **Google Analytics** — when a Measurement ID is entered, the GA4 script is injected at runtime and page view events fire on every navigation. Leaving the field blank disables tracking entirely. The ID is stored in `localStorage` alongside other settings. See [`SECURITY.md`](SECURITY.md) for the privacy analysis.
+
+**Parental Lock** — gates `/admin` and `/parent` behind a single shared unlock: by default, a generated math problem (e.g. "What's 7 + 8?"); setting a 4-digit PIN here replaces it with that PIN instead, until removed. Unlocking once covers the rest of the browser session (closing the tab/browser re-locks it). See [`SECURITY.md`](SECURITY.md#parental-lock) for what this does and doesn't protect against.
 
 **Child's Name** — when set, the dashboard title reads "&lt;Name&gt;'s Playground"; when left blank, it shows the default "My Playground".
 
