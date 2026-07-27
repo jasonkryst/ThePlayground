@@ -30,6 +30,7 @@ Everything the app persists lives in the browser's `localStorage`, on the device
 | Best streaks | Highest answer streak per game | No |
 | Personal bests | Best accuracy/speed (quiz), fewest flips / fastest time per board size (memory) | No |
 | Badge data | Earned badges and lifetime counters per game | No |
+| Parental lock PIN | Optional 4-digit PIN a parent sets to gate `/admin`/`/parent`; stored in plaintext alongside other settings (see below) | No |
 
 The only PII in the system is an optional first name, entered by the parent, displayed in the dashboard title, and stored locally. Nothing is transmitted anywhere — with one deliberate, opt-in exception: Google Analytics, below.
 
@@ -40,6 +41,15 @@ Practical corollaries: clearing browser site data erases everything (backup path
 Google Analytics 4 is **off by default** and stays off unless a parent deliberately enters a GA4 Measurement ID on the admin page. When enabled, the GA script loads at runtime and page-view events (route paths only — no names, scores, or settings) are sent on navigation. Clearing the field disables tracking entirely.
 
 Children's-privacy assessment (also recorded in [`docs/ENHANCEMENTS.md`](docs/ENHANCEMENTS.md)): as a self-hosted app with analytics off by default and enabled only by the child's own parent for their own household, the app has no COPPA exposure in its intended use. That analysis should be revisited if the app is ever distributed to other families with GA enabled by default, or if any analytics beyond page views are added.
+
+## Parental lock
+
+`/admin` and `/parent` are gated behind an unlock challenge (issue #127), on by default: a generated math problem (e.g. "What's 7 + 8?"), or a parent-set 4-digit PIN if one has been configured in Settings. This is a **toddler deterrent, not an access-control boundary** — consistent with this app's overall threat model (no accounts, no server, physical access to the device is already access to the data):
+
+- The PIN is stored in plaintext in the same `localStorage` settings object as everything else — hashing a client-side secret that's checked by client-side JavaScript against client-side storage provides no real protection, since the comparison code and the stored value are both fully visible to anyone with the access a hash would be defending against.
+- There is no rate-limiting or lockout on wrong attempts — this app has no attacker model to defend against beyond a curious child, and a lockout would only risk locking out the parent.
+- **There is no PIN recovery.** A forgotten PIN has no reset flow beyond the same "clear browser site data" wipe this document already describes for score/settings data loss (see Data inventory, above) — clearing site data also removes the PIN, reverting to the default math challenge.
+- Unlocking is scoped to the browser session (`sessionStorage`), not persisted (`localStorage`): navigating between `/admin` and `/parent` within the same visit doesn't re-prompt, but closing the tab or browser re-locks it.
 
 ## XSS surfaces and mitigations
 

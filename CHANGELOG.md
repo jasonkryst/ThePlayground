@@ -3,6 +3,12 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.37.0] - 2026-07-26
+
+### Added
+
+- Parental lock on `/admin` and `/parent` (issue #127): both routes now sit behind a shared unlock challenge, on by default — a generated math problem (e.g. "What's 7 + 8?") requiring no setup, or a 4-digit PIN a parent can set from a new "Parental Lock" section in Settings. `ParentalLockGate` (`src/components/`) wraps both routes outside their lazy `<Suspense>` boundary, so the admin/parent bundle isn't even fetched until the challenge is passed, and the gated content is never mounted (not just hidden) while locked. Verification logic (`getChallenge`/`verifyUnlock`, `src/lib/parentalLock.js`) and the per-session unlock state (`useParentalLockSession`, backed by `sessionStorage` — closing the tab/browser re-locks it) are deliberately isolated from the gate component itself, so a future login system has clean seams to extend rather than a rewrite. This is a toddler deterrent, not a real access-control boundary — see `SECURITY.md` § Parental lock for the full threat-model rationale (plaintext PIN storage, no rate-limiting, no recovery beyond clearing site data).
+
 ## [0.36.0] - 2026-07-26
 
 ### Added

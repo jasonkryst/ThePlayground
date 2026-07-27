@@ -18,6 +18,9 @@ dist-ssr
 # Generated output
 coverage/
 
+# Lighthouse CI reports
+.lighthouseci/
+
 # Stryker mutation testing
 reports/
 .stryker-tmp/
@@ -45,3 +48,6 @@ storybook-static/
 
 # superpowers subagent-driven-development scratch state
 .superpowers/
+
+# Git worktrees (superpowers:using-git-worktrees)
+.worktrees/

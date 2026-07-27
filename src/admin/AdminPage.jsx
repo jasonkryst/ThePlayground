@@ -21,6 +21,32 @@ export default function AdminPage({ manifests = [] }) {
   const resetConfirmTimeoutRef = useRef(null)
   useEffect(() => () => clearTimeout(resetConfirmTimeoutRef.current), [])
 
+  const [pinDraft, setPinDraft] = useState('')
+  const [pinConfirmDraft, setPinConfirmDraft] = useState('')
+  const [pinError, setPinError] = useState(null) // 'mismatch' | 'invalid' | null
+
+  function handleSetPin() {
+    if (!/^\d{4}$/.test(pinDraft)) {
+      setPinError('invalid')
+      return
+    }
+    if (pinDraft !== pinConfirmDraft) {
+      setPinError('mismatch')
+      return
+    }
+    setPinError(null)
+    updateSetting('parentalLock', { ...settings.parentalLock, pin: pinDraft })
+    setPinDraft('')
+    setPinConfirmDraft('')
+  }
+
+  function handleRemovePin() {
+    updateSetting('parentalLock', { ...settings.parentalLock, pin: '' })
+    setPinDraft('')
+    setPinConfirmDraft('')
+    setPinError(null)
+  }
+
   function handleResetClick() {
     if (resetConfirming) {
       clearTimeout(resetConfirmTimeoutRef.current)
@@ -185,6 +211,62 @@ export default function AdminPage({ manifests = [] }) {
                 aria-label={t('admin.gaLabel')}
                 spellCheck={false}
               />
+            </div>
+
+            <div className="admin__section">
+              <h3>{t('admin.parentalLockHeading')}</h3>
+              <p className="admin__hint">{t('admin.parentalLockHint')}</p>
+              <div className="admin__toggle">
+                <button
+                  className={`admin__toggle-btn${settings.parentalLock?.enabled ? ' active' : ''}`}
+                  onClick={() => updateSetting('parentalLock', { ...settings.parentalLock, enabled: true })}
+                >
+                  {t('admin.parentalLockToggleOn')}
+                </button>
+                <button
+                  className={`admin__toggle-btn${!settings.parentalLock?.enabled ? ' active' : ''}`}
+                  onClick={() => updateSetting('parentalLock', { ...settings.parentalLock, enabled: false })}
+                >
+                  {t('admin.parentalLockToggleOff')}
+                </button>
+              </div>
+              {settings.parentalLock?.enabled && (
+                <div className="admin__tag-row">
+                  <p className="admin__hint">
+                    {settings.parentalLock?.pin ? t('admin.parentalLockModePinHint') : t('admin.parentalLockModeMathHint')}
+                  </p>
+                  <input
+                    className="admin__text-input"
+                    type="text"
+                    inputMode="numeric"
+                    placeholder={t('admin.parentalLockPinPlaceholder')}
+                    value={pinDraft}
+                    onChange={e => { setPinDraft(e.target.value); setPinError(null) }}
+                    aria-label={t('admin.parentalLockPinLabel')}
+                  />
+                  <input
+                    className="admin__text-input"
+                    type="text"
+                    inputMode="numeric"
+                    placeholder={t('admin.parentalLockPinConfirmPlaceholder')}
+                    value={pinConfirmDraft}
+                    onChange={e => { setPinConfirmDraft(e.target.value); setPinError(null) }}
+                    aria-label={t('admin.parentalLockPinConfirmLabel')}
+                  />
+                  {pinError === 'mismatch' && <p className="admin__tag-error">{t('admin.parentalLockPinMismatchError')}</p>}
+                  {pinError === 'invalid' && <p className="admin__tag-error">{t('admin.parentalLockPinInvalidError')}</p>}
+                  <div className="admin__tag-buttons">
+                    <button className="admin__tag-save" onClick={handleSetPin}>
+                      {t('admin.parentalLockSetPinButton')}
+                    </button>
+                    {settings.parentalLock?.pin && (
+                      <button className="admin__tag-reset" onClick={handleRemovePin}>
+                        {t('admin.parentalLockRemovePinButton')}
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           </section>
 

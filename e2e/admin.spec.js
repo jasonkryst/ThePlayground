@@ -1,6 +1,10 @@
 import { test, expect } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
 
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => sessionStorage.setItem('pg-parental-lock-unlocked', '1'))
+})
+
 test('admin settings persist after reload', async ({ page }) => {
   await page.goto('/admin')
   await page.getByLabel("Child's Name").fill('Mia')

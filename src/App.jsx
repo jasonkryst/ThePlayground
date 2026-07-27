@@ -3,6 +3,7 @@ import { Suspense, lazy, useEffect } from 'react'
 import Dashboard from './components/Dashboard'
 import AppShell from './components/AppShell'
 import OrientationGate from './components/OrientationGate'
+import ParentalLockGate from './components/ParentalLockGate'
 import useSettings from './hooks/useSettings'
 import { gameIconMap, resolveIcon } from './lib/gameIcons'
 import i18n from './i18n'
@@ -105,8 +106,8 @@ export default function App() {
       <Routes>
         <Route element={<AppShell manifests={manifests} />}>
           <Route path="/"             element={<Dashboard manifests={manifests} />} />
-          <Route path="/admin"        element={<Suspense fallback={<div style={{ padding: 24 }}>Loading...</div>}><AdminPage manifests={manifests} /></Suspense>} />
-          <Route path="/parent"       element={<Suspense fallback={<div style={{ padding: 24 }}>Loading...</div>}><ParentDashboard manifests={manifests} /></Suspense>} />
+          <Route path="/admin"        element={<ParentalLockGate><Suspense fallback={<div style={{ padding: 24 }}>Loading...</div>}><AdminPage manifests={manifests} /></Suspense></ParentalLockGate>} />
+          <Route path="/parent"       element={<ParentalLockGate><Suspense fallback={<div style={{ padding: 24 }}>Loading...</div>}><ParentDashboard manifests={manifests} /></Suspense></ParentalLockGate>} />
           <Route path="/my-progress" element={<Suspense fallback={<div style={{ padding: 24 }}>Loading...</div>}><KidsProgressPage manifests={manifests} /></Suspense>} />
           <Route path="/game/:gameId" element={<GameRoute />} />
         </Route>

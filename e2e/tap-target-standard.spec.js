@@ -14,6 +14,10 @@ const WCAG_MIN_TAP_TARGET = 24
 // trivially true for every button in the app, and guard the documented
 // parent-only/secondary-control exceptions from being "fixed" by mistake.
 
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => sessionStorage.setItem('pg-parental-lock-unlocked', '1'))
+})
+
 test.describe('dashboard tab strip meets the primary 64px tap-target standard', () => {
   test('an unselected tag pill meets the 64px floor at desktop width', async ({ page }) => {
     await page.goto('/')

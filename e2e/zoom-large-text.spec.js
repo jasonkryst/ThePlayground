@@ -172,6 +172,7 @@ test.describe('OS/browser large-text settings', () => {
 // (still px). See ParentDashboard.jsx/.css for the fix.
 test.describe('parent dashboard: chart-axis labels and heatmap alignment under large text (issue #130)', () => {
   test.beforeEach(async ({ page }) => {
+    await page.addInitScript(() => sessionStorage.setItem('pg-parental-lock-unlocked', '1'))
     await page.addInitScript((scores) => {
       localStorage.setItem('playground_scores', JSON.stringify(scores))
     }, seedParentScores([1, 2, 3, 10, 45]))

@@ -1,6 +1,10 @@
 import { test, expect } from '@playwright/test'
 import AxeBuilder from '@axe-core/playwright'
 
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => sessionStorage.setItem('pg-parental-lock-unlocked', '1'))
+})
+
 test('character match: how-to-play intro shows on first visit and starts the session', async ({ page }) => {
   await page.goto('/game/character-match')
 

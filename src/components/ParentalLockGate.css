@@ -1,0 +1,60 @@
+.parental-lock-gate {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: var(--color-bg);
+}
+
+.parental-lock-gate__card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  max-width: 360px;
+  text-align: center;
+}
+
+.parental-lock-gate__heading {
+  font-size: 1.75rem;
+  font-weight: 800;
+  margin: 0;
+}
+
+.parental-lock-gate__heading:focus         { outline: none; }
+.parental-lock-gate__heading:focus-visible { outline: 3px solid var(--color-lavender); outline-offset: 3px; }
+
+.parental-lock-gate__label {
+  font-size: 1.1rem;
+}
+
+.parental-lock-gate__input {
+  font-size: 1.5rem;
+  text-align: center;
+  padding: 12px;
+  border: 2px solid var(--color-lavender);
+  border-radius: 12px;
+}
+
+.parental-lock-gate__input:focus { outline: 3px solid var(--color-lavender); outline-offset: 2px; }
+
+.parental-lock-gate__submit {
+  font-size: 1.1rem;
+  font-weight: 700;
+  padding: 12px 24px;
+  border-radius: 12px;
+  border: none;
+  background: var(--color-aqua);
+  min-height: 64px;
+  cursor: pointer;
+}
+
+.parental-lock-gate__submit:hover { opacity: 0.9; }
+.parental-lock-gate__submit:focus         { outline: none; }
+.parental-lock-gate__submit:focus-visible { outline: 3px solid var(--color-lavender); outline-offset: 3px; }
+
+.parental-lock-gate__error {
+  color: var(--color-error);
+  margin: 0;
+}

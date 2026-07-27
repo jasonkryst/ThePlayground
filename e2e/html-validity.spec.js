@@ -33,6 +33,10 @@ const htmlvalidate = new HtmlValidate({
   },
 })
 
+test.beforeEach(async ({ page }) => {
+  await page.addInitScript(() => sessionStorage.setItem('pg-parental-lock-unlocked', '1'))
+})
+
 const routes = [
   { name: 'dashboard', path: '/' },
   { name: 'admin', path: '/admin' },
