@@ -1,6 +1,6 @@
 .game__swatch { width: 96px; height: 96px; border-radius: var(--radius-card); box-shadow: 0 4px 12px rgb(0 0 0 / 25%); border: 4px solid white; }
 
-.game__choice--bordered { border: 2px solid rgb(0 0 0 / 15%); }
+.game__choice--bordered { border: 2px solid var(--color-hairline); }
 
 /* Color names sit on the answer's own color; inherit the per-choice inline
    text color instead of the shared white. */

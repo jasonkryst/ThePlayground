@@ -2,6 +2,7 @@
 
 .kid-progress__game {
   background: var(--color-surface);
+  border: 2px solid var(--color-surface-outline);
   border-radius: var(--radius-card);
   padding: 20px;
   margin-bottom: 24px;

@@ -13,7 +13,7 @@
   gap: 6px;
   padding: 8px 16px;
   background: var(--color-surface);
-  border-bottom: 1px solid rgb(0 0 0 / 8%);
+  border-bottom: 1px solid var(--color-hairline);
 }
 
 .shell__row {
@@ -90,7 +90,7 @@
 .shell__brand:hover,
 .shell__back:hover,
 .shell__nav-link:hover,
-.shell__home:hover { background: rgb(0 0 0 / 6%); }
+.shell__home:hover { background: var(--color-hover-tint); }
 
 .shell__brand:focus,
 .shell__back:focus,
@@ -105,7 +105,7 @@
   outline-offset: 3px;
 }
 
-.shell__nav-link[aria-current='page'] { background: rgb(0 0 0 / 8%); }
+.shell__nav-link[aria-current='page'] { background: var(--color-hover-tint); }
 
 /* Without this, .shell__nav-link's own `display: flex` (needed for its
    icon centering) makes each link a block-level box, so the three links
@@ -121,7 +121,7 @@
   align-items: center;
   gap: 12px;
   padding-top: 6px;
-  border-top: 1px solid rgb(0 0 0 / 8%);
+  border-top: 1px solid var(--color-hairline);
 }
 
 .shell__title {
@@ -164,7 +164,7 @@ img.shell__title-icon { width: 20px; height: 20px; object-fit: contain; }
   padding: 12px 16px;
   font-size: 0.8125rem;
   color: var(--color-text-muted);
-  border-top: 1px solid rgb(0 0 0 / 8%);
+  border-top: 1px solid var(--color-hairline);
 }
 
 .shell__footer-versions { display: flex; gap: 12px; }

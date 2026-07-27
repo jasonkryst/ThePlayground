@@ -9,7 +9,7 @@
   box-shadow: 0 4px 24px rgb(0 0 0 / 12%);
   text-decoration: none;
   color: var(--color-text);
-  border: 3px solid transparent;
+  border: 2px solid var(--color-surface-outline);
   margin-bottom: 28px;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
@@ -39,7 +39,7 @@ img.featured-card__icon { width: 72px; height: 72px; object-fit: contain; }
 .featured-card__landscape-badge {
   font-size: 0.875rem;
   line-height: 1;
-  background: rgb(0 0 0 / 5%);
+  background: var(--color-hover-tint);
   border-radius: 12px;
   padding: 4px 10px;
 }
