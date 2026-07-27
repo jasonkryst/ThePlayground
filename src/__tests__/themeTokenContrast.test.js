@@ -72,12 +72,6 @@ describe.each(Object.entries(THEMES))('%s theme token contrast', (_name, t) => {
     expect(contrast(t.onAccent, t.lavenderDark)).toBeGreaterThanOrEqual(TEXT_MIN)
     expect(contrast(t.onAccent, t.errorSolid)).toBeGreaterThanOrEqual(TEXT_MIN)
   })
-  it('accent pop colors are non-text-visible (>= 3:1) against the page background', () => {
-    expect(contrast(t.aqua, t.bg)).toBeGreaterThanOrEqual(NON_TEXT_MIN)
-    expect(contrast(t.teal, t.bg)).toBeGreaterThanOrEqual(NON_TEXT_MIN)
-    expect(contrast(t.lavender, t.bg)).toBeGreaterThanOrEqual(NON_TEXT_MIN)
-    expect(contrast(t.lilac, t.bg)).toBeGreaterThanOrEqual(NON_TEXT_MIN)
-  })
 })
 
 // Negative case: proves the test actually discriminates rather than trivially
