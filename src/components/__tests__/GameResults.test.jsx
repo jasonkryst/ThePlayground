@@ -231,4 +231,63 @@ describe('GameResults', () => {
     render(<GameResults score={3} total={5} missed={[]} onPlayAgain={vi.fn()} onHome={vi.fn()} renderMissedItem={renderMissedItem} />)
     expect(screen.getByRole('heading', { name: /results/i })).toHaveFocus()
   })
+
+  it('applies the accent color as inset shading on the results panel and a ring shadow on the emoji', () => {
+    const { container } = render(
+      <GameResults
+        score={3} total={5} missed={[]} onPlayAgain={vi.fn()} onHome={vi.fn()} renderMissedItem={renderMissedItem}
+        accentColor="#4DB6AC"
+      />
+    )
+    expect(container.querySelector('.results')).toHaveStyle({ boxShadow: 'inset 0 6px 0 #4DB6AC' })
+    expect(container.querySelector('.results__emoji')).toHaveStyle({
+      boxShadow: '0 0 0 4px #4DB6AC',
+      borderRadius: '50%',
+    })
+  })
+
+  it('negative: adds no inline styling when accentColor is omitted', () => {
+    const { container } = render(
+      <GameResults score={3} total={5} missed={[]} onPlayAgain={vi.fn()} onHome={vi.fn()} renderMissedItem={renderMissedItem} />
+    )
+    expect(container.querySelector('.results')).not.toHaveAttribute('style')
+    expect(container.querySelector('.results__emoji')).not.toHaveAttribute('style')
+  })
+
+  it('shows the memory-phrased headline when gameType is "memory"', () => {
+    render(
+      <GameResults
+        score={4} total={5} missed={[]} onPlayAgain={vi.fn()} onHome={vi.fn()} renderMissedItem={renderMissedItem}
+        gameType="memory"
+      />
+    )
+    expect(screen.getByText('You found 4 out of 5 pairs!')).toBeInTheDocument()
+    expect(screen.queryByText(/you scored/i)).not.toBeInTheDocument()
+  })
+
+  it('negative: shows the quiz-phrased headline when gameType is omitted or not "memory"', () => {
+    const { rerender } = render(
+      <GameResults score={4} total={5} missed={[]} onPlayAgain={vi.fn()} onHome={vi.fn()} renderMissedItem={renderMissedItem} />
+    )
+    expect(screen.getByText('You scored 4 out of 5!')).toBeInTheDocument()
+    expect(screen.queryByText(/you found/i)).not.toBeInTheDocument()
+
+    rerender(
+      <GameResults
+        score={4} total={5} missed={[]} onPlayAgain={vi.fn()} onHome={vi.fn()} renderMissedItem={renderMissedItem}
+        gameType="quiz"
+      />
+    )
+    expect(screen.getByText('You scored 4 out of 5!')).toBeInTheDocument()
+  })
+
+  it('has no accessibility violations with accentColor and a memory gameType set', async () => {
+    const { container } = render(
+      <GameResults
+        score={5} total={5} missed={[]} onPlayAgain={vi.fn()} onHome={vi.fn()} renderMissedItem={renderMissedItem}
+        accentColor="#4DB6AC" gameType="memory"
+      />
+    )
+    expect(await axe(container)).toHaveNoViolations()
+  })
 })

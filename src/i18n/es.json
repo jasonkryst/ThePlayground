@@ -1,6 +1,7 @@
 {
   "common": {
     "scoreLabel": "¡Sacaste {{score}} de {{total}}!",
+    "scoreLabelMemory": "¡Encontraste {{score}} de {{total}} pares!",
     "playAgain": "Jugar de nuevo",
     "home": "Inicio",
     "next": "Siguiente →",

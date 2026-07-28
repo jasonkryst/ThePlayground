@@ -17,7 +17,7 @@ import QuizGameShell from '../QuizGameShell'
 // text the assertions below already expect, without touching real resources.
 i18n.addResourceBundle('en', 'translation', { quizGameShellTest: { name: 'Test Quiz' } }, true, true)
 
-const manifest = { icon: '🎨', nameKey: 'quizGameShellTest.name', version: '1.0.0' }
+const manifest = { icon: '🎨', nameKey: 'quizGameShellTest.name', version: '1.0.0', color: '#4DB6AC' }
 
 function makeSession(overrides = {}) {
   return {
@@ -114,6 +114,13 @@ describe('QuizGameShell — screens', () => {
     expect(session.restart).toHaveBeenCalled()
     fireEvent.click(screen.getByRole('button', { name: /home/i }))
     expect(onGameEnd).toHaveBeenCalledWith(2, 3)
+  })
+
+  it('forwards manifest.color as the results accent (quiz games have no gameType, so the quiz headline wording is used)', () => {
+    const session = makeSession({ done: true, score: 2, total: 3, missed: [] })
+    const { container } = renderShell(session)
+    expect(container.querySelector('.results')).toHaveStyle({ boxShadow: 'inset 0 6px 0 #4DB6AC' })
+    expect(screen.getByText('You scored 2 out of 3!')).toBeInTheDocument()
   })
 
   it('shows the resume prompt instead of the intro when resumeAvailable is true, and defers to it over everything else', () => {

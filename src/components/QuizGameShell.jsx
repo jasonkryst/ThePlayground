@@ -85,6 +85,8 @@ export default function QuizGameShell({
         onDismissDifficultyBump={dismissDifficultyBump}
         personalBestResult={personalBestResult}
         newBadges={newBadges}
+        accentColor={manifest.color}
+        gameType={manifest.gameType}
       />
     )
   }

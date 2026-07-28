@@ -59,3 +59,21 @@ export const WithNewBadges = {
     ],
   },
 }
+
+export const WithAccent = {
+  args: {
+    score: 5, total: 5, missed: [], onPlayAgain: () => {}, onHome: () => {}, renderMissedItem,
+    accentColor: '#4DB6AC',
+  },
+}
+
+export const WithAccentDark = { ...WithAccent, parameters: { theme: 'dark' } }
+export const WithAccentHighContrast = { ...WithAccent, parameters: { theme: 'high-contrast' } }
+
+export const MemoryPerfectRun = {
+  args: {
+    score: 5, total: 5, missed: [], onPlayAgain: () => {}, onHome: () => {}, renderMissedItem,
+    gameType: 'memory',
+    accentColor: '#4DB6AC',
+  },
+}

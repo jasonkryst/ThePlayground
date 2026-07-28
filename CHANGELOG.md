@@ -3,6 +3,12 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.39.0] - 2026-07-28
+
+### Added
+
+- Per-game result theming (issue #92): the shared `GameResults` screen now takes two optional props, `accentColor` and `gameType`, wired from every game's own `manifest.json` (`manifest.color`, `manifest.gameType`) at the two existing call sites (`QuizGameShell`, Animal Memory Match's `index.jsx`). `accentColor` draws a thin colored top border and a matching ring around the results emoji — purely decorative inline styles, the same technique `KidsProgressPage`'s existing `manifest.color` border already used, so it carries no WCAG text-contrast obligation across Light/Dark/High-Contrast. `gameType === 'memory'` switches the results headline from "You scored X out of Y!" to "You found X out of Y pairs!" (new `common.scoreLabelMemory` i18n key, added to all three locales), matching the wording already used in-game. Omitting both props renders `GameResults` identically to before this change.
+
 ## [0.38.0] - 2026-07-27
 
 ### Added
