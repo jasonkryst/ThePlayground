@@ -1,0 +1,28 @@
+{
+  "soundMemoryMatch": {
+    "manifestName": "Sound Memory Match",
+    "manifestDescription": "Flip the tiles and find the matching sound pairs — listen closely!",
+    "prompt": "Listen and find the matching pairs!",
+    "progress": "{{found}} of {{total}} pairs found",
+    "howToPlay": "Flip two tiles at a time — each one plays a sound instead of showing a picture. Listen closely and find all the matching pairs by ear!",
+    "matchAnnounce": "It's a match! {{name}}!",
+    "noMatchAnnounce": "Not a match — try again!",
+    "completeAnnounce": "You found all the pairs!",
+    "sounds": {
+      "elephant": { "name": "Elephant" },
+      "horse":    { "name": "Horse" },
+      "owl":      { "name": "Owl" },
+      "pig":      { "name": "Pig" },
+      "rooster":  { "name": "Rooster" },
+      "sheep":    { "name": "Sheep" }
+    },
+    "badges": {
+      "goodEar":         { "name": "Good Ear",         "desc": "Finish a board with almost no wasted flips." },
+      "listeningStreak": { "name": "Listening Streak", "desc": "Match 3 pairs in a row without a miss." },
+      "fullChorus":      { "name": "Full Chorus",      "desc": "Complete a 6-pair board." },
+      "soundSpotter":    { "name": "Sound Spotter",    "desc": "Match 25 pairs in total." },
+      "soundPro":        { "name": "Sound Pro",        "desc": "Match 100 pairs in total." },
+      "soundMaestro":    { "name": "Sound Maestro",    "desc": "Match 500 pairs in total." }
+    }
+  }
+}

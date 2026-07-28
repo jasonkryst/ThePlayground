@@ -1,0 +1,11 @@
+{
+  "id": "sound-memory-match",
+  "nameKey": "soundMemoryMatch.manifestName",
+  "descriptionKey": "soundMemoryMatch.manifestDescription",
+  "icon": "🔊",
+  "gameType": "memory",
+  "color": "#80DEEA",
+  "version": "1.0.0",
+  "orientation": "landscape",
+  "tags": ["memory", "sounds"]
+}

@@ -8,6 +8,11 @@ import './MemoryBoard.css'
 // the default 16px root font size).
 const TILE_GAP_PX = 12
 
+// `renderFace(itemId, tileState)`: `tileState` ('up' | 'matched' | 'mismatch')
+// is passed for games that want to render differently once a pair is
+// resolved (e.g. Sound Memory Match reveals the item's picture only after a
+// match). Optional — callers that only take `itemId` are unaffected, since
+// the extra argument is simply ignored.
 export default function MemoryBoard({ tiles, onFlip, renderFace, getFaceLabel, animationsEnabled = true, liveMessage = '' }) {
   const { t } = useTranslation()
   const total = tiles.length
@@ -40,7 +45,7 @@ export default function MemoryBoard({ tiles, onFlip, renderFace, getFaceLabel, a
             >
               <span className="memory-board__tile-inner" aria-hidden="true">
                 <span className="memory-board__tile-back">❓</span>
-                <span className="memory-board__tile-face">{faceUp ? renderFace(tile.itemId) : null}</span>
+                <span className="memory-board__tile-face">{faceUp ? renderFace(tile.itemId, tile.state) : null}</span>
               </span>
               {tile.state === 'mismatch' && <span className="memory-board__cross" aria-hidden="true">✗</span>}
             </button>

@@ -1,0 +1,28 @@
+{
+  "soundMemoryMatch": {
+    "manifestName": "Memorama de Sonidos",
+    "manifestDescription": "¡Voltea las fichas y encuentra los pares de sonidos — escucha con atención!",
+    "prompt": "¡Escucha y encuentra los pares!",
+    "progress": "{{found}} de {{total}} pares encontrados",
+    "howToPlay": "¡Voltea dos fichas a la vez — cada una reproduce un sonido en lugar de mostrar una imagen. Escucha con atención y encuentra todos los pares de oído!",
+    "matchAnnounce": "¡Es un par! ¡{{name}}!",
+    "noMatchAnnounce": "No es un par — ¡inténtalo de nuevo!",
+    "completeAnnounce": "¡Encontraste todos los pares!",
+    "sounds": {
+      "elephant": { "name": "Elefante" },
+      "horse":    { "name": "Caballo" },
+      "owl":      { "name": "Búho" },
+      "pig":      { "name": "Cerdo" },
+      "rooster":  { "name": "Gallo" },
+      "sheep":    { "name": "Oveja" }
+    },
+    "badges": {
+      "goodEar":         { "name": "Buen oído",             "desc": "Termina un tablero con casi ningún volteo desperdiciado." },
+      "listeningStreak": { "name": "Racha auditiva",        "desc": "Empareja 3 pares seguidos sin fallar." },
+      "fullChorus":      { "name": "Coro completo",         "desc": "Completa un tablero de 6 pares." },
+      "soundSpotter":    { "name": "Detector de sonidos",   "desc": "Empareja 25 pares en total." },
+      "soundPro":        { "name": "Experto en sonidos",    "desc": "Empareja 100 pares en total." },
+      "soundMaestro":    { "name": "Maestro de sonidos",    "desc": "Empareja 500 pares en total." }
+    }
+  }
+}

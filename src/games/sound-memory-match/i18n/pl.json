@@ -1,0 +1,28 @@
+{
+  "soundMemoryMatch": {
+    "manifestName": "Dźwiękowe Memory",
+    "manifestDescription": "Odwracaj kafelki i znajdź pasujące pary dźwięków — słuchaj uważnie!",
+    "prompt": "Słuchaj i znajdź pasujące pary!",
+    "progress": "Znaleziono {{found}} z {{total}} par",
+    "howToPlay": "Odwracaj po dwa kafelki naraz — każdy z nich odtwarza dźwięk zamiast pokazywać obrazek. Słuchaj uważnie i znajdź wszystkie pasujące pary ze słuchu!",
+    "matchAnnounce": "To para! {{name}}!",
+    "noMatchAnnounce": "To nie para — spróbuj ponownie!",
+    "completeAnnounce": "Wszystkie pary znalezione!",
+    "sounds": {
+      "elephant": { "name": "Słoń" },
+      "horse":    { "name": "Koń" },
+      "owl":      { "name": "Sowa" },
+      "pig":      { "name": "Świnia" },
+      "rooster":  { "name": "Kogut" },
+      "sheep":    { "name": "Owca" }
+    },
+    "badges": {
+      "goodEar":         { "name": "Dobry słuch",         "desc": "Ukończ planszę z prawie zerową liczbą niepotrzebnych ruchów." },
+      "listeningStreak": { "name": "Seria słuchowa",      "desc": "Dopasuj 3 pary z rzędu bez pomyłki." },
+      "fullChorus":      { "name": "Pełny chór",          "desc": "Ukończ planszę z 6 parami." },
+      "soundSpotter":    { "name": "Tropiciel dźwięków",  "desc": "Dopasuj łącznie 25 par." },
+      "soundPro":        { "name": "Ekspert od dźwięków", "desc": "Dopasuj łącznie 100 par." },
+      "soundMaestro":    { "name": "Mistrz dźwięków",     "desc": "Dopasuj łącznie 500 par." }
+    }
+  }
+}

@@ -1,0 +1,13 @@
+.memory-game__question {
+  text-align: center;
+}
+
+.memory-game__prompt {
+  font-size: 1.3rem;
+  font-weight: bold;
+}
+
+.memory-game__progress {
+  color: var(--color-text-muted, #666);
+  font-size: 0.9rem;
+}
