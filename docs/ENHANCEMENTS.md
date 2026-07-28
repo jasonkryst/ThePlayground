@@ -18,7 +18,6 @@ Everything from the 2026-07-05 standards audit is resolved (shipped across v0.13
 
 ## UI
 
-- **Per-game-type results theming** — the shared `GameResults` screen is deliberately generic; a light theming hook (accent color from the game's manifest `color`, game-type-appropriate stat labels) would make results feel like part of each game without forking the component.
 - **Drag to reorder** — let parents arrange game cards by preference; the dashboard currently orders by category and discovery order, which stops being ideal once the catalog grows.
 
 ## UX
