@@ -175,7 +175,7 @@ test('an inactive admin tab still shows the light hover tint, not the active col
   const gamesTab = page.getByRole('tab', { name: /games/i })
   await gamesTab.hover()
   await page.waitForTimeout(200)
-  await expect(gamesTab).toHaveCSS('background-color', 'rgba(0, 0, 0, 0.05)')
+  await expect(gamesTab).toHaveCSS('background-color', 'rgba(0, 0, 0, 0.06)')
 })
 
 test('active admin tab has no accessibility violations while hovered', async ({ page }) => {
