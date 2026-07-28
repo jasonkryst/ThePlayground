@@ -1,6 +1,7 @@
 {
   "common": {
     "scoreLabel": "Wynik: {{score}} na {{total}}!",
+    "scoreLabelMemory": "Znaleziono {{score}} z {{total}} par!",
     "playAgain": "Zagraj ponownie",
     "home": "Strona główna",
     "next": "Dalej →",

@@ -6,16 +6,26 @@ export default function GameResults({
   score, total, missed, onPlayAgain, onHome, renderMissedItem,
   offerDifficultyBump = false, numChoices, onAcceptDifficultyBump, onDismissDifficultyBump,
   personalBestResult = null, newBadges = [],
+  accentColor, gameType,
 }) {
   const { t } = useTranslation()
   const headingRef = useFocusOnMount()
 
+  // Light per-game theming hook (issue #92): purely decorative (border/ring,
+  // never text-on-fill), so it carries no WCAG text-contrast obligation —
+  // same technique as KidsProgressPage's manifest.color border-top.
+  const scoreLabelKey = gameType === 'memory' ? 'common.scoreLabelMemory' : 'common.scoreLabel'
+  const rootStyle = accentColor ? { borderTop: `6px solid ${accentColor}` } : undefined
+  const emojiStyle = accentColor
+    ? { border: `4px solid ${accentColor}`, borderRadius: '50%', padding: '10px' }
+    : undefined
+
   return (
-    <div className="results">
+    <div className="results" style={rootStyle}>
       <h2 className="sr-only" tabIndex={-1} ref={headingRef}>{t('common.resultsHeading')}</h2>
-      <div className="results__emoji">{missed.length === 0 ? '🎉' : '⭐'}</div>
+      <div className="results__emoji" style={emojiStyle}>{missed.length === 0 ? '🎉' : '⭐'}</div>
       <div className="results__score">{score} / {total}</div>
-      <div className="results__label">{t('common.scoreLabel', { score, total })}</div>
+      <div className="results__label">{t(scoreLabelKey, { score, total })}</div>
 
       {personalBestResult?.accuracy?.isNewRecord && (
         <div className="results__record">

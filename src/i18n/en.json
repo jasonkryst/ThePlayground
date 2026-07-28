@@ -1,6 +1,7 @@
 {
   "common": {
     "scoreLabel": "You scored {{score}} out of {{total}}!",
+    "scoreLabelMemory": "You found {{score}} out of {{total}} pairs!",
     "playAgain": "Play Again",
     "home": "Home",
     "next": "Next →",
