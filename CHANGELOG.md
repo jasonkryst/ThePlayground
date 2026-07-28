@@ -3,6 +3,12 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.0.0] - 2026-07-28
+
+### Changed
+
+- First 1.0.0 release. No functional changes from 0.40.1 — this marks the app as stable after seven games, three locales (en/es/pl), the full quiz/memory engine, parental lock, session resume, adaptive item selection, badges, and a nine-job CI pipeline (lint, unit tests, e2e, accessibility, visual regression, HTML/CSS validation, Docker build, dependency audit, Lighthouse budgets, Trivy image scanning) all in place and green.
+
 ## [0.40.1] - 2026-07-28
 
 ### Fixed
