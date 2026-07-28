@@ -15,9 +15,9 @@ export default function GameResults({
   // never text-on-fill), so it carries no WCAG text-contrast obligation —
   // same technique as KidsProgressPage's manifest.color border-top.
   const scoreLabelKey = gameType === 'memory' ? 'common.scoreLabelMemory' : 'common.scoreLabel'
-  const rootStyle = accentColor ? { borderTop: `6px solid ${accentColor}` } : undefined
+  const rootStyle = accentColor ? { boxShadow: `inset 0 6px 0 ${accentColor}` } : undefined
   const emojiStyle = accentColor
-    ? { border: `4px solid ${accentColor}`, borderRadius: '50%', padding: '10px' }
+    ? { boxShadow: `0 0 0 4px ${accentColor}`, borderRadius: '50%', padding: '10px' }
     : undefined
 
   return (

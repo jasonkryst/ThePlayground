@@ -145,5 +145,5 @@ test('memory match: results screen receives the shared themed styling (#53) and 
   await expect(results).toHaveCSS('display', 'flex')
   await expect(results).toHaveCSS('text-align', 'center')
   await expect(page.getByRole('button', { name: /play again/i })).toHaveCSS('border-radius', '16px')
-  await expect(results).toHaveCSS('border-top-color', 'rgb(77, 182, 172)') // manifest.color #4DB6AC
+  await expect(results).toHaveCSS('box-shadow', 'rgb(77, 182, 172) 0px 6px 0px 0px inset') // manifest.color #4DB6AC
 })

@@ -119,7 +119,7 @@ describe('QuizGameShell — screens', () => {
   it('forwards manifest.color as the results accent (quiz games have no gameType, so the quiz headline wording is used)', () => {
     const session = makeSession({ done: true, score: 2, total: 3, missed: [] })
     const { container } = renderShell(session)
-    expect(container.querySelector('.results')).toHaveStyle({ borderTop: '6px solid #4DB6AC' })
+    expect(container.querySelector('.results')).toHaveStyle({ boxShadow: 'inset 0 6px 0 #4DB6AC' })
     expect(screen.getByText('You scored 2 out of 3!')).toBeInTheDocument()
   })
 

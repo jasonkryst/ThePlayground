@@ -232,16 +232,16 @@ describe('GameResults', () => {
     expect(screen.getByRole('heading', { name: /results/i })).toHaveFocus()
   })
 
-  it('applies the accent color as a top border and an emoji ring when accentColor is given', () => {
+  it('applies the accent color as inset shading on the results panel and a ring shadow on the emoji', () => {
     const { container } = render(
       <GameResults
         score={3} total={5} missed={[]} onPlayAgain={vi.fn()} onHome={vi.fn()} renderMissedItem={renderMissedItem}
         accentColor="#4DB6AC"
       />
     )
-    expect(container.querySelector('.results')).toHaveStyle({ borderTop: '6px solid #4DB6AC' })
+    expect(container.querySelector('.results')).toHaveStyle({ boxShadow: 'inset 0 6px 0 #4DB6AC' })
     expect(container.querySelector('.results__emoji')).toHaveStyle({
-      border: '4px solid #4DB6AC',
+      boxShadow: '0 0 0 4px #4DB6AC',
       borderRadius: '50%',
     })
   })

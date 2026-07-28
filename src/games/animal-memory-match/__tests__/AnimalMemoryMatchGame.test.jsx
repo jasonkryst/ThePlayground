@@ -229,7 +229,7 @@ describe('AnimalMemoryMatchGame', () => {
     await act(async () => {})
     expect(screen.getByText('You found 3 out of 3 pairs!')).toBeInTheDocument()
     expect(screen.queryByText(/you scored/i)).not.toBeInTheDocument()
-    expect(container.querySelector('.results')).toHaveStyle({ borderTop: '6px solid #4DB6AC' })
+    expect(container.querySelector('.results')).toHaveStyle({ boxShadow: 'inset 0 6px 0 #4DB6AC' })
   })
 
   it('shows the fewest-flips record banner on the results screen', async () => {
