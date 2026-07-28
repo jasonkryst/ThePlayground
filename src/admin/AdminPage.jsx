@@ -212,6 +212,7 @@ export default function AdminPage({ manifests = [] }) {
                     key={opt.value}
                     className={`admin__toggle-btn${settings.theme === opt.value ? ' active' : ''}`}
                     onClick={() => updateSetting('theme', opt.value)}
+                    aria-pressed={settings.theme === opt.value}
                   >
                     {opt.label}
                   </button>

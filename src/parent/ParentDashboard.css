@@ -84,7 +84,7 @@
   overflow-wrap: anywhere;
   hyphens: auto;
   text-align: center;
-  border-bottom: 1px solid var(--color-hover-tint);
+  border-bottom: 1px solid var(--color-hairline);
 }
 
 .parent__streak-table th {

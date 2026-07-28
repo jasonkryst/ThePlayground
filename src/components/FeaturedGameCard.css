@@ -9,7 +9,7 @@
   box-shadow: 0 4px 24px rgb(0 0 0 / 12%);
   text-decoration: none;
   color: var(--color-text);
-  border: 2px solid var(--color-surface-outline);
+  border: 3px solid var(--color-surface-outline);
   margin-bottom: 28px;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
 }

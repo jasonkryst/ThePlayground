@@ -5,8 +5,8 @@
   gap: 6px;
 }
 
-.game__replay    { font-size: 2.25rem; background: rgb(255 255 255 / 30%); border-radius: 50%; width: 72px; height: 72px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: none; transition: background 0.15s; }
-.game__replay:hover { background: rgb(255 255 255 / 50%); }
+.game__replay    { font-size: 2.25rem; background: color-mix(in srgb, var(--color-on-accent) 30%, transparent); border-radius: 50%; width: 72px; height: 72px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: none; transition: background 0.15s; }
+.game__replay:hover { background: color-mix(in srgb, var(--color-on-accent) 50%, transparent); }
 .game__replay:focus         { outline: none; }
 .game__replay:focus-visible { outline: 3px solid var(--color-lavender); outline-offset: 3px; }
 
@@ -26,4 +26,4 @@
   .game__replay--blocked { animation: pulse-replay 1.2s ease-in-out infinite; }
 }
 
-.replay-button__hint { color: white; font-size: 0.9375rem; font-weight: 700; text-align: center; }
+.replay-button__hint { color: var(--color-on-accent); font-size: 0.9375rem; font-weight: 700; text-align: center; }

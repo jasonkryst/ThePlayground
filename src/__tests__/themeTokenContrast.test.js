@@ -24,6 +24,10 @@ const THEMES = {
     lavenderText: '#C9A9FF', tealText: '#26D9B7',
     aqua: '#4DD8E8', teal: '#26D9B7', lavender: '#C9A9FF', lilac: '#FF8AD8',
     aquaDark: '#4DD8E8', tealDark: '#26D9B7', lavenderDark: '#C9A9FF',
+    // Flat colors only in this theme (transparent in Light/Dark, so not
+    // meaningfully testable as a hex there without replicating alpha-compositing
+    // math this file doesn't otherwise do).
+    hairline: '#FFFFFF', surfaceOutline: '#FFFFFF',
   },
 }
 
@@ -72,6 +76,18 @@ describe.each(Object.entries(THEMES))('%s theme token contrast', (_name, t) => {
     expect(contrast(t.onAccent, t.lavenderDark)).toBeGreaterThanOrEqual(TEXT_MIN)
     expect(contrast(t.onAccent, t.errorSolid)).toBeGreaterThanOrEqual(TEXT_MIN)
   })
+
+  // Non-text/border threshold (Global Constraint) — --color-hairline and
+  // --color-surface-outline are `transparent` in Light/Dark, so only High
+  // Contrast (where both are flat #FFFFFF) is meaningfully testable here.
+  if (_name === 'highContrast') {
+    it('hairline divider on page background >= 3:1', () => {
+      expect(contrast(t.hairline, t.bg)).toBeGreaterThanOrEqual(NON_TEXT_MIN)
+    })
+    it('surface outline on page background >= 3:1', () => {
+      expect(contrast(t.surfaceOutline, t.bg)).toBeGreaterThanOrEqual(NON_TEXT_MIN)
+    })
+  }
 })
 
 // Negative case: proves the test actually discriminates rather than trivially
