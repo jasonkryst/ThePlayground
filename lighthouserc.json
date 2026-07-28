@@ -11,8 +11,8 @@
       ],
       "numberOfRuns": 3,
       "puppeteerScript": "./lighthouse-puppeteer.cjs",
-      "settings": {
-        "chromeFlags": ["--no-sandbox"]
+      "puppeteerLaunchOptions": {
+        "args": ["--no-sandbox"]
       }
     },
     "assert": {

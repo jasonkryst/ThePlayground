@@ -282,12 +282,18 @@ supports:
   launching it crashed with `No usable sandbox!` — Chrome installed by
   `browser-actions/setup-chrome` has no setuid-sandbox helper or AppArmor
   profile registered in the Actions container's namespace, unlike whatever
-  a distro-packaged/apt-installed Chrome would have. Added
-  `"settings": { "chromeFlags": ["--no-sandbox"] }` to `lighthouserc.json`'s
-  `collect` block — standard, expected for any CI-downloaded (non-apt)
-  Chrome binary in a container that doesn't grant the extra namespace
-  privileges the sandbox needs, and not a meaningful security tradeoff in an
-  ephemeral, single-use CI container.
+  a distro-packaged/apt-installed Chrome would have. First attempt,
+  `collect.settings.chromeFlags: ["--no-sandbox"]`, turned out to be
+  silently ignored — lhci's own runtime warning explained why: this config
+  already sets `collect.puppeteerScript` (for the parental-lock
+  `localStorage` seed), and `chromeFlags` is only honored on the
+  non-puppeteerScript launch path. The actual fix is
+  `collect.puppeteerLaunchOptions.args: ["--no-sandbox"]`, which passes
+  straight through to `puppeteer.launch()` regardless of `puppeteerScript`
+  — confirmed against a real Actions run. A negative test now guards the
+  first (wrong) key path specifically, since it's exactly the kind of
+  looks-right-but-silently-does-nothing config that would otherwise
+  regress unnoticed.
 - **The PR's own first real CI run also surfaced one unrelated `e2e` flake**
   (`css-validity.spec.js`'s "animal sounds gameplay screen has no invalid
   inline CSS" — a 60s timeout waiting for `game-intro-start` to become
