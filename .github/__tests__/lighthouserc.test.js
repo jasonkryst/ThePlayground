@@ -32,6 +32,10 @@ describe('lighthouserc.json', () => {
     expect(config.ci.collect.startServerCommand).not.toContain('vite dev')
   })
 
+  it('launches Chrome with --no-sandbox (setup-chrome-installed Chrome has no zygote sandbox helper registered in the GitHub Actions container)', () => {
+    expect(config.ci.collect.settings?.chromeFlags).toContain('--no-sandbox')
+  })
+
   it.each(EXPECTED_CATEGORIES)('%s category has an error-level assertion at minScore 0.8', (category) => {
     const assertion = config.ci.assert.assertions[`categories:${category}`]
     expect(assertion).toBeDefined()

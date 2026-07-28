@@ -10,7 +10,10 @@
         "http://localhost:4173/my-progress"
       ],
       "numberOfRuns": 3,
-      "puppeteerScript": "./lighthouse-puppeteer.cjs"
+      "puppeteerScript": "./lighthouse-puppeteer.cjs",
+      "settings": {
+        "chromeFlags": ["--no-sandbox"]
+      }
     },
     "assert": {
       "assertions": {

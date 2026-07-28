@@ -277,3 +277,30 @@ supports:
   remains out of scope (per the original CI design's own reasoning), so this
   change is validated the same way the original design doc says everything
   workflow-shaped ultimately is: "the Actions run itself is the live proof."
+  That proof surfaced a second, deeper issue the local investigation
+  couldn't have caught: once Chrome was actually found (confirming §2's fix),
+  launching it crashed with `No usable sandbox!` — Chrome installed by
+  `browser-actions/setup-chrome` has no setuid-sandbox helper or AppArmor
+  profile registered in the Actions container's namespace, unlike whatever
+  a distro-packaged/apt-installed Chrome would have. Added
+  `"settings": { "chromeFlags": ["--no-sandbox"] }` to `lighthouserc.json`'s
+  `collect` block — standard, expected for any CI-downloaded (non-apt)
+  Chrome binary in a container that doesn't grant the extra namespace
+  privileges the sandbox needs, and not a meaningful security tradeoff in an
+  ephemeral, single-use CI container.
+- **The PR's own first real CI run also surfaced one unrelated `e2e` flake**
+  (`css-validity.spec.js`'s "animal sounds gameplay screen has no invalid
+  inline CSS" — a 60s timeout waiting for `game-intro-start` to become
+  clickable against the shared `npm run dev` webServer). Same *symptom*
+  shape as §5's confetti-csp race (a button that should render almost
+  immediately taking too long under worker contention), but a different
+  mechanism — this test doesn't share confetti-csp's `beforeAll`/build/
+  Docker machinery at all, it's a plain `page.goto` + click against the
+  suite's one shared dev server, which many parallel CI workers request
+  different game routes from simultaneously. No prior occurrence found
+  across the last 15+ CI runs searched, and this PR's own changes don't
+  touch `animal-sounds` or `css-validity.spec.js` — treated as a one-off
+  flake (re-run to confirm) rather than a sixth pipeline bug in scope of
+  issue #141, since inventing a fix for an unreproduced, never-before-seen
+  single failure risks solving the wrong problem. Worth revisiting if it
+  recurs.
