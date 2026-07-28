@@ -56,10 +56,6 @@ Quiz-type (all get the engine's retries, hints, timers, badges, and personal bes
 - **First Words** — a picture is shown and its word is spoken; the child picks the matching picture from spoken-word prompts; receptive vocabulary for pre-verbal children.
 - **Same or Different** — two pictures, one binary choice; the simplest possible mechanic, reachable by the youngest users before multi-choice games make sense.
 
-Memory-type (exercise the v0.23.0 memory engine — `useMemorySession`, `MemoryBoard`, `buildDeck` — beyond its single current game):
-
-- **Sound Memory Match** — tiles play sounds instead of showing pictures when flipped; matching by ear combines the memory engine with the shared sound library and adds an auditory-memory dimension no current game has.
-
 ## Security
 
 Mirrors the "known gaps" in `SECURITY.md` — each of these is acknowledged there and tracked here. Items marked **SEC-n** come from the 2026-07-12 full security audit (`docs/superpowers/specs/2026-07-12-security-audit-findings.md`), which found no HIGH-severity issues:

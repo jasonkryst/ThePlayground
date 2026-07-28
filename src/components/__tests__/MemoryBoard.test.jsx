@@ -80,6 +80,28 @@ describe('MemoryBoard', () => {
     const { container } = renderBoard()
     expect(await axe(container)).toHaveNoViolations()
   })
+
+  it('passes the tile state as renderFace\'s second argument for each face-up tile', () => {
+    const stateByTile = {}
+    renderBoard({
+      tiles: [
+        { tileId: 'a', itemId: 'dog', state: 'up' },
+        { tileId: 'b', itemId: 'cat', state: 'matched' },
+        { tileId: 'c', itemId: 'cat', state: 'mismatch' },
+      ],
+      renderFace: (itemId, tileState) => { stateByTile[itemId + tileState] = tileState; return <span>{itemId}</span> },
+    })
+    expect(stateByTile.dogup).toBe('up')
+    expect(stateByTile.catmatched).toBe('matched')
+    expect(stateByTile.catmismatch).toBe('mismatch')
+  })
+
+  it('does not break a renderFace that only reads the first argument (backward compatibility)', () => {
+    // Regression guard: existing callers (e.g. Animal Memory Match) declare
+    // `renderFace={itemId => ...}` and never look at a second argument —
+    // passing tile.state along must stay silently ignorable, not required.
+    expect(() => renderBoard({ renderFace: itemId => <span>{itemId}</span> })).not.toThrow()
+  })
 })
 
 describe('MemoryBoard grid sizing (issue #58)', () => {

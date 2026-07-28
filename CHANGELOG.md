@@ -3,6 +3,12 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.40.0] - 2026-07-28
+
+### Added
+
+- Sound Memory Match (issue #131): a new memory-type game reusing the v0.23.0 memory engine (`useMemorySession`, `MemoryBoard`, `buildDeck`) with a twist — flipping a tile plays a sound clip instead of revealing a picture, so pairs are found by ear rather than by sight. `MemoryBoard`'s generic `renderFace` render prop already made this a game-level change, not an engine change: the new game's `index.jsx` wraps `flipTile` in its own `handleFlip`, mirroring the engine's own down/locked guards so a click that would be a no-op internally (already face-up, or during the post-mismatch lock window) never fires a clip either. While a pair is still being found, every face-up tile (including a mismatch) renders the same generic 🔊 glyph, so there's never a visual shortcut around listening; only once a pair is actually matched does the tile swap to the real item picture, as a reward rather than a hint. That reveal needed one small additive change to the shared engine: `MemoryBoard`'s `renderFace(itemId)` now also receives the tile's state as a second argument (`renderFace(itemId, tileState)`), which existing callers (Animal Memory Match) simply ignore. Ships its own 6-clip item pool (elephant/horse/owl/pig/rooster/sheep, all already in the shared sound library) distinct from Animal Memory Match's animals, its own 6-badge catalog (`goodEar`, `listeningStreak`, `fullChorus` session badges; `soundSpotter`/`soundPro`/`soundMaestro` lifetime tiers on a per-game `pairsMatched` counter), and full en/es/pl i18n. Uses the `manifest.color`/`gameType` results theming from issue #92 (`#80DEEA`) and picks up personal bests, badges, orientation-lock, and every other memory-engine feature for free.
+
 ## [0.39.0] - 2026-07-28
 
 ### Added

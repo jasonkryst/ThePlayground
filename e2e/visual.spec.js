@@ -48,6 +48,7 @@ const stories = [
   'pages-adminpage--default-high-contrast',
   'pages-kidsprogresspage--default',
   'games-animalmemorymatchgame--default',
+  'games-soundmemorymatchgame--default',
   'games-animalsoundsgame--default',
   'games-charactermatchgame--default',
   'games-colormatchgame--default',
