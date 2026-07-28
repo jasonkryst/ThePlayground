@@ -151,7 +151,7 @@ describe('AnimalMemoryMatchGame', () => {
     expect(finalClip.pause).not.toHaveBeenCalled()
     act(() => { vi.advanceTimersByTime(2100) })
     await act(async () => {})
-    expect(screen.getByText(/you scored/i)).toBeInTheDocument()
+    expect(screen.getByText(/you found/i)).toBeInTheDocument()
     expect(finalClip.pause).toHaveBeenCalledTimes(1)
   })
 
@@ -217,7 +217,19 @@ describe('AnimalMemoryMatchGame', () => {
     await playFullBoard()
     act(() => { vi.advanceTimersByTime(2100) })
     await act(async () => {})
-    expect(screen.getByText(/you scored/i)).toBeInTheDocument()
+    expect(screen.getByText(/you found/i)).toBeInTheDocument()
+  })
+
+  it('shows the memory-phrased headline and the manifest accent color on the results screen', async () => {
+    vi.useFakeTimers()
+    let container
+    await act(async () => { container = render(<AnimalMemoryMatchGame onGameEnd={onGameEnd} />).container })
+    await playFullBoard()
+    act(() => { vi.advanceTimersByTime(2100) })
+    await act(async () => {})
+    expect(screen.getByText('You found 3 out of 3 pairs!')).toBeInTheDocument()
+    expect(screen.queryByText(/you scored/i)).not.toBeInTheDocument()
+    expect(container.querySelector('.results')).toHaveStyle({ borderTop: '6px solid #4DB6AC' })
   })
 
   it('shows the fewest-flips record banner on the results screen', async () => {
@@ -249,7 +261,7 @@ describe('AnimalMemoryMatchGame', () => {
     await playFullBoard()
     act(() => { vi.advanceTimersByTime(2100) })
     await act(async () => {})
-    expect(screen.getByText(/you scored/i)).toBeInTheDocument()
+    expect(screen.getByText(/you found/i)).toBeInTheDocument()
     expect(screen.queryByText(/new record/i)).not.toBeInTheDocument()
   })
 

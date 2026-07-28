@@ -63,6 +63,8 @@ export default function AnimalMemoryMatchGame({ onGameEnd }) {
         onHome={() => onGameEnd(pairsFound, totalPairs)}
         personalBestResult={personalBestResult}
         newBadges={newBadges}
+        accentColor={manifest.color}
+        gameType={manifest.gameType}
       />
     )
   }

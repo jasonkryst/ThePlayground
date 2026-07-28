@@ -47,7 +47,7 @@ test('memory match: matched pair stays revealed; mismatched pair flips back', as
 test('memory match: full play-through reaches results and returns home', async ({ page }) => {
   await startGame(page)
   await completeBoard(page)
-  await expect(page.getByText(/you scored/i)).toBeVisible({ timeout: 10_000 })
+  await expect(page.getByText(/you found/i)).toBeVisible({ timeout: 10_000 })
   await page.getByRole('button', { name: 'Home', exact: true }).click()
   await expect(page).toHaveURL('/')
 })
@@ -135,7 +135,7 @@ test('memory match: board stays centered on a wide screen instead of sticking to
   expect(gridBox.width).toBeGreaterThan(700)
 })
 
-test('memory match: results screen receives the shared themed styling (#53)', async ({ page }) => {
+test('memory match: results screen receives the shared themed styling (#53) and the manifest accent color (#92)', async ({ page }) => {
   // Direct navigation matters: the bug only reproduced when no quiz game's
   // stylesheet (which used to carry the .results rules) had been loaded first.
   await startGame(page)
@@ -145,4 +145,5 @@ test('memory match: results screen receives the shared themed styling (#53)', as
   await expect(results).toHaveCSS('display', 'flex')
   await expect(results).toHaveCSS('text-align', 'center')
   await expect(page.getByRole('button', { name: /play again/i })).toHaveCSS('border-radius', '16px')
+  await expect(results).toHaveCSS('border-top-color', 'rgb(77, 182, 172)') // manifest.color #4DB6AC
 })
