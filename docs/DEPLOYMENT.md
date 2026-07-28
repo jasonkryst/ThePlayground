@@ -233,7 +233,7 @@ Consequences worth understanding before you rely on the data:
 - **"Clear site data" wipes it.** Browser privacy cleanups, private-browsing windows, and some "free up space" flows delete `localStorage`. There is no recycle bin.
 - **The container is stateless.** Rebuilding, upgrading, or moving the Docker container never touches user data — but by the same token, backing up the server does *not* back up scores.
 - **Backup = CSV export.** The Parent Dashboard (`/parent`) has an Export CSV button that downloads the full score history for the currently selected date range (select "All time" first for a complete backup). This is currently the only export path.
-- **Swapping in a real backend** is a designed-for path: implement the storage adapter's ten methods against your backend and change one export in `src/storage/index.js`. See the Storage Adapter section of the [README](../README.md#storage-adapter).
+- **Swapping in a real backend** is a designed-for path: implement the storage adapter's 15 methods against your backend and change one export in `src/storage/index.js`. See the Storage Adapter section of the [README](../README.md#storage-adapter).
 
 ---
 

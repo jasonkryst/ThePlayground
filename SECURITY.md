@@ -100,7 +100,7 @@ Stated plainly rather than papered over (each is tracked in [`docs/ENHANCEMENTS.
 
 | Version | Supported |
 |---|---|
-| Latest minor (0.24.x) | ✅ |
+| Latest minor (0.40.x) | ✅ |
 | Older | ❌ — it's a static site; the upgrade path is `git pull` and redeploy ([`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md#updating-a-running-deployment)) |
 
 ## Reporting a vulnerability

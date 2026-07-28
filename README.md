@@ -13,6 +13,7 @@ A browser-based game dashboard designed for infants and toddlers. Games are disp
 - **Fruit & Veggie ID** (quiz) — a fruit or vegetable's name is spoken aloud (browser speech synthesis); the child taps the matching picture from picture-only buttons (falls back to on-screen text where the browser has no speech synthesis)
 - **Color Match** (quiz) — a color swatch is shown; the child picks the matching colored object from picture buttons
 - **Character Match** (quiz) — a character's name is shown; the child picks the matching character from picture buttons (real images rather than emoji)
+- **Character Match: Bluey** (quiz) — the same Character Match gameplay, themed around the Bluey cast, as its own auto-discovered game with its own manifest and assets
 - **Animal Memory Match** (memory) — face-down tiles (3–6 animal pairs, parent-configurable); the child flips two at a time, hearing the animal's sound on each match, with fireworks on completing the board
 - **Sound Memory Match** (memory) — the same memory engine, but a tile's sound *is* its face: flipping a tile plays a clip instead of revealing a picture, so pairs are found by ear rather than by sight; a matched pair reveals its real picture afterward as a reward, never as a hint beforehand
 - **Admin / Settings** — tabbed settings page (Settings · Games · Badges · History); configure child's name, answer choices (2–4), feedback mode, questions per session, memory board size, Google Analytics ID, and per-game tag overrides
@@ -98,6 +99,7 @@ For production builds, Docker deployment, and self-hosting guidance, see [`docs/
 | `npm run validate:css` | CSS validation of dynamic inline styles only (subset of `e2e`) |
 | `npm run storybook` | Browse component/game stories at [localhost:6006](http://localhost:6006) |
 | `npm run build-storybook` | Production Storybook build check |
+| `npm run mutation` | Mutation testing (Stryker) over core hooks/utils |
 
 ---
 
@@ -113,7 +115,8 @@ src/
 │                              #   ShellContext, Dashboard, GameCard, FeaturedGameCard, CategorySection,
 │                              #   GameIntro, GameResults, QuizGameShell, GameChoiceGrid, MemoryBoard, Timer,
 │                              #   StreakBadge, BadgeGallery, ScoreHistory, ManifestIcon, ExitConfirmDialog,
-│                              #   LocaleSelector, ParentalLockGate
+│                              #   LocaleSelector, ParentalLockGate, OrientationGate/OrientationGateContext/
+│                              #   OrientationOverlay, ReplayButton, ResumePrompt, TagFilterBar
 ├── admin/
 │   └── AdminPage.jsx          # Settings, game tags, badges, score history (tabbed)
 ├── parent/
@@ -124,11 +127,13 @@ src/
 ├── hooks/                     # useGameSession (quiz loop), useMemorySession (memory loop),
 │                              #   useSettings, useScores, useBadges, useBestStreak, usePersonalBest,
 │                              #   useSoundPlayer, useFocusOnMount, useFeaturedGame, useRecentlyPlayed, useGameTags,
-│                              #   useParentalLockSession
+│                              #   useParentalLockSession, useItemStats, useOrientation, useQuestionAudio,
+│                              #   useSpeech, useFitTileSize, useHeaderHeightVar, useTagRowOverflow
 ├── lib/                       # badges.js (quiz badge catalog), confetti.js, soundLibrary.js, parentalLock.js
 ├── utils/                     # buildQueue, buildDeck, reinsertMissed, idealColumns, kidStats,
 │                              #   dashboardUtils, dateRangeUtils, computeBadgeAwards,
-│                              #   computeGameBadgeAwards, evaluatePersonalBest, evaluateMemoryPersonalBest
+│                              #   computeGameBadgeAwards, evaluatePersonalBest, evaluateMemoryPersonalBest,
+│                              #   computeItemWeight, weightedShuffle, sessionResume
 ├── assets/
 │   └── sounds/                # Shared sound library (animal mp3s and future effect sounds)
 │
@@ -143,8 +148,9 @@ src/
 │   ├── pl.json                # Polish translation, same structure as en.json
 │   └── index.js               # Merges en.json/es.json/pl.json + every game's i18n/*.json at startup
 │
-└── games/                     # One folder per game — animal-sounds, color-match,
-    └── animal-memory-match/   #   character-match, animal-memory-match; drop a new folder to add one
+└── games/                     # One folder per game — animal-sounds, color-match, character-match,
+    └── animal-memory-match/   #   character-match-bluey, fruit-veggie-id, animal-memory-match,
+                                #   sound-memory-match; drop a new folder to add one
         ├── manifest.json      # Game metadata (id, nameKey/descriptionKey, tags, version, optional gameType, orientation)
         ├── index.jsx          # Game component (default export accepting onGameEnd)
         ├── badges.js          # Optional per-game badge catalog (auto-discovered)
@@ -185,7 +191,7 @@ never reports status can always be exited immediately.
 
 ### Storage Adapter
 
-All persistence goes through the paired get/save interface defined in `src/storage/adapter.js` — ten methods in five pairs:
+All persistence goes through the paired get/save interface defined in `src/storage/adapter.js` — 15 methods across 7 groups (6 get/save pairs plus a 3-method session-resume group):
 
 ```js
 getScores()                  // → Promise<Score[]>
@@ -198,11 +204,16 @@ getPersonalBests()           // → Promise<{ [gameId]: { accuracy?, speedMs?, f
 savePersonalBests(bestsMap)  // → Promise<void>
 getBadgeData()               // → Promise<{ awards, lifetimeQuestions, lifetimeCounters }>
 saveBadgeData(data)          // → Promise<void>
+getItemStats()               // → Promise<{ [gameId]: { [itemId]: { missCount, lastMissedAt } } }>
+saveItemStats(data)          // → Promise<void>
+getSessionResume()           // → Promise<SessionResumeState | null>
+saveSessionResume(state)     // → Promise<void>
+clearSessionResume()         // → Promise<void>
 ```
 
 **Score shape:** every record carries the base `{ gameId, score, total, date, timestamp }`. Quiz sessions add `peakStreak` and a `timings[]` array (`{ questionIndex, itemId, correct, durationMs, attemptNumber, timedOut? }` per question). Memory sessions add `flipAttempts`, `mismatches`, `peakMatchStreak`, and `durationMs`. The JSDoc in `src/storage/adapter.js` is the authoritative contract for every stored shape.
 
-The active adapter is exported from `src/storage/index.js`. To swap `localStorage` for Supabase, Firebase, or any other backend, implement these ten methods and change that one export — no game code or hook changes needed. Games consume shared state through the `useSettings`/`useScores` hooks (and friends) rather than props drilling.
+The active adapter is exported from `src/storage/index.js`. To swap `localStorage` for Supabase, Firebase, or any other backend, implement these 15 methods and change that one export — no game code or hook changes needed. Games consume shared state through the `useSettings`/`useScores` hooks (and friends) rather than props drilling.
 
 A new adapter's compliance with this interface is enforced by a shared contract test suite (`src/storage/__tests__/adapterContract.js`) rather than left to convention — see [`docs/TESTING.md`](docs/TESTING.md) § Layer 1.
 
@@ -290,7 +301,7 @@ The full guide — annotated nginx configuration, cache tiers, HTTPS/reverse-pro
 
 ## Testing
 
-The Playground has six layers of automated testing — unit/component (Vitest + RTL), accessibility audits (jest-axe + axe-core/playwright), end-to-end (Playwright), visual regression (Storybook + Playwright screenshots), HTML5 validation against the rendered DOM (html-validate), and CSS validation of dynamic inline styles (Stylelint against the live DOM) — all runnable locally with no external accounts. Static linting (ESLint with `eslint-plugin-jsx-a11y`, Stylelint against every `.css` source file) catches most CSS3/accessibility conformance issues at edit time, before any of the above run. All six layers, plus a Docker build check, a two-tier `npm audit` gate, and Lighthouse performance/accessibility budgets, also run in CI on every push and pull request (`.github/workflows/ci.yml`) — see [`docs/TESTING.md`](docs/TESTING.md) for the full reference, including how to run each layer and update visual baselines.
+The Playground has six layers of automated testing — unit/component (Vitest + RTL), accessibility audits (jest-axe + axe-core/playwright), end-to-end (Playwright), visual regression (Storybook + Playwright screenshots), HTML5 validation against the rendered DOM (html-validate), and CSS validation of dynamic inline styles (Stylelint against the live DOM) — all runnable locally with no external accounts. Static linting (ESLint with `eslint-plugin-jsx-a11y`, Stylelint against every `.css` source file) catches most CSS3/accessibility conformance issues at edit time, before any of the above run. All six layers, plus a Docker build check, a two-tier `npm audit` gate, a Trivy container image scan, and Lighthouse performance/accessibility budgets, also run in CI on every push and pull request (`.github/workflows/ci.yml`) — see [`docs/TESTING.md`](docs/TESTING.md) for the full reference, including how to run each layer and update visual baselines.
 
 ```bash
 npm test           # unit/component tests, watch mode
