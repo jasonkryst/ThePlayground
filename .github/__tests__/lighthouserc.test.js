@@ -32,6 +32,14 @@ describe('lighthouserc.json', () => {
     expect(config.ci.collect.startServerCommand).not.toContain('vite dev')
   })
 
+  it('launches Chrome with --no-sandbox via puppeteerLaunchOptions (collect.settings.chromeFlags is silently ignored whenever puppeteerScript is set — confirmed by lhci\'s own runtime warning)', () => {
+    expect(config.ci.collect.puppeteerLaunchOptions?.args).toContain('--no-sandbox')
+  })
+
+  it('negative: --no-sandbox is not set via the ignored collect.settings.chromeFlags path', () => {
+    expect(config.ci.collect.settings?.chromeFlags).toBeUndefined()
+  })
+
   it.each(EXPECTED_CATEGORIES)('%s category has an error-level assertion at minScore 0.8', (category) => {
     const assertion = config.ci.assert.assertions[`categories:${category}`]
     expect(assertion).toBeDefined()

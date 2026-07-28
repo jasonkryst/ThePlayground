@@ -105,13 +105,27 @@ describe('.github/workflows/ci.yml', () => {
     expect(stepUses('docker-build').some(u => u.includes('login-action'))).toBe(false)
   })
 
-  it('npm-audit gate step fails on moderate+ production-tree findings, unsilenced', () => {
+  it('npm-audit gate step fails on moderate+ production-tree findings via audit-ci, unsilenced', () => {
     const steps = workflow.jobs['npm-audit'].steps
-    const gate = steps.find(s => s.run && s.run.includes('--omit=dev'))
+    const gate = steps.find(s => s.run && s.run.includes('audit-ci'))
     expect(gate).toBeDefined()
-    expect(gate.run).toContain('--audit-level=moderate')
+    expect(gate.run).toContain('--moderate')
+    expect(gate.run).toContain('--skip-dev')
     expect(gate['continue-on-error']).toBeUndefined()
     expect(gate.run).not.toContain('|| true')
+  })
+
+  it('npm-audit gate step allowlists GHSA-qwww-vcr4-c8h2 (react-router RSC-mode advisory, not reachable by this SPA)', () => {
+    const steps = workflow.jobs['npm-audit'].steps
+    const gate = steps.find(s => s.run && s.run.includes('audit-ci'))
+    expect(gate.run).toContain('--allowlist GHSA-qwww-vcr4-c8h2')
+  })
+
+  it('negative: npm-audit gate step allowlists exactly one advisory (guards against silently widening the exception)', () => {
+    const steps = workflow.jobs['npm-audit'].steps
+    const gate = steps.find(s => s.run && s.run.includes('audit-ci'))
+    const ghsaMatches = gate.run.match(/GHSA-/g) || []
+    expect(ghsaMatches.length).toBe(1)
   })
 
   it('npm-audit report step covers the dev tree, always runs, and never fails the job', () => {
@@ -129,10 +143,38 @@ describe('.github/workflows/ci.yml', () => {
     expect(report.run).not.toContain('--audit-level')
   })
 
+  it('negative: npm-audit report step does not use audit-ci (plain npm audit is sufficient since this step never fails the job)', () => {
+    const steps = workflow.jobs['npm-audit'].steps
+    const report = steps.find(s => s.run && s.run.includes('--omit=prod'))
+    expect(report.run).not.toContain('audit-ci')
+  })
+
   it('lighthouse job builds the app and runs lhci autorun', () => {
     const runs = stepRuns('lighthouse')
     expect(runs.some(r => r.includes('npm run build'))).toBe(true)
     expect(runs.some(r => r.includes('lhci autorun'))).toBe(true)
+  })
+
+  it('lighthouse job installs Chrome before running lhci, and wires its path through CHROME_PATH', () => {
+    const steps = workflow.jobs['lighthouse'].steps
+    const chromeStepIndex = steps.findIndex(s => s.uses && s.uses.startsWith('browser-actions/setup-chrome'))
+    const lhciStepIndex = steps.findIndex(s => s.run && s.run.includes('lhci autorun'))
+    expect(chromeStepIndex).toBeGreaterThanOrEqual(0)
+    expect(lhciStepIndex).toBeGreaterThan(chromeStepIndex)
+
+    const chromeStep = steps[chromeStepIndex]
+    expect(chromeStep.id).toBeTruthy()
+
+    const lhciStep = steps[lhciStepIndex]
+    expect(lhciStep.env?.CHROME_PATH).toContain(`steps.${chromeStep.id}.outputs.chrome-path`)
+  })
+
+  it('negative: no job other than lighthouse sets up Chrome (it is the only job that launches a browser via lhci)', () => {
+    for (const [jobName, job] of Object.entries(workflow.jobs)) {
+      if (jobName === 'lighthouse') continue
+      const steps = job.steps || []
+      expect(steps.some(s => s.uses && s.uses.startsWith('browser-actions/setup-chrome')), `${jobName} should not set up Chrome`).toBe(false)
+    }
   })
 
   it('negative: trivy job does not set up Node (it only needs Docker)', () => {

@@ -69,6 +69,21 @@ async function clickFirstPair(page) {
 test.describe('confetti renders under the real production CSP (issue #109)', () => {
   test.skip(!dockerAvailable(), 'Docker is not available in this environment')
 
+  // Without this, fullyParallel can schedule this describe block's 3 tests
+  // across different CI workers, and each worker runs its own copy of
+  // beforeAll below — so two `npm run build` invocations can run
+  // concurrently, both writing into the repo's single dist/ directory that
+  // this test's own Docker container then bind-mounts. That race is the
+  // most coherent explanation for issue #141's observed flake (a 60s
+  // timeout waiting for a button that should render almost immediately, on
+  // a route this file's own changes never touch). Serial mode forces all 3
+  // tests onto one worker, so beforeAll only ever runs once per test run —
+  // same fix e2e/visual.spec.js already uses, there for Storybook
+  // cold-compile contention rather than a concurrent build, but the
+  // underlying problem (worker-scoped setup racing a shared directory) is
+  // the same shape.
+  test.describe.configure({ mode: 'serial' })
+
   let containerPort
 
   test.beforeAll(() => {
