@@ -7,8 +7,10 @@
 
 Every CI run on `main` has failed since PR #135 (2026-07-24). Issue #141 has no
 body — "fix all pipelines" is the whole brief — so this design starts with an
-audit of what's actually broken, since the failures turn out to be five
-unrelated problems bundled under one vague title, not one root cause:
+audit of what's actually broken, since the failures turn out to be six
+unrelated problems bundled under one vague title, not one root cause (#6 only
+surfaced once this branch's own PR started generating real CI runs to audit
+against — see the "Risks / open questions" section for how it was found):
 
 | # | Job | Symptom | Root cause | Fix |
 |---|---|---|---|---|
@@ -17,6 +19,7 @@ unrelated problems bundled under one vague title, not one root cause:
 | 3 | `e2e` (visual) | 5 tests fail: "snapshot doesn't exist" | Two feature PRs (#92 per-game result theming, #131 Sound Memory Match) generated their Playwright baseline screenshots on a Windows dev machine (`*-chromium-win32.png`, already committed) but CI runs on Linux and needs `*-chromium-linux.png` — those were never generated | Generate the 5 missing Linux baselines in a Docker container pinned to the installed Playwright version, commit them |
 | 4 | `e2e` (zoom-large-text) | 1 test fails: horizontal overflow at phone width under large text | Core Themes (PR #140) added a 4th header icon (`.shell__theme-toggle`) to a row already documented as a fixed-width budget; that icon (and the pre-existing 3) size their glyph with `font-size: 1.5rem`, which scales with the large-text root-font simulation even though their box is a hard `min-width/min-height: 48px` floor — under 2× text the glyphs outgrow the fixed box and the header overflows | Freeze the icon glyph `font-size` to a fixed `px` value so OS/app text-scaling can't inflate icon-only buttons past their already-fixed touch target |
 | 5 | `e2e` (confetti-csp) | 1 test flakes: 60s timeout waiting for `game-intro-start` | `confetti-csp.spec.js`'s 3 tests share a worker-scoped `beforeAll` that runs `npm run build` into the repo's single `dist/` directory, then bind-mounts that same directory into a Docker container. With `fullyParallel: true` and 2 CI workers, two of those tests can land on different workers, so two `npm run build` invocations can run concurrently against the same `dist/` output — one build's in-progress file writes intermittently getting served (or clobbered) by the other worker's container, which is consistent with a page that never finishes mounting | `test.describe.configure({ mode: 'serial' })` (same pattern already used in `e2e/visual.spec.js`, for an analogous worker-contention reason) forces all 3 tests onto one worker, so there's only ever one `beforeAll`/one build per run |
+| 6 | `e2e` (css-validity) | Flaked twice across this PR's own first 3 CI runs: 60s timeout waiting for `game-intro-start` on `/game/animal-sounds` | CI's `e2e` job runs with only 2 workers (2-vCPU standard runner), all sharing one `npm run dev` instance; Vite compiles each route's module graph lazily on first request, so two workers' simultaneous first-touch navigations to two different routes can occasionally lose that race past even a 60s timeout | `e2e/global-setup.js` (new `playwright.config.js` `globalSetup`) sequentially visits every route once, single-threaded, before the parallel workers start, so every route is already compiled by the time real tests begin |
 
 All five are independent — no shared code path — so they're fixed as five
 separate, narrowly-scoped changes rather than one sweeping refactor.
@@ -294,19 +297,26 @@ supports:
   first (wrong) key path specifically, since it's exactly the kind of
   looks-right-but-silently-does-nothing config that would otherwise
   regress unnoticed.
-- **The PR's own first real CI run also surfaced one unrelated `e2e` flake**
-  (`css-validity.spec.js`'s "animal sounds gameplay screen has no invalid
-  inline CSS" — a 60s timeout waiting for `game-intro-start` to become
-  clickable against the shared `npm run dev` webServer). Same *symptom*
-  shape as §5's confetti-csp race (a button that should render almost
-  immediately taking too long under worker contention), but a different
-  mechanism — this test doesn't share confetti-csp's `beforeAll`/build/
-  Docker machinery at all, it's a plain `page.goto` + click against the
-  suite's one shared dev server, which many parallel CI workers request
-  different game routes from simultaneously. No prior occurrence found
-  across the last 15+ CI runs searched, and this PR's own changes don't
-  touch `animal-sounds` or `css-validity.spec.js` — treated as a one-off
-  flake (re-run to confirm) rather than a sixth pipeline bug in scope of
-  issue #141, since inventing a fix for an unreproduced, never-before-seen
-  single failure risks solving the wrong problem. Worth revisiting if it
-  recurs.
+- **A sixth bug, found only once this PR's own CI runs started stacking up:**
+  `css-validity.spec.js`'s "animal sounds gameplay screen has no invalid
+  inline CSS" test (a plain `page.goto('/game/animal-sounds')` + click on
+  `game-intro-start`) timed out at 60s twice across three real Actions runs
+  on this PR — not a one-off (the first occurrence was provisionally treated
+  as one, per the risk note originally here, but the second occurrence on
+  the very next run made that read wrong). Root cause: CI's `e2e` job runs
+  with only 2 workers (a 2-vCPU standard GitHub-hosted runner), all sharing
+  one `npm run dev` instance; Vite compiles each route's JS module graph
+  lazily, on the first real browser request for it, so when two workers'
+  first-ever navigations to two different not-yet-compiled routes land at
+  the same time, the loser can occasionally exceed even a 60s test timeout.
+  `retries: 0` in `playwright.config.js` is a deliberate choice in this repo
+  (a flaky pass-on-retry is treated as worse than a loud failure), so the
+  fix had to remove the contention itself rather than paper over it with a
+  retry: `e2e/global-setup.js`, wired via `playwright.config.js`'s new
+  `globalSetup` option, sequentially visits every route (the 4 static pages
+  plus every `/game/<id>` discovered from `src/games/*`, matching the app's
+  own auto-discovery convention) once, in a single browser, before the
+  parallel workers start — so every route's module graph is already
+  compiled and cached by the time real tests begin, and no worker is ever
+  the one paying a cold-compile's full cost under contention. Verified
+  locally: 230/230 passing, total suite runtime unchanged (~1.3 min).

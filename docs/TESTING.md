@@ -66,7 +66,7 @@ If either level reports a violation, the failure message names the specific rule
 npm run e2e
 ```
 
-Playwright starts both `npm run dev` (port 5173) and Storybook (port 6006) automatically via the `webServer` array in `playwright.config.js`. The specs in `e2e/`:
+Playwright starts both `npm run dev` (port 5173) and Storybook (port 6006) automatically via the `webServer` array in `playwright.config.js`. `globalSetup` (`e2e/global-setup.js`) then visits every route once, single-threaded, before the parallel test workers start — CI runs with only 2 workers sharing that one dev server, and Vite compiles each route's module graph lazily on first request, so without this warm-up two workers' simultaneous first-touch navigations to different routes could occasionally exceed even the 60s test timeout (issue #141). The specs in `e2e/`:
 
 | Spec | Covers |
 |---|---|
