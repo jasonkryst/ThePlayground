@@ -4,7 +4,7 @@ Ideas for future development. Not committed to any timeline.
 
 Completed work is recorded in `CHANGELOG.md` — entries here are removed once they ship. Each entry carries a one-line rationale so the "why" survives until someone picks it up.
 
-Organized by the improvement categories from issue #61: UI, UX, accessibility, game features, new games, security, testing layers, and backend/sync.
+Organized by the improvement categories from issue #61: UI, UX, accessibility, core engine, game features, new games, security, testing layers, and backend/sync.
 
 ---
 
@@ -19,6 +19,8 @@ Everything from the 2026-07-05 standards audit is resolved (shipped across v0.13
 ## UI
 
 - **Drag to reorder** — let parents arrange game cards by preference; the dashboard currently orders by category and discovery order, which stops being ideal once the catalog grows.
+- **Collapse the duplicate header** (issue #49) — `Dashboard.jsx` renders its own "{Name}'s Playground" title directly below `AppShell`'s "The Playground" brand link, so the home route shows two near-identical titles stacked on top of each other; fold the child's name into the shell's header row instead.
+- **Game enable/disable toggle in Admin** (issue #19) — let a parent hide a game from the dashboard without deleting its folder; useful once the catalog has 10+ games and not every one suits every child.
 
 ## UX
 
@@ -34,6 +36,10 @@ Items marked **AU-n** come from the 2026-07-12 a11y/i18n/UX audit (`docs/accessi
 - **Switch-access exploration** — the target audience overlaps with early-intervention users; investigating single-switch scanning support (sequential focus + one activation input) would widen who can play.
 - **Real assistive-technology pass** — one NVDA or VoiceOver session through a full game loop (AU-2 landed in v0.26.0; known gap for that pass: consecutive same-type events render identical live-region text, so screen readers may not re-announce the second of two correct answers in a row — the memory game's mismatch announcement shares this property); static audits and axe can't judge announcement verbosity or pronunciation.
 
+## Core Engine
+
+- **Shared `CHOICE_COLORS` constant** — `src/games/animal-sounds/index.jsx` and `src/games/fruit-veggie-id/index.jsx` each define an identical 4-entry array of the same CSS-variable colors for picture-choice buttons; extracting it to a shared `src/lib/choiceColors.js` (or a `QuizGameShell` default) removes the copy-paste for this and any future picture-choice quiz game.
+
 ## Game Features
 
 - **Difficulty levels per game** — easy (2 choices, common items) vs hard (4 choices, similar-sounding/looking items); item pools tagged by difficulty. Originally proposed for Animal Sounds; the mechanism generalizes to every quiz game.
@@ -48,13 +54,13 @@ Quiz-type (all get the engine's retries, hints, timers, badges, and personal bes
 - **Shape Sort** — present a shape name/picture, child picks the correct shape; foundational geometry vocabulary.
 - **Number Tap** — display a number (1–5), child taps that many objects on screen; builds early counting.
 - **Alphabet Sounds** — play a letter sound (phonics), child picks the correct letter card; pre-reading phonemic awareness.
-- **Fruit & Veggie ID** — picture of a fruit/vegetable plays its name, child matches it; everyday-object vocabulary.
 - **Big or Small** — show two objects side by side, child taps the bigger (or smaller) one; builds spatial reasoning.
 - **Emotions Match** — show an emotion word ("happy", "sad"), child picks the matching face; builds emotional vocabulary.
 - **Body Parts** — "Where's your nose?" with a cartoon figure; child taps the correct body part; receptive language staple.
 - **Simple Patterns** — show a color/shape sequence with one item missing, child picks what comes next; early sequencing/logic.
 - **First Words** — a picture is shown and its word is spoken; the child picks the matching picture from spoken-word prompts; receptive vocabulary for pre-verbal children.
 - **Same or Different** — two pictures, one binary choice; the simplest possible mechanic, reachable by the youngest users before multi-choice games make sense.
+- **Learning Spanish** (issue #106) / **Learning Polish** (issue #108) — a vocabulary quiz teaching Spanish/Polish words, reusing the existing `useSpeech` hook and quiz engine; the app already ships full es/pl locale infrastructure for UI translation, but nothing yet uses it as gameplay content.
 
 ## Security
 
@@ -78,7 +84,7 @@ Mirrors the "known gaps" in `SECURITY.md` — each of these is acknowledged ther
 
 ## Backend / Sync
 
-- **Cloud sync** — swap the localStorage adapter for a Supabase or Firebase adapter so scores follow the child across devices; the ten-method adapter interface was designed for exactly this swap (see `README.md` § Storage Adapter), and the contract test above would gate it.
+- **Cloud sync** — swap the localStorage adapter for a Supabase or Firebase adapter so scores follow the child across devices; the 15-method adapter interface was designed for exactly this swap (see `README.md` § Storage Adapter), and the contract test above would gate it (once extended to cover the item-stats/session-resume methods it doesn't yet exercise).
 - **Per-child profiles** — support multiple child accounts with separate score histories; the storage shapes are keyed by game today, so profiles are a schema evolution best paired with the adapter/backend work.
 - **Parent Dashboard enhancements** — game-name labels in charts (the interactive date-range filter and heatmap month labels shipped in v0.21.0; PIN protection for the `/parent` route shipped in issue #127).
 
