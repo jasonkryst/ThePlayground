@@ -3,6 +3,18 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.40.1] - 2026-07-28
+
+### Fixed
+
+- Fix all five broken CI pipelines (issue #141), which had been red on `main` since PR #135 (2026-07-24):
+  - `npm-audit`: was failing on every run since a high-severity `react-router` advisory (`GHSA-qwww-vcr4-c8h2`, RSC-mode CSRF, published after the gate shipped) matched the installed `7.18.1`. The gate mechanism moved from plain `npm audit` to `audit-ci` (new devDependency), which adds the missing per-advisory allowlist primitive: `GHSA-qwww-vcr4-c8h2` is now allowlisted (this app is a client-only SPA using `BrowserRouter`, never react-router's RSC/framework mode — the vulnerable path isn't reachable here), while every other moderate+ production-tree finding, present or future, still fails the gate exactly as before. The real fix — upgrading to React 19 + react-router 8, which removes the need for this allowlist — is tracked as a backlog item in `docs/ENHANCEMENTS.md` rather than rushed through here, since react-router 8 drops the `react-router-dom` package and requires React ≥19.2.7.
+  - `lighthouse`: was failing since PR #139 (2026-07-27) with "Chrome installation not found" — `ubuntu-latest` stopped guaranteeing a pre-installed Chrome for `lhci`'s browser launcher to auto-detect, unrelated to any app change. Added an explicit `browser-actions/setup-chrome@v2` step, wiring its `chrome-path` output to `CHROME_PATH`.
+  - `e2e` visual regression: 5 stories added by issues #92 and #131 (`components-gameresults--with-accent`/`-dark`/`-high-contrast`, `components-gameresults--memory-perfect-run`, `games-soundmemorymatchgame--default`) had their Playwright baseline screenshots generated and committed from a Windows dev machine (`*-chromium-win32.png`) but never got the `*-chromium-linux.png` sibling CI actually needs. Generated and committed the 5 missing Linux baselines.
+  - `e2e` zoom-large-text: Core Themes (issue #11) added a 4th header icon (the theme quick-toggle) to `AppShell`'s row-1 icon nav without re-verifying its already-documented fixed-width budget under a large-text setting. Root cause: the icon buttons paired a hard `min-width/min-height: 48px` touch-target floor with a *relative* glyph `font-size: 1.5rem`, which grows past that fixed box once the root font-size gets large enough (2× large text makes `1.5rem` == 48px, matching the whole box) — the 4th icon was just what tipped an already-marginal row over a phone-width viewport. Froze the icon glyph `font-size` to a fixed `24px` on `.shell__back`/`.shell__nav-link`/`.shell__home`/`.shell__theme-toggle` (decorative, aria-labelled glyphs, not resizable text WCAG 1.4.4 applies to).
+  - `e2e` confetti-csp flake: its 3 tests shared a worker-scoped `beforeAll` that runs `npm run build` into the repo's single `dist/` directory before bind-mounting it into a Docker container; with `fullyParallel` scheduling across CI's 2 workers, two tests could land on different workers and run concurrent, colliding builds against that one shared directory. Added `test.describe.configure({ mode: 'serial' })` (the same pattern `e2e/visual.spec.js` already uses, there for Storybook cold-compile contention) so the file's tests always run on one worker.
+  - See `docs/superpowers/specs/2026-07-28-fix-ci-pipelines-design.md` for full root-cause analysis of all five.
+
 ## [0.40.0] - 2026-07-28
 
 ### Added

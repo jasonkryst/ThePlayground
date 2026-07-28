@@ -93,8 +93,16 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
+      # Allowlists GHSA-qwww-vcr4-c8h2 only (react-router "RSC Mode CSRF
+      # Bypass" — this app is a client-only SPA using BrowserRouter, never
+      # react-router's RSC/framework mode, so the vulnerable path isn't
+      # reachable here). Everything else in the production tree still fails
+      # the gate exactly as before. Real fix (removes the need for this
+      # allowlist entirely) is tracked in docs/ENHANCEMENTS.md under
+      # Security: upgrading to React 19 + react-router 8, which is a bigger
+      # change than this gate fix — react-router 8 requires React >=19.2.7.
       - name: Production dependency audit (gate)
-        run: npm audit --omit=dev --audit-level=moderate
+        run: npx audit-ci --moderate --skip-dev --allowlist GHSA-qwww-vcr4-c8h2
       - name: Dev dependency audit (report-only)
         if: always()
         run: |
@@ -145,4 +153,16 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run build
-      - run: npx lhci autorun
+      # ubuntu-latest stopped guaranteeing a pre-installed Chrome that
+      # lhci's chrome-launcher can auto-detect (broke between PR #138 and
+      # #139, 2026-07-26/27, with no app-code change in between) — install
+      # one explicitly instead of relying on the runner image's contents.
+      - name: Set up Chrome for Lighthouse CI
+        id: setup-chrome
+        uses: browser-actions/setup-chrome@v2
+        with:
+          chrome-version: stable
+      - name: Run Lighthouse CI
+        run: npx lhci autorun
+        env:
+          CHROME_PATH: ${{ steps.setup-chrome.outputs.chrome-path }}

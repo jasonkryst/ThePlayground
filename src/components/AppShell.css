@@ -53,18 +53,32 @@
 }
 
 /* 480px isn't an arbitrary phone-class guess: row 1 (back link + brand +
-   the 3-icon nav row, since row 2's title doesn't share this row — see
-   AppShell.jsx) is a fixed-size, non-shrinking layout (.shell__side is
-   `flex: 0 0 auto`). Measured directly with the wordmark forced visible,
-   its worst case — a subpage with a back link — needs back(48) + gap(4) +
-   brand(~203) + header-gap(12) + nav(152) + padding(32) = ~451px. Below
+   the end side's theme toggle plus 3-icon nav row, since row 2's title
+   doesn't share this row — see AppShell.jsx) is a fixed-size, non-shrinking
+   layout (.shell__side is `flex: 0 0 auto`). Measured directly with the
+   wordmark forced visible, its worst case — a subpage with a back link —
+   needs back(48) + gap(4) + brand(~203) + header-gap(12) + end-side
+   (theme-toggle 48 + gap 4 + nav 152 = 204) + padding(32) = ~471px. Below
    480px, hiding the wordmark to icon-only keeps row 1 itself from
    overflowing on any common phone width (most are 360–430px), independent
-   of whatever the title row is doing. */
+   of whatever the title row is doing. This budget only holds because the
+   icon glyphs below are frozen to a fixed px size (see next comment) — if
+   they scaled with the root font-size the way text does, a large-text
+   setting alone could blow this budget without adding a single icon. */
 @media (width <= 480px) {
   .shell__brand-label { display: none; }
 }
 
+/* font-size is a fixed px, not rem, on every icon-only button below. These
+   are decorative/aria-labelled glyphs (not resizable text WCAG 1.4.4
+   applies to), already sized to a generous fixed 48px touch target
+   regardless of any text-size setting — a rem-based glyph size would grow
+   past that fixed box once the root font-size grows large enough (2x large
+   text makes 1.5rem == 48px, i.e. the glyph alone matches the whole box),
+   forcing each button wider than its own floor and overflowing the row-1
+   budget above. Found via e2e/zoom-large-text.spec.js after Core Themes
+   added the 4th icon (.shell__theme-toggle) tipped an already-marginal
+   budget over the edge under a large-text setting. */
 .shell__back,
 .shell__nav-link {
   display: flex;
@@ -73,7 +87,7 @@
   justify-content: center;
   min-width: 48px;
   min-height: 48px;
-  font-size: 1.5rem;
+  font-size: 24px;
   color: var(--color-text);
   text-decoration: none;
   border-radius: var(--radius-button);
@@ -83,14 +97,14 @@
 .shell__home {
   min-width: 48px;
   min-height: 48px;
-  font-size: 1.5rem;
+  font-size: 24px;
   background: transparent;
 }
 
 .shell__theme-toggle {
   min-width: 48px;
   min-height: 48px;
-  font-size: 1.5rem;
+  font-size: 24px;
   background: transparent;
   border-radius: var(--radius-button);
   transition: background 0.15s;
