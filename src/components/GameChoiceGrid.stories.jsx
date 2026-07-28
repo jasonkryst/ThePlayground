@@ -20,3 +20,5 @@ export const HintActiveSubtle = { args: { ...baseArgs, selected: null, locked: f
 export const HintActiveBold = { args: { ...baseArgs, selected: null, locked: false, disabledChoiceIds: ['b'], hintActive: true, hintStrength: 1 } }
 export const Locked = { args: { ...baseArgs, selected: 'a', locked: true, disabledChoiceIds: [], hintActive: false } }
 export const LockedWrong = { args: { ...baseArgs, selected: 'b', locked: true, disabledChoiceIds: ['b'], hintActive: false } }
+export const DefaultDark = { args: { ...baseArgs, selected: null, locked: false, disabledChoiceIds: [], hintActive: false }, parameters: { theme: 'dark' } }
+export const DefaultHighContrast = { args: { ...baseArgs, selected: null, locked: false, disabledChoiceIds: [], hintActive: false }, parameters: { theme: 'high-contrast' } }
