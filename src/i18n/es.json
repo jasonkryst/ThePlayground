@@ -54,7 +54,11 @@
     "copyright": "© {{year}} The Playground",
     "exitConfirmTitle": "¿Salir del juego?",
     "keepPlaying": "¡Seguir jugando! ▶️",
-    "leaveGame": "Salir del juego 🏠"
+    "leaveGame": "Salir del juego 🏠",
+    "themeToggleSystem": "Tema: Sistema. Activa para cambiar a Claro.",
+    "themeToggleLight": "Tema: Claro. Activa para cambiar a Oscuro.",
+    "themeToggleDark": "Tema: Oscuro. Activa para cambiar a Alto contraste.",
+    "themeToggleHighContrast": "Tema: Alto contraste. Activa para cambiar a Sistema."
   },
   "dashboard": {
     "titleDefault": "Mi Playground",
@@ -180,6 +184,11 @@
     "soundEffectsHeading": "Efectos de sonido",
     "soundEffectsOn": "🔊 Activados",
     "soundEffectsOff": "Desactivados",
+    "themeHeading": "Tema",
+    "themeSystem": "Sistema",
+    "themeLight": "Claro",
+    "themeDark": "Oscuro",
+    "themeHighContrast": "Alto contraste",
     "parentalLockHeading": "Bloqueo parental",
     "parentalLockHint": "Exigir resolver un desafío sencillo antes de abrir Configuración o el Panel de padres.",
     "parentalLockToggleOn": "Activado",

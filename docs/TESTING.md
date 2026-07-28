@@ -58,6 +58,8 @@ If either level reports a violation, the failure message names the specific rule
 
 **CSS-filter contrast checks:** jsdom doesn't compute rendered CSS filter effects (e.g. `grayscale()`/`brightness()`), so `jest-axe` can't catch a filter that visually drops a color combination below WCAG contrast thresholds — it only sees the unfiltered DOM. `src/__tests__/disabledWrongChoiceContrast.test.js` is the pattern for this: it reimplements the relevant CSS Filter Effects math in plain JS and checks the WCAG contrast formula directly against every real color/text pairing in the data (not just one example), so a future palette addition that breaks contrast fails a fast unit test instead of shipping unnoticed. Reuse this pattern for any other CSS-filter-dependent contrast state.
 
+`src/__tests__/themeTokenContrast.test.js` follows the same pattern for the Light/Dark/High-Contrast token layer in `src/index.css` — it duplicates each theme's token hex values (kept in sync manually with `index.css`, same convention) and checks every text/background and border/background pairing against the WCAG formula directly.
+
 ## Layer 3: End-to-end tests (Playwright)
 
 ```bash
@@ -86,6 +88,7 @@ Playwright starts both `npm run dev` (port 5173) and Storybook (port 6006) autom
 | `html-validity.spec.js` | HTML5 validation (layer 5, below) |
 | `css-validity.spec.js` | Inline-style CSS validation (layer 6, below) |
 | `parental-lock.spec.js` | Route-gating challenge (issue #127): cold-visit lock screen on `/admin` and `/parent`, wrong math/PIN rejection, correct-PIN unlock with shared-session persistence between the two routes, a fresh-context re-lock, and an axe scan of the challenge screen |
+| `themes.spec.js` | Light/Dark/High Contrast: axe-core scans (including `color-contrast`) of Dashboard/Admin/a game's results screen under each theme, `system` resolving correctly under both `prefers-color-scheme` values via `page.emulateMedia`, and the header theme-toggle's click-cycle + persistence across reload |
 
 **`nginx-headers.spec.js` and `confetti-csp.spec.js` are the two specs that aren't browser tests against the dev server** — the app's `vite dev` server never applies `nginx.conf` (or its CSP) at all, so the only way to prove the shipped config actually behaves correctly is to run it in real nginx. `nginx-headers.spec.js` boots the same pinned `nginxinc/nginx-unprivileged:1.30-alpine` image the Dockerfile ships (mounting `nginx.conf`, `nginx/security-headers.conf`, and a handful of fixture asset files — not the full `Dockerfile` build, which needs `npm run build` first and is much slower) and drives it with Playwright's `request` fixture. `confetti-csp.spec.js` boots the same image but *does* run `npm run build` first and mounts the real `dist/`, then drives an actual `page` through a memory-match play-through: `canvas-confetti`'s default export tries to build its animation loop from a `blob:` Web Worker, which this app's CSP silently kills (no `worker-src`, and `script-src` doesn't allow `blob:`) — that's exactly what broke confetti/fireworks in every real deployment despite the setting being on, and only a real browser enforcing the real CSP can prove the fix (`src/lib/confetti.js` forcing main-thread rendering via `create(null, { useWorker: false })`) actually renders pixels again. Both specs require a running Docker daemon; both `test.skip()` with a clear reason when Docker isn't available, so `npm run e2e` still runs everywhere else. A companion fast check with no Docker dependency, `nginx/__tests__/securityHeaders.test.js` (runs under `npm test`), statically parses `nginx.conf` and fails if any `location` block sets its own `add_header` without including the shared security-headers snippet — this is what actually catches a headers regression on a machine without Docker; `src/lib/__tests__/confetti.test.js` is the equivalent fast, Docker-free guard for the confetti fix, asserting (with a mocked `canvas-confetti`) that `create()` is always called with `useWorker: false`.
 
@@ -97,6 +100,8 @@ npm run build-storybook   # production build check
 ```
 
 Key components and every game have stories under `src/**/*.stories.jsx`. `e2e/visual.spec.js` navigates to each story's isolated URL and asserts `toHaveScreenshot()` against a baseline PNG committed in `e2e/visual.spec.js-snapshots/`.
+
+Dashboard, AdminPage, GameChoiceGrid, and GameResults each get an additional Dark and High-Contrast baseline (8 total) via a `parameters: { theme: 'dark' | 'high-contrast' }` story parameter, applied by a global Storybook decorator in `.storybook/preview.js` that sets `document.documentElement.dataset.theme`. The other 38 stories are Light-only — Light's token values never change, so no theme parameter is needed there.
 
 **Updating a baseline after an intentional UI change:**
 

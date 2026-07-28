@@ -7,6 +7,7 @@ import StreakBadge from './StreakBadge'
 import ManifestIcon from './ManifestIcon'
 import useFocusOnMount from '../hooks/useFocusOnMount'
 import useHeaderHeightVar from '../hooks/useHeaderHeightVar'
+import useSettings from '../hooks/useSettings'
 import { version } from '../../package.json'
 import './AppShell.css'
 
@@ -22,6 +23,15 @@ const PAGE_TITLE_KEYS = {
   '/my-progress': 'kids.title',
 }
 
+const THEME_CYCLE = ['system', 'light', 'dark', 'high-contrast']
+const THEME_ICON = { system: '🌓', light: '☀️', dark: '🌙', 'high-contrast': '◐' }
+const THEME_LABEL_KEY = {
+  system: 'shell.themeToggleSystem',
+  light: 'shell.themeToggleLight',
+  dark: 'shell.themeToggleDark',
+  'high-contrast': 'shell.themeToggleHighContrast',
+}
+
 export default function AppShell({ manifests = [] }) {
   const { t } = useTranslation()
   const location = useLocation()
@@ -33,6 +43,8 @@ export default function AppShell({ manifests = [] }) {
   const bodyRef = useRef(null)
   const headerRef = useRef(null)
   useHeaderHeightVar(headerRef)
+  const { settings, updateSetting } = useSettings()
+  const currentTheme = THEME_CYCLE.includes(settings.theme) ? settings.theme : 'system'
 
   // Read inside the popstate handler below instead of closing over
   // gameStatus/isGameRoute directly, so the handler (registered once) always
@@ -131,6 +143,11 @@ export default function AppShell({ manifests = [] }) {
     }
   }
 
+  function handleThemeToggle() {
+    const nextIndex = (THEME_CYCLE.indexOf(currentTheme) + 1) % THEME_CYCLE.length
+    updateSetting('theme', THEME_CYCLE[nextIndex])
+  }
+
   return (
     <ShellContext.Provider value={contextValue}>
       <div className="shell">
@@ -159,6 +176,13 @@ export default function AppShell({ manifests = [] }) {
               </div>
 
               <div className="shell__side shell__side--end">
+                <button
+                  className="shell__theme-toggle"
+                  aria-label={t(THEME_LABEL_KEY[currentTheme])}
+                  onClick={handleThemeToggle}
+                >
+                  <span aria-hidden="true">{THEME_ICON[currentTheme]}</span>
+                </button>
                 {isGameRoute ? (
                   <button className="shell__home" aria-label={t('shell.home')} onClick={handleHomeButtonClick}>
                     🏠

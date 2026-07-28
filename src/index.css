@@ -10,6 +10,7 @@
   --color-lilac:       #CE93D8;
   --color-lilac-dark:  #8E24AA;
   --color-error:       #c62828;
+  --color-error-solid: #c62828;
   --color-bg:          #F0FDFF;
   --color-surface:     #FFF;
   --color-text:        #37474F;
@@ -17,6 +18,105 @@
   --radius-card:    20px;
   --radius-button:  16px;
   --font-main:      'Nunito', sans-serif;
+
+  /* Text/border role split out of the old dual-purpose -dark tokens: -dark
+     itself stays a solid-fill-behind-white-text color (bg-independent, so it
+     doesn't need to vary by theme); these -text tokens are for headings/
+     borders painted directly on the page/card background, which DOES need to
+     vary by theme (a value that reads on a white card fails on a dark one). */
+  --color-lavender-text: #6A4FA3;
+  --color-teal-text:     #00695C;
+
+  /* Text color drawn on top of a solid accent fill (--color-*-dark /
+     --color-error-solid). White in light/dark; flips to black in high
+     contrast, where the accent fills themselves become bright. */
+  --color-on-accent: #FFF;
+
+  /* Parent Dashboard activity heatmap's 4-step sequential scale + the
+     matching progress-bar track background (same "faint aqua" shade as
+     heatmap step 0). */
+  --color-heatmap-0: #e8f4f6;
+  --color-heatmap-1: #80cbc4;
+  --color-heatmap-2: #26a69a;
+  --color-heatmap-3: #006C7A;
+
+  /* Structural chrome tints: visible borders, hover/active washes, and the
+     exit-confirm modal backdrop dimmer. Light values below consolidate what
+     were several different hardcoded rgb(0 0 0 / N%) opacities (5-15%)
+     across call sites down to two canonical values; most call sites keep
+     their exact prior appearance, but a handful shift by 1-3 percentage
+     points of tint (imperceptible, a deliberate accepted tradeoff — see
+     Task 3's commit history / the SDD ledger for the full rationale). The
+     backdrop value (45%) is unchanged everywhere, so that one substitution
+     genuinely is zero-diff. */
+  --color-hairline: rgb(0 0 0 / 12%);
+  --color-hover-tint: rgb(0 0 0 / 6%);
+  --color-backdrop: rgb(0 0 0 / 45%);
+
+  /* Card/panel border, invisible in light/dark (where surface already reads
+     against the page background) and a solid white outline in high contrast
+     (where surface == bg == black, so a card has no boundary without one). */
+  --color-surface-outline: transparent;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    --color-bg: #0D2126;
+    --color-surface: #17323A;
+    --color-text: #E8F6F7;
+    --color-text-muted: #9EC2C7;
+    --color-error: #FF8A80;
+    --color-lavender-text: #B39DDB;
+    --color-teal-text: #80CBC4;
+    --color-heatmap-0: #173139;
+    --color-heatmap-1: #00695C;
+    --color-heatmap-2: #26a69a;
+    --color-heatmap-3: #80DEEA;
+    --color-hairline: rgb(255 255 255 / 40%);
+    --color-hover-tint: rgb(255 255 255 / 10%);
+  }
+}
+
+:root[data-theme="dark"] {
+  --color-bg: #0D2126;
+  --color-surface: #17323A;
+  --color-text: #E8F6F7;
+  --color-text-muted: #9EC2C7;
+  --color-error: #FF8A80;
+  --color-lavender-text: #B39DDB;
+  --color-teal-text: #80CBC4;
+  --color-heatmap-0: #173139;
+  --color-heatmap-1: #00695C;
+  --color-heatmap-2: #26a69a;
+  --color-heatmap-3: #80DEEA;
+  --color-hairline: rgb(255 255 255 / 40%);
+  --color-hover-tint: rgb(255 255 255 / 10%);
+}
+
+:root[data-theme="high-contrast"] {
+  --color-aqua: #4DD8E8;
+  --color-teal: #26D9B7;
+  --color-lavender: #C9A9FF;
+  --color-lilac: #FF8AD8;
+  --color-aqua-dark: #4DD8E8;
+  --color-teal-dark: #26D9B7;
+  --color-lavender-dark: #C9A9FF;
+  --color-error: #FF6E6E;
+  --color-error-solid: #FF6E6E;
+  --color-on-accent: #000;
+  --color-bg: #000;
+  --color-surface: #000;
+  --color-text: #FFF;
+  --color-text-muted: #C8C8C8;
+  --color-lavender-text: #C9A9FF;
+  --color-teal-text: #26D9B7;
+  --color-heatmap-0: #000;
+  --color-heatmap-1: #26D9B7;
+  --color-heatmap-2: #4DD8E8;
+  --color-heatmap-3: #C9A9FF;
+  --color-hairline: #FFF;
+  --color-hover-tint: rgb(255 255 255 / 20%);
+  --color-surface-outline: #FFF;
 }
 
 html {

@@ -1,5 +1,5 @@
 /* Character cards sit on the app surface, not a per-answer color. */
-.game__choice { background: var(--color-surface); }
+.game__choice { background: var(--color-surface); border: 2px solid var(--color-surface-outline); }
 
 .game__choice-image { width: 64px; height: 64px; object-fit: contain; border-radius: 8px; }
 

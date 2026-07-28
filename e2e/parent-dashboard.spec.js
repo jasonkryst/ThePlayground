@@ -104,7 +104,7 @@ test('an inactive date-range tab still shows the light hover tint, not the activ
   const thirtyDaysTab = page.getByRole('tab', { name: '30 days' })
   await thirtyDaysTab.hover()
   await page.waitForTimeout(200)
-  await expect(thirtyDaysTab).toHaveCSS('background-color', 'rgba(0, 0, 0, 0.05)')
+  await expect(thirtyDaysTab).toHaveCSS('background-color', 'rgba(0, 0, 0, 0.06)')
 })
 
 test('active date-range tab has no accessibility violations while hovered', async ({ page }) => {

@@ -14,7 +14,7 @@
   font-size: 0.9375rem;
   font-weight: 700;
   background: var(--color-aqua-dark);
-  color: #fff;
+  color: var(--color-on-accent);
   border-radius: var(--radius-button);
   border: none;
   min-height: 48px;
@@ -32,6 +32,7 @@
 
 .parent__section {
   background: var(--color-surface);
+  border: 2px solid var(--color-surface-outline);
   border-radius: var(--radius-card);
   padding: 20px 20px 24px;
   margin-bottom: 24px;
@@ -42,7 +43,7 @@
   font-size: 1.125rem;
   font-weight: 800;
   margin-bottom: 6px;
-  color: var(--color-lavender-dark);
+  color: var(--color-lavender-text);
 }
 
 .parent__hint {
@@ -83,7 +84,7 @@
   overflow-wrap: anywhere;
   hyphens: auto;
   text-align: center;
-  border-bottom: 1px solid rgb(0 0 0 / 7%);
+  border-bottom: 1px solid var(--color-hairline);
 }
 
 .parent__streak-table th {
@@ -189,10 +190,10 @@
   height: 0.875rem;
   border-radius: 3px;
 }
-.heatmap__cell--0 { background: #e8f4f6; }
-.heatmap__cell--1 { background: #80cbc4; }
-.heatmap__cell--2 { background: #26a69a; }
-.heatmap__cell--3 { background: #006C7A; }
+.heatmap__cell--0 { background: var(--color-heatmap-0); }
+.heatmap__cell--1 { background: var(--color-heatmap-1); }
+.heatmap__cell--2 { background: var(--color-heatmap-2); }
+.heatmap__cell--3 { background: var(--color-heatmap-3); }
 
 .heatmap__legend {
   display: flex;
@@ -237,7 +238,7 @@
 .parent__missed-label { font-weight: 600; }
 
 .parent__missed-bar-wrap {
-  background: #e8f4f6;
+  background: var(--color-heatmap-0);
   border-radius: 4px;
   height: 10px;
   overflow: hidden;

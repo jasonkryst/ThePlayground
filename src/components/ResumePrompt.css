@@ -45,7 +45,7 @@
 
 .resume-prompt__resume {
   background: var(--color-lavender-dark);
-  color: white;
+  color: var(--color-on-accent);
 }
 
 .resume-prompt__start-fresh {

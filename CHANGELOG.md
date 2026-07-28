@@ -3,6 +3,18 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [0.38.0] - 2026-07-27
+
+### Added
+
+- Core themes (issue #11): a new `theme` setting (`system` / `light` / `dark` / `high-contrast`, default `system`) reflows every chrome color — page/card backgrounds, text, borders, focus rings, solid-fill buttons, and the Parent Dashboard activity heatmap — through theme-aware CSS custom properties in `src/index.css`. `system` follows the OS's `prefers-color-scheme` via a `@media` block; the three explicit themes are set via a `data-theme` attribute on `<html>`, synced by a new `ThemeSync` component. Selectable in Admin (a new Theme control) or via a quick-toggle button in the header, reachable on every route, that cycles through all four options. All three rendered themes are verified WCAG AA (4.5:1 text, 3:1 borders/non-text) by a new `themeTokenContrast.test.js` unit test and `e2e/themes.spec.js`'s axe-core scans. Per-game content colors (Color Match's teaching swatches, character/animal art) and the correct/wrong feedback signal colors are unaffected by theme — they stay constant by design.
+
+### Fixed
+
+- `.results__btn--play` (the primary "Play Again" button on every game's results screen) had white text on the light `--color-lavender` pastel — 2.40:1 contrast, below the WCAG AA minimum. Now uses `--color-lavender-dark` (6.44:1), the token every other primary button in the app already used correctly.
+- `.results__score`, `.results__label`, and `.results__missed-heading` in `src/components/GameResults.css` were using raw color tokens with opacity dimming instead of theme-aware `-text` and `-muted` tokens, causing insufficient contrast in Dark and High-Contrast modes. Now use the proper theme-aligned tokens for correct rendering under all themes.
+- Confetti and fireworks canvas elements in `src/lib/confetti.js` were rendering without the `aria-hidden` attribute, tripping WCAG region-semantic violations in accessibility audits. Now properly marked to exclude decorative canvas from assistive-technology examination.
+
 ## [0.37.0] - 2026-07-26
 
 ### Added

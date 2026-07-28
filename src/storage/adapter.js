@@ -21,6 +21,7 @@ export const DEFAULT_SETTINGS = {
   parentDateRange: { preset: 'all', start: null, end: null },
   memoryPairs: 5,
   soundEffectsEnabled: true,
+  theme: 'system',
   // parentalLock.enabled gates /admin and /parent behind a challenge (issue
   // #127); parentalLock.pin === '' means "use a generated math challenge",
   // a 4-digit string switches the gate to PIN mode. See
@@ -68,6 +69,9 @@ export const DEFAULT_SETTINGS = {
  *     strings, only meaningful when preset === 'custom'. Added v0.21.0.
  *   memoryPairs: 3 | 4 | 5 | 6 — pairs per board for memory-type games (added v0.23.0)
  *   soundEffectsEnabled: boolean — gates game sound effects: memory match sounds and quiz correct/wrong chimes (added v0.23.0; quiz chimes v0.26.0)
+ *   theme: 'system' | 'light' | 'dark' | 'high-contrast' — 'system' follows the OS prefers-color-scheme
+ *     (light/dark only; never auto-selects high-contrast). Applied to <html data-theme> by ThemeSync in
+ *     App.jsx. (added v0.38.0)
  *   adaptiveItemSelectionEnabled: boolean — when true, future sessions' queues are weighted toward
  *     items missed in *previous* sessions (decayed by recency, capped at 3x baseline). Independent of
  *     spacedRepetitionEnabled, which only reinserts a missed item within the *same* session. (added v0.35.0)

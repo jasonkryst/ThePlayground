@@ -8,3 +8,5 @@ export default {
 }
 
 export const Default = {}
+export const DefaultDark = { parameters: { theme: 'dark' } }
+export const DefaultHighContrast = { parameters: { theme: 'high-contrast' } }

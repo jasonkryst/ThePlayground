@@ -87,3 +87,35 @@ describe('App — shell chrome', () => {
     expect(screen.getByRole('contentinfo')).toBeInTheDocument()
   })
 })
+
+describe('App — theme sync', () => {
+  it('sets data-theme to the persisted explicit theme', async () => {
+    storage.getSettings.mockResolvedValue({ theme: 'dark' })
+    render(<App />)
+    await waitFor(() => expect(document.documentElement.dataset.theme).toBe('dark'))
+    storage.getSettings.mockResolvedValue({ locale: 'en' })
+  })
+
+  it('sets data-theme to high-contrast', async () => {
+    storage.getSettings.mockResolvedValue({ theme: 'high-contrast' })
+    render(<App />)
+    await waitFor(() => expect(document.documentElement.dataset.theme).toBe('high-contrast'))
+    storage.getSettings.mockResolvedValue({ locale: 'en' })
+  })
+
+  it('removes the data-theme attribute for the system setting (lets the CSS media query resolve it)', async () => {
+    document.documentElement.dataset.theme = 'dark' // simulate a leftover from a previous explicit choice
+    storage.getSettings.mockResolvedValue({ theme: 'system' })
+    render(<App />)
+    await waitFor(() => expect(document.documentElement.dataset.theme).toBeUndefined())
+    storage.getSettings.mockResolvedValue({ locale: 'en' })
+  })
+
+  it('falls back to system (no attribute) for an unrecognized persisted value, without throwing', async () => {
+    document.documentElement.dataset.theme = 'dark'
+    storage.getSettings.mockResolvedValue({ theme: 'blorp' })
+    expect(() => render(<App />)).not.toThrow()
+    await waitFor(() => expect(document.documentElement.dataset.theme).toBeUndefined())
+    storage.getSettings.mockResolvedValue({ locale: 'en' })
+  })
+})

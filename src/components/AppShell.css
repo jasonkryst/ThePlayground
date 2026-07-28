@@ -13,7 +13,7 @@
   gap: 6px;
   padding: 8px 16px;
   background: var(--color-surface);
-  border-bottom: 1px solid rgb(0 0 0 / 8%);
+  border-bottom: 1px solid var(--color-hairline);
 }
 
 .shell__row {
@@ -37,7 +37,7 @@
   padding: 0 8px;
   font-size: 1.25rem;
   font-weight: 800;
-  color: var(--color-lavender-dark);
+  color: var(--color-lavender-text);
   text-decoration: none;
   border-radius: var(--radius-button);
 }
@@ -87,25 +87,37 @@
   background: transparent;
 }
 
+.shell__theme-toggle {
+  min-width: 48px;
+  min-height: 48px;
+  font-size: 1.5rem;
+  background: transparent;
+  border-radius: var(--radius-button);
+  transition: background 0.15s;
+}
+
 .shell__brand:hover,
 .shell__back:hover,
 .shell__nav-link:hover,
-.shell__home:hover { background: rgb(0 0 0 / 6%); }
+.shell__home:hover,
+.shell__theme-toggle:hover { background: var(--color-hover-tint); }
 
 .shell__brand:focus,
 .shell__back:focus,
 .shell__nav-link:focus,
-.shell__home:focus { outline: none; }
+.shell__home:focus,
+.shell__theme-toggle:focus { outline: none; }
 
 .shell__brand:focus-visible,
 .shell__back:focus-visible,
 .shell__nav-link:focus-visible,
-.shell__home:focus-visible {
+.shell__home:focus-visible,
+.shell__theme-toggle:focus-visible {
   outline: 3px solid var(--color-lavender);
   outline-offset: 3px;
 }
 
-.shell__nav-link[aria-current='page'] { background: rgb(0 0 0 / 8%); }
+.shell__nav-link[aria-current='page'] { background: var(--color-hover-tint); }
 
 /* Without this, .shell__nav-link's own `display: flex` (needed for its
    icon centering) makes each link a block-level box, so the three links
@@ -121,7 +133,7 @@
   align-items: center;
   gap: 12px;
   padding-top: 6px;
-  border-top: 1px solid rgb(0 0 0 / 8%);
+  border-top: 1px solid var(--color-hairline);
 }
 
 .shell__title {
@@ -130,7 +142,7 @@
   overflow: hidden;
   font-size: 1.125rem;
   font-weight: 800;
-  color: var(--color-lavender-dark);
+  color: var(--color-lavender-text);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -164,7 +176,7 @@ img.shell__title-icon { width: 20px; height: 20px; object-fit: contain; }
   padding: 12px 16px;
   font-size: 0.8125rem;
   color: var(--color-text-muted);
-  border-top: 1px solid rgb(0 0 0 / 8%);
+  border-top: 1px solid var(--color-hairline);
 }
 
 .shell__footer-versions { display: flex; gap: 12px; }

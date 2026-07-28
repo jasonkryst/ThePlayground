@@ -80,6 +80,10 @@ describe('CSP-safe cannon construction (issue #109 regression guard)', () => {
     await import('../confetti')
     expect(createMock).toHaveBeenCalledTimes(1)
     const [canvasArg, options] = createMock.mock.calls[0]
+    // Canvas stays null (library-created, appended lazily on first real
+    // burst) rather than a self-supplied element -- e2e/confetti-csp.spec.js
+    // depends on no <canvas> existing in the DOM until a burst actually
+    // fires (e.g. when the animations setting is off).
     expect(canvasArg).toBeNull()
     expect(options.useWorker).toBe(false)
   })
@@ -92,5 +96,46 @@ describe('CSP-safe cannon construction (issue #109 regression guard)', () => {
     vi.advanceTimersByTime(FIREWORKS_BURSTS * FIREWORKS_INTERVAL_MS)
     vi.useRealTimers()
     expect(defaultExportMock).not.toHaveBeenCalled()
+  })
+})
+
+// Regression coverage for the "region" axe-core rule (page content not
+// contained by a landmark) firing on any screen rendered after a correct
+// answer -- canvas-confetti's own auto-created canvas is decorative
+// (pointer-events: none, nothing meant to be perceived by assistive tech)
+// but isn't marked aria-hidden by the library itself.
+describe('decorative canvas is hidden from the accessibility tree', () => {
+  // The mocked create()/confetti() above never touches the DOM (that's the
+  // real library's job), so simulate what it leaves behind: a bare <canvas>
+  // appended to the body, exactly as canvas-confetti's own getCanvas() does.
+  function appendUnlabeledCanvas() {
+    const canvas = document.createElement('canvas')
+    document.body.appendChild(canvas)
+    return canvas
+  }
+
+  it('marks a newly-appended canvas aria-hidden after fireConfetti', async () => {
+    const { fireConfetti } = await import('../confetti')
+    const canvas = appendUnlabeledCanvas()
+    fireConfetti()
+    expect(canvas.getAttribute('aria-hidden')).toBe('true')
+  })
+
+  it('marks a newly-appended canvas aria-hidden after each fireFireworks burst', async () => {
+    const { fireFireworks, FIREWORKS_BURSTS, FIREWORKS_INTERVAL_MS } = await import('../confetti')
+    vi.useFakeTimers()
+    const canvas = appendUnlabeledCanvas()
+    fireFireworks()
+    vi.advanceTimersByTime(FIREWORKS_BURSTS * FIREWORKS_INTERVAL_MS)
+    vi.useRealTimers()
+    expect(canvas.getAttribute('aria-hidden')).toBe('true')
+  })
+
+  it('negative: a canvas already carrying an aria-hidden value is left untouched', async () => {
+    const { fireConfetti } = await import('../confetti')
+    const canvas = appendUnlabeledCanvas()
+    canvas.setAttribute('aria-hidden', 'false')
+    fireConfetti()
+    expect(canvas.getAttribute('aria-hidden')).toBe('false')
   })
 })

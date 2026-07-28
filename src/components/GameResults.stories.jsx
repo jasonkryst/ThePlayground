@@ -11,6 +11,9 @@ export const PerfectRun = {
   args: { score: 5, total: 5, missed: [], onPlayAgain: () => {}, onHome: () => {}, renderMissedItem },
 }
 
+export const PerfectRunDark = { ...PerfectRun, parameters: { theme: 'dark' } }
+export const PerfectRunHighContrast = { ...PerfectRun, parameters: { theme: 'high-contrast' } }
+
 export const WithMissedItems = {
   args: {
     score: 3, total: 5,

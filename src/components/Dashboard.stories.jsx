@@ -14,3 +14,5 @@ const manifests = [
 
 export const Default = { args: { manifests } }
 export const Empty = { args: { manifests: [] } }
+export const DefaultDark = { args: { manifests }, parameters: { theme: 'dark' } }
+export const DefaultHighContrast = { args: { manifests }, parameters: { theme: 'high-contrast' } }

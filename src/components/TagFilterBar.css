@@ -22,7 +22,7 @@
   background: transparent;
   font-size: 0.8125rem;
   font-weight: 600;
-  color: var(--color-lavender-dark);
+  color: var(--color-lavender-text);
   text-decoration: underline;
   cursor: pointer;
 }

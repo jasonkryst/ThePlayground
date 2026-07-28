@@ -324,6 +324,7 @@ Accessible from the dashboard via the gear icon (⚙).
 | Difficulty auto-progression | Off | On, Off |
 | Pairs per board | 5 | 3, 4, 5, 6 |
 | Sound effects | On | On, Off |
+| Theme | System | System, Light, Dark, High Contrast |
 | Google Analytics ID | *(empty)* | Any valid GA4 Measurement ID (e.g. `G-XXXXXXXXXX`) |
 | Parental Lock | On (math challenge) | On/Off; optional 4-digit PIN |
 
@@ -340,6 +341,8 @@ Accessible from the dashboard via the gear icon (⚙).
 **Child's Name** — when set, the dashboard title reads "&lt;Name&gt;'s Playground"; when left blank, it shows the default "My Playground".
 
 **Celebration animations** — when on, a confetti burst plays on every correct answer (and fireworks on completing a memory board) and the game header shows the current answer streak once it reaches 2; the end-of-game screen lists any missed items. Turning this off disables the confetti only — streak tracking and the missed-items summary remain.
+
+**Theme** — "System" follows the device's light/dark preference automatically; "Light", "Dark", and "High Contrast" are explicit overrides. Also reachable via a quick-toggle button in the header on every page (cycles through all four), independent of the Admin page. All three rendered themes (Light, Dark, High Contrast) meet WCAG AA contrast (4.5:1 text, 3:1 borders/non-text).
 
 **Timer** — "Show timer" is a running stopwatch, purely informational. "Answer within Ns" instead counts down; when it reaches zero the question locks in as missed (same as exhausting retries) and always advances after a "Time's up!" message, regardless of feedback mode. "Off" hides the timer and enforces no limit. Memory games use the stopwatch for the fastest-board record but are not subject to the countdown.
 
