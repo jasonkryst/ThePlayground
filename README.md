@@ -1,6 +1,8 @@
 # The Playground
 
 [![CI](https://github.com/jasonkryst/ThePlayground/actions/workflows/ci.yml/badge.svg)](https://github.com/jasonkryst/ThePlayground/actions/workflows/ci.yml)
+[![Copilot](https://github.com/jasonkryst/ThePlayground/actions/workflows/agents/copilot-pull-request-reviewer/badge.svg)](https://github.com/jasonkryst/ThePlayground/actions/workflows/agents/copilot-pull-request-reviewer)
+[![Docker Release](https://github.com/jasonkryst/ThePlayground/actions/workflows/docker-image.yml/badge.svg)](https://github.com/jasonkryst/ThePlayground/actions/workflows/docker-image.yml)
 
 A browser-based game dashboard designed for infants and toddlers. Games are displayed as large, tappable cards. Each game is self-contained in its own folder — adding a new game requires no changes to the core application.
 
