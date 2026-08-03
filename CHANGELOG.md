@@ -3,6 +3,15 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.0.3] - 2026-08-03
+
+### Fixed
+
+- Accessibility findings from the issue #133 full-audit re-run (issue #146):
+  - **Incomplete ARIA tabs pattern in `DateRangeFilter.jsx`.** Its preset pills already used `role="tablist"`/`role="tab"`/`aria-selected`, but nothing linked a tab to a panel (no `aria-controls`) and the custom-date section below wasn't marked `role="tabpanel"` — the same defect class already fixed in `AdminPage.jsx`, just never applied here. Unlike `AdminPage`'s tabs (one exclusive panel per tab), every preset here shares a single custom-range panel — picking `7d`/`30d`/`90d`/`all` doesn't hide it, and typing dates directly switches the range to `custom` without any tab click — so the fix gives each tab a stable `id`, points every tab's `aria-controls` at that one shared panel, marks the panel `role="tabpanel"`, and sets its `aria-labelledby` to all four tab ids jointly (WCAG 4.1.2 / WAI-ARIA APG Tabs pattern).
+  - **Hardcoded hex colors bypassing the design-token convention (CLAUDE.md).** `GameChoiceGrid.css`'s `.highlight-correct::after` overlay and `index.css`'s `.correct` rule both hardcoded the same `#a5d6a7` green literal with no shared token — added a `--color-success` custom property to `index.css` and pointed both at it. Separately, `AnimalMemoryMatchGame.css` and `SoundMemoryMatchGame.css` both used `var(--color-text-muted, #666)` — a stale fallback that doesn't match either theme's real `--color-text-muted` value and was never needed since that token is always defined — removed the dead fallback in both files.
+  - Added regression tests at every layer touched: `DateRangeFilter.test.jsx` (tabpanel role, aria-controls/aria-labelledby wiring, holds across preset changes), a new `src/__tests__/designTokenColors.test.js` (source-text assertions that the token is referenced and the old literals are gone, following the same `fs.readFileSync`-based pattern as `nginx/__tests__/securityHeaders.test.js`), and confirmed the existing `parent-dashboard.spec.js` e2e a11y/visual suite still passes unchanged.
+
 ## [1.0.2] - 2026-08-03
 
 ### Fixed
