@@ -14,11 +14,14 @@ import { useCallback, useEffect } from 'react'
  * @param {boolean}  p.showIntro      session.showIntro
  * @param {boolean}  p.introResolved  session.introResolved
  * @param {boolean}  p.done           session.done
+ * @param {boolean}  p.resumeAvailable session.resumeAvailable — true for the
+ *   entire awaiting-resume-choice window, before the player has chosen
+ *   Resume or Start Fresh
  * @param {(current: object) => void} p.announce  plays the prompt for `current`
  * @param {() => void} p.stop         stops any in-flight prompt audio
  * @returns {() => void} replay — re-announces the current question
  */
-export default function useQuestionAudio({ index, current, showIntro, introResolved, done, announce, stop }) {
+export default function useQuestionAudio({ index, current, showIntro, introResolved, done, resumeAvailable, announce, stop }) {
   const replay = useCallback(() => {
     if (!current) return
     announce(current)
@@ -30,11 +33,16 @@ export default function useQuestionAudio({ index, current, showIntro, introResol
     return () => { stop() }
   }, [current, stop])
 
-  // Auto-announce the active question — but never during loading or the intro.
+  // Auto-announce the active question — but never during loading, the
+  // intro, or while a resume decision is still pending (issue #153):
+  // useGameSession's resume-check effect populates `current` and forces
+  // showIntro closed for that entire window so QuizGameShell can show the
+  // resume prompt's real progress, which otherwise satisfies every other
+  // condition here before the player has pressed Resume/Start Fresh.
   useEffect(() => {
-    if (!current || showIntro || !introResolved) return
+    if (!current || showIntro || !introResolved || resumeAvailable) return
     replay()
-  }, [index, replay, current, showIntro, introResolved])
+  }, [index, replay, current, showIntro, introResolved, resumeAvailable])
 
   // Stop when the session ends or returns to the intro screen.
   useEffect(() => {

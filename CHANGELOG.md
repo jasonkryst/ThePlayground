@@ -3,6 +3,12 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.0.2] - 2026-08-03
+
+### Fixed
+
+- Question audio autoplaying during the resume prompt, before Resume/Start Fresh is pressed (issue #153): Animal Sounds and Fruit & Veggie ID are the two games whose prompt is itself spoken aloud, via the shared `useQuestionAudio` hook's auto-announce effect. That effect fires whenever `current` is truthy and `showIntro`/`introResolved` say the intro isn't blocking play — but it never checked `resumeAvailable`. `useGameSession`'s resume-check effect populates `current`/`index` from the saved snapshot and force-closes `showIntro` for the entire awaiting-resume-choice window (so `ResumePrompt` can preview real progress), which already satisfied every other guard condition before the player had chosen anything on that screen — so the clip/speech played under the resume prompt itself. Added a `resumeAvailable` param to `useQuestionAudio`'s guard, threaded through from both games' `session.resumeAvailable`. Added regression tests: hook-level (`useQuestionAudio.test.js`) covering both the suppressed and now-resumed-permitted cases, game-level unit tests for both affected games (resume prompt showing → no audio; Resume or Start Fresh chosen → audio plays), and a real-browser Playwright regression in `session-resume.spec.js` that counts actual `HTMLMediaElement.play()` calls rather than mocking audio.
+
 ## [1.0.1] - 2026-08-03
 
 ### Fixed

@@ -18,7 +18,7 @@ const CHOICE_COLORS = [
 export default function FruitVeggieIdGame({ onGameEnd }) {
   const { t } = useTranslation()
   const session = useGameSession({ gameId: 'fruit-veggie-id', items: foods })
-  const { current, index, done, showIntro, introResolved } = session
+  const { current, index, done, showIntro, introResolved, resumeAvailable } = session
 
   // The spoken name is the question itself, so it plays regardless of the
   // shell's soundEffectsEnabled chime setting. useQuestionAudio owns the
@@ -29,7 +29,7 @@ export default function FruitVeggieIdGame({ onGameEnd }) {
   const announce = useCallback(food => {
     if (supported) speak(t(food.correct.nameKey))
   }, [supported, speak, t])
-  const replay = useQuestionAudio({ index, current, showIntro, introResolved, done, announce, stop: cancel })
+  const replay = useQuestionAudio({ index, current, showIntro, introResolved, done, resumeAvailable, announce, stop: cancel })
 
   return (
     <QuizGameShell
