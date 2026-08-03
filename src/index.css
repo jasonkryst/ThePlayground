@@ -11,6 +11,7 @@
   --color-lilac-dark:  #8E24AA;
   --color-error:       #c62828;
   --color-error-solid: #c62828;
+  --color-success:     #a5d6a7;
   --color-bg:          #F0FDFF;
   --color-surface:     #FFF;
   --color-text:        #37474F;
@@ -217,7 +218,7 @@ button {
    no longer needs this treatment: GameChoiceGrid.css layers it as a
    `::after` overlay instead of replacing `background`, so it paints over
    any inline color without an !important fight. */
-.correct { background: #a5d6a7 !important; }
+.correct { background: var(--color-success) !important; }
 .wrong   { background: #ef9a9a !important; }
 
 /* grayscale(85%)/brightness(0.88) (this rule's pre-2026-07-06 values) dropped some

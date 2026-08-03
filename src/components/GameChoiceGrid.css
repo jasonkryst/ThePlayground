@@ -42,7 +42,7 @@
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  background: #a5d6a7;
+  background: var(--color-success);
   opacity: var(--hint-strength, 1);
   pointer-events: none;
   z-index: -1;

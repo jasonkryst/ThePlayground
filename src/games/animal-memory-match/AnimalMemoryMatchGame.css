@@ -8,6 +8,6 @@
 }
 
 .memory-game__progress {
-  color: var(--color-text-muted, #666);
+  color: var(--color-text-muted);
   font-size: 0.9rem;
 }

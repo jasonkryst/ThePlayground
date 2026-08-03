@@ -9,6 +9,8 @@ const PRESET_LABEL_KEY = {
   '90d': 'parent.dateRange90d',
   'all': 'parent.dateRangeAll',
 }
+const PANEL_ID = 'date-range-filter-panel'
+const tabId = preset => `date-range-tab-${preset}`
 
 export default function DateRangeFilter({ range, onChange }) {
   const { t } = useTranslation()
@@ -49,8 +51,10 @@ export default function DateRangeFilter({ range, onChange }) {
         {PRESETS.map(preset => (
           <button
             key={preset}
+            id={tabId(preset)}
             role="tab"
             aria-selected={range.preset === preset}
+            aria-controls={PANEL_ID}
             className={`date-range-filter__tab${range.preset === preset ? ' date-range-filter__tab--active' : ''}`}
             onClick={() => selectPreset(preset)}
           >
@@ -59,7 +63,17 @@ export default function DateRangeFilter({ range, onChange }) {
         ))}
       </div>
 
-      <div className="date-range-filter__custom">
+      {/* Unlike AdminPage's tabs (one exclusive panel per tab), every preset
+          here shares this single custom-range panel — picking a preset
+          doesn't hide it, and typing dates directly switches the range to
+          'custom' without any tab click. So aria-controls/aria-labelledby
+          reference it as jointly owned by all four tabs, not one each. */}
+      <div
+        className="date-range-filter__custom"
+        role="tabpanel"
+        id={PANEL_ID}
+        aria-labelledby={PRESETS.map(tabId).join(' ')}
+      >
         <label className="date-range-filter__label" htmlFor="date-range-from">
           {t('parent.dateRangeFrom')}
         </label>
