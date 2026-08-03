@@ -86,6 +86,44 @@ test.describe('system theme resolution', () => {
   })
 })
 
+// Regression coverage for issue #152: the theme toggle's icon is
+// aria-hidden (decorative, the button itself carries the accessible name),
+// so axe's automated color-contrast checks above never look at it --
+// nothing in the a11y-focused tests would have caught the icon rendering in
+// the same color as its own background. These tests assert on the actual
+// computed color instead of relying on axe.
+test.describe('theme toggle icon visibility', () => {
+  for (const theme of ['system', 'light', 'dark', 'high-contrast']) {
+    test(`icon color is distinguishable from the header background in ${theme} (positive case)`, async ({ page }) => {
+      await seedTheme(page, theme)
+      await page.goto('/')
+      const button = page.getByRole('button', { name: /theme/i })
+      await expect(button).toBeVisible()
+
+      const [iconColor, headerBg] = await page.evaluate(() => [
+        getComputedStyle(document.querySelector('.shell__theme-toggle')).color,
+        getComputedStyle(document.querySelector('.shell__header')).backgroundColor,
+      ])
+      expect(iconColor).not.toBe(headerBg)
+    })
+  }
+
+  test('icon color still differs from the header background when the persisted theme value is invalid (negative case)', async ({ page }) => {
+    await page.addInitScript(() => {
+      localStorage.setItem('playground_settings', JSON.stringify({ theme: 'not-a-real-theme' }))
+    })
+    await page.goto('/')
+    const button = page.getByRole('button', { name: /theme/i })
+    await expect(button).toBeVisible()
+
+    const [iconColor, headerBg] = await page.evaluate(() => [
+      getComputedStyle(document.querySelector('.shell__theme-toggle')).color,
+      getComputedStyle(document.querySelector('.shell__header')).backgroundColor,
+    ])
+    expect(iconColor).not.toBe(headerBg)
+  })
+})
+
 test('header theme toggle cycles and persists across reload', async ({ page }) => {
   await seedTheme(page, 'system')
   await page.goto('/')

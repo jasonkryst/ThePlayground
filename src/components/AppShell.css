@@ -101,10 +101,18 @@
   background: transparent;
 }
 
+/* color is needed here (unlike the purely-emoji icon buttons) because the
+   high-contrast theme's glyph, unlike the other three themes' glyphs, isn't
+   a color emoji -- U+25D0 has no default emoji presentation, so browsers
+   render it as plain text taking the button's foreground color. Without an
+   explicit color it fell back to the browser's default button text color
+   (black) rather than var(--color-text), which is invisible against the
+   high-contrast theme's black header background (issue #152). */
 .shell__theme-toggle {
   min-width: 48px;
   min-height: 48px;
   font-size: 24px;
+  color: var(--color-text);
   background: transparent;
   border-radius: var(--radius-button);
   transition: background 0.15s;

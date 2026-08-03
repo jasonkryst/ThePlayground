@@ -271,4 +271,29 @@ describe('AppShell — theme toggle', () => {
     expect(() => fireEvent.click(button)).not.toThrow()
     await waitFor(() => expect(storage.saveSettings).toHaveBeenLastCalledWith(expect.objectContaining({ theme: 'system' })))
   })
+
+  // Regression coverage for issue #152: the toggle rendered the right glyph
+  // for every theme, but the high-contrast glyph (a plain-text symbol, not a
+  // color emoji like the other three) was invisible against the
+  // high-contrast header because .shell__theme-toggle never set `color` --
+  // jsdom doesn't apply real CSS, so that part is covered separately in
+  // e2e/themes.spec.js. This suite only guards the glyph-per-theme logic.
+  it.each([
+    ['system', '🌓'],
+    ['light', '☀️'],
+    ['dark', '🌙'],
+    ['high-contrast', '◐'],
+  ])('renders the %s theme icon glyph', async (theme, glyph) => {
+    storage.getSettings.mockResolvedValue({ theme })
+    await renderShell('/')
+    const button = await screen.findByRole('button', { name: /theme/i })
+    expect(button).toHaveTextContent(glyph)
+  })
+
+  it('falls back to the system icon glyph for an unrecognized persisted theme value', async () => {
+    storage.getSettings.mockResolvedValue({ theme: 'not-a-real-theme' })
+    await renderShell('/')
+    const button = await screen.findByRole('button', { name: /theme/i })
+    expect(button).toHaveTextContent('🌓')
+  })
 })

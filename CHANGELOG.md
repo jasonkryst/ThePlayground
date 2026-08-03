@@ -3,6 +3,12 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.0.1] - 2026-08-03
+
+### Fixed
+
+- Theme toggle icon invisible in High Contrast (issue #152): `.shell__theme-toggle` (the header's theme-cycling button) never set a `color`, unlike its sibling icon buttons (`.shell__back`, `.shell__nav-link`). That was harmless for three of the four theme glyphs (🌓/☀️/🌙), which are color emoji and ignore CSS `color` entirely, but the High Contrast glyph (◐, U+25D0) has no default emoji presentation and renders as plain text taking the button's inherited foreground color — which fell back to the browser's default black button text, invisible against High Contrast's black header background. Existing axe-based contrast tests never caught this because the icon `<span>` is `aria-hidden` (decorative; the button's `aria-label` carries the accessible name), which axe excludes from its contrast scan. Added `color: var(--color-text)` to `.shell__theme-toggle`, plus a real-browser regression test (`e2e/themes.spec.js`) that compares the icon's computed color against the header background for every theme instead of relying on axe, and unit tests (`AppShell.test.jsx`) asserting the correct glyph renders for every valid theme and that an unrecognized persisted theme value still falls back to a visible icon.
+
 ## [1.0.0] - 2026-07-28
 
 ### Changed
