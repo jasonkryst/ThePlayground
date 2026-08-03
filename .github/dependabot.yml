@@ -1,0 +1,9 @@
+version: 2
+updates:
+  # Keeps the commit-SHA pins in .github/workflows/*.yml current (issue
+  # #145) — SHA-pinning stops a tag being silently repointed, but only if
+  # something also updates the pins when the action ships a new version.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"

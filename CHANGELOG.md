@@ -3,6 +3,17 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.0.4] - 2026-08-03
+
+### Fixed
+
+- CI hardening & supply-chain findings from the issue #133 full-audit re-run (issue #145):
+  - **react-router CVE allowlist had no expiry/re-review mechanism.** `ci.yml`'s `npm-audit` gate allowlists `GHSA-qwww-vcr4-c8h2` with sound reasoning (this SPA never reaches react-router's RSC/framework mode), but nothing stopped that exception from silently calcifying. Added a dated `# Allowlist entry added: 2026-07-28` marker and a `.github/__tests__/ci.test.js` assertion that fails once the entry is more than 180 days old, forcing a fresh re-review or the already-tracked React 19 + react-router 8 upgrade (`docs/ENHANCEMENTS.md`).
+  - **8 of 9 `ci.yml` jobs inherited the default `GITHUB_TOKEN` scope instead of an explicit least-privilege baseline.** Added a workflow-level `permissions: { contents: read }` default; the `trivy` job keeps its own job-level override for the extra `security-events: write` it needs (job-level permissions replace, not merge with, the workflow-level default).
+  - **GitHub Actions were pinned to floating tags, not commit SHAs.** Every third-party action in `ci.yml` and `docker-image.yml` is now pinned to a commit SHA (e.g. `actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0`), so a tag can no longer be silently repointed. Added `.github/dependabot.yml` (github-actions ecosystem, weekly) so pins get automated update PRs.
+  - **The pushed release image was never directly Trivy-scanned** — `docker-image.yml` built the image twice more and pushed straight from each `docker/build-push-action` call, so only a same-commit proxy build in `ci.yml` was ever scanned. Reworked the release job to build once locally (`push: false`, `load: true`), run the same CRITICAL/HIGH fixable-findings Trivy gate against that exact image, and only then tag and push it — a scan failure now blocks the release.
+  - Added regression tests for all four fixes: extended `.github/__tests__/ci.test.js` (permissions default, SHA-pinning validator + real-file assertion, allowlist-age validator + real-file assertion) and added `.github/__tests__/dockerImage.test.js` (permissions, SHA-pinning, build→scan→tag/push ordering) and `.github/__tests__/dependabot.test.js`, following the same `fs.readFileSync` + `yaml.parse` static-config-test pattern as `nginx/__tests__/securityHeaders.test.js` and the existing `ci.test.js`.
+
 ## [1.0.3] - 2026-08-03
 
 ### Fixed

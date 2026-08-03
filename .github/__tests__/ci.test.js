@@ -12,10 +12,11 @@ const EXPECTED_JOBS = ['lint', 'lint-css', 'unit-tests', 'build', 'e2e', 'docker
 const NODE_JOBS = ['lint', 'lint-css', 'unit-tests', 'build', 'e2e', 'npm-audit', 'lighthouse']
 
 let workflow
+let ciYmlText
 
 beforeAll(() => {
-  const raw = fs.readFileSync(CI_YML_PATH, 'utf8')
-  workflow = parse(raw)
+  ciYmlText = fs.readFileSync(CI_YML_PATH, 'utf8')
+  workflow = parse(ciYmlText)
 })
 
 function stepRuns(jobName) {
@@ -240,5 +241,116 @@ describe('.github/workflows/ci.yml', () => {
     const report = steps.find(s => s.uses && s.uses.startsWith('aquasecurity/trivy-action') && s.with.format === 'sarif')
     expect(report.with.severity).toBeUndefined()
     expect(report.with['ignore-unfixed']).toBeUndefined()
+  })
+
+  // Guards issue #145's `permissions:` finding: 8 of 9 jobs inherited the
+  // default GITHUB_TOKEN scope instead of an explicit least-privilege
+  // baseline. A workflow-level default plus trivy's own job-level override
+  // (already covered above) closes the gap for every job.
+  describe('workflow-level permissions (issue #145)', () => {
+    it('declares a least-privilege contents:read default for every job', () => {
+      expect(workflow.permissions).toEqual({ contents: 'read' })
+    })
+
+    it('negative: no job other than trivy declares its own permissions override', () => {
+      for (const [jobName, job] of Object.entries(workflow.jobs)) {
+        if (jobName === 'trivy') continue
+        expect(job.permissions, `${jobName} should rely on the workflow-level default`).toBeUndefined()
+      }
+    })
+  })
+})
+
+// Guards issue #145's SHA-pinning finding: a floating tag (`@v4`) can be
+// repointed by the action's maintainer (or an attacker who compromises
+// their account) without this repo's consent. A commit SHA can't be moved.
+function isShaPinned(usesValue) {
+  const atIndex = usesValue.lastIndexOf('@')
+  if (atIndex === -1) return false
+  return /^[0-9a-f]{40}$/i.test(usesValue.slice(atIndex + 1))
+}
+
+describe('isShaPinned (validator)', () => {
+  it('accepts a 40-character commit SHA pin', () => {
+    expect(isShaPinned('actions/checkout@11d5960a326750d5838078e36cf38b85af677262')).toBe(true)
+  })
+
+  it('rejects a floating major-version tag', () => {
+    expect(isShaPinned('actions/checkout@v4')).toBe(false)
+  })
+
+  it('rejects a floating branch reference', () => {
+    expect(isShaPinned('actions/checkout@main')).toBe(false)
+  })
+
+  it('rejects a value with no ref at all', () => {
+    expect(isShaPinned('actions/checkout')).toBe(false)
+  })
+})
+
+describe('.github/workflows/ci.yml — Action SHA-pinning (issue #145)', () => {
+  it('pins every third-party action to a commit SHA, not a floating tag', () => {
+    const unpinned = []
+    for (const [jobName, job] of Object.entries(workflow.jobs)) {
+      for (const step of job.steps || []) {
+        if (step.uses && !isShaPinned(step.uses)) unpinned.push(`${jobName}: ${step.uses}`)
+      }
+    }
+    expect(unpinned).toEqual([])
+  })
+
+  it('carries a human-readable version comment alongside every SHA pin', () => {
+    const usesLines = ciYmlText.split('\n').filter(line => /uses:\s*\S+@[0-9a-f]{40}/i.test(line))
+    expect(usesLines.length).toBeGreaterThan(0)
+    for (const line of usesLines) {
+      expect(line, line).toMatch(/#\s*v[\w.]+/)
+    }
+  })
+})
+
+// Guards issue #145's react-router CVE allowlist finding: the allowlist in
+// the npm-audit job's gate step had no expiry/re-review mechanism, risking
+// "allowlisted" silently being read as "resolved" forever. A dated marker
+// plus this age check means the entry can't calcify unnoticed — either the
+// tracked React 19 + react-router 8 upgrade (docs/ENHANCEMENTS.md) lands and
+// removes the allowlist, or this test starts failing and forces a look.
+const ALLOWLIST_MAX_AGE_DAYS = 180
+
+function daysSince(dateStr, now) {
+  const from = new Date(`${dateStr}T00:00:00Z`)
+  return Math.floor((now.getTime() - from.getTime()) / (1000 * 60 * 60 * 24))
+}
+
+function isAllowlistEntryStale(dateStr, now, maxDays = ALLOWLIST_MAX_AGE_DAYS) {
+  return daysSince(dateStr, now) > maxDays
+}
+
+describe('isAllowlistEntryStale (validator)', () => {
+  it('is not stale a few days after being added', () => {
+    expect(isAllowlistEntryStale('2026-01-01', new Date('2026-01-10T00:00:00Z'))).toBe(false)
+  })
+
+  it('is not stale exactly at the max-age boundary', () => {
+    expect(isAllowlistEntryStale('2026-01-01', new Date('2026-06-30T00:00:00Z'), 180)).toBe(false)
+  })
+
+  it('is stale once past the max-age boundary', () => {
+    expect(isAllowlistEntryStale('2026-01-01', new Date('2026-07-01T00:00:00Z'), 180)).toBe(true)
+  })
+
+  it('is stale a year after being added', () => {
+    expect(isAllowlistEntryStale('2026-01-01', new Date('2027-01-02T00:00:00Z'))).toBe(true)
+  })
+})
+
+describe('react-router CVE allowlist re-review (issue #145)', () => {
+  it('records a dated marker for when the allowlist entry was added', () => {
+    const match = ciYmlText.match(/Allowlist entry added:\s*(\d{4}-\d{2}-\d{2})/)
+    expect(match).not.toBeNull()
+  })
+
+  it('has not gone stale — fails once the entry is more than 180 days old, forcing a re-review or the tracked React 19 upgrade', () => {
+    const match = ciYmlText.match(/Allowlist entry added:\s*(\d{4}-\d{2}-\d{2})/)
+    expect(isAllowlistEntryStale(match[1], new Date())).toBe(false)
   })
 })
