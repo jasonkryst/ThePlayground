@@ -2,22 +2,30 @@
 
 .admin__tabs {
   display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 8px;
   margin-bottom: 28px;
 }
 
+/* Natural width + `white-space: nowrap` (not `flex: 1` sharing a fixed row)
+   so a tab's label is never split across two lines -- long translations
+   (e.g. Spanish "Configuración") or narrow phone widths instead make the
+   whole pill wrap down to its own row via `.admin__tabs`'s `flex-wrap`,
+   the same graceful-degradation pattern `.date-range-filter__tab` already
+   uses. See issue #156. */
 .admin__tab {
-  flex: 1;
-  padding: 10px 16px;
+  padding: 10px 20px;
   border-radius: var(--radius-button);
   border: 2px solid var(--color-hairline);
   background: transparent;
-  font-size: 0.9375rem;
+  font-size: 0.875rem;
   font-weight: 700;
   color: var(--color-text-muted);
   cursor: pointer;
   transition: background 0.15s, color 0.15s, border-color 0.15s;
   min-height: 56px;
+  white-space: nowrap;
 }
 
 .admin__tab:hover { background: var(--color-hover-tint); }
@@ -112,6 +120,26 @@
   color: var(--color-text);
   transition: background 0.15s;
   min-height: 64px;
+}
+
+/* `--auto` opts a group out of the `flex: 1` equal-width split above: it's
+   for wider option sets (e.g. the 4-way Theme picker) where forcing equal
+   shares plus the global `overflow-wrap: anywhere` (src/index.css, issue
+   #115) wrapped a single label's own text across two-plus lines at phone
+   widths -- "High Contrast"/"Systemowy" etc. Natural width + `white-space:
+   nowrap` instead lets a whole pill that doesn't fit drop to the next line
+   via `.admin__toggle`'s existing `flex-wrap: wrap`, the same fix applied to
+   `.admin__tab` (see comment there). Plain On/Off pairs stay on the default
+   equal-width split, which is still the better look for a two-way toggle
+   and never risks this wrap in any supported locale (issue #156). */
+.admin__toggle--auto {
+  justify-content: center;
+}
+
+.admin__toggle--auto .admin__toggle-btn {
+  flex: 0 1 auto;
+  padding: 14px 20px;
+  white-space: nowrap;
 }
 
 .admin__toggle-btn.active {

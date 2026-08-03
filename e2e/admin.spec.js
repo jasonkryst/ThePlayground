@@ -253,3 +253,84 @@ test.describe('pill text overfill regression (issue #115)', () => {
     expect(results.violations).toEqual([])
   })
 })
+
+test.describe('pill label single-line regression (issue #156)', () => {
+  // Distinct from issue #115's checks above, which guard against a label's
+  // text overflowing its pill or the page. These guard the other half of the
+  // same underlying `flex: 1` + global `overflow-wrap: anywhere` (src/index.css)
+  // interaction: even with no overflow at all, an equal-width pill could still
+  // break its own label across two lines when the label didn't fit its share
+  // of the row -- reproducible pre-fix even in English (e.g. the Settings/
+  // Games/Badges/History tab row, and the 4-way Theme picker, both at an
+  // ordinary 375-390px phone width). A label's text occupies more than one
+  // CSS line box exactly when `Range.getClientRects()` over its content
+  // reports more than one distinct `top` offset.
+  const PHONE_VIEWPORT = { width: 390, height: 844 }
+
+  function seedLocale(page, locale) {
+    return page.addInitScript((loc) => {
+      localStorage.setItem('playground_settings', JSON.stringify({ locale: loc }))
+    }, locale)
+  }
+
+  async function lineCount(locator) {
+    return locator.evaluate(el => {
+      const range = document.createRange()
+      range.selectNodeContents(el)
+      const tops = new Set(
+        Array.from(range.getClientRects())
+          .filter(r => r.width > 0 && r.height > 0)
+          .map(r => Math.round(r.top))
+      )
+      return tops.size
+    })
+  }
+
+  test('positive: every admin tab label stays on one line at phone width (English)', async ({ page }) => {
+    await page.setViewportSize(PHONE_VIEWPORT)
+    await page.goto('/admin')
+    for (const name of ['Settings', 'Games', 'Badges', 'History']) {
+      expect(await lineCount(page.getByRole('tab', { name }))).toBe(1)
+    }
+  })
+
+  test('positive: every Theme option label stays on one line at phone width (English)', async ({ page }) => {
+    await page.setViewportSize(PHONE_VIEWPORT)
+    await page.goto('/admin')
+    for (const name of ['System', 'Light', 'Dark', 'High Contrast']) {
+      expect(await lineCount(page.getByRole('button', { name, exact: true }))).toBe(1)
+    }
+  })
+
+  test('positive: the longest Spanish tab and Theme labels still stay on one line at phone width', async ({ page }) => {
+    await seedLocale(page, 'es')
+    await page.setViewportSize(PHONE_VIEWPORT)
+    await page.goto('/admin')
+    expect(await lineCount(page.getByRole('tab', { name: 'Configuración' }))).toBe(1)
+    expect(await lineCount(page.getByRole('button', { name: 'Alto contraste', exact: true }))).toBe(1)
+  })
+
+  test('negative: the Spanish tab row actually spans two rows at phone width, proving whole pills wrap rather than merely fitting', async ({ page }) => {
+    await seedLocale(page, 'es')
+    await page.setViewportSize(PHONE_VIEWPORT)
+    await page.goto('/admin')
+    const tablistBox = await page.getByRole('tablist').boundingBox()
+    const oneTabBox = await page.getByRole('tab', { name: 'Juegos' }).boundingBox()
+    // A single row of tabs is one tab's height; two rows (with the 8px gap
+    // between them) run to roughly double that. If this ever shrinks back
+    // to ~oneTabBox.height, the fix regressed to cramming every tab into one
+    // row again (the state that used to force per-label wrapping instead).
+    expect(tablistBox.height).toBeGreaterThan(oneTabBox.height * 1.5)
+  })
+
+  test('negative: a plain two-way On/Off toggle is unaffected by the --auto opt-out and still fills the row at phone width', async ({ page }) => {
+    await seedLocale(page, 'pl')
+    await page.setViewportSize(PHONE_VIEWPORT)
+    await page.goto('/admin')
+    const onBox = await page.getByRole('button', { name: 'Włączone', exact: true }).first().boundingBox()
+    const offBox = await page.getByRole('button', { name: 'Wyłączone', exact: true }).first().boundingBox()
+    // Equal-width split (flex: 1, unchanged by this fix) means both pills in
+    // a pair are still the same width, unlike the natural-width Theme pills.
+    expect(Math.abs(onBox.width - offBox.width)).toBeLessThan(1)
+  })
+})
