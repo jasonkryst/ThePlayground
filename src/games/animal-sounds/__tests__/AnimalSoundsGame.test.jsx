@@ -4,6 +4,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { axe } from 'jest-axe'
 import AnimalSoundsGame from '../index'
 import { ShellContext } from '../../../components/ShellContext'
+import animals from '../data/animals'
 
 window.HTMLMediaElement.prototype.play  = vi.fn().mockResolvedValue(undefined)
 window.HTMLMediaElement.prototype.pause = vi.fn()
@@ -50,9 +51,13 @@ vi.mock('../../../hooks/useItemStats', () => ({
   default: () => ({ itemStats: {}, recordMisses: vi.fn().mockResolvedValue(undefined) }),
 }))
 
+const { mockGetSessionResume } = vi.hoisted(() => ({
+  mockGetSessionResume: vi.fn().mockResolvedValue(null),
+}))
+
 vi.mock('../../../storage/index', () => ({
   default: {
-    getSessionResume: vi.fn().mockResolvedValue(null),
+    getSessionResume: mockGetSessionResume,
     saveSessionResume: vi.fn(),
     clearSessionResume: vi.fn(),
   },
@@ -344,5 +349,45 @@ describe('AnimalSoundsGame — how-to-play intro', () => {
     await act(async () => { render(<AnimalSoundsGame onGameEnd={onGameEnd} />) })
 
     expect(window.HTMLMediaElement.prototype.play).not.toHaveBeenCalled()
+  })
+})
+
+describe('AnimalSoundsGame — session resume (issue #153)', () => {
+  const savedQueue = [
+    { correct: animals[0], choices: [animals[0], animals[1]] },
+    { correct: animals[1], choices: [animals[0], animals[1]] },
+  ]
+  const savedSnapshot = {
+    gameId: 'animal-sounds', queue: savedQueue, index: 0, score: 1, streak: 1,
+    missed: [], timings: [], peakStreak: 1, savedAt: Date.now(),
+  }
+
+  it('does NOT autoplay the question sound while the resume prompt is showing', async () => {
+    mockGetSessionResume.mockResolvedValueOnce(savedSnapshot)
+    await act(async () => { render(<AnimalSoundsGame onGameEnd={onGameEnd} />) })
+    await act(async () => {})
+
+    expect(screen.getByTestId('resume-prompt-resume')).toBeInTheDocument()
+    expect(window.HTMLMediaElement.prototype.play).not.toHaveBeenCalled()
+  })
+
+  it('plays the question sound once the player chooses to resume', async () => {
+    mockGetSessionResume.mockResolvedValueOnce(savedSnapshot)
+    await act(async () => { render(<AnimalSoundsGame onGameEnd={onGameEnd} />) })
+    await act(async () => {})
+
+    await act(async () => { await userEvent.click(screen.getByTestId('resume-prompt-resume')) })
+
+    expect(window.HTMLMediaElement.prototype.play).toHaveBeenCalled()
+  })
+
+  it('plays the question sound once the player starts fresh instead of resuming', async () => {
+    mockGetSessionResume.mockResolvedValueOnce(savedSnapshot)
+    await act(async () => { render(<AnimalSoundsGame onGameEnd={onGameEnd} />) })
+    await act(async () => {})
+
+    await act(async () => { await userEvent.click(screen.getByTestId('resume-prompt-start-fresh')) })
+
+    expect(window.HTMLMediaElement.prototype.play).toHaveBeenCalled()
   })
 })

@@ -5,6 +5,7 @@ import { axe } from 'jest-axe'
 import FruitVeggieIdGame from '../index'
 import { ShellContext } from '../../../components/ShellContext'
 import i18n from '../../../i18n'
+import foods from '../data/foods'
 
 vi.mock('../../../lib/confetti', () => ({ fireConfetti: vi.fn() }))
 
@@ -52,9 +53,13 @@ vi.mock('../../../hooks/useItemStats', () => ({
   default: () => ({ itemStats: {}, recordMisses: vi.fn().mockResolvedValue(undefined) }),
 }))
 
+const { mockGetSessionResume } = vi.hoisted(() => ({
+  mockGetSessionResume: vi.fn().mockResolvedValue(null),
+}))
+
 vi.mock('../../../storage/index', () => ({
   default: {
-    getSessionResume: vi.fn().mockResolvedValue(null),
+    getSessionResume: mockGetSessionResume,
     saveSessionResume: vi.fn(),
     clearSessionResume: vi.fn(),
   },
@@ -305,6 +310,46 @@ describe('FruitVeggieIdGame — Spanish locale', () => {
       corn: 'Maíz', broccoli: 'Brócoli', potato: 'Papa', pepper: 'Pimiento',
     }
     expect(mockSpeak).toHaveBeenCalledWith(spanishNameById[correctId])
+  })
+})
+
+describe('FruitVeggieIdGame — session resume (issue #153)', () => {
+  const savedQueue = [
+    { correct: foods[0], choices: [foods[0], foods[1]] },
+    { correct: foods[1], choices: [foods[0], foods[1]] },
+  ]
+  const savedSnapshot = {
+    gameId: 'fruit-veggie-id', queue: savedQueue, index: 0, score: 1, streak: 1,
+    missed: [], timings: [], peakStreak: 1, savedAt: Date.now(),
+  }
+
+  it('does NOT speak the name while the resume prompt is showing', async () => {
+    mockGetSessionResume.mockResolvedValueOnce(savedSnapshot)
+    await act(async () => { render(<FruitVeggieIdGame onGameEnd={onGameEnd} />) })
+    await act(async () => {})
+
+    expect(screen.getByTestId('resume-prompt-resume')).toBeInTheDocument()
+    expect(mockSpeak).not.toHaveBeenCalled()
+  })
+
+  it('speaks the name once the player chooses to resume', async () => {
+    mockGetSessionResume.mockResolvedValueOnce(savedSnapshot)
+    await act(async () => { render(<FruitVeggieIdGame onGameEnd={onGameEnd} />) })
+    await act(async () => {})
+
+    await act(async () => { await userEvent.click(screen.getByTestId('resume-prompt-resume')) })
+
+    expect(mockSpeak).toHaveBeenCalled()
+  })
+
+  it('speaks the name once the player starts fresh instead of resuming', async () => {
+    mockGetSessionResume.mockResolvedValueOnce(savedSnapshot)
+    await act(async () => { render(<FruitVeggieIdGame onGameEnd={onGameEnd} />) })
+    await act(async () => {})
+
+    await act(async () => { await userEvent.click(screen.getByTestId('resume-prompt-start-fresh')) })
+
+    expect(mockSpeak).toHaveBeenCalled()
   })
 })
 

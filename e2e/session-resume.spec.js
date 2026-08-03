@@ -43,6 +43,20 @@ function seedResume(page, snapshot) {
   }, snapshot)
 }
 
+// Tracks real HTMLMediaElement.play() calls (issue #153) instead of mocking
+// audio entirely, so this stays a genuine assertion about the actual <audio>
+// element the app creates via `new Audio(url)` in useSoundPlayer.
+function trackAudioPlayCalls(page) {
+  return page.addInitScript(() => {
+    window.__audioPlayCalls = 0
+    const realPlay = window.HTMLMediaElement.prototype.play
+    window.HTMLMediaElement.prototype.play = function (...args) {
+      window.__audioPlayCalls += 1
+      return realPlay.apply(this, args)
+    }
+  })
+}
+
 async function playUntilDone(page) {
   for (let i = 0; i < QUESTIONS_PER_SESSION; i++) {
     if (await page.getByText(/you scored/i).isVisible()) break
@@ -131,4 +145,39 @@ test('animal sounds: an expired resume snapshot is discarded and the game starts
     const raw = await page.evaluate(() => localStorage.getItem('playground_session_resume'))
     return raw && JSON.parse(raw)
   }).toMatchObject({ gameId: 'animal-sounds', index: 0, score: 0 })
+})
+
+test('animal sounds: the question sound does not autoplay while the resume prompt is showing, and plays once resumed (issue #153)', async ({ page }) => {
+  const snapshot = buildResumeSnapshot({ index: 4, score: 3 })
+  await seedResume(page, snapshot)
+  await trackAudioPlayCalls(page)
+
+  await page.goto('/game/animal-sounds')
+
+  await expect(page.getByTestId('resume-prompt-resume')).toBeVisible()
+  // Negative: no audio while the resume prompt is up and undecided.
+  expect(await page.evaluate(() => window.__audioPlayCalls)).toBe(0)
+
+  await page.getByTestId('resume-prompt-resume').click()
+
+  // Positive: the resumed question's clip plays once the choice is made.
+  await expect(page.locator('[data-animal-id]').first()).toBeVisible()
+  await expect.poll(() => page.evaluate(() => window.__audioPlayCalls)).toBeGreaterThan(0)
+})
+
+test('animal sounds: the question sound does not autoplay while the resume prompt is showing, and plays once started fresh (issue #153)', async ({ page }) => {
+  const snapshot = buildResumeSnapshot({ index: 6, score: 5 })
+  await seedResume(page, snapshot)
+  await trackAudioPlayCalls(page)
+
+  await page.goto('/game/animal-sounds')
+
+  await expect(page.getByTestId('resume-prompt-resume')).toBeVisible()
+  expect(await page.evaluate(() => window.__audioPlayCalls)).toBe(0)
+
+  await page.getByTestId('resume-prompt-start-fresh').click()
+  await page.getByTestId('game-intro-start').click()
+
+  await expect(page.locator('[data-animal-id]').first()).toBeVisible()
+  await expect.poll(() => page.evaluate(() => window.__audioPlayCalls)).toBeGreaterThan(0)
 })
