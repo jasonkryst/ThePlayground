@@ -3,6 +3,13 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.0.5] - 2026-08-03
+
+### Fixed
+
+- Admin page pill labels breaking across two lines instead of wrapping as whole pills (issue #156): `.admin__tab` (Settings/Games/Badges/History) and the 4-way Theme picker (`.admin__toggle-btn` within a new `.admin__toggle--auto` group) both used `flex: 1` to split a fixed-width row evenly, which — combined with the global `button { overflow-wrap: anywhere }` rule added for issue #115 — let an individual label's own text wrap onto a second (or third) line once its equal share of the row got too narrow. This reproduced even in English at ordinary phone widths (390px), not just for longer translations. Switched both to natural width plus `white-space: nowrap`, so a label that doesn't fit its row now sends the *whole pill* down to a new line via the existing `flex-wrap: wrap` container, never splitting a word — the same graceful-degradation pattern `.date-range-filter__tab` already used. Plain two-way On/Off toggles are unaffected and keep the equal-width 50/50 split, since no supported locale's short "On"/"Off" text is at risk there.
+- Added `e2e/admin.spec.js`'s "pill label single-line regression (issue #156)" suite: positive checks that every tab and Theme-option label renders on exactly one CSS line box (via `Range.getClientRects()`) at phone width in English and, for the longest labels, Spanish; negative checks that the Spanish tab row genuinely spans two rows (proving whole-pill wrap, not merely fitting) and that a plain On/Off pair's equal-width split is untouched by the fix.
+
 ## [1.0.4] - 2026-08-03
 
 ### Fixed
