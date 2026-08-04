@@ -55,7 +55,6 @@ Quiz-type (all get the engine's retries, hints, timers, badges, and personal bes
 - **Number Tap** — display a number (1–5), child taps that many objects on screen; builds early counting.
 - **Alphabet Sounds** — play a letter sound (phonics), child picks the correct letter card; pre-reading phonemic awareness.
 - **Big or Small** — show two objects side by side, child taps the bigger (or smaller) one; builds spatial reasoning.
-- **Emotions Match** — show an emotion word ("happy", "sad"), child picks the matching face; builds emotional vocabulary.
 - **Body Parts** — "Where's your nose?" with a cartoon figure; child taps the correct body part; receptive language staple.
 - **Simple Patterns** — show a color/shape sequence with one item missing, child picks what comes next; early sequencing/logic.
 - **First Words** — a picture is shown and its word is spoken; the child picks the matching picture from spoken-word prompts; receptive vocabulary for pre-verbal children.

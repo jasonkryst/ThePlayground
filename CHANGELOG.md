@@ -3,6 +3,13 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.0.8] - 2026-08-04
+
+### Added
+
+- Emotions Match (issue #76): a new quiz-type game teaching emotional vocabulary. An emotion word is shown on screen as the prompt itself (unlike Fruit & Veggie ID, which hides its word to avoid spoiling the picture answer — here the word *is* the answer key, so there's no spoiler risk) and spoken aloud via the existing `useSpeech`/`useQuestionAudio`/`ReplayButton` stack for pre-readers; the child taps the matching face among plain-emoji picture-only choices. Ships 8 emotions (happy, sad, angry, scared, surprised, tired, silly, calm) chosen for being visually distinct at a glance, full en/es/pl i18n, and no engine changes — it's a pure consumer of `QuizGameShell`/`useGameSession`, closely modeled on `src/games/fruit-veggie-id/`. Uses the `vocabulary`/`emotions` dashboard tags, the latter falling back to the existing auto-capitalize tag-label behavior other untranslated tags (e.g. `food`) already rely on.
+- Added `src/games/emotions-match/__tests__/emotions.test.js` (positive: exactly 8 emotions, each with id/nameKey/emoji, nameKey follows the `emotion.<id>.name` convention, every key resolves in i18n; negative: no duplicate ids or emoji) and `EmotionsMatchGame.test.jsx` (full session flow, intro, session-resume, es/pl locale speech, a11y, and the speech-unsupported case — the word prompt still renders since it was never hidden, and the replay button is absent).
+
 ## [1.0.7] - 2026-08-04
 
 ### Fixed

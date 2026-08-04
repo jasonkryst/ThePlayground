@@ -14,6 +14,7 @@ A browser-based game dashboard designed for infants and toddlers. Games are disp
 - **Animal Sounds** (quiz) — an animal sound plays automatically; the child picks the matching animal from picture buttons
 - **Fruit & Veggie ID** (quiz) — a fruit or vegetable's name is spoken aloud (browser speech synthesis); the child taps the matching picture from picture-only buttons (falls back to on-screen text where the browser has no speech synthesis)
 - **Color Match** (quiz) — a color swatch is shown; the child picks the matching colored object from picture buttons
+- **Emotions Match** (quiz) — an emotion word is shown (and spoken aloud); the child picks the matching face from picture buttons
 - **Character Match** (quiz) — a character's name is shown; the child picks the matching character from picture buttons (real images rather than emoji)
 - **Character Match: Bluey** (quiz) — the same Character Match gameplay, themed around the Bluey cast, as its own auto-discovered game with its own manifest and assets
 - **Animal Memory Match** (memory) — face-down tiles (3–6 animal pairs, parent-configurable); the child flips two at a time, hearing the animal's sound on each match, with fireworks on completing the board
@@ -151,8 +152,8 @@ src/
 │   └── index.js               # Merges en.json/es.json/pl.json + every game's i18n/*.json at startup
 │
 └── games/                     # One folder per game — animal-sounds, color-match, character-match,
-    └── animal-memory-match/   #   character-match-bluey, fruit-veggie-id, animal-memory-match,
-                                #   sound-memory-match; drop a new folder to add one
+    └── animal-memory-match/   #   character-match-bluey, fruit-veggie-id, emotions-match,
+                                #   animal-memory-match, sound-memory-match; drop a new folder to add one
         ├── manifest.json      # Game metadata (id, nameKey/descriptionKey, tags, version, optional gameType, orientation)
         ├── index.jsx          # Game component (default export accepting onGameEnd)
         ├── badges.js          # Optional per-game badge catalog (auto-discovered)
