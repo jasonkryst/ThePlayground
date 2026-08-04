@@ -44,20 +44,21 @@ No other change to `useGameSession` is needed — `buildQueue`/`items`/`current.
 ## Game mechanic
 
 - **Items** (`src/games/number-tap/data/numbers.js`): 5 entries, `{ id: 'number-1' .. 'number-5', value: 1..5 }`. `questionsPerSession` still comes from the shared settings, drawn via the existing `buildQueue`/spaced-repetition/adaptive-selection machinery — Number Tap inherits all of it for free.
-- **Object pool**: on each question, one icon is chosen at random from a fixed set (🍎 apple, ⭐ star, 🎈 balloon, ⚽ ball, 🌸 flower) and repeated `poolSize` times, where `poolSize = target + random(1..3)`, capped at 8. This guarantees there's always room to overshoot the target — without at least one spare object, every question would be trivially correct. Computed once per question via `useMemo` keyed on `current.correct.id` so the pool doesn't reshuffle position on unrelated re-renders.
-- **Interaction**: tapping an untapped object selects it (visually marked, `aria-disabled` afterward — not `disabled`, matching the existing memory-tile convention so keyboard focus doesn't jump). No explicit "Done"/submit button.
-- **Evaluation**: runs after every tap, comparing the running selected count to the target:
-  - count === target → `handleAttempt(true)` (correct)
-  - count > target (the tap that overshoots) → `handleAttempt(false)` (wrong)
-  - count < target → no resolution yet, keep waiting
-- **Retry**: on a wrong attempt where tries remain (`maxTries` not yet exhausted), selections clear back to zero and the same pool stays on screen so the child recounts from scratch. On the final wrong attempt, `handleAttempt` locks the question as missed exactly as it does for discrete-choice games (existing `lockAsMissed`/`feedbackMode==='immediate'` advance-after-1500ms path, or the `parent-tap` Next-button path — both already handled by the hook and reused verbatim).
+- **Object pool**: on each question, one icon is chosen at random from a fixed set (🍎 apple, ⭐ star, 🎈 balloon, ⚽ ball, 🌸 flower) and repeated `poolSize` times, where `poolSize = target + random(1..3)` (no upper cap needed — target tops out at 5 and extra tops out at 3, so pool size never exceeds 8 anyway). This guarantees there's always room for a wrong count — without at least one spare object, every question would be trivially correct. Computed once per question via `useMemo` keyed on `current.correct.id` so the pool doesn't reshuffle position on unrelated re-renders.
+- **Interaction**: tapping an object toggles it selected/unselected (`aria-pressed`, not `aria-disabled` — unlike memory tiles, a tap here isn't a one-way commitment, so a misclick can be undone before confirming). A "Done ✓" button is always visible below the grid.
+- **Evaluation**: only runs when "Done" is pressed (not per-tap — see below for why), comparing the tapped count at that moment to the target:
+  - tapped count === target → `handleAttempt(true)` (correct)
+  - tapped count ≠ target (too few or too many) → `handleAttempt(false)` (wrong)
+
+  *Rejected alternative*: auto-evaluate after every tap, locking in "correct" the instant the running count first reaches the target, no button. This was the original plan approved with the user, but it doesn't work: since a tap only ever increases the count by one, the count always passes through exactly `target` before it could ever exceed it — so the question would always auto-lock as correct at that instant, and the child could never overshoot. The only way to ever be wrong would be a countdown timeout, which doesn't test counting at all. Caught during implementation planning and corrected with the user in favor of the explicit-button approach above.
+- **Retry**: on a wrong "Done" press where tries remain (`maxTries` not yet exhausted), selections clear back to zero and the same pool stays on screen so the child recounts from scratch. On the final wrong attempt, `handleAttempt` locks the question as missed exactly as it does for discrete-choice games (existing `lockAsMissed`/`feedbackMode==='immediate'` advance-after-1500ms path, or the `parent-tap` Next-button path — both already handled by the hook and reused verbatim).
 - **Hints**: when `hintActive` (existing `hintsEnabled`/`hintAfterWrongTaps` settings), the first `target` untapped objects (in DOM order) get a pulsing highlight, opacity scaled by `hintStrength` — the same ramp `GameChoiceGrid` already applies to the correct choice, just targeting a set of objects instead of one button.
-- **Reveal on lock**: while locked (whether from the final wrong attempt or from a timeout), the first `target` objects are highlighted as the "correct answer," mirroring how discrete-choice games reveal the correct choice when locked.
+- **Reveal on lock**: while locked (whether from the final wrong attempt or from a timeout), the first `target` objects (in DOM order, regardless of tap state) are highlighted as the "correct answer," mirroring how discrete-choice games reveal the correct choice when locked.
 - **Timer/timeout**: untouched — `useGameSession`'s timeout effect already fires independent of how answers are submitted; `handleTimeout` already calls `lockAsMissed`, which needs no changes.
 
 ## Rendering — `src/games/number-tap/`
 
-Does not use `QuizGameShell` (built around a discrete choice grid, which doesn't apply here). Following the `animal-memory-match`/`useMemorySession` precedent, `index.jsx` composes `GameIntro`, `GameResults`, `Timer`, and the shared correct/wrong live-region announcement pattern directly, calling `useGameSession` itself. A small game-local presentational piece, `NumberTapBoard.jsx`, renders the tappable object grid; it stays local to this game folder (not promoted to `src/components/`) since no second consumer exists yet — consistent with the repo's practice of only extracting shared components once something actually shares them.
+Does not use `QuizGameShell` (built around a discrete choice grid, which doesn't apply here). Following the `animal-memory-match`/`useMemorySession` precedent, `index.jsx` composes `GameIntro`, `GameResults`, `Timer`, and the shared correct/wrong live-region announcement pattern directly, calling `useGameSession` itself. The tappable object grid renders inline in `index.jsx` rather than as a separate component file — no game in this repo currently splits its board markup into a local subcomponent (`GameChoiceGrid`/`MemoryBoard` are shared *components* precisely because 2+ games use each; nothing here would share a `NumberTapBoard`), so a standalone file would be an unfollowed convention, not an established one.
 
 ### `src/games/number-tap/manifest.json`
 
@@ -90,11 +91,11 @@ Prompt is `"Tap {{count}}!"` — deliberately not a counted noun phrase ("Tap 3 
 - **`src/hooks/__tests__/useGameSession.test.js`** (existing file, extend): add cases exercising `handleAttempt(true)`/`handleAttempt(false)` called directly (bypassing `handleChoice`), confirming score/streak/timings/lock/retry behavior matches calling `handleChoice` with a matching/non-matching item — i.e., the refactor is behavior-preserving for existing games *and* correct for the new direct-boolean path.
 - **`src/games/number-tap/__tests__/numbers.test.js`**: data shape sanity (5 entries, values 1–5, unique ids).
 - **`src/games/number-tap/__tests__/NumberTapGame.test.jsx`**:
-  - *Positive*: tapping exactly `target` objects scores a point, advances, eventually reaches `GameResults`; personal-best and badge wiring fires the same as other games (mock the same seams `animal-sounds`/`emotions-match` tests mock).
-  - *Positive*: retry path — overshoot once (tries remaining), selection clears, then tapping exactly `target` on the second attempt still counts as a (non-streak, per `retryCountsAsStreak` setting) correct answer.
-  - *Negative*: overshooting on the final allowed try locks the question as missed and it appears in the results' missed list.
+  - *Positive*: tapping exactly `target` objects, then pressing Done, scores a point, advances, eventually reaches `GameResults`; personal-best and badge wiring fires the same as other games (mock the same seams `animal-sounds`/`emotions-match` tests mock).
+  - *Positive*: retry path — pressing Done with the wrong count once (tries remaining) clears the selection, then tapping exactly `target` and pressing Done again on the second attempt still counts as a (non-streak, per `retryCountsAsStreak` setting) correct answer.
+  - *Negative*: pressing Done with the wrong count on the final allowed try locks the question as missed and it appears in the results' missed list.
   - *Negative*: timeout (countdown `timerMode`) locks the question as missed without any taps.
-  - A11y: tapped objects are `aria-disabled`, not `disabled`; hint highlighting appears only once `hintActive` is true.
+  - A11y: tapped objects toggle `aria-pressed`; the Done button is a real `<button>`; hint highlighting appears only once `hintActive` is true.
 - **`src/games/number-tap/NumberTapGame.stories.jsx`**: Storybook story matching the `EmotionsMatchGame.stories.jsx` precedent from this branch.
 
 ## Docs / versioning
