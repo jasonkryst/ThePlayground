@@ -7,21 +7,28 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const GAMES_DIR = path.join(__dirname, '..', 'src', 'games')
 const DEV_SERVER = 'http://localhost:5173'
 
-// CI runs this suite with only 2 workers (a 2-vCPU standard GitHub-hosted
-// runner) against one shared `npm run dev` instance. Vite compiles each
-// route's JS module graph lazily, on the first real browser request for it
-// -- so when two workers' first-ever navigations to two different
-// not-yet-compiled routes land at the same time, the loser can occasionally
-// exceed even a 60s test timeout (issue #141: css-validity.spec.js's
-// animal-sounds test hit exactly this, twice across three real CI runs,
-// with no prior history and no relation to any of that PR's actual
-// changes). retries: 0 in playwright.config.js is deliberate (this repo
-// treats a flaky pass-on-retry as worse than a loud failure), so the fix
-// has to remove the contention itself rather than paper over it with a
-// retry. Sequentially visiting every route once here -- before the parallel
-// workers start -- means every route's module graph is already compiled
-// and cached by the time the real suite begins, so no worker is ever the
-// one paying a cold-compile's full cost under contention.
+// Vite compiles each route's JS module graph lazily, on the first real
+// browser request for it, which can be slow enough on its own to threaten
+// a test's timeout (issue #141: css-validity.spec.js's animal-sounds test
+// hit exactly this). Sequentially visiting every route once here -- before
+// the real test workers start -- means every route's module graph is
+// already compiled and cached by the time the suite begins, so no test is
+// ever the one paying a cold-compile's full cost.
+//
+// This used to also be the fix for a second, unrelated hazard: CI ran 2
+// workers against one shared `npm run dev` instance, and two workers'
+// simultaneous first-ever navigations to two different not-yet-compiled
+// routes could still occasionally exceed even a 60s timeout despite this
+// warm-up, because the warm-up alone doesn't stop two *already-warm* routes
+// from contending for CPU once the real parallel workers start. That
+// resurfaced repeatedly in different tests each time (issues #147/#165,
+// then #167) since patching whichever specific test lost the race never
+// removed the actual contention -- so `playwright.config.js` now pins CI to
+// a single worker (`workers: process.env.CI ? 1 : undefined`) instead,
+// removing cross-worker contention at its source. retries: 0 stays
+// deliberate either way (this repo treats a flaky pass-on-retry as worse
+// than a loud failure) -- this warm-up remains as defense-in-depth against
+// the plain cold-compile cost, not cross-worker contention.
 export default async function globalSetup() {
   const gameIds = fs.readdirSync(GAMES_DIR, { withFileTypes: true })
     .filter(entry => entry.isDirectory())
