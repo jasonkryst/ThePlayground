@@ -3,6 +3,13 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.0.7] - 2026-08-04
+
+### Fixed
+
+- Recurring CI-only e2e flakes surfacing in a different test each time, rather than the same one (issue #167). Two CI reruns of the exact commit that fixed #147/#165 each failed on a *different*, previously-passing test (`dashboard.spec.js`'s dashboard-cards test, then `css-validity.spec.js`'s animal-sounds intro — the latter being the same test/signature #165's own body already cited as a pre-existing occurrence on `main`, predating that fix entirely). Root cause: CI ran Playwright with 2 parallel workers, each launching a real Chromium instance against one shared `npm run dev` process, on `ubuntu-latest`'s ~2 vCPUs — occasional CPU contention could stall whichever test happened to be rendering at that moment well past its timeout, and which specific test lost that race was effectively random. This is the third time this exact contention class has surfaced in a different test (issue #141's `confetti-csp.spec.js`, issues #147/#165's `admin.spec.js`, now this), and each prior fix correctly patched its specific test but left the underlying contention in place for the next one. Pinned CI to a single Playwright worker (`workers: process.env.CI ? 1 : undefined` in `playwright.config.js`), removing the contention at its source instead of continuing to patch individual tests; local dev keeps Playwright's own default parallelism. `retries: 0` stays unchanged (deliberate — see `e2e/global-setup.js`).
+- Added `__tests__/playwrightConfig.test.js`: positive (CI env pins `workers` to exactly `1`) and negative (`workers` is `undefined` outside CI, so local parallelism is untouched; `retries` and `fullyParallel` are unaffected by either).
+
 ## [1.0.6] - 2026-08-03
 
 ### Fixed
