@@ -1,0 +1,19 @@
+{
+  "emotionsMatch": {
+    "manifestName": "Emotions Match",
+    "manifestDescription": "See the word, tap the matching face!",
+    "prompt": "Find: {{emotion}}!",
+    "replay": "Say it again",
+    "howToPlay": "An emotion word appears — tap the face that matches how it feels!"
+  },
+  "emotion": {
+    "happy": { "name": "Happy" },
+    "sad": { "name": "Sad" },
+    "angry": { "name": "Angry" },
+    "scared": { "name": "Scared" },
+    "surprised": { "name": "Surprised" },
+    "tired": { "name": "Tired" },
+    "silly": { "name": "Silly" },
+    "calm": { "name": "Calm" }
+  }
+}
