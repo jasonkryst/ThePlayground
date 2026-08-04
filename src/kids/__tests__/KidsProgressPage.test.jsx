@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react'
+import { render, screen, within, act } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { axe } from 'jest-axe'
@@ -125,8 +125,12 @@ describe('KidsProgressPage — no data yet', () => {
 // ─── No games ───────────────────────────────────────────────────────────────
 
 describe('KidsProgressPage — no games', () => {
-  it('renders without crashing when manifests is empty', () => {
+  it('renders without crashing when manifests is empty', async () => {
     const { container } = render(<MemoryRouter><KidsProgressPage manifests={[]} /></MemoryRouter>)
+    // Empty manifests still mounts the getBestStreaks effect regardless --
+    // flush its resolved promise so the resulting setBestStreaks lands
+    // inside act() instead of after the test returns.
+    await act(async () => {})
     // The component should render its container div (proves no crash)
     expect(container.querySelector('.kid-progress')).toBeInTheDocument()
     // No game sections should be rendered (manifests.map() over empty array produces nothing)

@@ -727,7 +727,7 @@ describe('useGameSession — how-to-play intro', () => {
   })
 
   it('introResolved becomes true in the same tick showIntro resolves — never a render behind, ' +
-     'unlike settingsLoaded (which flips a render before showIntro is correct)', () => {
+     'unlike settingsLoaded (which flips a render before showIntro is correct)', async () => {
     // Regression test for the render-N race: settingsLoaded flips true the
     // moment useSettings()'s async load resolves, but showIntro only gets
     // its correct value one render later, from an effect reacting to that
@@ -748,7 +748,11 @@ describe('useGameSession — how-to-play intro', () => {
     expect(result.current.showIntro).toBe(false)
 
     mockLoaded = true
-    act(() => { rerender() })
+    // async act: `loaded` flipping also fires the resume-check effect, whose
+    // adapter.getSessionResume().then(...) callback lands as a microtask
+    // after a synchronous act() would already have returned — leaving that
+    // state update unwrapped (same pattern as line ~1364's fake-timer test).
+    await act(async () => { rerender() })
 
     // The instant settingsLoaded flips true (and the intro-init effect has
     // had a chance to run), introResolved must already be true too — and
@@ -1320,6 +1324,45 @@ describe('useGameSession — session resume', () => {
     expect(mockSaveSessionResume).toHaveBeenCalledWith(
       expect.objectContaining({ gameId: 'test-game', index: 1, score: 1 })
     )
+  })
+
+  // Regression guard for issues #147/#165: a freshly built queue must be
+  // persisted from the refs the moment it's built (persistFreshSessionResume),
+  // not solely via the downstream queue-state-driven effect a render pass
+  // later -- the CI flake this guards against was exactly a navigation
+  // landing in the gap between those two passes. This test can't prove the
+  // pass-count directly (RTL flushes cascading effects within one act()),
+  // but it locks in that the fresh, zeroed-out values are what get saved.
+  it('persists a fresh snapshot with the freshly-reset values as soon as the first queue exists', async () => {
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.current).toBeDefined())
+
+    expect(mockSaveSessionResume).toHaveBeenCalledWith(
+      expect.objectContaining({ gameId: 'test-game', index: 0, score: 0, streak: 0 })
+    )
+  })
+
+  // Negative counterpart: acceptResume() suppresses the queue-build effect
+  // (suppressNextBuildRef) precisely so a resumed session isn't clobbered by
+  // a brand-new queue. If persistFreshSessionResume's early-return guard
+  // above suppressNextBuildRef's check were ever reordered or dropped, this
+  // would start persisting a fresh 3-item rebuilt queue over the resumed
+  // 1-item one.
+  it('does not persist a freshly rebuilt queue when accepting an existing resume snapshot', async () => {
+    mockGetSessionResume.mockResolvedValue({
+      gameId: 'test-game',
+      queue: [{ correct: items[0], choices: [items[0], items[1]] }],
+      index: 0, score: 2, streak: 1, missed: [], timings: [], peakStreak: 1, savedAt: Date.now(),
+    })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.resumeAvailable).toBe(true))
+    mockSaveSessionResume.mockClear() // drop the harmless preview re-save of the unchanged resumed snapshot
+
+    await act(async () => { result.current.acceptResume() })
+
+    for (const call of mockSaveSessionResume.mock.calls) {
+      expect(call[0].queue).toHaveLength(1)
+    }
   })
 
   it('clears the snapshot once the session finishes', async () => {

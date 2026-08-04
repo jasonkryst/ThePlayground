@@ -210,12 +210,29 @@ export default function useGameSession({ gameId, items }) {
     return adaptiveItemSelectionEnabled ? item => computeItemWeight(itemStatsRef.current, item.id) : null
   }
 
+  // Snapshots a freshly built queue from refs (always up to date the
+  // instant the queue exists — score/index/etc. are reset via refs before
+  // any queue-build path runs) rather than waiting for `queue`/`index`/etc.
+  // state to commit and re-trigger the effect below on a second render. A
+  // fresh session that's autosaved this way is resumable immediately, not
+  // one render pass later — closing the window a fast subsequent navigation
+  // (e.g. e2e/admin.spec.js's Start Fresh flow, issues #147/#165) could
+  // otherwise race past before the state-driven effect below ever runs.
+  function persistFreshSessionResume(q) {
+    adapter.saveSessionResume({
+      gameId, queue: q, index: indexRef.current, score: scoreRef.current,
+      streak: streakRef.current, missed: missedRef.current, timings: timingsRef.current,
+      peakStreak: peakStreakRef.current, savedAt: Date.now(),
+    })
+  }
+
   useEffect(() => {
     if (!sessionReady || !numChoices || !questionsPerSession) return
     if (suppressNextBuildRef.current) { suppressNextBuildRef.current = false; return }
     const q = buildQueue(items, numChoices, questionsPerSession, selectionWeightFn())
     queueRef.current = q
     setQueue(q)
+    persistFreshSessionResume(q)
   }, [sessionReady, numChoices, questionsPerSession, items, adaptiveItemSelectionEnabled])
 
   // Persists a resumable snapshot once per question transition (not
@@ -224,7 +241,9 @@ export default function useGameSession({ gameId, items }) {
   // effects of the just-answered question have already committed), so by
   // the time this effect re-runs, the snapshot it captures is always fully
   // settled — never a half-answered question where index still points at
-  // the old one. Cleared the moment the session finishes.
+  // the old one. Cleared the moment the session finishes. Also covers
+  // fresh-queue builds (redundantly with persistFreshSessionResume above,
+  // once `queue` state itself catches up) and restart()'s rebuild.
   useEffect(() => {
     if (done) { adapter.clearSessionResume(); return }
     if (!queue.length) return
@@ -498,6 +517,7 @@ export default function useGameSession({ gameId, items }) {
     const q = buildQueue(items, numChoices, questionsPerSession, selectionWeightFn())
     queueRef.current = q
     setQueue(q)
+    persistFreshSessionResume(q)
     setIndex(0)
     setLocked(false)
     setSelected(null)

@@ -114,6 +114,21 @@ test('replay intro brings back a dismissed game intro', async ({ page }) => {
   // reaching the intro/game views it's actually asserting on below.
   await page.getByTestId('resume-prompt-start-fresh').click()
 
+  // Start Fresh begins yet another untouched session (see the comment below,
+  // where this test relies on it having been autosaved). Verify that
+  // snapshot actually landed in localStorage before navigating away (guards
+  // against a navigation race -- issues #147/#165: on CI's constrained
+  // 2-worker runner, the goto below could otherwise fire before the fresh
+  // session's snapshot finished persisting, so the next visit would find no
+  // resumable snapshot at all and fall straight through to the intro
+  // instead of the resume prompt this test asserts on further down).
+  await expect.poll(async () => {
+    const raw = await page.evaluate(() => localStorage.getItem('playground_session_resume'))
+    if (!raw) return null
+    const s = JSON.parse(raw)
+    return s?.gameId === 'animal-sounds' && s?.index === 0 ? 'ready' : null
+  }).toBe('ready')
+
   await page.goto('/admin')
   await page.getByRole('tab', { name: /games/i }).click()
   const soundsRow = page.locator('.admin__tag-row', { has: page.getByLabel('Tags for Animal Sounds') })
