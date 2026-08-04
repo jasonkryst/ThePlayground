@@ -201,7 +201,7 @@ export default function AdminPage({ manifests = [] }) {
 
             <div className="admin__section">
               <h3>{t('admin.themeHeading')}</h3>
-              <div className="admin__toggle">
+              <div className="admin__toggle admin__toggle--auto">
                 {[
                   { value: 'system', label: t('admin.themeSystem') },
                   { value: 'light', label: t('admin.themeLight') },
