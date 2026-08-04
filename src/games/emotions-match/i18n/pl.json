@@ -1,0 +1,19 @@
+{
+  "emotionsMatch": {
+    "manifestName": "Dopasuj Emocje",
+    "manifestDescription": "Zobacz słowo i dotknij pasującej buzi!",
+    "prompt": "Znajdź: {{emotion}}!",
+    "replay": "Powiedz ponownie",
+    "howToPlay": "Pojawia się słowo emocji — dotknij buzi, która pasuje do tego uczucia!"
+  },
+  "emotion": {
+    "happy": { "name": "Wesoły" },
+    "sad": { "name": "Smutny" },
+    "angry": { "name": "Zły" },
+    "scared": { "name": "Przestraszony" },
+    "surprised": { "name": "Zaskoczony" },
+    "tired": { "name": "Zmęczony" },
+    "silly": { "name": "Głupkowaty" },
+    "calm": { "name": "Spokojny" }
+  }
+}

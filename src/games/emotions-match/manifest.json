@@ -1,0 +1,9 @@
+{
+  "id": "emotions-match",
+  "nameKey": "emotionsMatch.manifestName",
+  "descriptionKey": "emotionsMatch.manifestDescription",
+  "icon": "😊",
+  "color": "#FFD54F",
+  "version": "1.0.0",
+  "tags": ["vocabulary", "emotions"]
+}

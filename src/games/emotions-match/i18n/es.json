@@ -1,0 +1,19 @@
+{
+  "emotionsMatch": {
+    "manifestName": "Combinar Emociones",
+    "manifestDescription": "¡Mira la palabra y toca la cara que coincida!",
+    "prompt": "¡Encuentra: {{emotion}}!",
+    "replay": "Decirlo de nuevo",
+    "howToPlay": "Aparece una palabra de emoción — ¡toca la cara que coincida con ese sentimiento!"
+  },
+  "emotion": {
+    "happy": { "name": "Feliz" },
+    "sad": { "name": "Triste" },
+    "angry": { "name": "Enojado" },
+    "scared": { "name": "Asustado" },
+    "surprised": { "name": "Sorprendido" },
+    "tired": { "name": "Cansado" },
+    "silly": { "name": "Gracioso" },
+    "calm": { "name": "Tranquilo" }
+  }
+}
