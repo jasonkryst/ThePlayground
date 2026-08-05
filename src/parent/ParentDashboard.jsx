@@ -13,6 +13,7 @@ import {
 import useScores from '../hooks/useScores'
 import useSettings from '../hooks/useSettings'
 import adapter from '../storage/index'
+import ScoreHistory from '../components/ScoreHistory'
 import {
   computeScoreTrend,
   computeResponseTimes,
@@ -384,6 +385,12 @@ export default function ParentDashboard({ manifests = [] }) {
             <h2 id="missed-heading">{t('parent.missedHeading')}</h2>
             <p className="parent__hint">{t('parent.missedHint')}</p>
             <MissedItemsPanel missedItems={missedItems} gameNames={gameNames} />
+          </section>
+
+          <section className="parent__section" aria-labelledby="raw-history-heading">
+            <h2 id="raw-history-heading">{t('parent.rawHistoryHeading')}</h2>
+            <p className="parent__hint">{t('parent.rawHistoryHint')}</p>
+            <ScoreHistory scores={filteredScores} />
           </section>
         </>
       )}

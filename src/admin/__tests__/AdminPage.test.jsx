@@ -30,17 +30,6 @@ vi.mock('../../hooks/useSettings', () => ({
   }),
 }))
 
-vi.mock('../../hooks/useScores', () => ({
-  default: () => ({
-    getAllScores: () => [
-      { gameId: 'animal-sounds', score: 8, total: 10, date: '2026-06-07', timestamp: 1000 },
-    ],
-    getBestScore: () => 0,
-    getScoresByGame: () => [],
-    scores: [],
-  }),
-}))
-
 vi.mock('../../hooks/useBadges', () => ({
   default: () => ({
     badgeData: {
@@ -128,14 +117,6 @@ describe('AdminPage', () => {
     } finally {
       vi.useRealTimers()
     }
-  })
-
-  it('renders score history section', async () => {
-    const user = userEvent.setup()
-    render(<MemoryRouter><AdminPage /></MemoryRouter>)
-    await user.click(screen.getByRole('tab', { name: /history/i }))
-    expect(screen.getByText(/score history/i)).toBeInTheDocument()
-    expect(screen.getByText('8 / 10')).toBeInTheDocument()
   })
 
   it('renders the animations toggle and calls updateSetting when clicked', async () => {
@@ -338,6 +319,15 @@ describe('AdminPage', () => {
   it('renders a Badges tab', () => {
     render(<MemoryRouter><AdminPage manifests={manifestsFixture} /></MemoryRouter>)
     expect(screen.getByRole('tab', { name: 'Badges' })).toBeInTheDocument()
+  })
+
+  // Regression guard (issue #173): the History tab and its raw score list
+  // moved to the Parent Dashboard, which is the one encompassing place for
+  // score-related data now — Settings/Games/Badges stay, nothing else does.
+  it('no longer renders a History tab (issue #173)', () => {
+    render(<MemoryRouter><AdminPage manifests={manifestsFixture} /></MemoryRouter>)
+    expect(screen.queryByRole('tab', { name: /history/i })).not.toBeInTheDocument()
+    expect(screen.getAllByRole('tab')).toHaveLength(3)
   })
 
   it('shows the badge gallery when the Badges tab is active', async () => {
