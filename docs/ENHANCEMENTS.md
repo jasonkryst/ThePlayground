@@ -92,4 +92,4 @@ Mirrors the "known gaps" in `SECURITY.md` — each of these is acknowledged ther
 
 ## PWA / Installable
 
-- **Offline-first PWA** — `vite-plugin-pwa` to generate a service worker and `manifest.webmanifest` so the app installs to the home screen and works without a network connection; a static SPA with localStorage persistence is the ideal PWA candidate, and car/travel use is a natural fit for this audience.
+- ~~**Offline-first PWA**~~ — done (issue #96): `vite-plugin-pwa` generates a service worker (`registerType: 'autoUpdate'` with `skipWaiting`/`clientsClaim`, so a new deploy activates silently, no update prompt) and `manifest.webmanifest`, installing the app to a home screen and precaching the full app shell plus every game's images/audio so a previously-visited game keeps working fully offline — a natural fit for car/travel use with a static SPA already persisting scores to `localStorage`. See `README.md` § Features and `docs/DEPLOYMENT.md` § PWA.

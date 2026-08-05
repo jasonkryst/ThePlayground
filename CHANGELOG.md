@@ -3,6 +3,13 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.0.10] - 2026-08-04
+
+### Added
+
+- PWA support (issue #96): the app is now installable to a home screen and works fully offline once a game has been visited, via `vite-plugin-pwa` (`generateSW` mode, `registerType: 'autoUpdate'` with `skipWaiting`/`clientsClaim` so a new deploy activates silently on the next load — no interrupting "update available" prompt). Precache covers the full app shell plus every game's images and audio (extending Workbox's default `globPatterns`), not just the JS/CSS shell, since the audience's car/travel use case needs actual gameplay to keep working, not just a blank screen. `scripts/generate-pwa-icons.mjs` hand-rolls the app icons (192/512/maskable, apple-touch-icon, favicon) as flat-color PNGs using the `--color-aqua`/`--color-aqua-dark` design tokens — the same zlib-based PNG-encoding approach `generate-character-match-placeholders.mjs` already used, avoiding a new image-library dependency. Also fixed `index.html`'s favicon link, which pointed at `/vite.svg` — a file that never existed in this repo, so every page load was silently 404ing on it.
+- Added `e2e/pwa.spec.js` (positive: manifest is valid and installable with reachable icons, theme-color meta and apple-touch-icon present, the new favicon resolves; positive: the service worker registers, activates, and a previously-visited page survives going fully offline; negative control: a fresh browser context with no service worker installed does *not* survive offline, proving the positive case is really exercising the cache) — runs its own `npm run build` + `vite preview` rather than the dev server, since `vite-plugin-pwa` only injects the manifest/SW registration into the built `index.html`. Added `e2e/pwa-csp.spec.js`, mirroring `nginx-headers.spec.js`/`confetti-csp.spec.js`'s live-nginx-container pattern, proving the service worker registers and the app survives offline under the app's real, locked-down CSP too (negative: no CSP violations logged during registration) — skips without Docker, like its siblings.
+
 ## [1.0.9] - 2026-08-04
 
 ### Added

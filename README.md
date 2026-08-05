@@ -29,6 +29,7 @@ A browser-based game dashboard designed for infants and toddlers. Games are disp
 - **Milestone badges** — repeatable per-game achievements (streak tiers, perfect sessions, lifetime totals); memory games ship their own badge catalog via per-game `badges.js` files
 - **Kid-safe exit guard** — leaving a game mid-session requires a deliberate second tap, so a stray toddler tap can't kill a session
 - **Session resume** — a browser crash, tab close, reload, or even a deliberate exit mid-session leaves a resumable snapshot; reopening that game within 4 hours offers to continue where the child left off, or start fresh
+- **Installable / offline (PWA)** — installs to a home screen like a native app; a service worker precaches the app shell plus every game's images and audio, so a game already visited once keeps working fully offline (car/travel use) — updates activate silently on the next load, with no interrupting prompt
 - **Version display** — app version shown in the dashboard footer; game version shown alongside it on game routes
 - **Google Analytics** — optional GA4 tracking configured at runtime via the admin page; fires page view events on every React Router navigation (off by default — see [`SECURITY.md`](SECURITY.md))
 
@@ -300,6 +301,8 @@ Two supported paths:
 - **Docker:** a two-stage build (Node compiles, `nginxinc/nginx-unprivileged:1.30-alpine` serves as a non-root user, ~25 MB image). `docker compose up --build`, then open [http://localhost:8080](http://localhost:8080).
 
 The full guide — annotated nginx configuration, cache tiers, HTTPS/reverse-proxy setup, data persistence and backup, troubleshooting — is in [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md).
+
+The production build is a PWA: `npm run build` also generates `dist/sw.js` and `dist/manifest.webmanifest` via `vite-plugin-pwa`, so a static or Docker deploy is installable and works offline with no extra setup. `npm run dev` intentionally skips the service worker (a dev-mode SW is a common source of stale-cache confusion) — build+serve the `dist/` output to see PWA behavior locally.
 
 ---
 
