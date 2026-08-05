@@ -372,14 +372,15 @@ export default function useGameSession({ gameId, items }) {
 
   useEffect(() => { handleTimeoutRef.current = handleTimeout })
 
-  function handleChoice(item) {
-    if (blockedRef.current) return
-    if (lockedRef.current) return
-    if (disabledChoiceIdsRef.current.includes(item.id)) return
-    setSelected(item.id)
-
+  // Shared per-attempt state machine: timings, score/streak, wrong-attempt
+  // counting, lock-as-missed, and scheduling advance() for 'immediate'
+  // feedback mode. Any interaction type reports its outcome here once it
+  // knows whether the attempt was correct -- handleChoice (discrete
+  // choice-click) is one caller; the hook makes no assumption about *how*
+  // correctness was determined, so non-discrete interactions (e.g. Number
+  // Tap's tap-until-the-count-matches-then-confirm) can call this directly.
+  function handleAttempt(isCorrect) {
     const durationMs = Date.now() - questionStartRef.current
-    const isCorrect = item.id === current.correct.id
     const attemptNumber = wrongAttemptsRef.current + 1
 
     const entry = { questionIndex: index, itemId: current.correct.id, correct: isCorrect, durationMs, attemptNumber }
@@ -412,10 +413,6 @@ export default function useGameSession({ gameId, items }) {
       wrongAttemptsRef.current = nextWrongAttempts
       setWrongAttempts(nextWrongAttempts)
 
-      const nextDisabled = [...disabledChoiceIdsRef.current, item.id]
-      disabledChoiceIdsRef.current = nextDisabled
-      setDisabledChoiceIds(nextDisabled)
-
       const resolvedMax = resolveMaxTries(maxTries)
       if (nextWrongAttempts >= resolvedMax) {
         // Deferred reinsertion note (still applies): mutating `queue` now
@@ -435,6 +432,21 @@ export default function useGameSession({ gameId, items }) {
         setTimeout(advance, 1500)
       }
     }
+  }
+
+  function handleChoice(item) {
+    if (blockedRef.current) return
+    if (lockedRef.current) return
+    if (disabledChoiceIdsRef.current.includes(item.id)) return
+    setSelected(item.id)
+
+    const isCorrect = item.id === current.correct.id
+    if (!isCorrect) {
+      const nextDisabled = [...disabledChoiceIdsRef.current, item.id]
+      disabledChoiceIdsRef.current = nextDisabled
+      setDisabledChoiceIds(nextDisabled)
+    }
+    handleAttempt(isCorrect)
   }
 
   function advance() {
@@ -551,6 +563,6 @@ export default function useGameSession({ gameId, items }) {
     showIntro, introResolved, settingsLoaded: loaded, dontShowAgain, setDontShowAgain,
     lastEvent, soundEffectsEnabled,
     resumeAvailable, acceptResume, declineResume,
-    handleChoice, advance, restart, acceptDifficultyBump, dismissDifficultyBump, dismissIntro,
+    handleChoice, handleAttempt, advance, restart, acceptDifficultyBump, dismissDifficultyBump, dismissIntro,
   }
 }
