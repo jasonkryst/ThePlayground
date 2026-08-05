@@ -1,0 +1,17 @@
+{
+  "numberTap": {
+    "manifestName": "Dotknij Liczbę",
+    "manifestDescription": "Zobacz liczbę i dotknij tyle rzeczy!",
+    "howToPlay": "Pojawia się liczba — dotknij tyle rzeczy na ekranie, a potem naciśnij znak zaznaczenia!",
+    "prompt": "Dotknij {{count}}!",
+    "objectLabel": "{{name}} {{index}}",
+    "done": "Gotowe",
+    "objects": {
+      "apple": "jabłko",
+      "star": "gwiazda",
+      "balloon": "balon",
+      "ball": "piłka",
+      "flower": "kwiat"
+    }
+  }
+}

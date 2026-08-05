@@ -1,0 +1,17 @@
+{
+  "numberTap": {
+    "manifestName": "Number Tap",
+    "manifestDescription": "See a number, tap that many things!",
+    "howToPlay": "A number appears — tap that many things on the screen, then press the checkmark!",
+    "prompt": "Tap {{count}}!",
+    "objectLabel": "{{name}} {{index}}",
+    "done": "Done",
+    "objects": {
+      "apple": "apple",
+      "star": "star",
+      "balloon": "balloon",
+      "ball": "ball",
+      "flower": "flower"
+    }
+  }
+}
