@@ -1,0 +1,9 @@
+{
+  "id": "number-tap",
+  "nameKey": "numberTap.manifestName",
+  "descriptionKey": "numberTap.manifestDescription",
+  "icon": "🔢",
+  "color": "#90CAF9",
+  "version": "1.0.0",
+  "tags": ["math", "counting"]
+}

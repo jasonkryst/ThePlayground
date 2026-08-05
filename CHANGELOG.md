@@ -3,6 +3,14 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.0.9] - 2026-08-04
+
+### Added
+
+- Number Tap (issue #73): a new game teaching early counting. A target number (1–5) is shown, and the child taps that many objects from a larger pool (the pool always has 1-3 more objects than the target, so a wrong count is always reachable) then presses a "Done ✓" button to confirm — a wrong count (too few or too many) clears the selection for a retry, same `maxTries`/hint/streak/timer rules as every other game. This mechanic doesn't fit the existing discrete-choice quiz shell, so it's the first game to call `useGameSession` directly (composing `GameIntro`/`GameResults`/`ResumePrompt`/`Timer` itself, following the `animal-memory-match` precedent) instead of going through `QuizGameShell`.
+- `useGameSession`'s `handleChoice` was split into a new `handleAttempt(isCorrect)` (the scoring/streak/timer/hint/retry/lock state machine) plus a thin `handleChoice(item)` wrapper that determines correctness from a discrete choice-click — a pure, behavior-preserving refactor (every existing game's tests pass unmodified) that lets Number Tap, and any future non-discrete-choice mechanic, drive the same engine by just reporting a boolean.
+- Added `src/games/number-tap/__tests__/numbers.test.js`, `buildQuestionPool.test.js` (positive: pool always exceeds the target by 1-3 objects, for every target 1-5; negative: an equal-or-smaller pool would make every question trivially correct), and `NumberTapGame.test.jsx` (full session flow, retry-then-correct, wrong-count-on-final-try miss, countdown timeout, intro, session-resume, a11y, and a check that the results screen never offers the discrete-choice "harder difficulty" bump, which would otherwise silently change the shared `numChoices` setting for other games). Extended `useGameSession.test.js` with direct `handleAttempt` coverage plus a regression test proving `handleChoice`'s behavior is unchanged.
+
 ## [1.0.8] - 2026-08-04
 
 ### Added

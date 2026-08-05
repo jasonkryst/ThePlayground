@@ -52,7 +52,6 @@ Items marked **AU-n** come from the 2026-07-12 a11y/i18n/UX audit (`docs/accessi
 Quiz-type (all get the engine's retries, hints, timers, badges, and personal bests for free):
 
 - **Shape Sort** — present a shape name/picture, child picks the correct shape; foundational geometry vocabulary.
-- **Number Tap** — display a number (1–5), child taps that many objects on screen; builds early counting.
 - **Alphabet Sounds** — play a letter sound (phonics), child picks the correct letter card; pre-reading phonemic awareness.
 - **Big or Small** — show two objects side by side, child taps the bigger (or smaller) one; builds spatial reasoning.
 - **Body Parts** — "Where's your nose?" with a cartoon figure; child taps the correct body part; receptive language staple.

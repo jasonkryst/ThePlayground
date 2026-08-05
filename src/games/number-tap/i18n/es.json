@@ -1,0 +1,17 @@
+{
+  "numberTap": {
+    "manifestName": "Toca el Número",
+    "manifestDescription": "¡Ve un número y toca esa cantidad de cosas!",
+    "howToPlay": "Aparece un número — ¡toca esa cantidad de cosas en la pantalla y luego presiona la marca de verificación!",
+    "prompt": "¡Toca {{count}}!",
+    "objectLabel": "{{name}} {{index}}",
+    "done": "Listo",
+    "objects": {
+      "apple": "manzana",
+      "star": "estrella",
+      "balloon": "globo",
+      "ball": "pelota",
+      "flower": "flor"
+    }
+  }
+}

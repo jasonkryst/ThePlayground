@@ -258,6 +258,70 @@ describe('useGameSession — existing behavior', () => {
   })
 })
 
+describe('useGameSession — handleAttempt (generalized attempt reporting)', () => {
+  it('handleAttempt(true) scores, streaks, fires confetti, and locks, same as handleChoice with the correct item', async () => {
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.current).toBeDefined())
+
+    await act(async () => { result.current.handleAttempt(true) })
+
+    expect(result.current.score).toBe(1)
+    expect(result.current.streak).toBe(1)
+    expect(result.current.locked).toBe(true)
+    expect(mockFireConfetti).toHaveBeenCalledTimes(1)
+    expect(mockRecordStreak).toHaveBeenCalledWith(1)
+  })
+
+  it('handleAttempt(false) with default maxTries locks immediately and records the correct item as missed', async () => {
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.current).toBeDefined())
+    const correctItem = result.current.current.correct
+
+    await act(async () => { result.current.handleAttempt(false) })
+
+    expect(result.current.locked).toBe(true)
+    expect(result.current.streak).toBe(0)
+    expect(result.current.missed).toEqual([correctItem])
+  })
+
+  it('handleAttempt(false) with maxTries=2 does not lock on the first wrong attempt, allowing a retry', async () => {
+    setSettings({ maxTries: 2 })
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.current).toBeDefined())
+
+    await act(async () => { result.current.handleAttempt(false) })
+    expect(result.current.locked).toBe(false)
+
+    await act(async () => { result.current.handleAttempt(true) })
+    expect(result.current.score).toBe(1)
+    expect(result.current.locked).toBe(true)
+  })
+
+  it('records a timings entry keyed to the current question on every attempt', async () => {
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.current).toBeDefined())
+    const correctId = result.current.current.correct.id
+
+    await act(async () => { result.current.handleAttempt(true) })
+
+    expect(result.current.timings).toHaveLength(1)
+    expect(result.current.timings[0]).toMatchObject({ questionIndex: 0, itemId: correctId, correct: true, attemptNumber: 1 })
+  })
+
+  // Negative/regression: handleChoice must still behave identically after the extraction
+  it('handleChoice still scores and locks exactly as before', async () => {
+    const { result } = renderHook(() => useGameSession({ gameId: 'test-game', items }))
+    await waitFor(() => expect(result.current.current).toBeDefined())
+    const correctItem = result.current.current.correct
+
+    await act(async () => { result.current.handleChoice(correctItem) })
+
+    expect(result.current.score).toBe(1)
+    expect(result.current.streak).toBe(1)
+    expect(result.current.locked).toBe(true)
+  })
+})
+
 describe('useGameSession — retries and maxTries', () => {
   it('maxTries=2 allows one retry before locking', async () => {
     setSettings({ maxTries: 2 })
