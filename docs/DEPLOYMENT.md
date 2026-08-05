@@ -51,6 +51,16 @@ If you deploy `dist/` to your own static host instead of using the Docker image,
 
 ---
 
+## PWA
+
+`npm run build` also generates `dist/sw.js`, `dist/workbox-*.js`, and `dist/manifest.webmanifest` via `vite-plugin-pwa` (issue #96) — no extra deployment step needed, they're just more files in `dist/` that the SPA fallback/cache rules above already cover. The service worker precaches the full app shell plus every game's images/audio, so a game already visited once keeps working fully offline; updates activate silently on the next load (`registerType: 'autoUpdate'` with `skipWaiting`/`clientsClaim` — no user-facing "update available" prompt).
+
+**Requires a secure context.** Browsers only register a service worker over HTTPS or on `localhost` — plain HTTP to a non-localhost origin (e.g. visiting the Docker container's `:8080` directly over a LAN IP) silently gets no service worker at all, no install prompt, no offline support, with no error surfaced to the user. This is the same HTTPS requirement the [reverse-proxy section below](#https--running-behind-a-reverse-proxy) already covers for other reasons — a TLS-terminating proxy in front satisfies it.
+
+`npm run dev` intentionally does not register a service worker (`devOptions.enabled` is left off) — a dev-mode SW is a common source of confusing stale-cache bugs while iterating. To see PWA behavior locally, use `npm run build && npm run preview` instead.
+
+---
+
 ## Docker
 
 **Prerequisites:** Docker with Compose.
@@ -208,6 +218,7 @@ browser ──HTTPS──▶ reverse proxy ──HTTP──▶ playground contai
 Notes for that setup:
 
 - **TLS and HSTS belong at the proxy**, not in this image. The container has no certificate handling on purpose — proxies like Caddy automate certificates (Let's Encrypt) far better than a static-site container should try to.
+- **This is also what the [PWA service worker](#pwa) needs** — browsers refuse to register one over plain HTTP to a non-localhost origin, so skipping this step silently disables install/offline support with no error surfaced anywhere.
 - **No forwarded headers are required.** The app has no server-side sessions, redirects, or absolute-URL generation, so it doesn't care about `X-Forwarded-For`/`X-Forwarded-Proto`. Pass them or don't.
 - **Compression** (gzip/brotli) is also best handled at the proxy if you want it; the image ships nginx defaults.
 
