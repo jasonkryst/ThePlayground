@@ -3,6 +3,12 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.1.1] - 2026-08-05
+
+### Fixed
+
+- Documentation gaps from the PWA work (issue #96): `SECURITY.md`'s "Architecture from a security standpoint" list never mentioned the new service worker — a genuinely new piece of same-origin runtime, even though it runs under the existing CSP with no new attack surface — and its "Supported versions" table still said `0.40.x`, stale well before this branch but glaring now that the version bump made it obviously wrong. `CLAUDE.md` now disambiguates the new `manifest.webmanifest` from every per-game `manifest.json` it already documents heavily, and notes where the PWA icons/generator script live.
+
 ## [1.1.0] - 2026-08-05
 
 ### Added
