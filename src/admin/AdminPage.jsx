@@ -1,9 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import useSettings from '../hooks/useSettings'
-import useScores from '../hooks/useScores'
 import useBadges from '../hooks/useBadges'
-import ScoreHistory from '../components/ScoreHistory'
 import BadgeGallery from '../components/BadgeGallery'
 import LocaleSelector from '../components/LocaleSelector'
 import { SUPPORTED_LOCALES } from '../i18n'
@@ -12,7 +10,6 @@ import './AdminPage.css'
 export default function AdminPage({ manifests = [] }) {
   const { t } = useTranslation()
   const { settings, loaded, updateSetting, resetSettings } = useSettings()
-  const { getAllScores } = useScores()
   const { badgeData } = useBadges()
 
   const [activeTab, setActiveTab] = useState('settings')
@@ -117,7 +114,6 @@ export default function AdminPage({ manifests = [] }) {
     { id: 'settings', label: t('admin.tabSettings') },
     { id: 'games',    label: t('admin.tabGames') },
     { id: 'badges',   label: t('admin.tabBadges') },
-    { id: 'history',  label: t('admin.tabHistory') },
   ]
 
   return (
@@ -629,12 +625,6 @@ export default function AdminPage({ manifests = [] }) {
         </div>
       )}
 
-      {activeTab === 'history' && (
-        <div className="admin__section" role="tabpanel" id="admin-panel-history" aria-labelledby="admin-tab-history">
-          <h2>{t('admin.scoreHistoryHeading')}</h2>
-          <ScoreHistory scores={getAllScores()} />
-        </div>
-      )}
     </div>
   )
 }

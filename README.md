@@ -20,7 +20,7 @@ A browser-based game dashboard designed for infants and toddlers. Games are disp
 - **Character Match: Bluey** (quiz) — the same Character Match gameplay, themed around the Bluey cast, as its own auto-discovered game with its own manifest and assets
 - **Animal Memory Match** (memory) — face-down tiles (3–6 animal pairs, parent-configurable); the child flips two at a time, hearing the animal's sound on each match, with fireworks on completing the board
 - **Sound Memory Match** (memory) — the same memory engine, but a tile's sound *is* its face: flipping a tile plays a clip instead of revealing a picture, so pairs are found by ear rather than by sight; a matched pair reveals its real picture afterward as a reward, never as a hint beforehand
-- **Admin / Settings** — tabbed settings page (Settings · Games · Badges · History); configure child's name, answer choices (2–4), feedback mode, questions per session, memory board size, Google Analytics ID, and per-game tag overrides
+- **Admin / Settings** — tabbed settings page (Settings · Games · Badges); configure child's name, answer choices (2–4), feedback mode, questions per session, memory board size, Google Analytics ID, and per-game tag overrides
 - **Parental Lock** — `/admin` and `/parent` are gated behind a generated math challenge by default (or an optional 4-digit PIN a parent sets), so a toddler tapping around the dashboard can't reach settings or the parent dashboard
 - **My Progress page** — a kid-facing `/my-progress` page (🌟 link on the dashboard) showing each game's best score, best streak, total questions answered, and earned badges (memory games show fewest flips and pairs matched instead of score/questions), with locked badges shown dimmed rather than as unreadable text; separate from the parent-facing `/parent` analytics dashboard and the admin `/admin` settings page
 - **How-to-play intro screens** — each game shows a brief instructional screen before its first question; parents can permanently dismiss it per game, or bring it back from the admin Games tab
@@ -67,7 +67,7 @@ A dedicated `/my-progress` page, linked via the 🌟 button on the main dashboar
 
 ### Parent Analytics Dashboard
 
-A dedicated `/parent` page shows five sections built from score history: **Score Trend** (accuracy % per game over time), **Response Time** (average answer speed per game), **Streak History** (longest correct-answer run in the last 7 days, last 30 days, and all-time), **Play Calendar** (a GitHub-style heatmap of daily activity, with month labels above the week columns), and **Missed Items** (which items are answered incorrectly most often, per game).
+A dedicated `/parent` page shows six sections built from score history: **Score Trend** (accuracy % per game over time), **Response Time** (average answer speed per game), **Streak History** (longest correct-answer run in the last 7 days, last 30 days, and all-time), **Play Calendar** (a GitHub-style heatmap of daily activity, with month labels above the week columns), **Missed Items** (which items are answered incorrectly most often, per game), and **Session History** (the raw per-session score list — moved here from Settings' old History tab in issue #173, so every score-related view lives in one encompassing place instead of being split across two pages).
 
 Every section reacts to the **date-range filter** at the top of the page: quick presets (7 days / 30 days / 90 days / All time) or a custom from–to range. The heatmap resizes to span exactly the selected range instead of always showing a fixed window, and Streak History's "last 7/30 days" columns re-anchor to the end of the selected range rather than always meaning "as of right now" — so a past custom range still shows meaningful streak data. The selected range is remembered across visits (stored alongside the other settings). CSV export via the toolbar button reflects whatever range is currently active.
 
@@ -123,9 +123,9 @@ src/
 │                              #   LocaleSelector, ParentalLockGate, OrientationGate/OrientationGateContext/
 │                              #   OrientationOverlay, ReplayButton, ResumePrompt, TagFilterBar
 ├── admin/
-│   └── AdminPage.jsx          # Settings, game tags, badges, score history (tabbed)
+│   └── AdminPage.jsx          # Settings, game tags, badges (tabbed)
 ├── parent/
-│   └── ParentDashboard.jsx    # Score/response-time charts, streak history, play calendar, missed items
+│   └── ParentDashboard.jsx    # Score/response-time charts, streak history, play calendar, missed items, raw session history
 ├── kids/
 │   └── KidsProgressPage.jsx   # Kid-facing per-game stats + badges (/my-progress)
 │

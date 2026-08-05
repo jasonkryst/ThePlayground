@@ -222,7 +222,7 @@ test.describe('pill text overfill regression (issue #115)', () => {
 
   // Every button in this app is pill-shaped (`button { border-radius:
   // var(--radius-button) }` in src/index.css) and a11y-sized to a 64px
-  // minimum tap target. `.admin__tab` (the Settings/Games/Badges/History
+  // minimum tap target. `.admin__tab` (the Settings/Games/Badges
   // row) and `.admin__toggle-btn` (every On/Off control) are both `flex: 1`
   // siblings sharing equal width -- a single unbreakable word that doesn't
   // fit (Spanish "Configuración", Polish "Odznaki") used to blow the whole
@@ -276,10 +276,12 @@ test.describe('pill label single-line regression (issue #156)', () => {
   // interaction: even with no overflow at all, an equal-width pill could still
   // break its own label across two lines when the label didn't fit its share
   // of the row -- reproducible pre-fix even in English (e.g. the Settings/
-  // Games/Badges/History tab row, and the 4-way Theme picker, both at an
+  // Games/Badges tab row, and the 4-way Theme picker, both at an
   // ordinary 375-390px phone width). A label's text occupies more than one
   // CSS line box exactly when `Range.getClientRects()` over its content
-  // reports more than one distinct `top` offset.
+  // reports more than one distinct `top` offset. (The History tab moved to
+  // the Parent Dashboard in issue #173, but the underlying flex/wrap hazard
+  // this guards is unchanged for the tabs that remain.)
   const PHONE_VIEWPORT = { width: 390, height: 844 }
 
   function seedLocale(page, locale) {
@@ -304,7 +306,7 @@ test.describe('pill label single-line regression (issue #156)', () => {
   test('positive: every admin tab label stays on one line at phone width (English)', async ({ page }) => {
     await page.setViewportSize(PHONE_VIEWPORT)
     await page.goto('/admin')
-    for (const name of ['Settings', 'Games', 'Badges', 'History']) {
+    for (const name of ['Settings', 'Games', 'Badges']) {
       expect(await lineCount(page.getByRole('tab', { name }))).toBe(1)
     }
   })
@@ -325,18 +327,15 @@ test.describe('pill label single-line regression (issue #156)', () => {
     expect(await lineCount(page.getByRole('button', { name: 'Alto contraste', exact: true }))).toBe(1)
   })
 
-  test('negative: the Spanish tab row actually spans two rows at phone width, proving whole pills wrap rather than merely fitting', async ({ page }) => {
-    await seedLocale(page, 'es')
-    await page.setViewportSize(PHONE_VIEWPORT)
-    await page.goto('/admin')
-    const tablistBox = await page.getByRole('tablist').boundingBox()
-    const oneTabBox = await page.getByRole('tab', { name: 'Juegos' }).boundingBox()
-    // A single row of tabs is one tab's height; two rows (with the 8px gap
-    // between them) run to roughly double that. If this ever shrinks back
-    // to ~oneTabBox.height, the fix regressed to cramming every tab into one
-    // row again (the state that used to force per-label wrapping instead).
-    expect(tablistBox.height).toBeGreaterThan(oneTabBox.height * 1.5)
-  })
+  // A "Spanish tab row actually spans two rows, proving whole pills wrap"
+  // test used to live here, back when Settings/Games/Badges/History (4
+  // tabs) genuinely didn't fit one row at 390px in Spanish. Issue #173
+  // removed the History tab; the remaining 3 tabs now fit on one row even
+  // in Spanish (verified: tablist height equals a single tab's height), so
+  // that scenario no longer reproduces. The label-splitting invariant this
+  // guarded (a pill's own text never breaks across two lines, whether or
+  // not the row itself wraps) is still covered by the two
+  // "stays on one line" tests above, which don't depend on row count.
 
   test('negative: a plain two-way On/Off toggle is unaffected by the --auto opt-out and still fills the row at phone width', async ({ page }) => {
     await seedLocale(page, 'pl')

@@ -33,6 +33,19 @@ test('default load shows all-time data; selecting 7 days narrows the charts', as
   await expect(page.getByRole('tab', { name: '7 days' })).toHaveAttribute('aria-selected', 'true')
 })
 
+// Issue #173: the raw score list moved here from Admin's History tab, as its
+// own "Session History" section, reusing this page's own date-range filter.
+test('Session History section lists raw sessions and narrows with the date filter', async ({ page }) => {
+  await page.goto('/parent')
+  await expect(page.getByRole('heading', { name: 'Session History' })).toBeVisible()
+  // All three seeded sessions (1/10/45 days ago) are within "All time".
+  await expect(page.locator('.score-history__item')).toHaveCount(3)
+
+  await page.getByRole('tab', { name: '7 days' }).click()
+  // Only the 1-day-old session survives a 7-day filter.
+  await expect(page.locator('.score-history__item')).toHaveCount(1)
+})
+
 test('custom range via date inputs updates the dashboard and persists across a reload', async ({ page }) => {
   await page.goto('/parent')
 

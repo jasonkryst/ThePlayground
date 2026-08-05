@@ -135,6 +135,7 @@ describe('ParentDashboard — empty state', () => {
   it('does not render chart sections in empty state', async () => {
     await renderDashboard()
     expect(screen.queryByText(/score trend/i)).not.toBeInTheDocument()
+    expect(screen.queryByText(/session history/i)).not.toBeInTheDocument()
   })
 
   it('renders the Export CSV button', async () => {
@@ -155,7 +156,7 @@ describe('ParentDashboard — with scores', () => {
     mockGetAllScores.mockReturnValue([makeScore(), makeScore({ date: new Date(NOW - 2 * DAY).toISOString().split('T')[0], timestamp: NOW - 2 * DAY })])
   })
 
-  it('renders all five section headings', async () => {
+  it('renders all six section headings', async () => {
     await renderDashboard()
     // Use the heading role specifically — the new hidden chart data tables
     // also render a <caption> with the same text as the section heading.
@@ -164,6 +165,14 @@ describe('ParentDashboard — with scores', () => {
     expect(screen.getByRole('heading', { name: /streak history/i })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: /play calendar/i })).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: /missed items/i })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /session history/i })).toBeInTheDocument()
+  })
+
+  // Issue #173: the raw score list used to live in Admin's History tab;
+  // it's now this dashboard's own "Session History" section instead.
+  it('renders the raw session history list', async () => {
+    await renderDashboard()
+    expect(screen.getAllByText('8 / 10').length).toBeGreaterThan(0)
   })
 
   it('renders the streak history table with correct headers', async () => {
@@ -305,6 +314,17 @@ describe('ParentDashboard — date range filter', () => {
     expect(screen.queryAllByText('color-match').length).toBe(0)
   })
 
+  // Issue #173: the raw session-history list reuses this same filtered-scores
+  // memo, so it should narrow exactly like every other section above.
+  it('narrows the raw session-history list to sessions in the selected range', async () => {
+    await renderDashboard()
+    expect(screen.getAllByText('8 / 10').length).toBe(2)
+
+    fireEvent.click(screen.getByRole('tab', { name: '7 days' }))
+    // oldDate's session is 60 days old — excluded once the range narrows to 7 days
+    expect(screen.getAllByText('8 / 10').length).toBe(1)
+  })
+
   it('persists the selected range via updateSetting', async () => {
     await renderDashboard()
     fireEvent.click(screen.getByRole('tab', { name: '30 days' }))
@@ -322,6 +342,7 @@ describe('ParentDashboard — date range filter', () => {
     await renderDashboard()
     fireEvent.click(screen.getByRole('tab', { name: '7 days' }))
     expect(screen.getByText(/no missed-item data yet/i)).toBeInTheDocument()
+    expect(screen.getByText(/no scores yet/i)).toBeInTheDocument()
   })
 
   it('CSV export reflects the active filter', async () => {

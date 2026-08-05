@@ -3,6 +3,14 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.1.1] - 2026-08-05
+
+### Changed
+
+- Consolidated all parent-facing score data under `/parent` (issue #173): the raw session list used to live in Admin's "History" tab, sitting inside the Settings/Games/Badges tab group even though it wasn't a setting. It now renders as a new "Session History" section on the Parent Dashboard, reusing that page's existing date-range filter — `/admin` is purely configuration now (Settings/Games/Badges), and `/parent` is the one encompassing place for every score-related view (trends, streaks, heatmap, missed items, and the raw log).
+- Fixed a pre-existing color-contrast failure in `ScoreHistory`'s date text (`opacity: 0.6` over the default text color rendered at 3.22:1 against a white background, below WCAG AA's 4.5:1 for normal-size text) — never caught before because the Admin page's own accessibility test only scanned the default Settings tab, not History. Switched to the same `--color-text-muted` token `ScoreHistory`'s own empty-state text already used, restoring ~5.2:1 contrast.
+- Added `AdminPage` regression coverage confirming the History tab is really gone (3 tabs, not 4); extended `ParentDashboard` tests for the new section (all six headings, respects the date-range filter, matches the other sections' empty-state behavior) and a live e2e check (`e2e/parent-dashboard.spec.js`) that the raw list actually narrows with the date filter in a real browser. Retired an `e2e/admin.spec.js` test whose premise (4 tabs forcing a two-row wrap in Spanish at phone width) no longer holds with 3 tabs — the label-splitting invariant it guarded is still covered by the file's other "stays on one line" checks, which don't depend on row count.
+
 ## [1.1.0] - 2026-08-05
 
 ### Added
