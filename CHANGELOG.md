@@ -3,6 +3,12 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.1.2] - 2026-08-05
+
+### Fixed
+
+- `e2e/pwa-csp.spec.js`'s CSP-violation check (issue #96) was failing in CI, and the same violation was live in the already-shipped `v1.1.1` production image: `src/index.css` loaded Nunito via a `@import url('https://fonts.googleapis.com/...')`, which `style-src 'self' 'unsafe-inline'` (`nginx/security-headers.conf`) blocks outright, since that directive predates the font import and was never widened for it — every real page load logged a blocked-stylesheet CSP violation and silently fell back to the default sans-serif. The Docker Release workflow builds and publishes images independently of the `CI` workflow's e2e job, so the broken font shipped to `v1.1.1` without the failing check stopping it. Fixed by self-hosting the font via `@fontsource/nunito` instead of widening the CSP to trust a third-party host — same-origin also means the font now benefits from `vite-plugin-pwa`'s asset precache (it wasn't covered by the service worker at all before), so it now loads offline too, consistent with issue #96's actual goal.
+
 ## [1.1.1] - 2026-08-05
 
 ### Changed
