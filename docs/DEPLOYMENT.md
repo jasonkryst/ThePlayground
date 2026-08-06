@@ -167,6 +167,14 @@ server {
         try_files $uri $uri/ /index.html;
     }
 
+    # vite-plugin-pwa's generated manifest isn't in nginx's bundled
+    # mime.types, so it falls back to `default_type` (application/octet-stream)
+    # -- the well-known IANA media type is application/manifest+json.
+    location = /manifest.webmanifest {
+        default_type application/manifest+json;
+        include /etc/nginx/security-headers.conf;
+    }
+
     # Long-cache hashed static assets (Vite appends content hash to filenames)
     location ~* \.(js|css|woff2?|ttf|svg|ico|png|jpg|jpeg)$ {
         expires 1y;
@@ -196,6 +204,8 @@ add_header Permissions-Policy "camera=(), microphone=(), geolocation=(), payment
 Block by block:
 
 **SPA fallback (`try_files $uri $uri/ /index.html`)** — try the exact file, then a directory, then hand everything else to `index.html`. This is what makes a direct visit (or refresh) on `/admin` or `/game/animal-memory-match` work: nginx serves the shell, and React Router resolves the route in the browser. Without it, every deep link 404s.
+
+**Web app manifest content type** — nginx's bundled `mime.types` predates the `.webmanifest` extension, so without this block the file falls back to the `default_type`, `application/octet-stream` — some browsers' PWA installability checks reject that. `location = /manifest.webmanifest` matches vite-plugin-pwa's fixed (non-hashed) output filename exactly and forces the correct `application/manifest+json`.
 
 **1-year `immutable` tier (js/css/fonts/images)** — safe *only because* Vite content-hashes these filenames. A changed file gets a new name, so a stale cache can never serve wrong content — the HTML simply references a name the cache has never seen. `immutable` additionally tells the browser not to revalidate even on refresh.
 
