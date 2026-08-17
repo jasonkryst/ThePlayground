@@ -5,16 +5,10 @@ import useSoundPlayer from '../../hooks/useSoundPlayer'
 import useQuestionAudio from '../../hooks/useQuestionAudio'
 import QuizGameShell from '../../components/QuizGameShell'
 import ReplayButton from '../../components/ReplayButton'
+import { CHOICE_COLORS } from '../../lib/choiceColors'
 import animals from './data/animals'
 import { getSoundUrl } from './data/sounds'
 import manifest from './manifest.json'
-
-const CHOICE_COLORS = [
-  'var(--color-lavender-dark)',
-  'var(--color-teal-dark)',
-  'var(--color-aqua-dark)',
-  'var(--color-lilac-dark)',
-]
 
 export default function AnimalSoundsGame({ onGameEnd }) {
   const { t } = useTranslation()
