@@ -36,10 +36,6 @@ Items marked **AU-n** come from the 2026-07-12 a11y/i18n/UX audit (`docs/accessi
 - **Switch-access exploration** — the target audience overlaps with early-intervention users; investigating single-switch scanning support (sequential focus + one activation input) would widen who can play.
 - **Real assistive-technology pass** — one NVDA or VoiceOver session through a full game loop (AU-2 landed in v0.26.0; known gap for that pass: consecutive same-type events render identical live-region text, so screen readers may not re-announce the second of two correct answers in a row — the memory game's mismatch announcement shares this property); static audits and axe can't judge announcement verbosity or pronunciation.
 
-## Core Engine
-
-- **Shared `CHOICE_COLORS` constant** — `src/games/animal-sounds/index.jsx` and `src/games/fruit-veggie-id/index.jsx` each define an identical 4-entry array of the same CSS-variable colors for picture-choice buttons; extracting it to a shared `src/lib/choiceColors.js` (or a `QuizGameShell` default) removes the copy-paste for this and any future picture-choice quiz game.
-
 ## Game Features
 
 - **Difficulty levels per game** — easy (2 choices, common items) vs hard (4 choices, similar-sounding/looking items); item pools tagged by difficulty. Originally proposed for Animal Sounds; the mechanism generalizes to every quiz game.

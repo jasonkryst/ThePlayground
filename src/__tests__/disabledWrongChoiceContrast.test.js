@@ -51,7 +51,7 @@ describe('.game__choice--disabled-wrong contrast', () => {
     }
   )
 
-  // Animal Sounds cycles choice backgrounds through these three tokens (src/games/animal-sounds/index.jsx's
+  // Animal Sounds cycles choice backgrounds through these three tokens (src/lib/choiceColors.js's
   // CHOICE_COLORS) with white choice-name text (AnimalSoundsGame.css's .game__choice-name).
   it.each([
     ['lavender-dark', '#6A4FA3', '#FFFFFF'],

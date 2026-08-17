@@ -3,6 +3,12 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.1.3] - 2026-08-17
+
+### Changed
+
+- Extracted the `CHOICE_COLORS` array (issue #148) — duplicated verbatim between `src/games/animal-sounds/index.jsx` and `src/games/fruit-veggie-id/index.jsx` for cycling picture-choice button backgrounds — into a shared `src/lib/choiceColors.js`. No behavior change; removes the copy-paste for this and any future picture-choice quiz game.
+
 ## [1.1.2] - 2026-08-05
 
 ### Fixed

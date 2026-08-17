@@ -5,15 +5,9 @@ import useSpeech from '../../hooks/useSpeech'
 import useQuestionAudio from '../../hooks/useQuestionAudio'
 import QuizGameShell from '../../components/QuizGameShell'
 import ReplayButton from '../../components/ReplayButton'
+import { CHOICE_COLORS } from '../../lib/choiceColors'
 import foods from './data/foods'
 import manifest from './manifest.json'
-
-const CHOICE_COLORS = [
-  'var(--color-lavender-dark)',
-  'var(--color-teal-dark)',
-  'var(--color-aqua-dark)',
-  'var(--color-lilac-dark)',
-]
 
 export default function FruitVeggieIdGame({ onGameEnd }) {
   const { t } = useTranslation()
