@@ -6,6 +6,8 @@ This document is both the security **posture** description for The Playground (w
 
 **Delta re-audit:** 2026-07-28 (issue #133, [`docs/superpowers/specs/2026-07-28-full-audit-findings.md`](docs/superpowers/specs/2026-07-28-full-audit-findings.md)) re-verified every item above with no regressions, and found one Medium and two Low CI/CD hardening gaps plus one Info-level gap, all fixed 2026-08-03 (issue #145): CI job `permissions:` least-privilege blocks, commit-SHA pinning for every third-party GitHub Action (+ Dependabot to keep pins current), a dated re-review gate on the react-router CVE allowlist, and a Trivy scan of the actual image `docker-image.yml` pushes on release (previously only a same-commit proxy build was scanned). Details below.
 
+**Second delta re-audit:** 2026-08-31 ([`docs/superpowers/specs/2026-08-31-security-audit-findings.md`](docs/superpowers/specs/2026-08-31-security-audit-findings.md)) re-verified every item above with **no regressions and no new findings** — headers, CSP, Docker pins, CSV escaping, the confetti CSP workaround, parental lock, and every CI/CD control from issue #145 all match this document byte-for-byte. Also reviewed every surface shipped since 2026-07-28 (PWA/service worker precache, session-resume, item-stats, three new games, `docker-image.yml`'s `APP_VERSION` build-arg) with no new risk identified. The `GHSA-qwww-vcr4-c8h2` allowlist marker (dated 2026-07-28) had 146 days left on its 180-day re-review trigger as of this audit.
+
 ## Scope
 
 The Playground is a self-hosted, browser-based game dashboard for infants and toddlers, typically run by one family on a home network or private server. It is not a hosted service and has no central operator. This document describes the app as shipped; anyone self-hosting it is responsible for the environment around it (TLS, network exposure — see [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md)).
@@ -103,7 +105,7 @@ Stated plainly rather than papered over (each is tracked in [`docs/ENHANCEMENTS.
 
 | Version | Supported |
 |---|---|
-| Latest minor (0.40.x) | ✅ |
+| Latest minor (1.1.x) | ✅ |
 | Older | ❌ — it's a static site; the upgrade path is `git pull` and redeploy ([`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md#updating-a-running-deployment)) |
 
 ## Reporting a vulnerability
