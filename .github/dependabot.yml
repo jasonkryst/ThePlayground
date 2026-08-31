@@ -7,3 +7,12 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+
+  # Keeps the Dockerfile's major.minor base-image tags (node:24-alpine,
+  # nginxinc/nginx-unprivileged:1.30-alpine) current. npm is deliberately
+  # NOT tracked here — production deps are already gated by audit-ci in
+  # ci.yml, a separate concern (see .github/__tests__/dependabot.test.js).
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
