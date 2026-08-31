@@ -3,6 +3,12 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.1.7] - 2026-08-31
+
+### Added
+
+- CodeQL static analysis (SAST) and Trivy filesystem scan in a new `.github/workflows/security.yml` workflow, triggered on push/PR to main and weekly on a schedule. The `codeql` job analyses the JavaScript source for vulnerability classes (injection, DOM XSS, prototype pollution, etc.) and uploads results to the Security → Code scanning tab. The `trivy-fs` job scans the project directory and npm dependency tree in Trivy `fs` mode — a second independent gate alongside `npm audit`, with identical CRITICAL/HIGH fixable-findings blocking logic and SARIF upload to the Security tab (`category: trivy-fs`, distinct from the container scan's upload). Both jobs use least-privilege `permissions:` overrides and SHA-pinned actions, consistent with issue #145's conventions. A new test file (`.github/__tests__/security.test.js`) verifies trigger events, permissions, scan modes, gate configuration, and SHA-pinning for both jobs. `SECURITY.md`'s Docker posture section updated to document the new controls.
+
 ## [1.1.6] - 2026-08-31
 
 ### Changed
