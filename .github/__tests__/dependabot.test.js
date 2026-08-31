@@ -32,4 +32,11 @@ describe('.github/dependabot.yml', () => {
   it('negative: does not also track npm here (production deps are already gated by audit-ci in ci.yml, a separate concern)', () => {
     expect(config.updates.some(u => u['package-ecosystem'] === 'npm')).toBe(false)
   })
+
+  it('tracks the docker ecosystem at the repo root (keeps Dockerfile base-image tags current)', () => {
+    const entry = config.updates.find(u => u['package-ecosystem'] === 'docker')
+    expect(entry).toBeDefined()
+    expect(entry.directory).toBe('/')
+    expect(entry.schedule?.interval).toBeTruthy()
+  })
 })

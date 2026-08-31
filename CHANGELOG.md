@@ -3,6 +3,12 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.1.4] - 2026-08-30
+
+### Added
+
+- Dependabot now also tracks the `docker` ecosystem (issue #148), opening weekly update PRs for the Dockerfile's base-image tags (`node:24-alpine`, `nginxinc/nginx-unprivileged:1.30-alpine`) — previously only `.github/workflows/*.yml`'s SHA-pinned GitHub Actions were tracked (issue #145). npm remains deliberately untracked here, since production dependency risk is already gated by `audit-ci` in CI (see `SECURITY.md` § Dependency policy); a negative test in `.github/__tests__/dependabot.test.js` guards that boundary.
+
 ## [1.1.3] - 2026-08-17
 
 ### Changed
