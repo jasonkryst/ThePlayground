@@ -3,6 +3,12 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.1.8] - 2026-09-03
+
+### Fixed
+
+- Dockerfile's `nginx-unprivileged` stage now runs `apk update && apk upgrade --no-cache` (as root, restoring the unprivileged uid 101 afterward) before copying in the built app, so the shipped image picks up patched Alpine packages instead of being pinned to whatever was baked into the base tag on publish. Fixes the CI `trivy` job's CRITICAL/HIGH gate, which was failing on CVE-2026-14456 (`libcrypto3`/openssl, HIGH) across every open Dependabot PR — none of which touched that package themselves.
+
 ## [1.1.7] - 2026-08-31
 
 ### Added
