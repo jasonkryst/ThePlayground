@@ -172,7 +172,7 @@ jobs:
       # one explicitly instead of relying on the runner image's contents.
       - name: Set up Chrome for Lighthouse CI
         id: setup-chrome
-        uses: browser-actions/setup-chrome@2e1d749697dd1612b833dba4a722266286fbefcd # v2.1.2
+        uses: browser-actions/setup-chrome@48ad923757ca74d66703209fe939badbdf80f2f4 # v2.2.0
         with:
           chrome-version: stable
       - name: Run Lighthouse CI
