@@ -3,6 +3,27 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.1.8] - 2026-09-03
+
+### Fixed
+
+- Dockerfile's `nginx-unprivileged` stage now runs `apk update && apk upgrade --no-cache` (as root, restoring the unprivileged uid 101 afterward) before copying in the built app, so the shipped image picks up patched Alpine packages instead of being pinned to whatever was baked into the base tag on publish. Fixes the CI `trivy` job's CRITICAL/HIGH gate, which was failing on CVE-2026-14456 (`libcrypto3`/openssl, HIGH) across every open Dependabot PR — none of which touched that package themselves.
+
+## [1.1.7] - 2026-08-31
+
+### Added
+
+- CodeQL static analysis (SAST) and Trivy filesystem scan in a new `.github/workflows/security.yml` workflow, triggered on push/PR to main and weekly on a schedule. The `codeql` job analyses the JavaScript source for vulnerability classes (injection, DOM XSS, prototype pollution, etc.) and uploads results to the Security → Code scanning tab. The `trivy-fs` job scans the project directory and npm dependency tree in Trivy `fs` mode — a second independent gate alongside `npm audit`, with identical CRITICAL/HIGH fixable-findings blocking logic and SARIF upload to the Security tab (`category: trivy-fs`, distinct from the container scan's upload). Both jobs use least-privilege `permissions:` overrides and SHA-pinned actions, consistent with issue #145's conventions. A new test file (`.github/__tests__/security.test.js`) verifies trigger events, permissions, scan modes, gate configuration, and SHA-pinning for both jobs. `SECURITY.md`'s Docker posture section updated to document the new controls.
+
+## [1.1.6] - 2026-08-31
+
+### Changed
+
+- Full documentation audit and refresh. Re-verified every claim in `README.md`, `SECURITY.md`, `docs/TESTING.md`, `docs/DEPLOYMENT.md`, and `CLAUDE.md` against the current codebase (architecture tree, hooks/components/utils inventories, storage adapter method list, settings table vs. `DEFAULT_SETTINGS`, npm scripts, nginx config, Dockerfile, and CI workflow) — all found accurate except two stale spots, now fixed: `SECURITY.md`'s "Supported versions" table still said `0.40.x` (now `1.1.x`), and `README.md`'s documentation index was missing `docs/accessibility_usability.md`. `[1.1.5]` (published directly via PR #188 with no changelog entry) is folded into this release; no code changed between the two.
+- Re-ran the full automated suite as part of this audit: `npm run lint`, `npm run lint:css`, `npm run build`, `npm run coverage` (1431/1433 passing — the 2 timeouts were confirmed environmental, both pass cleanly in isolation), `npm run e2e` (250/250 passing, including the Docker-backed nginx-headers/confetti-csp/pwa-csp specs), and the production `audit-ci` dependency gate (passing, no new advisories). No regressions found.
+- Ran a full manual security re-audit (`docs/superpowers/specs/2026-08-31-security-audit-findings.md`), the second delta pass after 2026-07-12 (full) and 2026-07-28 (first delta): zero new findings, every standing `SECURITY.md` claim re-verified byte-for-byte against the live config/code, and every surface shipped since 2026-07-28 (PWA/service worker precache, session-resume, item-stats, three new games, `docker-image.yml`'s `APP_VERSION` build-arg) reviewed with no new risk. `SECURITY.md` gained a third audit-history line recording this.
+- Ran a full manual accessibility/i18n/UX re-audit (`docs/superpowers/specs/2026-08-31-accessibility-usability-audit-findings.md`), re-verifying the 2026-07-12 audit's AU-1 through AU-8 by direct source inspection: AU-1, AU-2, AU-3, AU-6, and AU-8 confirmed genuinely resolved (not just marked so in the backlog); AU-5 (RTL `dir` sync) confirmed still open. Found two new items: **AU-9** (Medium) — `ResumePrompt`'s heading never receives focus on mount, unlike every other phase transition in the engine, so a keyboard/screen-reader user resuming an interrupted session gets no announcement of the context switch; tracked in `docs/ENHANCEMENTS.md` § Accessibility as a backlog item (not fixed in this release — this is a docs/audit pass, no application code changed). **AU-10** (Low, docs-only) — `README.md`'s tap-target exception wording said "parent-only surfaces," which didn't actually cover the dashboard's own child-facing category tab strip, the surface the original AU-7 finding was about; reworded to match `docs/TESTING.md`'s accurate description, fixed directly in this release.
+
 ## [1.1.4] - 2026-08-30
 
 ### Added
