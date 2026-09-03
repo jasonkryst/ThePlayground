@@ -3,6 +3,12 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.1.10] - 2026-09-03
+
+### Changed
+
+- Docker Compose's published host port changed from `8080` to `32800` (`docker-compose.yml`'s `ports:` mapping is now `"32800:8080"`; the container's internal nginx port is unchanged). Updated every doc reference to the host-facing URL/port accordingly: `README.md`'s Docker quick-start, and in `docs/DEPLOYMENT.md` — the "app is served at" URL, the compose snippet and its annotation, the reverse-proxy diagram and example Caddyfile, the service-worker secure-context note, and the port-already-allocated troubleshooting row.
+
 ## [1.1.9] - 2026-09-03
 
 ### Changed
