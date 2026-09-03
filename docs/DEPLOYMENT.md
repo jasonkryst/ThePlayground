@@ -55,7 +55,7 @@ If you deploy `dist/` to your own static host instead of using the Docker image,
 
 `npm run build` also generates `dist/sw.js`, `dist/workbox-*.js`, and `dist/manifest.webmanifest` via `vite-plugin-pwa` (issue #96) — no extra deployment step needed, they're just more files in `dist/` that the SPA fallback/cache rules above already cover. The service worker precaches the full app shell plus every game's images/audio, so a game already visited once keeps working fully offline; updates activate silently on the next load (`registerType: 'autoUpdate'` with `skipWaiting`/`clientsClaim` — no user-facing "update available" prompt).
 
-**Requires a secure context.** Browsers only register a service worker over HTTPS or on `localhost` — plain HTTP to a non-localhost origin (e.g. visiting the Docker container's `:8080` directly over a LAN IP) silently gets no service worker at all, no install prompt, no offline support, with no error surfaced to the user. This is the same HTTPS requirement the [reverse-proxy section below](#https--running-behind-a-reverse-proxy) already covers for other reasons — a TLS-terminating proxy in front satisfies it.
+**Requires a secure context.** Browsers only register a service worker over HTTPS or on `localhost` — plain HTTP to a non-localhost origin (e.g. visiting the Docker container's `:32800` directly over a LAN IP) silently gets no service worker at all, no install prompt, no offline support, with no error surfaced to the user. This is the same HTTPS requirement the [reverse-proxy section below](#https--running-behind-a-reverse-proxy) already covers for other reasons — a TLS-terminating proxy in front satisfies it.
 
 `npm run dev` intentionally does not register a service worker (`devOptions.enabled` is left off) — a dev-mode SW is a common source of confusing stale-cache bugs while iterating. To see PWA behavior locally, use `npm run build && npm run preview` instead.
 
@@ -70,7 +70,7 @@ docker compose up --build    # build image and start (foreground)
 docker compose up -d         # run in background after first build
 ```
 
-The app is served at [http://localhost:8080](http://localhost:8080).
+The app is served at [http://localhost:32800](http://localhost:32800).
 
 ### The image, stage by stage
 
@@ -114,11 +114,11 @@ services:
   app:
     build: .
     ports:
-      - "8080:8080"
+      - "32800:8080"
     restart: unless-stopped
 ```
 
-- **`8080:8080`** — nginx listens on 8080 inside the container (its non-root user can't bind the privileged port 80); change the left side if 8080 is taken on your host.
+- **`32800:8080`** — nginx listens on 8080 inside the container (its non-root user can't bind the privileged port 80); change the left side if 32800 is taken on your host.
 - **`restart: unless-stopped`** — the container survives daemon restarts and host reboots, but stays down if you explicitly `docker compose stop` it.
 - **No volumes** — the container is stateless. All user data lives in the *browser*, not the container (see [Data persistence](#data-persistence--backup)). You can destroy and recreate the container freely.
 
@@ -225,7 +225,7 @@ Block by block:
 The container serves plain HTTP on port 8080 (its non-root nginx process can't bind the privileged port 80). For anything beyond a trusted home LAN, put a TLS-terminating reverse proxy in front — Caddy, Traefik, or another nginx:
 
 ```
-browser ──HTTPS──▶ reverse proxy ──HTTP──▶ playground container (:8080 → :8080)
+browser ──HTTPS──▶ reverse proxy ──HTTP──▶ playground container (:32800 → :8080)
 ```
 
 Notes for that setup:
@@ -239,7 +239,7 @@ Example Caddyfile for a home server:
 
 ```
 playground.example.com {
-    reverse_proxy localhost:8080
+    reverse_proxy localhost:32800
 }
 ```
 
@@ -268,6 +268,6 @@ Consequences worth understanding before you rely on the data:
 | Blank page or 404 when refreshing on `/admin`, `/game/...`, etc. | Serving `dist/` from a host without an SPA fallback | Configure the host to serve `index.html` for unmatched paths (the Docker image's nginx already does) |
 | Old UI still showing after a deploy | Cached `index.html` (usually an over-aggressive CDN/proxy rule, not this image's nginx) | Ensure HTML is served with revalidation (ETag / short max-age); hashed assets may keep their 1-year tier |
 | A replaced sound file still plays the old audio | mp3s cache for 7 days by design | Wait out the TTL, hard-refresh, or rename the file (a new name bypasses every cache) |
-| `docker compose up` fails: port already allocated | Host port 8080 in use | Change the left side of `ports:` in `docker-compose.yml` (e.g. `"8081:8080"`) |
+| `docker compose up` fails: port already allocated | Host port 32800 in use | Change the left side of `ports:` in `docker-compose.yml` (e.g. `"8081:8080"`) |
 | Scores/settings vanished | Browser site data was cleared, or a different browser/device/profile is in use | Restore expectations, not data — see [Data persistence](#data-persistence--backup); export CSV periodically if the history matters |
 | Dev server doesn't pick up file changes | Editor writing via a path the poller misses (rare) | The watcher already polls every 300 ms (`vite.config.js`); restart `npm run dev` |
