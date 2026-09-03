@@ -11,7 +11,7 @@ COPY . .
 RUN npm run build
 
 # Stage 2: Serve
-FROM nginxinc/nginx-unprivileged:1.30-alpine
+FROM nginxinc/nginx-unprivileged:1.31-alpine
 # Pull in patched Alpine packages at build time so the image isn't pinned to
 # whatever CVEs were unfixed when this base tag was published (e.g. openssl).
 # apk needs root; the base image's non-root user (101) is restored after.
