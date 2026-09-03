@@ -3,6 +3,13 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.1.9] - 2026-09-03
+
+### Changed
+
+- Merged four Dependabot bumps once [1.1.8](#118---2026-09-03)'s Trivy fix unblocked them: `node:24-alpine` → `node:26-alpine` (build stage), `nginxinc/nginx-unprivileged:1.30-alpine` → `1.31-alpine` (runtime stage, resolved a merge conflict with 1.1.8's `apk upgrade` addition to the same stage), `docker/setup-buildx-action` 4.2.0 → 4.3.0, and `github/codeql-action/upload-sarif` 4.37.7 → 4.37.9 (in `ci.yml`; `security.yml`'s separate pin of the same action is still 4.37.7 and will get its own Dependabot PR).
+- Synced every live doc reference to the new base-image tags — `README.md`, `SECURITY.md`, `docs/DEPLOYMENT.md` (including its inline Dockerfile stage-2 excerpt, now also showing the 1.1.8 `apk upgrade` step), and `docs/TESTING.md`. Also fixed two config comments/steps that still named the old tags: `.github/dependabot.yml`'s docker-ecosystem comment, and `ci.yml`'s `docker pull nginxinc/nginx-unprivileged:...` e2e pre-pull step, which was silently pre-pulling the wrong tag (1.30 instead of the now-current 1.31) and so no longer actually warming the cache the step exists for.
+
 ## [1.1.8] - 2026-09-03
 
 ### Fixed

@@ -76,10 +76,10 @@ The app is served at [http://localhost:8080](http://localhost:8080).
 
 `Dockerfile` is a two-stage build:
 
-**Stage 1 — build (`node:24-alpine`):**
+**Stage 1 — build (`node:26-alpine`):**
 
 ```dockerfile
-FROM node:24-alpine AS build
+FROM node:26-alpine AS build
 WORKDIR /app
 COPY package*.json ./
 RUN npm ci
@@ -89,10 +89,13 @@ RUN npm run build
 
 `package*.json` is copied and `npm ci` run *before* the rest of the source is copied. Docker caches layers by input: as long as the lockfile hasn't changed, rebuilds skip dependency installation entirely and only re-run `vite build`. `npm ci` (rather than `npm install`) installs exactly what `package-lock.json` pins — reproducible builds, no surprise version drift.
 
-**Stage 2 — serve (`nginxinc/nginx-unprivileged:1.30-alpine`):**
+**Stage 2 — serve (`nginxinc/nginx-unprivileged:1.31-alpine`):**
 
 ```dockerfile
-FROM nginxinc/nginx-unprivileged:1.30-alpine
+FROM nginxinc/nginx-unprivileged:1.31-alpine
+USER root
+RUN apk update && apk upgrade --no-cache
+USER 101
 COPY --from=build /app/dist /usr/share/nginx/html
 COPY nginx/security-headers.conf /etc/nginx/security-headers.conf
 COPY nginx.conf /etc/nginx/conf.d/default.conf
@@ -100,7 +103,7 @@ EXPOSE 8080
 CMD ["nginx", "-g", "daemon off;"]
 ```
 
-Only `dist/` and the nginx config cross into the final image. Node, npm, `node_modules`, and the source tree are all discarded with the build stage — the runtime image is ~25 MB and contains a static file server and static files, nothing else. (This is also a security property; see [`SECURITY.md`](../SECURITY.md#docker-posture).) Both base images are pinned to a specific major.minor version rather than a floating tag, for reproducible builds, and nginx runs as its image's built-in non-root `nginx` user (uid 101) rather than root — that's also why it listens on 8080 instead of 80: unprivileged processes can't bind ports below 1024 (issue #85).
+Only `dist/` and the nginx config cross into the final image. Node, npm, `node_modules`, and the source tree are all discarded with the build stage — the runtime image is ~25 MB and contains a static file server and static files, nothing else. (This is also a security property; see [`SECURITY.md`](../SECURITY.md#docker-posture).) Both base images are pinned to a specific major.minor version rather than a floating tag, for reproducible builds, and nginx runs as its image's built-in non-root `nginx` user (uid 101) rather than root — that's also why it listens on 8080 instead of 80: unprivileged processes can't bind ports below 1024 (issue #85). The `apk upgrade` step runs briefly as root (restoring uid 101 immediately after) to pull in any Alpine security patches published after the base tag itself, so the shipped image isn't pinned to whatever CVEs were still open when that tag was built.
 
 ### Compose
 
