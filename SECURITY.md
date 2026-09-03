@@ -87,7 +87,7 @@ Stated plainly rather than papered over (each is tracked in [`docs/ENHANCEMENTS.
 
 ## Docker posture
 
-- **Official base images, pinned:** `node:24-alpine` (build), `nginxinc/nginx-unprivileged:1.30-alpine` (runtime) — both pinned to a major.minor version rather than a floating tag, for reproducible builds (issue #85). `.github/dependabot.yml` (`docker` ecosystem, weekly, issue #148) opens update PRs when either tag ships a new major.minor release, so the pins don't go stale.
+- **Official base images, pinned:** `node:26-alpine` (build), `nginxinc/nginx-unprivileged:1.31-alpine` (runtime) — both pinned to a major.minor version rather than a floating tag, for reproducible builds (issue #85). `.github/dependabot.yml` (`docker` ecosystem, weekly, issue #148) opens update PRs when either tag ships a new major.minor release, so the pins don't go stale.
 - **Non-root runtime:** nginx runs as its image's built-in non-root `nginx` user (uid 101), not root — a container-escape or nginx RCE chain starts with less privilege (issue #85).
 - **Multi-stage build:** node, npm, `node_modules`, and the source tree never enter the runtime image — a compromise of the running container yields a static file server and public assets, not a toolchain.
 - **Stateless runtime:** no volumes, no secrets, no env vars in the image; nothing sensitive to exfiltrate server-side.
