@@ -16,3 +16,16 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    ignore:
+      # Node only ever promotes an even-numbered major to Active LTS (each
+      # October, for that year's April release) — odd majors are six-month
+      # "Current" releases that never go LTS at all. Dependabot can't tell
+      # the difference, so a routine major-bump PR already landed the
+      # Dockerfile on a non-LTS release once without anyone noticing until
+      # a manual review caught it (node:24-alpine -> node:26-alpine, 1.1.9;
+      # issue #193). Major bumps for node now require a deliberate manual
+      # PR, opened once the target major has actually reached LTS — minor/
+      # patch content within the current major tag still updates silently
+      # via Docker Hub with no PR needed either way.
+      - dependency-name: "node"
+        update-types: ["version-update:semver-major"]
