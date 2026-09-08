@@ -220,3 +220,37 @@ describe('Dockerfile image pinning and non-root runtime (SEC-4)', () => {
     expect(runtimeImage.startsWith('nginxinc/nginx-unprivileged:')).toBe(true)
   })
 })
+
+/**
+ * Guards issue #193: Node only ever promotes an even-numbered major to
+ * Active LTS (each October, for that year's April release) — odd majors are
+ * short-lived "Current" releases that never go LTS at all. Landing the build
+ * stage on an odd major would put the codebase on a release with no LTS
+ * window whatsoever, unlike an even major before its own LTS date (merely
+ * early, not permanently unsupported). See .github/dependabot.yml, which
+ * blocks Dependabot from auto-opening major-bump PRs for this same reason.
+ */
+function nodeBuildStageMajor(dockerfileText) {
+  const match = dockerfileText.match(/^FROM\s+node:(\d+)/m)
+  return match ? Number(match[1]) : null
+}
+
+describe('nodeBuildStageMajor (validator)', () => {
+  it('extracts the major version from the build-stage node image', () => {
+    expect(nodeBuildStageMajor('FROM node:24-alpine AS build\n')).toBe(24)
+  })
+
+  it('returns null when no node build stage is found', () => {
+    expect(nodeBuildStageMajor('FROM nginx:1.27-alpine\n')).toBeNull()
+  })
+})
+
+describe('Dockerfile build-stage Node version is LTS-track (issue #193)', () => {
+  const dockerfileText = fs.readFileSync(DOCKERFILE_PATH, 'utf8')
+  const major = nodeBuildStageMajor(dockerfileText)
+
+  it('pins the build stage to an even major (Node only ever promotes even majors to LTS)', () => {
+    expect(major).not.toBeNull()
+    expect(major % 2).toBe(0)
+  })
+})

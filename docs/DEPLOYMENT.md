@@ -89,6 +89,8 @@ RUN npm run build
 
 `package*.json` is copied and `npm ci` run *before* the rest of the source is copied. Docker caches layers by input: as long as the lockfile hasn't changed, rebuilds skip dependency installation entirely and only re-run `vite build`. `npm ci` (rather than `npm install`) installs exactly what `package-lock.json` pins — reproducible builds, no surprise version drift.
 
+Node 26 reaches Active LTS in October 2026 — it's a deliberate pin ahead of that date, not a stale one (issue #193). Dependabot no longer auto-opens major-version bump PRs for this image (see `.github/dependabot.yml`), since Node only ever promotes even-numbered majors to LTS and a routine merge previously landed a non-LTS pin here without review (`node:24-alpine` → `node:26-alpine`, 1.1.9). A static test (`nginx/__tests__/securityHeaders.test.js`) fails CI if the pinned major ever goes odd.
+
 **Stage 2 — serve (`nginxinc/nginx-unprivileged:1.31-alpine`):**
 
 ```dockerfile

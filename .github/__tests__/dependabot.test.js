@@ -39,4 +39,24 @@ describe('.github/dependabot.yml', () => {
     expect(entry.directory).toBe('/')
     expect(entry.schedule?.interval).toBeTruthy()
   })
+
+  // Guards issue #193: node only ever promotes an even-numbered major to
+  // Active LTS — a routine Dependabot major-bump PR previously landed the
+  // Dockerfile on a non-LTS release (node:24-alpine -> node:26-alpine,
+  // 1.1.9) without anyone deciding that was the right time. Major bumps now
+  // require a deliberate manual PR instead of an auto-opened one.
+  describe('node major-version bumps require manual review (issue #193)', () => {
+    it('ignores semver-major updates for the node docker dependency', () => {
+      const entry = config.updates.find(u => u['package-ecosystem'] === 'docker')
+      const nodeIgnore = entry.ignore?.find(i => i['dependency-name'] === 'node')
+      expect(nodeIgnore).toBeDefined()
+      expect(nodeIgnore['update-types']).toEqual(['version-update:semver-major'])
+    })
+
+    it('negative: does not ignore major bumps for the nginx docker dependency (those stay automatic)', () => {
+      const entry = config.updates.find(u => u['package-ecosystem'] === 'docker')
+      const nginxIgnore = entry.ignore?.find(i => i['dependency-name'] === 'nginx' || i['dependency-name']?.includes('nginx'))
+      expect(nginxIgnore).toBeUndefined()
+    })
+  })
 })

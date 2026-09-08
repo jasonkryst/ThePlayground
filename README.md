@@ -75,7 +75,7 @@ Every section reacts to the **date-range filter** at the top of the page: quick 
 
 ## Getting Started
 
-**Prerequisites:** Node.js 18+
+**Prerequisites:** Node.js 24+ (Active LTS; see `package.json`'s `engines` field, issue #193)
 
 ```bash
 npm install

@@ -3,6 +3,12 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.1.11] - 2026-09-08
+
+### Changed
+
+- Node LTS guardrails (issue #193). `.github/workflows/ci.yml`'s pipelines were already pinned to `node-version: 24` (Active LTS); the Dockerfile's build stage stays deliberately on `node:26-alpine` (it reaches Active LTS in October 2026 — re-pinning to 24 now would just mean re-bumping again in six weeks). What changed is the process gap that let `node:26-alpine` land there via a routine unreviewed Dependabot merge in the first place (1.1.9): `.github/dependabot.yml`'s `docker` ecosystem entry now ignores semver-major bumps for the `node` dependency (Node only ever promotes even-numbered majors to LTS; odd majors never go LTS at all), so future major bumps require a deliberate manual PR instead of an auto-opened one. A new test (`nginx/__tests__/securityHeaders.test.js`) fails CI if the Dockerfile's pinned Node major ever goes odd, and `.github/__tests__/dependabot.test.js` guards the new ignore rule. `package.json` gained an `engines.node` field (`>=24`) declaring the supported floor for local dev, and `README.md`'s stale "Node.js 18+" prerequisite (well below the current LTS floor) was corrected to match. `SECURITY.md`, `docs/TESTING.md`, `docs/DEPLOYMENT.md`, and `docs/ENHANCEMENTS.md` updated to document the new guardrail and the reasoning behind the pin.
+
 ## [1.1.10] - 2026-09-03
 
 ### Changed
