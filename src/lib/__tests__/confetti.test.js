@@ -16,23 +16,42 @@ beforeEach(() => {
   createMock.mockClear()
 })
 
+// Helpers to stub window.matchMedia for reduced-motion tests (issue #213).
+function stubMatchMedia(matches) {
+  vi.stubGlobal('matchMedia', (query) => ({
+    matches: query === '(prefers-reduced-motion: reduce)' ? matches : false,
+    addEventListener: vi.fn(),
+    removeEventListener: vi.fn(),
+  }))
+}
+
 describe('fireConfetti', () => {
   it('calls the canvas-confetti library', async () => {
+    stubMatchMedia(false)
     const { fireConfetti } = await import('../confetti')
     fireConfetti()
     expect(confettiMock).toHaveBeenCalledTimes(1)
   })
 
   it('passes a particleCount option', async () => {
+    stubMatchMedia(false)
     const { fireConfetti } = await import('../confetti')
     fireConfetti()
     const options = confettiMock.mock.calls[0][0]
     expect(options.particleCount).toBeGreaterThan(0)
   })
+
+  it('does NOT fire when prefers-reduced-motion is set (issue #213)', async () => {
+    stubMatchMedia(true)
+    const { fireConfetti } = await import('../confetti')
+    fireConfetti()
+    expect(confettiMock).not.toHaveBeenCalled()
+  })
 })
 
 describe('fireFireworks', () => {
   it('fires the first burst immediately and all bursts within the window', async () => {
+    stubMatchMedia(false)
     vi.useFakeTimers()
     const { fireFireworks, FIREWORKS_BURSTS, FIREWORKS_INTERVAL_MS } = await import('../confetti')
     fireFireworks()
@@ -43,7 +62,18 @@ describe('fireFireworks', () => {
     vi.useRealTimers()
   })
 
+  it('does NOT fire any burst when prefers-reduced-motion is set (issue #213)', async () => {
+    stubMatchMedia(true)
+    vi.useFakeTimers()
+    const { fireFireworks, FIREWORKS_BURSTS, FIREWORKS_INTERVAL_MS } = await import('../confetti')
+    fireFireworks()
+    vi.advanceTimersByTime(FIREWORKS_BURSTS * FIREWORKS_INTERVAL_MS)
+    expect(confettiMock).not.toHaveBeenCalled()
+    vi.useRealTimers()
+  })
+
   it('does not keep firing after the last burst', async () => {
+    stubMatchMedia(false)
     vi.useFakeTimers()
     const { fireFireworks, FIREWORKS_BURSTS, FIREWORKS_INTERVAL_MS } = await import('../confetti')
     fireFireworks()
@@ -53,6 +83,7 @@ describe('fireFireworks', () => {
   })
 
   it('varies burst origins across the sky', async () => {
+    stubMatchMedia(false)
     vi.useFakeTimers()
     const { fireFireworks, FIREWORKS_BURSTS, FIREWORKS_INTERVAL_MS } = await import('../confetti')
     fireFireworks()
@@ -89,6 +120,7 @@ describe('CSP-safe cannon construction (issue #109 regression guard)', () => {
   })
 
   it('never falls back to the bare default export (which would still be CSP-unsafe)', async () => {
+    stubMatchMedia(false)
     const { fireConfetti, fireFireworks, FIREWORKS_BURSTS, FIREWORKS_INTERVAL_MS } = await import('../confetti')
     vi.useFakeTimers()
     fireConfetti()
@@ -115,6 +147,7 @@ describe('decorative canvas is hidden from the accessibility tree', () => {
   }
 
   it('marks a newly-appended canvas aria-hidden after fireConfetti', async () => {
+    stubMatchMedia(false)
     const { fireConfetti } = await import('../confetti')
     const canvas = appendUnlabeledCanvas()
     fireConfetti()
@@ -122,6 +155,7 @@ describe('decorative canvas is hidden from the accessibility tree', () => {
   })
 
   it('marks a newly-appended canvas aria-hidden after each fireFireworks burst', async () => {
+    stubMatchMedia(false)
     const { fireFireworks, FIREWORKS_BURSTS, FIREWORKS_INTERVAL_MS } = await import('../confetti')
     vi.useFakeTimers()
     const canvas = appendUnlabeledCanvas()

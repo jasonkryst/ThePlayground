@@ -164,8 +164,8 @@ CLAUDE.md's and README's claim — "app version read from `package.json` at buil
 
 ## Recommendations (Prioritized)
 
-1. **[High] Add a top-level React error boundary** around the routed content in `App.jsx` (at minimum wrapping `<Routes>`, ideally with a "Return to dashboard" recovery affordance). Currently any component throw blanks the entire app, including chrome. Given the app's "drop in a new game folder" extensibility model, this is the single highest-value fix in this audit.
-2. **[Medium] Add a catch-all `<Route path="*">`** redirecting to `/` (or rendering a friendly not-found page within `AppShell`). Currently any unmatched URL renders a fully blank page with no chrome at all.
+1. **[High] ✅ Fixed v1.1.12 — React error boundary** added (`src/components/ErrorBoundary.jsx`), wrapping `<App />` in `main.jsx`. Any uncaught render error now shows a "Something went wrong / Go home" card instead of a blank screen.
+2. **[Medium] ✅ Fixed v1.1.12 — Catch-all `<Route path="*">`** added inside `AppShell`. Unknown URLs now render a localised "Page not found" card with a Go home link inside the app shell.
 3. **[Low] Address `docs/ENHANCEMENTS.md`'s AU-9 item** (`ResumePrompt` doesn't call `useFocusOnMount()`) — confirmed still open by this audit; it's already accurately tracked, just noting it's real and cheap to fix (the backlog entry already describes the exact one-line fix).
 4. **[Low] Align Number Tap's `handleDone`/`toggleObject` double-submit guard** with the ref-based `lockedRef` pattern used by `useGameSession.handleChoice`/`GameChoiceGrid`, for consistency (current reactive-state guard is very unlikely to actually double-fire in practice, but it's the one place in the engine that doesn't follow the established defensive pattern).
 5. **[Low] Add a `buildQueue` pool-size warning** mirroring `buildDeck.js`'s existing `console.warn` when a game's item pool can't fill the requested choice count — currently silent, `buildDeck` already sets the precedent.

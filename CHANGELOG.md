@@ -3,6 +3,23 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.1.12] - 2026-09-23
+
+### Fixed
+
+- **React error boundary** (issue #207). Wrapped `<App />` in a new `ErrorBoundary` class component (`src/components/ErrorBoundary.jsx`) so any uncaught render error in a game or route shows a "Something went wrong / Go home" fallback card instead of a blank white screen. The boundary's `componentDidCatch` logs the error and component stack to the console without rethrowing.
+- **localStorage write failures** (issue #214). All seven `localStorage.setItem` calls in `src/storage/localStorageAdapter.js` now go through a shared `safeSet()` helper that catches `QuotaExceededError` and other storage exceptions, logs a `console.warn`, and returns without throwing. The corresponding `get*` methods already had `try/catch`; writes now match.
+- **Confetti respects `prefers-reduced-motion`** (issue #213). `fireConfetti()` and `fireFireworks()` in `src/lib/confetti.js` now check `window.matchMedia('(prefers-reduced-motion: reduce)')` at call time and return immediately when the OS setting is active. The check happens on each call so it reflects live OS preference changes without requiring an app restart or settings migration.
+- **ResumePrompt moves focus on mount** (issue #215). `src/components/ResumePrompt.jsx` now uses `useFocusOnMount()` on its `<h2>` heading, making it the only remaining phase-transition screen to announce itself to screen-reader users on mount — consistent with `GameResults`, `ParentalLockGate`, and `OrientationOverlay`.
+- **Catch-all 404 route** (issue #208). Added `<Route path="*" element={<NotFound />} />` inside the `AppShell` layout. Unknown URLs now render a "Page not found" message with a Go home link inside the app shell instead of a blank white page.
+- **Hardcoded strings in `App.jsx`** (issue #211). Replaced four `"Loading..."` Suspense fallbacks and the `"Game not found."` inline string with `t('common.loading')` and `t('common.gameNotFound')`. Added the new keys (`loading`, `gameNotFound`, `notFoundHeading`, `notFoundBody`, `notFoundHome`) to all three locale files (`en`, `es`, `pl`).
+- **`.playwright-mcp/` gitignored** (issue #221). Added `.playwright-mcp/` to `.gitignore` alongside the existing `playwright-report/` and `test-results/` entries. The directory (which contains browser console logs and an unrelated 112 MB .NET installer) was untracked but not ignored, creating risk of accidental staging via `git add -A`.
+
+### Added
+
+- `src/components/ErrorBoundary.jsx` and `ErrorBoundary.css` — app-level error boundary (issue #207).
+- Tests: `src/components/__tests__/ErrorBoundary.test.jsx` (5 tests covering fallback render, error logging, and Go home navigation), six new tests appended to `src/storage/__tests__/localStorageAdapter.security.test.js` (QuotaExceeded and write-failure coverage for issue #214), two new tests in `src/lib/__tests__/confetti.test.js` (reduced-motion suppression for issue #213), and one test appended to `src/components/__tests__/ResumePrompt.test.jsx` (focus-on-mount assertion for issue #215).
+
 ## [1.1.11] - 2026-09-08
 
 ### Changed

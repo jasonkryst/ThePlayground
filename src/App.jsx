@@ -1,5 +1,6 @@
-import { BrowserRouter, Routes, Route, useParams, useNavigate, useLocation } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, useParams, useNavigate, useLocation, Link } from 'react-router-dom'
 import { Suspense, lazy, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import Dashboard from './components/Dashboard'
 import AppShell from './components/AppShell'
 import OrientationGate from './components/OrientationGate'
@@ -98,17 +99,34 @@ function ThemeSync() {
   return null
 }
 
+// Shown when a /game/:gameId URL doesn't match any registered game, or when
+// a completely unknown URL is visited (the catch-all * route). Both keep the
+// AppShell chrome so the user can navigate home via the header (issue #208).
+function NotFound() {
+  const { t } = useTranslation()
+  return (
+    <div style={{ padding: 24, textAlign: 'center' }}>
+      <h2 style={{ marginBottom: 12 }}>{t('common.notFoundHeading')}</h2>
+      <p style={{ marginBottom: 20, color: 'var(--color-text-muted)' }}>{t('common.notFoundBody')}</p>
+      <Link to="/" style={{ color: 'var(--color-aqua-dark)', fontWeight: 700 }}>
+        {t('common.notFoundHome')}
+      </Link>
+    </div>
+  )
+}
+
 function GameRoute() {
   const { gameId } = useParams()
   const navigate   = useNavigate()
+  const { t }      = useTranslation()
   const Game       = gameComponents[gameId]
   const manifest   = manifests.find(m => m.id === gameId)
 
-  if (!Game) return <div style={{ padding: 24 }}>Game not found.</div>
+  if (!Game) return <div style={{ padding: 24 }}>{t('common.gameNotFound')}</div>
 
   return (
     <OrientationGate orientation={manifest?.orientation}>
-      <Suspense fallback={<div style={{ padding: 24 }}>Loading...</div>}>
+      <Suspense fallback={<div style={{ padding: 24 }}>{t('common.loading')}</div>}>
         <Game onGameEnd={() => navigate('/')} />
       </Suspense>
     </OrientationGate>
@@ -116,6 +134,7 @@ function GameRoute() {
 }
 
 export default function App() {
+  const { t } = useTranslation()
   return (
     <BrowserRouter>
       <GoogleAnalytics />
@@ -124,10 +143,11 @@ export default function App() {
       <Routes>
         <Route element={<AppShell manifests={manifests} />}>
           <Route path="/"             element={<Dashboard manifests={manifests} />} />
-          <Route path="/admin"        element={<ParentalLockGate><Suspense fallback={<div style={{ padding: 24 }}>Loading...</div>}><AdminPage manifests={manifests} /></Suspense></ParentalLockGate>} />
-          <Route path="/parent"       element={<ParentalLockGate><Suspense fallback={<div style={{ padding: 24 }}>Loading...</div>}><ParentDashboard manifests={manifests} /></Suspense></ParentalLockGate>} />
-          <Route path="/my-progress" element={<Suspense fallback={<div style={{ padding: 24 }}>Loading...</div>}><KidsProgressPage manifests={manifests} /></Suspense>} />
+          <Route path="/admin"        element={<ParentalLockGate><Suspense fallback={<div style={{ padding: 24 }}>{t('common.loading')}</div>}><AdminPage manifests={manifests} /></Suspense></ParentalLockGate>} />
+          <Route path="/parent"       element={<ParentalLockGate><Suspense fallback={<div style={{ padding: 24 }}>{t('common.loading')}</div>}><ParentDashboard manifests={manifests} /></Suspense></ParentalLockGate>} />
+          <Route path="/my-progress" element={<Suspense fallback={<div style={{ padding: 24 }}>{t('common.loading')}</div>}><KidsProgressPage manifests={manifests} /></Suspense>} />
           <Route path="/game/:gameId" element={<GameRoute />} />
+          <Route path="*"             element={<NotFound />} />
         </Route>
       </Routes>
     </BrowserRouter>
