@@ -126,8 +126,8 @@ Confirmed by direct source/config inspection (not just trusting `SECURITY.md`'s 
 
 ## Recommendations (Prioritized)
 
-1. **(Low effort, Low priority)** Add `.playwright-mcp/` to `.gitignore` and delete the stray `dotnet-hosting-8-0-29-win.exe` from the working tree (F2).
-2. **(Low effort, Low priority)** Wrap `localStorage.setItem` calls in `src/storage/localStorageAdapter.js` in try/catch, surfacing a failure state instead of an uncaught throw on quota exhaustion (F1).
+1. **(Low effort, Low priority) ✅ Fixed v1.1.12** — `.playwright-mcp/` added to `.gitignore` (F2). The directory itself was left for manual cleanup.
+2. **(Low effort, Low priority) ✅ Fixed v1.1.12** — All `localStorage.setItem` calls in `src/storage/localStorageAdapter.js` now go through a `safeSet()` helper that catches `QuotaExceededError` and other storage exceptions, logs a `console.warn`, and returns without throwing (F1).
 3. **(Low effort, cleanup)** Remove or wire up the unused `APP_VERSION` build-arg in `docker-image.yml`/`Dockerfile` (F4).
 4. **(No urgency, already tracked)** Continue the existing plan to upgrade to React 19 + react-router 8 before the `GHSA-qwww-vcr4-c8h2` allowlist's 180-day re-review marker expires, to remove the exception entirely rather than re-date it indefinitely (F3).
 5. **(No urgency, already tracked)** If the CSP is ever tightened, migrate per-item inline `style` attributes to CSS custom properties so `style-src 'unsafe-inline'` can be dropped (F6).

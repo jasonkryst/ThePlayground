@@ -163,3 +163,63 @@ describe('localStorageAdapter — data integrity', () => {
     })
   })
 })
+
+// QuotaExceededError / unavailable storage — issue #214
+describe('localStorageAdapter — storage write failures', () => {
+  it('does not throw when addScore encounters a QuotaExceededError', async () => {
+    const throwingStorage = {
+      ...makeLocalStorage(),
+      setItem: () => { throw new DOMException('QuotaExceededError', 'QuotaExceededError') },
+    }
+    vi.stubGlobal('localStorage', throwingStorage)
+    await expect(localStorageAdapter.addScore({ gameId: 'animal-sounds', score: 5, total: 10, date: '2026-01-01', timestamp: 1 })).resolves.not.toThrow()
+  })
+
+  it('does not throw when saveSettings encounters a QuotaExceededError', async () => {
+    const throwingStorage = {
+      ...makeLocalStorage(),
+      setItem: () => { throw new DOMException('QuotaExceededError', 'QuotaExceededError') },
+    }
+    vi.stubGlobal('localStorage', throwingStorage)
+    await expect(localStorageAdapter.saveSettings({ numChoices: 2, feedbackMode: 'immediate', questionsPerSession: 10 })).resolves.not.toThrow()
+  })
+
+  it('does not throw when saveBestStreaks encounters a storage error', async () => {
+    const throwingStorage = {
+      ...makeLocalStorage(),
+      setItem: () => { throw new Error('Storage unavailable') },
+    }
+    vi.stubGlobal('localStorage', throwingStorage)
+    await expect(localStorageAdapter.saveBestStreaks({ 'animal-sounds': 5 })).resolves.not.toThrow()
+  })
+
+  it('does not throw when saveBadgeData encounters a storage error', async () => {
+    const throwingStorage = {
+      ...makeLocalStorage(),
+      setItem: () => { throw new Error('Storage unavailable') },
+    }
+    vi.stubGlobal('localStorage', throwingStorage)
+    await expect(localStorageAdapter.saveBadgeData({ awards: {}, lifetimeQuestions: {}, lifetimeCounters: {} })).resolves.not.toThrow()
+  })
+
+  it('does not throw when saveSessionResume encounters a storage error', async () => {
+    const throwingStorage = {
+      ...makeLocalStorage(),
+      setItem: () => { throw new Error('Storage unavailable') },
+    }
+    vi.stubGlobal('localStorage', throwingStorage)
+    await expect(localStorageAdapter.saveSessionResume({ gameId: 'animal-sounds', index: 2 })).resolves.not.toThrow()
+  })
+
+  it('logs a console.warn on write failure', async () => {
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    const throwingStorage = {
+      ...makeLocalStorage(),
+      setItem: () => { throw new DOMException('QuotaExceededError', 'QuotaExceededError') },
+    }
+    vi.stubGlobal('localStorage', throwingStorage)
+    await localStorageAdapter.saveSettings({ numChoices: 2, feedbackMode: 'immediate', questionsPerSession: 10 })
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('[storage]'), expect.anything())
+    warn.mockRestore()
+  })
+})

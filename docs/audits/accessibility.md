@@ -58,8 +58,8 @@ F-1 (confetti motion) is the most novel/highest-impact new finding.
 
 | ID | Area | WCAG SC | Severity | Status | Summary |
 |---|---|---|---|---|---|
-| AU-9 | Focus management | 2.4.3 (A) / 4.1.3-adjacent | Medium | **Still open** | `ResumePrompt` heading never receives focus on mount |
-| F-1 | Motion | 2.3.3 (AAA) | Medium | New | Confetti/fireworks bursts ignore OS `prefers-reduced-motion`; only a manual admin toggle stops them |
+| AU-9 | Focus management | 2.4.3 (A) / 4.1.3-adjacent | Medium | **Fixed v1.1.12** | `ResumePrompt` heading never receives focus on mount |
+| F-1 | Motion | 2.3.3 (AAA) | Medium | **Fixed v1.1.12** | Confetti/fireworks bursts ignore OS `prefers-reduced-motion`; only a manual admin toggle stops them |
 | F-2 | Automated coverage gap | N/A (process) | Medium | New | 4 of 9 games have no live-browser (`@axe-core/playwright`) e2e coverage at all |
 | F-3 | Status messages | 4.1.3 (AA) | Low | New | `StreakBadge`'s first appearance (streak hits 2) may not be announced — populated-on-mount live region |
 | F-4 | Code hygiene | N/A | Low | New | Stale comment in `src/index.css` claims choice buttons use `disabled`; they use `aria-disabled` since the AU-3 fix |

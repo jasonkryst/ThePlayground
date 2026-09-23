@@ -74,13 +74,13 @@ None of these individually warranted a full eighth audit; they're listed here so
 
 If tackling this list, the highest-leverage fixes given effort-vs-impact are:
 
-1. Add a top-level React error boundary (Core Functionality — High impact, small effort).
-2. Add a catch-all `*` route with the app shell rendered (Core Functionality — small effort).
+1. ✅ **Fixed v1.1.12** — Add a top-level React error boundary (Core Functionality — High impact, small effort).
+2. ✅ **Fixed v1.1.12** — Add a catch-all `*` route with the app shell rendered (Core Functionality — small effort).
 3. Extend the storage adapter contract suite to cover `getItemStats`/`saveItemStats` and the session-resume trio (Storage/Testing — protects against a real future regression given the networked-adapter direction under discussion).
 4. Re-encode the three oversized animal-sound MP3s and the one oversized game icon (Performance — cuts ~5MB+ off the PWA install size for near-zero product risk).
-5. Fix the four hardcoded strings in `App.jsx`'s loading/error fallbacks (i18n — small effort, highest-frequency-rendered untranslated text in the app).
+5. ✅ **Fixed v1.1.12** — Fix the four hardcoded strings in `App.jsx`'s loading/error fallbacks (i18n — small effort, highest-frequency-rendered untranslated text in the app).
 6. Add e2e/visual-regression coverage for the three untested games (Testing — closes a real, contradicts-the-docs gap).
-7. Gate confetti/celebration animation on `prefers-reduced-motion` in addition to the existing admin toggle (Accessibility — small effort).
-8. Wrap `localStorage.setItem` calls in try/catch with at least a logged failure signal (Security/Storage — cheap robustness win).
+7. ✅ **Fixed v1.1.12** — Gate confetti/celebration animation on `prefers-reduced-motion` in addition to the existing admin toggle (Accessibility — small effort).
+8. ✅ **Fixed v1.1.12** — Wrap `localStorage.setItem` calls in try/catch with at least a logged failure signal (Security/Storage — cheap robustness win).
 
 Items not in this list (RTL support, cross-tab concurrency, score-history pruning/retention policy, storage-usage UI) are real but lower-urgency or require a product decision first, per each full report's own recommendation ordering.

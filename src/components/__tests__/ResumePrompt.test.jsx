@@ -29,6 +29,12 @@ describe('ResumePrompt', () => {
     expect(screen.getByText(/1 of 10/i)).toBeInTheDocument()
   })
 
+  it('moves focus to the heading on mount (issue #215)', () => {
+    render(<ResumePrompt index={2} total={10} score={2} onResume={vi.fn()} onStartFresh={vi.fn()} />)
+    const heading = screen.getByRole('heading', { level: 2 })
+    expect(document.activeElement).toBe(heading)
+  })
+
   it('has no accessibility violations', async () => {
     const { container } = render(<ResumePrompt index={0} total={10} score={0} onResume={vi.fn()} onStartFresh={vi.fn()} />)
     expect(await axe(container)).toHaveNoViolations()

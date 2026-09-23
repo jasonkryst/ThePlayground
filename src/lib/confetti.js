@@ -35,7 +35,17 @@ function hideConfettiCanvasFromA11yTree() {
   })
 }
 
+// Check the OS reduce-motion preference at call time rather than at module
+// load so it reflects live changes (the user can toggle accessibility prefs
+// while the app is open). This is separate from the app-level
+// animationsEnabled setting — if the OS says reduce motion, confetti is
+// always suppressed regardless of what the setting says (issue #213).
+function prefersReducedMotion() {
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches
+}
+
 export function fireConfetti() {
+  if (prefersReducedMotion()) return
   confetti({
     particleCount: 80,
     spread: 70,
@@ -48,6 +58,7 @@ export const FIREWORKS_BURSTS = 6
 export const FIREWORKS_INTERVAL_MS = 350
 
 export function fireFireworks() {
+  if (prefersReducedMotion()) return
   for (let i = 0; i < FIREWORKS_BURSTS; i++) {
     setTimeout(() => {
       confetti({

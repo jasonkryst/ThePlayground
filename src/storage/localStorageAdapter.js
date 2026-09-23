@@ -8,6 +8,18 @@ const BADGES_KEY = 'playground_badges'
 const ITEM_STATS_KEY = 'playground_item_stats'
 const SESSION_RESUME_KEY = 'playground_session_resume'
 
+// Wraps every localStorage.setItem call. QuotaExceededError is the most
+// common failure mode (storage full); private-browsing restrictions can also
+// make setItem throw. Log a warning so the developer can notice in DevTools,
+// but don't rethrow — callers shouldn't crash on a failed save.
+function safeSet(key, value) {
+  try {
+    localStorage.setItem(key, value)
+  } catch (err) {
+    console.warn(`[storage] Failed to write "${key}":`, err)
+  }
+}
+
 const localStorageAdapter = {
   async getScores() {
     try {
@@ -21,7 +33,7 @@ const localStorageAdapter = {
   async addScore(score) {
     const scores = await localStorageAdapter.getScores()
     scores.push(score)
-    localStorage.setItem(SCORES_KEY, JSON.stringify(scores))
+    safeSet(SCORES_KEY, JSON.stringify(scores))
   },
 
   async getSettings() {
@@ -39,7 +51,7 @@ const localStorageAdapter = {
   },
 
   async saveSettings(settings) {
-    localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings))
+    safeSet(SETTINGS_KEY, JSON.stringify(settings))
   },
 
   async getBestStreaks() {
@@ -52,7 +64,7 @@ const localStorageAdapter = {
   },
 
   async saveBestStreaks(streaks) {
-    localStorage.setItem(STREAKS_KEY, JSON.stringify(streaks))
+    safeSet(STREAKS_KEY, JSON.stringify(streaks))
   },
 
   async getPersonalBests() {
@@ -65,7 +77,7 @@ const localStorageAdapter = {
   },
 
   async savePersonalBests(bests) {
-    localStorage.setItem(PERSONAL_BESTS_KEY, JSON.stringify(bests))
+    safeSet(PERSONAL_BESTS_KEY, JSON.stringify(bests))
   },
 
   async getBadgeData() {
@@ -83,7 +95,7 @@ const localStorageAdapter = {
   },
 
   async saveBadgeData(data) {
-    localStorage.setItem(BADGES_KEY, JSON.stringify(data))
+    safeSet(BADGES_KEY, JSON.stringify(data))
   },
 
   async getItemStats() {
@@ -96,7 +108,7 @@ const localStorageAdapter = {
   },
 
   async saveItemStats(data) {
-    localStorage.setItem(ITEM_STATS_KEY, JSON.stringify(data))
+    safeSet(ITEM_STATS_KEY, JSON.stringify(data))
   },
 
   async getSessionResume() {
@@ -109,7 +121,7 @@ const localStorageAdapter = {
   },
 
   async saveSessionResume(state) {
-    localStorage.setItem(SESSION_RESUME_KEY, JSON.stringify(state))
+    safeSet(SESSION_RESUME_KEY, JSON.stringify(state))
   },
 
   async clearSessionResume() {
