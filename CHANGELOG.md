@@ -3,6 +3,22 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.1.13] - 2026-09-27
+
+### Added
+
+- **Game visibility toggle** (issue #19). Admins can now show or hide individual games from the dashboard via a new "Game Visibility" section in the Admin Games tab. Hidden games are removed from the grid and search results but remain accessible at `/game/<id>` via direct URL. The toggle persists via a new `hiddenGames: string[]` field in settings (defaults to `[]`; no migration needed — absent field treated as empty).
+- **Item name after correct answer** (issue #90, part 1). All six quiz games using `QuizGameShell` (`animal-sounds`, `color-match`, `character-match`, `character-match-bluey`, `emotions-match`, `fruit-veggie-id`) now show the correct item's name in large text for the brief locked window after a correct tap, reinforcing early reading. Implemented via a new optional `getCorrectLabel(current)` prop on `QuizGameShell`.
+- **Sound replay on wrong answer** (issue #90, part 2). `useQuestionAudio` now accepts a `lastEvent` parameter; when a wrong tap fires, the question audio auto-replays so a child who mis-taps re-hears the prompt they were matching against. Active for `animal-sounds` (sound clip) and `fruit-veggie-id` (spoken name via Web Speech API).
+- Live-browser axe e2e specs for `fruit-veggie-id`, `character-match-bluey`, `emotions-match`, and `number-tap` (issue #216). Closes the gap identified in the 2026-09-04 accessibility audit: each spec covers the intro screen and game screen. The four games previously had `jest-axe` (jsdom) coverage only.
+
+### Fixed
+
+- **Locale-unaware chart dates** (issue #219). `ParentDashboard`'s `formatDate` helper now uses `Intl.DateTimeFormat(locale, { month: 'numeric', day: 'numeric' })` instead of a hardcoded US `M/D` string — consistent with the month labels in the same file. The `ScoreHistory` date fallback path similarly now passes `i18n.language` to `.toLocaleDateString()`.
+- **Redundant score-history read in `addScore`** (issue #225). `useScores.addScore` no longer calls `adapter.getScores()` a second time after writing to refresh hook state — it instead appends the known new record to the existing in-memory array via `setScores(prev => [...prev, result])`, eliminating one full `JSON.parse` pass per game completion.
+- **Dead `APP_VERSION` build-arg** (issue #222). Removed the `build-args` block from `.github/workflows/docker-image.yml`; the `Dockerfile` never declared a matching `ARG APP_VERSION`, so the value was silently discarded by Docker/BuildKit. App version is read from `package.json` at build time per `CLAUDE.md`.
+- **README audit pointer** (issue #226). Added a row for `docs/audits/SUMMARY.md` to the README documentation index, making the current per-domain audit reports discoverable alongside the other project docs.
+
 ## [1.1.12] - 2026-09-23
 
 ### Fixed

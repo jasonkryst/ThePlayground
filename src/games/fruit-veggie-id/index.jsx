@@ -12,7 +12,7 @@ import manifest from './manifest.json'
 export default function FruitVeggieIdGame({ onGameEnd }) {
   const { t } = useTranslation()
   const session = useGameSession({ gameId: 'fruit-veggie-id', items: foods })
-  const { current, index, done, showIntro, introResolved, resumeAvailable } = session
+  const { current, index, done, showIntro, introResolved, resumeAvailable, lastEvent } = session
 
   // The spoken name is the question itself, so it plays regardless of the
   // shell's soundEffectsEnabled chime setting. useQuestionAudio owns the
@@ -23,7 +23,7 @@ export default function FruitVeggieIdGame({ onGameEnd }) {
   const announce = useCallback(food => {
     if (supported) speak(t(food.correct.nameKey))
   }, [supported, speak, t])
-  const replay = useQuestionAudio({ index, current, showIntro, introResolved, done, resumeAvailable, announce, stop: cancel })
+  const replay = useQuestionAudio({ index, current, showIntro, introResolved, done, resumeAvailable, announce, stop: cancel, lastEvent })
 
   return (
     <QuizGameShell
@@ -46,6 +46,7 @@ export default function FruitVeggieIdGame({ onGameEnd }) {
       renderChoiceContent={food => (
         <span className="game__choice-emoji" aria-hidden="true">{food.emoji}</span>
       )}
+      getCorrectLabel={current => t(current.correct.nameKey)}
       renderMissedItem={food => (
         <>
           <span aria-hidden="true">{food.emoji}</span> {t(food.nameKey)}

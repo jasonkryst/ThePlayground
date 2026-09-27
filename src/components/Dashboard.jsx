@@ -47,8 +47,13 @@ export default function Dashboard({ manifests = [] }) {
   const { getBestScore } = useScores()
   const { settings } = useSettings()
   const recentlyPlayed = useRecentlyPlayed()
-  const featured = useFeaturedGame(manifests)
-  const { tagMap, allTags } = useGameTags(manifests)
+  const hiddenGames = settings.hiddenGames ?? []
+  const visibleManifests = hiddenGames.length > 0
+    ? manifests.filter(m => !hiddenGames.includes(m.id))
+    : manifests
+
+  const featured = useFeaturedGame(visibleManifests)
+  const { tagMap, allTags } = useGameTags(visibleManifests)
   const [searchText, setSearchText] = useState('')
   const [selectedTags, setSelectedTags] = useState(() => new Set())
   const titleRef = useFocusOnMount()
@@ -59,10 +64,10 @@ export default function Dashboard({ manifests = [] }) {
   const normalizedSearch = searchText.trim().toLowerCase()
 
   const searchMatches = useMemo(
-    () => manifests.filter(m =>
+    () => visibleManifests.filter(m =>
       normalizedSearch === '' || t(m.nameKey).toLowerCase().includes(normalizedSearch)
     ),
-    [manifests, normalizedSearch, t]
+    [visibleManifests, normalizedSearch, t]
   )
 
   const visibleTags = useMemo(() => {
@@ -80,9 +85,9 @@ export default function Dashboard({ manifests = [] }) {
         const tags = tagMap.get(m.id) ?? []
         return [...selectedTags].every(tag => tags.includes(tag))
       })
-    : manifests
+    : visibleManifests
 
-  const sections = isFiltering ? null : buildSections(manifests, tagMap, allTags, t)
+  const sections = isFiltering ? null : buildSections(visibleManifests, tagMap, allTags, t)
 
   function toggleTag(tag) {
     setSelectedTags(prev => {
@@ -106,7 +111,7 @@ export default function Dashboard({ manifests = [] }) {
 
       <FeaturedGameCard manifest={featured} />
 
-      {manifests.length === 0 ? (
+      {visibleManifests.length === 0 ? (
         <p className="dashboard__empty">{t('dashboard.empty')}</p>
       ) : (
         <>

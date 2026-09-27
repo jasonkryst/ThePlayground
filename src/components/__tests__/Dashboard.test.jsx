@@ -261,4 +261,20 @@ describe('Dashboard', () => {
     render(<MemoryRouter><Dashboard manifests={[]} /></MemoryRouter>)
     expect(screen.getByRole('heading', { level: 1 })).toHaveFocus()
   })
+
+  it('hides a game when its id is in settings.hiddenGames (issue #19)', () => {
+    mockSettings.hiddenGames = ['animal-sounds']
+    render(<MemoryRouter><Dashboard manifests={manifests} /></MemoryRouter>)
+    expect(screen.queryByText('Animal Sounds')).not.toBeInTheDocument()
+    expect(screen.getAllByText('Color Match').length).toBeGreaterThan(0)
+    delete mockSettings.hiddenGames
+  })
+
+  it('shows all games when hiddenGames is empty (issue #19 negative)', () => {
+    mockSettings.hiddenGames = []
+    render(<MemoryRouter><Dashboard manifests={manifests} /></MemoryRouter>)
+    expect(screen.getAllByText('Animal Sounds').length).toBeGreaterThan(0)
+    expect(screen.getAllByText('Color Match').length).toBeGreaterThan(0)
+    delete mockSettings.hiddenGames
+  })
 })

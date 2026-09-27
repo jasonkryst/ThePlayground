@@ -94,4 +94,24 @@ describe('useQuestionAudio', () => {
     rerender({ ...base, resumeAvailable: false })
     expect(announce).toHaveBeenCalledWith(q1)
   })
+
+  it('re-announces the prompt on a wrong tap (issue #90)', () => {
+    const { rerender } = renderHook(
+      props => useQuestionAudio({ ...props, announce, stop }),
+      { initialProps: base }
+    )
+    announce.mockClear()
+    rerender({ ...base, lastEvent: { type: 'wrong' } })
+    expect(announce).toHaveBeenCalledWith(q1)
+  })
+
+  it('does NOT re-announce on a correct tap (issue #90 negative)', () => {
+    const { rerender } = renderHook(
+      props => useQuestionAudio({ ...props, announce, stop }),
+      { initialProps: base }
+    )
+    announce.mockClear()
+    rerender({ ...base, lastEvent: { type: 'correct' } })
+    expect(announce).not.toHaveBeenCalled()
+  })
 })

@@ -10,8 +10,7 @@ export default function useScores() {
 
   async function addScore(result) {
     await adapter.addScore(result)
-    const updated = await adapter.getScores()
-    setScores(updated)
+    setScores(prev => [...prev, result])
   }
 
   function getScoresByGame(gameId) {

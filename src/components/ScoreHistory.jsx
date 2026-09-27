@@ -30,7 +30,7 @@ export default function ScoreHistory({ scores = [] }) {
         <li key={s.timestamp} className="score-history__item">
           <span className="score-history__result">{s.score} / {s.total}</span>
           <span className="score-history__date">
-            {s.date ? formatScoreDate(s.date, i18n.language) : new Date(s.timestamp).toLocaleDateString()}
+            {s.date ? formatScoreDate(s.date, i18n.language) : new Date(s.timestamp).toLocaleDateString(i18n.language)}
           </span>
         </li>
       ))}

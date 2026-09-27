@@ -13,13 +13,13 @@ import manifest from './manifest.json'
 export default function AnimalSoundsGame({ onGameEnd }) {
   const { t } = useTranslation()
   const session = useGameSession({ gameId: 'animal-sounds', items: animals })
-  const { current, index, done, showIntro, introResolved, resumeAvailable } = session
+  const { current, index, done, showIntro, introResolved, resumeAvailable, lastEvent } = session
 
   // Game-owned question audio: its own player instance, independent of the
   // shell's chime layer. The announce/stop lifecycle lives in useQuestionAudio.
   const { play, stop, blocked } = useSoundPlayer()
   const announce = useCallback(animal => play(getSoundUrl(animal.correct.sound)), [play])
-  const replay = useQuestionAudio({ index, current, showIntro, introResolved, done, resumeAvailable, announce, stop })
+  const replay = useQuestionAudio({ index, current, showIntro, introResolved, done, resumeAvailable, announce, stop, lastEvent })
 
   return (
     <QuizGameShell
@@ -42,6 +42,7 @@ export default function AnimalSoundsGame({ onGameEnd }) {
           <span className="game__choice-name">{t(animal.nameKey)}</span>
         </>
       )}
+      getCorrectLabel={current => t(current.correct.nameKey)}
       renderMissedItem={animal => (
         <>
           <span aria-hidden="true">{animal.emoji}</span> {t(animal.nameKey)}

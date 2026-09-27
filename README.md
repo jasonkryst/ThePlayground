@@ -416,5 +416,6 @@ Free CC0 animal sounds are available at [freesound.org](https://freesound.org).
 | [`SECURITY.md`](SECURITY.md) | Security posture, data privacy, children's-privacy analysis, vulnerability reporting |
 | [`docs/TESTING.md`](docs/TESTING.md) | All six test layers, testing patterns and gotchas, i18n string conventions |
 | [`docs/accessibility_usability.md`](docs/accessibility_usability.md) | Point-in-time accessibility/i18n/UX audit findings |
+| [`docs/audits/SUMMARY.md`](docs/audits/SUMMARY.md) | Current audit index — security, testing, a11y, i18n, performance, storage, and core functionality (supersedes the per-domain snapshots above) |
 | [`docs/ENHANCEMENTS.md`](docs/ENHANCEMENTS.md) | Backlog of planned games, features, and technical improvements |
 | [`CHANGELOG.md`](CHANGELOG.md) | Release history (Keep a Changelog format) |
