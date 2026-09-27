@@ -451,6 +451,38 @@ describe('settings groups', () => {
   })
 })
 
+describe('AdminPage — game visibility (issue #19)', () => {
+  it('shows Show and Hide buttons for each game on the Games tab', async () => {
+    renderAdmin()
+    const user = userEvent.setup()
+    await user.click(screen.getByRole('tab', { name: /games/i }))
+    expect(screen.getAllByRole('button', { name: /show/i })).toHaveLength(2)
+    expect(screen.getAllByRole('button', { name: /hide/i })).toHaveLength(2)
+  })
+
+  it('calls updateSetting with the game added to hiddenGames when Hide is clicked', async () => {
+    mockSettingsDefaults.hiddenGames = []
+    renderAdmin()
+    const user = userEvent.setup()
+    await user.click(screen.getByRole('tab', { name: /games/i }))
+    const hideButtons = screen.getAllByRole('button', { name: /hide/i })
+    await user.click(hideButtons[0])
+    expect(mockUpdateSetting).toHaveBeenCalledWith('hiddenGames', ['animal-sounds'])
+    delete mockSettingsDefaults.hiddenGames
+  })
+
+  it('calls updateSetting with the game removed from hiddenGames when Show is clicked', async () => {
+    mockSettingsDefaults.hiddenGames = ['animal-sounds']
+    renderAdmin()
+    const user = userEvent.setup()
+    await user.click(screen.getByRole('tab', { name: /games/i }))
+    const showButtons = screen.getAllByRole('button', { name: /show/i })
+    await user.click(showButtons[0])
+    expect(mockUpdateSetting).toHaveBeenCalledWith('hiddenGames', [])
+    delete mockSettingsDefaults.hiddenGames
+  })
+})
+
 describe('AdminPage — theme', () => {
   it('calls updateSetting with each theme option and marks it active', async () => {
     render(<MemoryRouter><AdminPage /></MemoryRouter>)

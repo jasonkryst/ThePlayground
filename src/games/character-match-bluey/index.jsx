@@ -27,6 +27,7 @@ export default function CharacterMatchGameBluey({ onGameEnd }) {
           <span className="game__choice-name">{t(character.nameKey)}</span>
         </>
       )}
+      getCorrectLabel={current => t(current.correct.nameKey)}
       renderMissedItem={character => (
         <>
           <img

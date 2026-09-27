@@ -55,8 +55,6 @@ jobs:
           file: ./Dockerfile
           push: false
           load: true
-          build-args: |
-            APP_VERSION=${{ steps.vars.outputs.version }}
           tags: playground:release
 
       - name: Vulnerability gate (fixable CRITICAL/HIGH findings) — the exact image about to be pushed

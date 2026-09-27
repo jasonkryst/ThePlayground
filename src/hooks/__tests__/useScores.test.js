@@ -23,9 +23,7 @@ beforeEach(() => {
 describe('useScores', () => {
   it('addScore appends a record and refreshes state', async () => {
     const newScore = makeScore('animal-sounds', 8, 10, 3000)
-    mockAdapter.getScores
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([newScore])
+    mockAdapter.getScores.mockResolvedValue([])
     const { result } = renderHook(() => useScores())
     await act(async () => {})
     await act(async () => {

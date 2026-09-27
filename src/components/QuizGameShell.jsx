@@ -20,6 +20,7 @@ export default function QuizGameShell({
   prompt, renderPromptExtra,
   getChoiceProps = () => ({}),
   renderChoiceContent, renderMissedItem,
+  getCorrectLabel,
 }) {
   const { t } = useTranslation()
   const {
@@ -119,6 +120,12 @@ export default function QuizGameShell({
         getChoiceProps={getChoiceProps}
         renderChoiceContent={renderChoiceContent}
       />
+
+      {locked && lastEvent?.type === 'correct' && getCorrectLabel && (
+        <div className="game__correct-label" aria-hidden="true">
+          {getCorrectLabel(current)}
+        </div>
+      )}
 
       {/* AU-2 (WCAG 4.1.3): persistent live region so correct/wrong reach
           screen readers; mirrors MemoryBoard's per-event live message.

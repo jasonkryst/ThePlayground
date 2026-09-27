@@ -41,6 +41,7 @@ export default function EmotionsMatchGame({ onGameEnd }) {
       renderChoiceContent={emotion => (
         <span className="game__choice-emoji" aria-hidden="true">{emotion.emoji}</span>
       )}
+      getCorrectLabel={current => t(current.correct.nameKey)}
       renderMissedItem={emotion => (
         <>
           <span aria-hidden="true">{emotion.emoji}</span> {t(emotion.nameKey)}

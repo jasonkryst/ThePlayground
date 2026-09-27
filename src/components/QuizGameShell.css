@@ -31,3 +31,21 @@
 .game__next:focus-visible { outline: 3px solid var(--color-lavender); outline-offset: 3px; }
 
 .game__timeout { text-align: center; font-size: 1.125rem; font-weight: 700; color: var(--color-error); margin-top: 8px; }
+
+.game__correct-label {
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-teal-dark);
+  margin-top: 4px;
+  animation: correct-label-in 0.2s ease-out;
+}
+
+@keyframes correct-label-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .game__correct-label { animation: none; }
+}

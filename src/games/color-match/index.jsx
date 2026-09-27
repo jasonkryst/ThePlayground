@@ -33,6 +33,7 @@ export default function ColorMatchGame({ onGameEnd }) {
           <span className="game__choice-name">{t(color.nameKey)}</span>
         </>
       )}
+      getCorrectLabel={current => t(current.correct.nameKey)}
       renderMissedItem={color => (
         <>
           <span

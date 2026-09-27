@@ -582,6 +582,39 @@ export default function AdminPage({ manifests = [] }) {
 
       {activeTab === 'games' && (
         <div className="admin__section" role="tabpanel" id="admin-panel-games" aria-labelledby="admin-tab-games">
+          <h2>{t('admin.visibilityHeading')}</h2>
+          <p className="admin__hint">{t('admin.visibilityHint')}</p>
+          {manifests.map(m => {
+            const isHidden = (settings.hiddenGames ?? []).includes(m.id)
+            return (
+              <div key={m.id} className="admin__visibility-row">
+                <span className="admin__visibility-name">{t(m.nameKey)}</span>
+                <div className="admin__toggle">
+                  <button
+                    className={`admin__toggle-btn${!isHidden ? ' active' : ''}`}
+                    onClick={() => {
+                      const next = (settings.hiddenGames ?? []).filter(id => id !== m.id)
+                      updateSetting('hiddenGames', next)
+                    }}
+                    aria-pressed={!isHidden}
+                  >
+                    {t('admin.visibilityShow')}
+                  </button>
+                  <button
+                    className={`admin__toggle-btn${isHidden ? ' active' : ''}`}
+                    onClick={() => {
+                      const current = settings.hiddenGames ?? []
+                      if (!current.includes(m.id)) updateSetting('hiddenGames', [...current, m.id])
+                    }}
+                    aria-pressed={isHidden}
+                  >
+                    {t('admin.visibilityHide')}
+                  </button>
+                </div>
+              </div>
+            )
+          })}
+
           <h2>{t('admin.tagsHeading')}</h2>
           <p className="admin__hint">{t('admin.tagsHint')}</p>
           {manifests.length === 0 && (

@@ -19,9 +19,11 @@ import { useCallback, useEffect } from 'react'
  *   Resume or Start Fresh
  * @param {(current: object) => void} p.announce  plays the prompt for `current`
  * @param {() => void} p.stop         stops any in-flight prompt audio
+ * @param {?object}  p.lastEvent      session.lastEvent — when present and type is 'wrong',
+ *   the prompt auto-replays so a child who mis-taps re-hears what they were matching against
  * @returns {() => void} replay — re-announces the current question
  */
-export default function useQuestionAudio({ index, current, showIntro, introResolved, done, resumeAvailable, announce, stop }) {
+export default function useQuestionAudio({ index, current, showIntro, introResolved, done, resumeAvailable, announce, stop, lastEvent }) {
   const replay = useCallback(() => {
     if (!current) return
     announce(current)
@@ -48,6 +50,11 @@ export default function useQuestionAudio({ index, current, showIntro, introResol
   useEffect(() => {
     if (done || showIntro) stop()
   }, [done, showIntro, stop])
+
+  // Auto-replay prompt on a wrong tap so the child re-hears what they were matching against.
+  useEffect(() => {
+    if (lastEvent?.type === 'wrong') replay()
+  }, [lastEvent, replay])
 
   return replay
 }

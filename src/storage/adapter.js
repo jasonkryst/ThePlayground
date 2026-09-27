@@ -27,6 +27,7 @@ export const DEFAULT_SETTINGS = {
   // a 4-digit string switches the gate to PIN mode. See
   // src/lib/parentalLock.js and src/components/ParentalLockGate.jsx.
   parentalLock: { enabled: true, pin: '' },
+  hiddenGames: [],
 }
 
 /**
@@ -69,6 +70,7 @@ export const DEFAULT_SETTINGS = {
  *     strings, only meaningful when preset === 'custom'. Added v0.21.0.
  *   memoryPairs: 3 | 4 | 5 | 6 — pairs per board for memory-type games (added v0.23.0)
  *   soundEffectsEnabled: boolean — gates game sound effects: memory match sounds and quiz correct/wrong chimes (added v0.23.0; quiz chimes v0.26.0)
+ *   hiddenGames: string[] — gameIds hidden from the dashboard (still routable at /game/<id>)
  *   theme: 'system' | 'light' | 'dark' | 'high-contrast' — 'system' follows the OS prefers-color-scheme
  *     (light/dark only; never auto-selects high-contrast). Applied to <html data-theme> by ThemeSync in
  *     App.jsx. (added v0.38.0)
