@@ -3,6 +3,12 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.1.14] - 2026-10-18
+
+### Fixed
+
+- **Flaky CI on Animal Memory Match's "fits one screen" e2e checks** (issue #104 follow-up). `useFitTileSize`'s fit calculation is a deliberate floor right at the available-height boundary — by design, ~1px of margin at the 900x490 viewport used by these tests. That margin is tight enough that a sub-pixel rendering difference between browser/OS font-rendering stacks (not a real, user-visible overflow) can tip `document.documentElement.scrollHeight` a hair past `window.innerHeight`, which is what failed CI on the push after merging PR #251 even though that PR only bumped a GitHub Action's pinned version. The two affected assertions in `e2e/animal-memory-match.spec.js` now allow a small, explicitly-documented `SCROLL_FIT_TOLERANCE_PX` (2px) instead of the production tile-sizing formula being loosened for every real user to chase a CI-only artifact.
+
 ## [1.1.13] - 2026-09-27
 
 ### Added
