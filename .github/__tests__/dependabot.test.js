@@ -29,6 +29,27 @@ describe('.github/dependabot.yml', () => {
     expect(entry.schedule?.interval).toBeTruthy()
   })
 
+  describe('codeql-action steps are bumped together in one PR', () => {
+    const actionsEntry = () => config.updates.find(u => u['package-ecosystem'] === 'github-actions')
+
+    it('groups github/codeql-action and its subpath actions (init, autobuild, analyze, upload-sarif)', () => {
+      const patterns = actionsEntry().groups?.['codeql-action']?.patterns
+      expect(patterns).toContain('github/codeql-action')
+      expect(patterns).toContain('github/codeql-action/*')
+    })
+
+    it('negative: the group does not use a bare * (that would swallow every action into one PR)', () => {
+      const patterns = actionsEntry().groups['codeql-action'].patterns
+      expect(patterns).not.toContain('*')
+      expect(patterns.every(p => p.startsWith('github/codeql-action'))).toBe(true)
+    })
+
+    it('negative: other ecosystems do not get this group', () => {
+      const others = config.updates.filter(u => u['package-ecosystem'] !== 'github-actions')
+      expect(others.some(u => u.groups?.['codeql-action'])).toBe(false)
+    })
+  })
+
   it('negative: does not also track npm here (production deps are already gated by audit-ci in ci.yml, a separate concern)', () => {
     expect(config.updates.some(u => u['package-ecosystem'] === 'npm')).toBe(false)
   })

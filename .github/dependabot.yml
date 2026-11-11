@@ -7,6 +7,17 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    groups:
+      # CodeQL errors if the steps in one workflow (init/autobuild/analyze/
+      # upload-sarif) are not all on the same version, so Dependabot's usual
+      # one-PR-per-action behavior produced red PRs that could never pass
+      # alone (#248-257, #262/#264/#266). Bump them together in one PR.
+      # Subpath actions are named "github/codeql-action/init" etc., so
+      # both the bare and wildcard forms are listed.
+      codeql-action:
+        patterns:
+          - "github/codeql-action"
+          - "github/codeql-action/*"
 
   # Keeps the Dockerfile's major.minor base-image tags (node:26-alpine,
   # nginxinc/nginx-unprivileged:1.31-alpine) current. npm is deliberately
