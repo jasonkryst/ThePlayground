@@ -82,10 +82,61 @@ describe('.github/workflows/ci.yml', () => {
     expect(stepRuns('build').some(r => r.includes('npm run build'))).toBe(true)
   })
 
-  it('e2e job installs Playwright browsers and runs npm run e2e', () => {
+  it('e2e job installs Playwright Chromium via the apt-fallback script before running npm run e2e', () => {
     const runs = stepRuns('e2e')
-    expect(runs.some(r => r.includes('playwright install'))).toBe(true)
-    expect(runs.some(r => r.includes('npm run e2e'))).toBe(true)
+    const installIndex = runs.findIndex(r => r.includes('scripts/ci/ensure-playwright-chromium.sh'))
+    const e2eIndex = runs.findIndex(r => r.includes('npm run e2e'))
+    expect(installIndex).toBeGreaterThanOrEqual(0)
+    expect(e2eIndex).toBeGreaterThan(installIndex)
+  })
+
+  it('e2e job references an install script that exists in the repo', () => {
+    expect(fs.existsSync(path.join(REPO_ROOT, 'scripts', 'ci', 'ensure-playwright-chromium.sh'))).toBe(true)
+  })
+
+  describe('Playwright install resilience (issue #268)', () => {
+    it('negative: no workflow runs `playwright install --with-deps` (apt on every run breaks CI when the Ubuntu mirror is down)', () => {
+      const workflowsDir = path.join(REPO_ROOT, '.github', 'workflows')
+      for (const file of fs.readdirSync(workflowsDir).filter(f => /\.ya?ml$/.test(f))) {
+        const text = fs.readFileSync(path.join(workflowsDir, file), 'utf8')
+        expect(text, `${file} should not use --with-deps`).not.toMatch(/playwright\s+install\b[^\n]*--with-deps/)
+      }
+    })
+
+    it('negative: no e2e step runs apt or install-deps directly (only the script may, as a fallback)', () => {
+      for (const run of stepRuns('e2e')) {
+        expect(run).not.toMatch(/apt(-get)?\s+install|install-deps/)
+      }
+    })
+
+    it('caches ~/.cache/ms-playwright before the install step', () => {
+      const steps = workflow.jobs['e2e'].steps
+      const cacheIndex = steps.findIndex(s => s.uses && s.uses.startsWith('actions/cache@'))
+      const installIndex = steps.findIndex(s => s.run && s.run.includes('ensure-playwright-chromium.sh'))
+      expect(cacheIndex).toBeGreaterThanOrEqual(0)
+      expect(installIndex).toBeGreaterThan(cacheIndex)
+      expect(steps[cacheIndex].with.path).toBe('~/.cache/ms-playwright')
+    })
+
+    it('keys the browser cache on the Playwright version resolved from package-lock.json', () => {
+      const steps = workflow.jobs['e2e'].steps
+      const versionStep = steps.find(s => s.id && s.run && s.run.includes('package-lock.json'))
+      expect(versionStep).toBeDefined()
+      expect(versionStep.run).toContain("node_modules/playwright")
+      const cacheStep = steps.find(s => s.uses && s.uses.startsWith('actions/cache@'))
+      expect(cacheStep.with.key).toContain(`steps.${versionStep.id}.outputs.version`)
+      expect(cacheStep.with.key).toContain('runner.os')
+    })
+
+    it('negative: the cache key is not a constant (a stale browser build would never be refreshed)', () => {
+      const cacheStep = workflow.jobs['e2e'].steps.find(s => s.uses && s.uses.startsWith('actions/cache@'))
+      expect(cacheStep.with.key).toMatch(/\$\{\{/)
+    })
+
+    it('the lockfile path the version step reads actually resolves to a Playwright version', () => {
+      const lock = JSON.parse(fs.readFileSync(path.join(REPO_ROOT, 'package-lock.json'), 'utf8'))
+      expect(lock.packages['node_modules/playwright']?.version).toMatch(/^\d+\.\d+\.\d+/)
+    })
   })
 
   it('e2e job uploads the Playwright report only on failure', () => {
