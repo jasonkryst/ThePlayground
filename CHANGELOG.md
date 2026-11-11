@@ -3,6 +3,27 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.2.2] - 2026-11-11
+
+### Security
+
+- **Triaged all open Dependabot alerts, plus three that only `npm audit` reported.** All of them were in development-only, transitive dependencies, so none reached the shipped app. See `SECURITY.md`'s Dependency policy for the full reasoning.
+  - **Fixed with scoped `overrides`:**
+    - `qs` → `^6.16.2`, resolving to 6.17.1 (GHSA-q8mj-m7cp-5q26, GHSA-6pq8-jhm2-2vcw).
+    - `uuid` → `^11.1.1` for `@storybook/addon-actions` (GHSA-w5hq-g745-h8pq).
+    - `glob` → `^14.0.2` for `workbox-build` and Storybook's docgen plugin (GHSA-3g3m-2fjr-6pw4). This also moves those paths onto minimatch 11. Builds before and after produced an identical 122-entry PWA precache manifest and an identical Storybook output file set.
+    - `basic-ftp` → `^6.2.1` for `get-uri`, under `@lhci/cli` (GHSA-c475-qrg2-pj4r, high).
+    - `colord` updated within stylelint's range to 2.12.0 (GHSA-2wm5-q62r-hmrv).
+  - **Dismissed as tolerable risk:**
+    - Stryker's own `minimatch` copy (GHSA-g3hv-75wg-m249). The fix exists only in minimatch 11, a breaking rewrite, and Stryker pins `~10.2.4`.
+    - `deepmerge` (GHSA-gcqx-w48m-w2h4). There's no fixed release, and it only merges this repo's own build config.
+  - **New tests in `.github/__tests__/dependencyAdvisories.test.js`:** 18 lockfile checks covering each fixed package, the scope of each override, the Stryker-only minimatch exception, and that minimatch and deepmerge stay out of the production tree.
+  - `npm audit` drops from 20 findings to 7, all of them the two dismissed advisories plus the packages that pull them in, and `npm audit --omit=dev` still reports 0.
+
+### Fixed
+
+- `SECURITY.md`'s supported-versions table now says 1.2.x instead of 1.1.x.
+
 ## [1.2.1] - 2026-11-11
 
 ### Fixed
