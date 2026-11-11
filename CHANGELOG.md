@@ -3,6 +3,13 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.2.1] - 2026-11-11
+
+### Fixed
+
+- **CI e2e job no longer depends on the Ubuntu apt mirror** (issue #268). `npx playwright install --with-deps chromium` ran `apt` on every job, so when GitHub's runners couldn't resolve `azure.archive.ubuntu.com` (2026-11-11), every Playwright job failed before running a test. The `e2e` job now calls `scripts/ci/ensure-playwright-chromium.sh`, which downloads only the browser and then launches headless Chromium once. It falls back to `npx playwright install-deps chromium` only if that launch fails, with a 600s `timeout` and one retry, and ends with a clear `::error::` if Chromium still can't start. The browser download is cached with `actions/cache` on `~/.cache/ms-playwright`, keyed on the `playwright` version in `package-lock.json`. New tests in `.github/__tests__/ensure-playwright-chromium.test.js` run the real script against faked `npx`/`node`/`timeout`/`sleep` and cover each path. New `ci.test.js` assertions forbid `--with-deps` in every workflow and check the cache key.
+- **Shell scripts keep LF line endings on Windows checkouts.** A new `.gitattributes` rule (`*.sh text eol=lf`) stops `core.autocrlf=true` from adding CRLF endings, which bash can't run.
+
 ## [1.2.0] - 2026-11-11
 
 ### Changed
