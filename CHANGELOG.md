@@ -3,6 +3,12 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.2.3] - 2026-11-11
+
+### Fixed
+
+- **`npm run lint` no longer lints generated output.** `eslint.config.js` now ignores every gitignored tool-output directory: `storybook-static`, `playwright-report`, `test-results`, `reports` and `.stryker-tmp` (Stryker), `.lighthouseci`, `dist-ssr` and `.worktrees`, alongside the existing `dist`, `coverage`, `node_modules` and `.claude`. Previously, after a local `npm run build-storybook`, lint failed with 58 `react-hooks/rules-of-hooks` errors from minified Storybook bundles, and a Stryker sandbox would have been linted as a second copy of `src/`. CI was unaffected because those folders never exist in a fresh checkout. New tests in `.github/__tests__/eslintIgnores.test.js` use ESLint's own `isPathIgnored()` to check that each generated folder is ignored. They also check that source files (`src/`, `e2e/`, `scripts/`, `.github/__tests__/`, a nested `src/reports/`) are still linted.
+
 ## [1.2.2] - 2026-11-11
 
 ### Security
