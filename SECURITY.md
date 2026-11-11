@@ -99,6 +99,18 @@ Stated plainly rather than papered over (each is tracked in [`docs/ENHANCEMENTS.
 
 - Installs are pinned by the committed `package-lock.json` and built with `npm ci`, so the artifact is reproducible and not subject to install-time version drift.
 - **`npm audit` runs in CI on every push/PR (issue #87), gated via `audit-ci` (issue #141):** `.github/workflows/ci.yml`'s `npm-audit` job fails on moderate+ severity findings in the production dependency tree (`audit-ci --moderate --skip-dev`); findings in the dev-only tree (e.g. the Storybook 8 chain's 3 moderate advisories, SEC-6) are reported to the run's step summary but never block a merge. Plain `npm audit` has no per-advisory exception mechanism, so the gate moved to `audit-ci`, which adds one: `GHSA-qwww-vcr4-c8h2` (react-router "RSC Mode CSRF Bypass Allows Action Execution Before 400 Response") is allowlisted — this app is a client-only SPA using `BrowserRouter`, never react-router's RSC/framework mode, so the vulnerable path isn't reachable here — but every other moderate+ finding in the production tree, present or future, still fails the gate exactly as before. The allowlist is scoped to that one advisory ID only (guarded by a negative CI test); it's a stopgap, not a fix — `docs/ENHANCEMENTS.md` tracks the real fix (upgrade to React 19 + react-router 8, which requires React ≥19.2.7 and is a larger change than this gate) as a backlog item. **Re-review gate (issue #145):** the allowlist line carries a dated `# Allowlist entry added: 2026-07-28` marker, and `.github/__tests__/ci.test.js` fails once that entry is more than 180 days old — so the exception can't be silently read as "resolved" forever; it either gets a fresh re-review or the React 19 upgrade lands and removes it.
+- **Dev-tree advisories, triaged 2026-11-11 (v1.2.2).** At that point the five open Dependabot alerts, plus three more found only by `npm audit`, were all in development-only, transitive dependencies:
+  - **Fixed with `overrides` in `package.json`, each scoped to the consumer that needed it:**
+    - **`qs`** (GHSA-q8mj-m7cp-5q26, GHSA-6pq8-jhm2-2vcw) is forced to `^6.16.2`. Stryker's `typed-rest-client` pinned 6.15.1.
+    - **`uuid`** (GHSA-w5hq-g745-h8pq) is forced to `^11.1.1` for `@storybook/addon-actions`, which only calls `v4()`.
+    - **`glob`** (GHSA-3g3m-2fjr-6pw4) is forced to `^14.0.2` for `workbox-build` and `@joshwooding/vite-plugin-react-docgen-typescript`. glob 14 also moves those paths onto minimatch 11. This was checked by building before and after the change: the PWA precache manifest (122 entries) and Storybook's output file set came out identical.
+    - **`basic-ftp`** (GHSA-c475-qrg2-pj4r) is forced to `^6.2.1` for `get-uri`, which `@lhci/cli` pulls in through `proxy-agent`. The only breaking change in 6.0 refuses separate FTP transfer hosts.
+    - **`colord`** (GHSA-2wm5-q62r-hmrv) was simply updated within stylelint's own range.
+  - Drop each override once its consumer ships a patched dependency (Storybook 9, a Stryker or workbox release, `get-uri` moving to basic-ftp 6).
+  - **Dismissed as tolerable risk, with no usable patched version:**
+    - **`minimatch` (GHSA-g3hv-75wg-m249, a pattern-amplification DoS), Stryker's copy only.** The only patched line is 11.x, a breaking rewrite that removes `makeRe()` and changes `Minimatch.set`. `@stryker-mutator/core` pins `~10.2.4`. Stryker is a manual developer tool (`npm run mutation`) whose patterns come from this repo's own config, never from an attacker.
+    - **`deepmerge` (GHSA-gcqx-w48m-w2h4, prototype poisoning).** No fixed release exists. It's used at build time by `@rollup/plugin-node-resolve` (via workbox) to merge plugin options from this repo's own config, never request or user data.
+  - **Re-check** when Stryker moves to minimatch 11 or deepmerge ships a fix. `.github/__tests__/dependencyAdvisories.test.js` guards all of this against the lockfile. It fails if any fixed package returns to a vulnerable version, if any vulnerable minimatch appears outside Stryker, or if minimatch or deepmerge ever lands in the production tree (which would void the dismissal reasoning).
 - Runtime dependency surface is deliberately small (React, React Router, i18next, Recharts, canvas-confetti); the larger dev-dependency tree never ships to users.
 - **`canvas-confetti` is deliberately kept off its own default Worker path.** Its bare default export lazily builds a shared cannon with `useWorker: true`, which loads its animation loop from a `blob:` Web Worker — this app's CSP has no `worker-src`, so per spec that falls back to `script-src`, which doesn't allow `blob:`, silently killing the worker and the celebration animation with it (issue #109). `src/lib/confetti.js` builds its own cannon via `create(null, { useWorker: false })` instead, forcing main-thread rendering. Don't add `worker-src blob:` to the CSP to "fix" this a different way without removing that `useWorker: false` — the two are redundant, and loosening the CSP is the wider-attack-surface option of the two (see the issue #109 fix notes in `CHANGELOG.md`).
 
@@ -106,7 +118,7 @@ Stated plainly rather than papered over (each is tracked in [`docs/ENHANCEMENTS.
 
 | Version | Supported |
 |---|---|
-| Latest minor (1.1.x) | ✅ |
+| Latest minor (1.2.x) | ✅ |
 | Older | ❌ — it's a static site; the upgrade path is `git pull` and redeploy ([`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md#updating-a-running-deployment)) |
 
 ## Reporting a vulnerability
