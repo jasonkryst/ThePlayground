@@ -4,7 +4,25 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 import jsxA11y from 'eslint-plugin-jsx-a11y'
 
 export default [
-  { ignores: ['dist', 'node_modules', '.claude', 'coverage'] },
+  // Generated / tool-output directories (all gitignored). Without these, a
+  // local `npm run build-storybook` makes `npm run lint` report dozens of
+  // errors from minified bundles, and a Stryker run lints its full repo copy.
+  {
+    ignores: [
+      'dist',
+      'dist-ssr',
+      'node_modules',
+      '.claude',
+      'coverage',
+      'storybook-static',
+      'playwright-report',
+      'test-results',
+      'reports',
+      '.stryker-tmp',
+      '.lighthouseci',
+      '.worktrees',
+    ],
+  },
   {
     files: ['**/*.{js,jsx}'],
     languageOptions: {
