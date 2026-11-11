@@ -3,6 +3,15 @@
 All notable changes to this project are documented here.
 Format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [1.2.0] - 2026-11-11
+
+### Changed
+
+- **Test runner upgraded to Vitest 4** (PR #247). `vitest` and `@vitest/coverage-v8` moved together from 3.2.x to 4.1.12 (the transitive `@vitest/mocker` 5.x bump required the matching major, otherwise `npm ci` failed with `ERESOLVE`). No test changes were needed.
+- **Lighthouse CI upgraded to `@lhci/cli` 0.16.0** (PR #267), bringing Lighthouse 13 and dropping the vulnerable `tmp` package from the dependency tree.
+- **Dependency security updates** via Dependabot's `npm_and_yarn` group: `react-router-dom` 7.18.4, `vite` 6.4.5, `storybook` 8.6.19, plus transitive fixes (`js-yaml`, `brace-expansion`, `postcss`, `fast-uri`, `serialize-javascript`, `compression`, `proxy-addr`, `ip-address`, and others).
+- **CI actions updated**: `github/codeql-action` (all steps) to v4.39.3, `actions/setup-node` to 7.1.0, `docker/login-action` to 4.8.0. All `codeql-action` steps are bumped together because CodeQL refuses to run when its `init`/`autobuild`/`analyze` steps are on different versions.
+
 ## [1.1.14] - 2026-10-18
 
 ### Fixed
